@@ -1,34 +1,37 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import BodyForm from './components/BodyForm'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [bodyData, setBodyData] = useState({
+    height: 170,
+    weight: 60,
+  });
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="App">
+      <h1>VFitAI - Dự án Thử đồ 3D</h1>
+      <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginTop: '20px' }}>
+
+        {/* Bên trái: Form điều khiển */}
+        <div style={{ width: '300px' }}>
+          <BodyForm data={bodyData} onChange={setBodyData} />
+        </div>
+
+        {/* Bên phải: Nơi chứa mô hình 3D (Tạm thời để trống) */}
+        <div style={{
+          width: '500px',
+          height: '400px',
+          border: '2px dashed #ccc',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <p>Khu vực hiển thị 3D (Ngày 2 sẽ làm)</p>
+        </div>
+
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </div>
   )
 }
 
