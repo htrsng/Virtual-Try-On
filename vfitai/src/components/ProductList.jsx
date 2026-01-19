@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-function ProductList({ products }) {
+function ProductList({ products, title = "GỢI Ý HÔM NAY", onBuy }) {
     // Kiểm tra xem có dữ liệu sản phẩm không
     if (!products || products.length === 0) {
         return <div style={{ textAlign: 'center', padding: '20px' }}>Đang tải sản phẩm...</div>;
@@ -16,7 +16,7 @@ function ProductList({ products }) {
                 display: 'inline-block',
                 paddingBottom: '5px'
             }}>
-                GỢI Ý HÔM NAY
+                {title}
             </h3>
 
             <div className="product-grid">

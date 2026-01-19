@@ -5,20 +5,24 @@ import ProductList from '../components/ProductList';
 function CategoryPage({ products, onBuy }) {
     const { id } = useParams();
 
-    const categoryMap = {
-        "ao-thun": "Áo Thun",
-        "ao-so-mi": "Áo Sơ Mi",
-        "ao-khoac": "Áo Khoác",
-        "quan-jeans": "Quần Jeans",
-        "quan-short": "Quần Short",
-        "vay-dam": "Váy & Đầm",
-        "chan-vay": "Chân Váy",
-        "do-ngu": "Đồ Ngủ",
-        "the-thao": "Đồ Thể Thao",
-        "phu-kien": "Phụ Kiện"
+    // Hàm chuyển slug thành tên danh mục
+    const slugToName = (slug) => {
+        const map = {
+            "ao-thun": "Áo Thun",
+            "ao-so-mi": "Áo Sơ Mi",
+            "ao-khoac": "Áo Khoác",
+            "quan-jeans": "Quần Jeans",
+            "quan-short": "Quần Short",
+            "vay-dam": "Váy & Đầm",
+            "chan-vay": "Chân Váy",
+            "do-ngu": "Đồ Ngủ",
+            "the-thao": "Đồ Thể Thao",
+            "phu-kien": "Phụ Kiện"
+        };
+        return map[slug] || slug;
     };
 
-    const currentCategoryName = categoryMap[id] || "Sản phẩm";
+    const currentCategoryName = slugToName(id) || "Sản phẩm";
 
     const filteredProducts = products.filter(p => p.category === currentCategoryName);
 

@@ -79,6 +79,7 @@ app.get("/api/users", async (req, res) => {
         const users = await UserModel.find();
         res.json(users);
     } catch (err) {
+        console.error("Lỗi lấy users:", err);
         res.status(500).json({ error: err.message });
     }
 });
@@ -87,6 +88,11 @@ app.get("/api/users", async (req, res) => {
 app.post("/api/users", async (req, res) => {
     try {
         const { email, password, role } = req.body;
+        
+        if (!email || !password) {
+            return res.status(400).json({ message: "Email và password là bắt buộc" });
+        }
+        
         // Kiểm tra trùng lặp
         const existingUser = await UserModel.findOne({ email });
         if (existingUser) {
@@ -96,6 +102,7 @@ app.post("/api/users", async (req, res) => {
         await newUser.save();
         res.json(newUser);
     } catch (err) {
+        console.error("Lỗi tạo user:", err);
         res.status(500).json({ error: err.message });
     }
 });

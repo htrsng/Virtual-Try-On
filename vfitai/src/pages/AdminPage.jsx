@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 function AdminPage({
     products, setProducts,
+    topSearch, setTopSearch,
     topProducts, setTopProducts,
     categories, setCategories,
     users, setUsers,
@@ -27,7 +28,8 @@ function AdminPage({
 
     const getCurrentList = () => {
         if (activeTab === 'products') return products;
-        if (activeTab === 'top_search') return topProducts;
+        if (activeTab === 'top_search') return topSearch;
+        if (activeTab === 'top_products_manage') return topProducts;
         if (activeTab === 'categories') return categories;
         if (activeTab === 'users') return users;
         return [];
@@ -56,7 +58,16 @@ function AdminPage({
                 await fetch(`http://localhost:3000/api/users/${id}`, { method: 'DELETE' });
             }
 
-            setList(list.filter(item => item.id !== id));
+            const updatedList = list.filter(item => item.id !== id);
+            setList(updatedList);
+
+            // Lưu vào localStorage
+            if (activeTab === 'products') localStorage.setItem('products', JSON.stringify(updatedList));
+            else if (activeTab === 'top_search') localStorage.setItem('topSearch', JSON.stringify(updatedList));
+            else if (activeTab === 'top_products_manage') localStorage.setItem('topProducts', JSON.stringify(updatedList));
+            else if (activeTab === 'categories') localStorage.setItem('categories', JSON.stringify(updatedList));
+            else if (activeTab === 'users') localStorage.setItem('users', JSON.stringify(updatedList));
+
             showToast("Đã xóa thành công!", "success");
         }
     };
@@ -72,6 +83,7 @@ function AdminPage({
                 smallBottom: form.smallBottom.value
             };
             setBannerData(newBannerData);
+            localStorage.setItem('bannerData', JSON.stringify(newBannerData));
             showToast("Đã cập nhật Banner!", "success");
             return;
         }
@@ -99,7 +111,9 @@ function AdminPage({
                     const savedProduct = await res.json();
                     const formattedProduct = { ...savedProduct, id: savedProduct._id };
 
-                    setProducts([...products, formattedProduct]);
+                    const updatedProducts = [...products, formattedProduct];
+                    setProducts(updatedProducts);
+                    localStorage.setItem('products', JSON.stringify(updatedProducts));
                     showToast("Đã lưu vào CSDL thành công!", "success");
                 } catch (err) {
                     showToast("Lỗi kết nối Server!", "error");
@@ -112,7 +126,9 @@ function AdminPage({
                         body: JSON.stringify(newItemData)
                     });
                 }
-                setProducts(products.map(p => p.id === editingItem.id ? { ...p, ...newItemData } : p));
+                const updatedProducts = products.map(p => p.id === editingItem.id ? { ...p, ...newItemData } : p);
+                setProducts(updatedProducts);
+                localStorage.setItem('products', JSON.stringify(updatedProducts));
                 showToast("Đã cập nhật sản phẩm!", "success");
             }
         } else {
@@ -126,16 +142,29 @@ function AdminPage({
             };
 
             if (activeTab === 'top_search') {
-                if (editingItem) setTopProducts(topProducts.map(p => p.id === newItem.id ? newItem : p));
-                else setTopProducts([...topProducts, newItem]);
+                const updatedTopSearch = editingItem
+                    ? topSearch.map(p => p.id === newItem.id ? newItem : p)
+                    : [...topSearch, newItem];
+                setTopSearch(updatedTopSearch);
+                localStorage.setItem('topSearch', JSON.stringify(updatedTopSearch));
+            } else if (activeTab === 'top_products_manage') {
+                const updatedTopProducts = editingItem
+                    ? topProducts.map(p => p.id === newItem.id ? newItem : p)
+                    : [...topProducts, newItem];
+                setTopProducts(updatedTopProducts);
+                localStorage.setItem('topProducts', JSON.stringify(updatedTopProducts));
             } else if (activeTab === 'categories') {
-                if (editingItem) setCategories(categories.map(c => c.id === newItem.id ? newItem : c));
-                else setCategories([...categories, newItem]);
+                const updatedCategories = editingItem
+                    ? categories.map(c => c.id === newItem.id ? newItem : c)
+                    : [...categories, newItem];
+                setCategories(updatedCategories);
+                localStorage.setItem('categories', JSON.stringify(updatedCategories));
             }
             showToast("Đã lưu thay đổi!", "success");
         }
 
         setEditingItem(null);
+        setCurrentPage(1);
         form.reset();
     };
 
@@ -167,6 +196,7 @@ function AdminPage({
                 <h3 style={{ marginTop: 0, color: '#ee4d2d' }}>QUẢN TRỊ VIÊN</h3>
                 <div className={`admin-menu-item ${activeTab === 'products' ? 'active' : ''}`} onClick={() => { setActiveTab('products'); setEditingItem(null); setCurrentPage(1); }}>Gợi ý hôm nay</div>
                 <div className={`admin-menu-item ${activeTab === 'top_search' ? 'active' : ''}`} onClick={() => { setActiveTab('top_search'); setEditingItem(null); setCurrentPage(1); }}>Tìm kiếm hàng đầu</div>
+                <div className={`admin-menu-item ${activeTab === 'top_products_manage' ? 'active' : ''}`} onClick={() => { setActiveTab('top_products_manage'); setEditingItem(null); setCurrentPage(1); }}>Quản lý sản phẩm hàng đầu</div>
                 <div className={`admin-menu-item ${activeTab === 'categories' ? 'active' : ''}`} onClick={() => { setActiveTab('categories'); setEditingItem(null); setCurrentPage(1); }}>Danh mục</div>
                 <div className={`admin-menu-item ${activeTab === 'banner' ? 'active' : ''}`} onClick={() => { setActiveTab('banner'); setEditingItem(null); }}>Quản lý Banner</div>
                 <div className={`admin-menu-item ${activeTab === 'users' ? 'active' : ''}`} onClick={() => { setActiveTab('users'); setEditingItem(null); setCurrentPage(1); }}>Quản lý tài khoản</div>
@@ -178,6 +208,7 @@ function AdminPage({
                     <h2>
                         {activeTab === 'products' && 'Quản lý Sản Phẩm Gợi Ý'}
                         {activeTab === 'top_search' && 'Quản lý Tìm Kiếm Hàng Đầu'}
+                        {activeTab === 'top_products_manage' && 'Quản lý Sản Phẩm Hàng Đầu'}
                         {activeTab === 'categories' && 'Quản lý Danh Mục'}
                         {activeTab === 'banner' && 'Thay đổi Hình ảnh Banner'}
                         {activeTab === 'users' && 'Quản lý Người Dùng'}
@@ -251,10 +282,43 @@ function AdminPage({
                         )}
 
                         {activeTab === 'top_search' && (
-                            <div className="form-group">
-                                <label className="form-label">Số lượng bán (VD: Bán 50k+):</label>
-                                <input name="sold" className="form-input" defaultValue={editingItem.sold} required />
-                            </div>
+                            <>
+                                <div className="form-group">
+                                    <label className="form-label">Giá tiền (Nhập số):</label>
+                                    <input name="price" type="number" className="form-input" defaultValue={editingItem.price || ""} required />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Danh mục:</label>
+                                    <select name="category" className="form-input" defaultValue={editingItem.category || ""}>
+                                        <option value="">-- Chọn danh mục --</option>
+                                        {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Số lượng bán (VD: Bán 50k+):</label>
+                                    <input name="sold" className="form-input" defaultValue={editingItem.sold || ""} required />
+                                </div>
+                            </>
+                        )}
+
+                        {activeTab === 'top_products_manage' && (
+                            <>
+                                <div className="form-group">
+                                    <label className="form-label">Giá tiền (Nhập số):</label>
+                                    <input name="price" type="number" className="form-input" defaultValue={editingItem.price || ""} required />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Danh mục:</label>
+                                    <select name="category" className="form-input" defaultValue={editingItem.category || ""}>
+                                        <option value="">-- Chọn danh mục --</option>
+                                        {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Mô tả chi tiết:</label>
+                                    <textarea name="description" className="form-input" rows="3" defaultValue={editingItem.description || "Chất liệu cao cấp, bền đẹp..."}></textarea>
+                                </div>
+                            </>
                         )}
 
                         <div className="form-actions">
@@ -273,14 +337,14 @@ function AdminPage({
                                     <th>Hình ảnh</th>
                                     <th>Tên</th>
                                     {activeTab === 'products' && <th>Giá</th>}
-                                    {activeTab === 'top_search' && <th>Đã bán</th>}
+                                    {(activeTab === 'top_search') && <th>Đã bán</th>}
                                     {activeTab === 'users' && <><th>Email</th><th>Vai trò</th></>}
                                     <th>Hành động</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {currentItems.map(item => (
-                                    <tr key={item.id}>
+                                {currentItems.map((item, index) => (
+                                    <tr key={`${item.id}-${activeTab}-${index}`}>
                                         <td>{String(item.id).substring(0, 6)}...</td>
                                         {activeTab === 'users' ? (
                                             <>
@@ -318,7 +382,7 @@ function AdminPage({
                                             {activeTab !== 'users' ? (
                                                 <>
                                                     <button className="admin-btn btn-edit" onClick={() => setEditingItem(item)}>Sửa</button>
-                                                    <button className="admin-btn btn-delete" onClick={() => handleDelete(activeTab === 'products' ? products : activeTab === 'top_search' ? topProducts : categories, activeTab === 'products' ? setProducts : activeTab === 'top_search' ? setTopProducts : setCategories, item.id)}>Xóa</button>
+                                                    <button className="admin-btn btn-delete" onClick={() => handleDelete(activeTab === 'products' ? products : activeTab === 'top_search' ? topSearch : activeTab === 'top_products_manage' ? topProducts : categories, activeTab === 'products' ? setProducts : activeTab === 'top_search' ? setTopSearch : activeTab === 'top_products_manage' ? setTopProducts : setCategories, item.id)}>Xóa</button>
                                                 </>
                                             ) : (
                                                 item.email !== 'admin' && (
@@ -348,7 +412,7 @@ function AdminPage({
                                 </button>
                                 {[...Array(totalPages)].map((_, index) => (
                                     <button
-                                        key={index}
+                                        key={`page-${index}`}
                                         onClick={() => handlePageChange(index + 1)}
                                         style={{
                                             padding: '5px 10px',

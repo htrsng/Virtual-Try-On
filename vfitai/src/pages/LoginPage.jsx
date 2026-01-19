@@ -49,6 +49,7 @@ function LoginPage({ users, setUsers, onLogin, showToast }) {
 
                 setUsers([...users, formattedUser]);
                 onLogin(formattedUser);
+                localStorage.setItem('currentUser', JSON.stringify(formattedUser));
                 showToast("Đăng ký thành công!", "success");
                 setTimeout(() => navigate('/'), 1000);
 
@@ -62,6 +63,7 @@ function LoginPage({ users, setUsers, onLogin, showToast }) {
 
             if (foundUser) {
                 onLogin(foundUser);
+                localStorage.setItem('currentUser', JSON.stringify(foundUser));
                 showToast("Đăng nhập thành công!", "success");
                 if (foundUser.role === 'admin') {
                     setTimeout(() => navigate('/admin'), 1000);

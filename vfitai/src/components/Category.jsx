@@ -5,13 +5,22 @@ function Category({ data }) {
     // Nếu chưa có dữ liệu truyền vào thì dùng mảng rỗng
     const categories = data || [];
 
+    // Hàm chuyển tên thành slug
+    const nameToSlug = (name) => {
+        return name
+            .toLowerCase()
+            .replace(/\s+/g, '-')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+    };
+
     return (
         <div className="container category-section">
             <div className="category-header">DANH MỤC THỜI TRANG</div>
             <div className="category-grid">
                 {categories.map((item) => (
                     <Link
-                        to={`/category/${item.id}`}
+                        to={`/category/${nameToSlug(item.name)}`}
                         key={item.id}
                         className="category-item"
                         style={{ textDecoration: 'none', color: 'inherit' }}

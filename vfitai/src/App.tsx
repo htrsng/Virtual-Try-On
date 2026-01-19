@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 // --- 1. IMPORT CÁC COMPONENT CỦA WEB BÁN HÀNG ---
 import Header from './components/Header';
 import CategoryPage from './pages/CategoryPage';
+import TopProductsPage from './pages/TopProductsPage';
 import LoginPage from './pages/LoginPage';
 import CheckoutPage from './pages/CheckoutPage';
 import ProductDetailPage from './pages/ProductDetailPage';
@@ -91,6 +92,7 @@ const formatPrice = (price: any) => {
 function App() {
   // --- STATE QUẢN LÝ DỮ LIỆU ---
   const [suggestionProducts, setSuggestionProducts] = useState(fallbackSuggestions);
+  const [topSearch, setTopSearch] = useState(initTopSearch);
   const [topProducts, setTopProducts] = useState(initTopSearch);
   const [categories, setCategories] = useState(initCategories);
   const [users, setUsers] = useState(fallbackUsers);
@@ -101,6 +103,79 @@ function App() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [toast, setToast] = useState<{ message: string, type: string } | null>(null);
+
+  // --- KHÔI PHỤC CURRENTUSER TỪ LOCALSTORAGE KHI COMPONENT MOUNT ---
+  useEffect(() => {
+    const savedCurrentUser = localStorage.getItem('currentUser');
+    if (savedCurrentUser) {
+      try {
+        setCurrentUser(JSON.parse(savedCurrentUser));
+      } catch (e) {
+        console.error("Lỗi parse currentUser:", e);
+      }
+    }
+
+    // Load categories từ localStorage
+    const savedCategories = localStorage.getItem('categories');
+    if (savedCategories) {
+      try {
+        setCategories(JSON.parse(savedCategories));
+      } catch (e) {
+        console.error("Lỗi parse categories:", e);
+      }
+    }
+    
+    // Load products từ localStorage
+    const savedProducts = localStorage.getItem('products');
+    if (savedProducts) {
+      try {
+        setSuggestionProducts(JSON.parse(savedProducts));
+      } catch (e) {
+        console.error("Lỗi parse products:", e);
+      }
+    }
+    
+    // Load banner từ localStorage
+    const savedBanner = localStorage.getItem('bannerData');
+    if (savedBanner) {
+      try {
+        setBannerData(JSON.parse(savedBanner));
+      } catch (e) {
+        console.error("Lỗi parse banner:", e);
+      }
+    }
+    
+    // Load topProducts từ localStorage
+    const savedTopProducts = localStorage.getItem('topProducts');
+    if (savedTopProducts) {
+      try {
+        setTopProducts(JSON.parse(savedTopProducts));
+      } catch (e) {
+        console.error("Lỗi parse topProducts:", e);
+      }
+    }
+    
+    // Load topSearch từ localStorage
+    const savedTopSearch = localStorage.getItem('topSearch');
+    if (savedTopSearch) {
+      try {
+        setTopSearch(JSON.parse(savedTopSearch));
+      } catch (e) {
+        console.error("Lỗi parse topSearch:", e);
+      }
+    }
+    
+    // Load users từ localStorage
+    const savedUsers = localStorage.getItem('users');
+    if (savedUsers) {
+      try {
+        const parsedUsers = JSON.parse(savedUsers);
+        setUsers(parsedUsers);
+      } catch (e) {
+        console.error("Lỗi parse users:", e);
+      }
+    }
+  }, []);
 
   // --- FETCH API TỪ SERVER ---
   useEffect(() => {
@@ -115,6 +190,7 @@ function App() {
             price: item.price
           }));
           setSuggestionProducts(formattedData);
+          localStorage.setItem('products', JSON.stringify(formattedData));
         }
       })
       .catch(err => console.error("Lỗi lấy sản phẩm (Có thể do chưa bật Server Nodejs):", err));
@@ -125,7 +201,11 @@ function App() {
       .then(data => {
         if (data && data.length > 0) {
           const formattedUsers = data.map((u: any) => ({ ...u, id: u._id }));
-          setUsers(prev => [...prev, ...formattedUsers]);
+          setUsers(prev => {
+            const updated = [...prev, ...formattedUsers];
+            localStorage.setItem('users', JSON.stringify(updated));
+            return updated;
+          });
         }
       })
       .catch(err => console.error("Lỗi lấy user:", err));
@@ -174,6 +254,7 @@ function App() {
 
   const handleLogout = () => {
     setCurrentUser(null);
+    localStorage.removeItem('currentUser');
     showToast("Đã đăng xuất thành công!", "info");
   };
 
@@ -199,7 +280,7 @@ function App() {
             <div>
               <Banner data={bannerData} />
               <Category data={categories} />
-              <TopSearch products={topProducts} />
+              <TopSearch products={topSearch} />
               <ProductList products={filteredProducts} />
             </div>
           } />
@@ -208,6 +289,7 @@ function App() {
           <Route path="/admin" element={
             <AdminPage
               products={suggestionProducts} setProducts={setSuggestionProducts}
+              topSearch={topSearch} setTopSearch={setTopSearch}
               topProducts={topProducts} setTopProducts={setTopProducts}
               categories={categories} setCategories={setCategories}
               users={users} setUsers={setUsers}
@@ -217,7 +299,10 @@ function App() {
           } />
 
           {/* 3. CÁC TRANG CHỨC NĂNG KHÁC */}
-          <Route path="/category/:id" element={<CategoryPage products={allProducts} categories={categories} />} />
+          <Route path="/category/:id" element={<CategoryPage products={displayProducts} categories={categories} />} />
+          
+          {/* 3a. TRANG SẢN PHẨM BÁN CHẠY */}
+          <Route path="/top-products" element={<TopProductsPage products={topProducts} onBuy={handleAddToCart} categories={categories} />} />
 
           {/* 👇 QUAN TRỌNG: Truyền user vào ProductDetailPage để check đăng nhập */}
           <Route path="/product/:id" element={<ProductDetailPage products={allProducts} onAddToCart={handleAddToCart} user={currentUser} showToast={showToast} />} />

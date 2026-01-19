@@ -1,7 +1,13 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 function TopSearch({ products }) {
+    const navigate = useNavigate();
+
+    const handleProductClick = (item) => {
+        navigate('/top-products', { state: { selectedCategory: item.category } });
+    };
+
     return (
         <div className="container top-search-section">
             <div className="top-header">
@@ -10,11 +16,11 @@ function TopSearch({ products }) {
             <div className="top-grid">
                 {/* Kiểm tra mảng tồn tại và có dữ liệu */}
                 {products?.length > 0 && products.map((item) => (
-                    <Link
-                        to={`/product/${item.id}`}
+                    <div
+                        onClick={() => handleProductClick(item)}
                         key={item.id}
                         className="top-item"
-                        style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
+                        style={{ textDecoration: 'none', color: 'inherit', display: 'block', cursor: 'pointer' }}
                     >
                         <div className="top-item-img-wrapper">
                             <div className="top-badge">TOP</div>
@@ -33,7 +39,7 @@ function TopSearch({ products }) {
                             <div className="sales-bar">Đã bán {item.sold}</div>
                         </div>
                         <div className="top-item-name">{item.name}</div>
-                    </Link>
+                    </div>
                 ))}
             </div>
         </div>
