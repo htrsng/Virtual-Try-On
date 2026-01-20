@@ -1,19 +1,18 @@
 // src/three/Scene.tsx
-import { Suspense, useState } from 'react'; // Bỏ React, chỉ lấy Suspense, useState
+import { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { Avatar } from './Avatar';
+import { Avatar } from './controls/avatar/Avatar';
 import { Lighting } from './Lighting';
 import { CameraControls } from './controls/CameraControls';
-import { DEFAULT_MORPHS } from '../features/virtual-tryon/types';
-import type { MorphParams } from '../features/virtual-tryon/types'; // Thêm type
 import { Html, Loader } from '@react-three/drei';
 
 export const Scene = () => {
-  const [morphParams] = useState<MorphParams>({
-    ...DEFAULT_MORPHS,
-    waist: 1,
-    height: 0
-  });
+  const morphParams = {
+    height: 0.5,
+    chest: 0.5,
+    waist: 0.5,
+    hips: 0.5,
+  };
 
   return (
     <div style={{ width: '100%', height: '100vh', background: '#111' }}>
@@ -21,7 +20,15 @@ export const Scene = () => {
         <Lighting />
 
         <Suspense fallback={<Html center>Đang tải 3D...</Html>}>
-          <Avatar params={morphParams} />
+          <Avatar
+            body={{
+              height: morphParams.height,
+              weight: 0.5,
+              chest: morphParams.chest,
+              waist: morphParams.waist,
+              hips: morphParams.hips,
+            }}
+          />
         </Suspense>
 
         <CameraControls />
