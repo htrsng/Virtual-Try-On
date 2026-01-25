@@ -1,58 +1,165 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiHeart, FiShoppingCart, FiEye, FiRepeat } from 'react-icons/fi';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
-function ProductList({ products, title = "GỢI Ý HÔM NAY", onBuy }) {
-    // Kiểm tra xem có dữ liệu sản phẩm không
-    if (!products || products.length === 0) {
-        return <div style={{ textAlign: 'center', padding: '20px' }}>Đang tải sản phẩm...</div>;
-    }
+function ProductList({ products, title = "GỢI Ý HÔM NAY", onBuy, loading = false }) {
+    const [hoveredId, setHoveredId] = useState(null);
 
-    return (
-        <div className="container">
-            <h3 style={{
-                marginTop: '20px',
-                color: '#ee4d2d',
-                borderBottom: '4px solid #ee4d2d',
-                display: 'inline-block',
-                paddingBottom: '5px'
-            }}>
-                {title}
-            </h3>
-
-            <div className="product-grid">
-                {products.map((product) => (
-                    /* QUAN TRỌNG: Phải dùng thẻ Link để bao quanh */
-                    <Link
-                        to={`/product/${product.id}`}
-                        key={product.id}
-                        className="product-card"
-                        style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
-                    >
-                        <img src={product.img} alt={product.name} className="product-img" />
-
-                        <div className="product-info">
-                            <div className="product-name">{product.name}</div>
-                            <div className="product-price">
-                                <span>{product.price}</span>
-                                <span style={{ fontSize: '10px', background: '#ee4d2d', color: 'white', padding: '2px 5px', borderRadius: '2px' }}>Xem ngay</span>
+    // Nếu đang loading, hiển thị skeleton
+    if (loading) {
+        return (
+            <div className="product-section">
+                <h3 className="section-title">{title}</h3>
+                <div className="product-grid">
+                    {[...Array(8)].map((_, index) => (
+                        <div key={index} className="product-card-skeleton">
+                            <Skeleton height={250} />
+                            <div style={{ padding: '15px' }}>
+                                <Skeleton count={2} />
+                                <Skeleton width={100} style={{ marginTop: '10px' }} />
                             </div>
                         </div>
-
-                        <div style={{
-                            position: 'absolute',
-                            top: '10px',
-                            left: '-4px',
-                            background: '#ee4d2d',
-                            color: 'white',
-                            fontSize: '10px',
-                            padding: '2px 4px',
-                            borderRadius: '0 2px 2px 0'
-                        }}>
-                            Yêu thích
-                        </div>
-                    </Link>
-                ))}
+                    ))}
+                </div>
             </div>
+        );
+    }
+
+    // Kiểm tra xem có dữ liệu sản phẩm không
+    if (!products || products.length === 0) {
+        return <div className="empty-state">Không có sản phẩm nào</div>;
+    }
+
+    const handleQuickAction = (e, action, product) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log(action, product);
+        // TODO: Implement wishlist, compare, quick view
+    };
+
+    return (
+        <div className="product-section">
+            <div className="product-header">{title}</div>
+
+            <motion.div
+                className="product-grid"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+            >
+                {products.map((product, index) => (
+                    <motion.div
+                        key={product.id}
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: index * 0.05 }}
+                        whileHover={{ y: -8 }}
+                        onHoverStart={() => setHoveredId(product.id)}
+                        onHoverEnd={() => setHoveredId(null)}
+                    >
+                        <Link
+                            to={`/product/${product.id}`}
+                            className="modern-product-card"
+                        >
+                            {/* Badge sale */}
+                            {product.discount && (
+                                <div className="product-badge sale-badge">
+                                    -{product.discount}%
+                                </div>
+                            )}
+
+                            {/* Quick Actions */}
+                            <AnimatePresence>
+                                {hoveredId === product.id && (
+                                    <motion.div
+                                        className="quick-actions"
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 20 }}
+                                        transition={{ duration: 0.2 }}
+                                    >
+                                        <motion.button
+                                            className="quick-action-btn"
+                                            whileHover={{ scale: 1.1 }}
+                                            whileTap={{ scale: 0.9 }}
+                                            onClick={(e) => handleQuickAction(e, 'wishlist', product)}
+                                            title="Thêm vào yêu thích"
+                                        >
+                                            <FiHeart />
+                                        </motion.button>
+                                        <motion.button
+                                            className="quick-action-btn"
+                                            whileHover={{ scale: 1.1 }}
+                                            whileTap={{ scale: 0.9 }}
+                                            onClick={(e) => handleQuickAction(e, 'compare', product)}
+                                            title="So sánh"
+                                        >
+                                            <FiRepeat />
+                                        </motion.button>
+                                        <motion.button
+                                            className="quick-action-btn"
+                                            whileHover={{ scale: 1.1 }}
+                                            whileTap={{ scale: 0.9 }}
+                                            onClick={(e) => handleQuickAction(e, 'quickview', product)}
+                                            title="Xem nhanh"
+                                        >
+                                            <FiEye />
+                                        </motion.button>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
+                            {/* Product Image */}
+                            <div className="product-image-wrapper">
+                                <img
+                                    src={product.img}
+                                    alt={product.name}
+                                    className="product-image"
+                                    loading="lazy"
+                                />
+                                <div className="product-overlay">
+                                    <motion.button
+                                        className="add-to-cart-overlay"
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            onBuy && onBuy(product);
+                                        }}
+                                    >
+                                        <FiShoppingCart /> Thêm vào giỏ
+                                    </motion.button>
+                                </div>
+                            </div>
+
+                            {/* Product Info */}
+                            <div className="product-info">
+                                <h4 className="product-name">{product.name}</h4>
+                                <div className="product-meta">
+                                    <div className="product-rating">
+                                        <span className="stars">⭐⭐⭐⭐⭐</span>
+                                        <span className="sold-count">Đã bán {product.sold || 0}</span>
+                                    </div>
+                                    <div className="product-price-wrapper">
+                                        {product.oldPrice && (
+                                            <span className="old-price">{product.oldPrice}</span>
+                                        )}
+                                        <span className="product-price">
+                                            {typeof product.price === 'number'
+                                                ? new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)
+                                                : product.price
+                                            }
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </Link>
+                    </motion.div>
+                ))}
+            </motion.div>
         </div>
     );
 }

@@ -9,7 +9,7 @@ function TopSearch({ products }) {
     };
 
     return (
-        <div className="container top-search-section">
+        <div className="top-search-section">
             <div className="top-header">
                 <div className="top-title">TÌM KIẾM HÀNG ĐẦU</div>
             </div>

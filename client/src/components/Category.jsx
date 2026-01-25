@@ -15,7 +15,7 @@ function Category({ data }) {
     };
 
     return (
-        <div className="container category-section">
+        <div className="category-section">
             <div className="category-header">DANH MỤC THỜI TRANG</div>
             <div className="category-grid">
                 {categories.map((item) => (

@@ -1,21 +1,52 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
+import { FiShoppingCart, FiUser, FiLogOut, FiHeart, FiSearch, FiSun, FiMoon, FiRepeat, FiX } from 'react-icons/fi';
 
-function Header({ cartCount, user, onSearch, showToast, onLogout }) {
+function Header({ cartCount, onSearch, showToast }) {
     const [inputValue, setInputValue] = useState("");
+    const [scrolled, setScrolled] = useState(false);
     const navigate = useNavigate();
+    const { user, logout, isAuthenticated } = useAuth();
+    const { theme, toggleTheme } = useTheme();
+
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 50);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     const handleSearchClick = () => {
-        onSearch(inputValue);
-        navigate('/');
+        if (!inputValue.trim()) {
+            showToast && showToast('Vui lòng nhập từ khóa tìm kiếm', 'warning');
+            return;
+        }
+
+        console.log('Search clicked with keyword:', inputValue.trim());
+
+        // Navigate to search results page
+        navigate(`/search?q=${encodeURIComponent(inputValue.trim())}`);
+        showToast && showToast(`Đang tìm kiếm: "${inputValue.trim()}"`, 'info');
+    };
+
+    const handleClearSearch = () => {
+        setInputValue('');
+        if (onSearch) {
+            onSearch('');
+        }
     };
 
     const handleKeyDown = (e) => {
-        if (e.key === 'Enter') handleSearchClick();
+        if (e.key === 'Enter') {
+            handleSearchClick();
+        }
     };
 
     const handleCartClick = () => {
-        if (user) {
+        if (isAuthenticated) {
             navigate('/checkout');
         } else {
             showToast("Vui lòng đăng nhập để xem Giỏ hàng!", "warning");
@@ -23,44 +54,89 @@ function Header({ cartCount, user, onSearch, showToast, onLogout }) {
         }
     };
 
+    const handleLogout = () => {
+        logout();
+        showToast("Đã đăng xuất thành công!", "success");
+        navigate('/');
+    };
+
     return (
-        <div className="shopee-header">
+        <div className={`shopee-header ${scrolled ? 'header-scrolled' : ''}`}>
             <div className="container header-content">
-                <Link to="/" className="logo" style={{ textDecoration: 'none', color: 'white', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <svg xmlns="http://www.w3.org/2000/svg" height="36" viewBox="0 -960 960 960" width="36" fill="white">
-                        <path d="M280-80q-33 0-56.5-23.5T200-160v-520q0-33 23.5-56.5T280-760h80v-40q0-50 35-85t85-35q50 0 85 35t35 85v40h80q33 0 56.5 23.5T760-680v520q0 33-23.5 56.5T680-80H280Zm0-80h400v-520H280v520Zm120-520h160v-40q0-33-23.5-56.5T480-840q-33 0-56.5 23.5T400-760v40Zm80 360q-50 0-85-35t-35-85h80q0 17 11.5 28.5T480-360q17 0 28.5-11.5T520-400h80q0 50-35 85t-85 35ZM280-160v-520 520Z" />
-                    </svg>
-                    <span style={{ fontWeight: 'bold', fontSize: '20px', fontFamily: 'Helvetica, Arial, sans-serif' }}>Shopee Fashion</span>
+                <Link to="/" className="logo">
+                    <span className="logo-shopee">Shopee</span>
+                    <span className="logo-divider">|</span>
+                    <span className="logo-subtitle">Thời Trang</span>
                 </Link>
 
                 <div className="search-box">
+                    <FiSearch className="search-icon" />
                     <input
-                        type="text" className="search-input"
+                        type="text"
+                        className="search-input"
                         placeholder="Tìm sản phẩm, thương hiệu..."
-                        value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyDown={handleKeyDown}
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        onKeyDown={handleKeyDown}
                     />
-                    <button className="search-btn" onClick={handleSearchClick}>🔍</button>
+                    {inputValue && (
+                        <button className="clear-search-btn" onClick={handleClearSearch} title="Xóa">
+                            <FiX />
+                        </button>
+                    )}
+                    <button className="search-btn" onClick={handleSearchClick}>Tìm kiếm</button>
                 </div>
 
                 <div className="header-actions">
-                    {user ? (
+                    <button
+                        className="icon-btn theme-toggle"
+                        onClick={toggleTheme}
+                        title={theme === 'light' ? 'Chuyển sang Dark Mode' : 'Chuyển sang Light Mode'}
+                    >
+                        {theme === 'light' ? <FiMoon size={20} /> : <FiSun size={20} />}
+                    </button>
+
+                    {isAuthenticated && (
                         <>
-                            <div className="user-action">Chào, {user.email}</div>
-                            {user.role === 'admin' && (
-                                <Link to="/admin" className="user-action" style={{ textDecoration: 'none', color: 'white', border: '1px solid white', padding: '2px 8px', borderRadius: '2px' }}>QUẢN TRỊ</Link>
-                            )}
-                            <div className="user-action" onClick={onLogout} style={{ cursor: 'pointer', fontWeight: 'bold' }}>Đăng Xuất</div>
-                        </>
-                    ) : (
-                        <>
-                            <Link to="/login" state={{ mode: 'register' }} className="user-action" style={{ textDecoration: 'none', color: 'white' }}>Đăng Ký</Link>
-                            <Link to="/login" state={{ mode: 'login' }} className="user-action" style={{ textDecoration: 'none', color: 'white' }}>Đăng Nhập</Link>
+                            <Link to="/wishlist" className="icon-btn" title="Yêu thích">
+                                <FiHeart size={20} />
+                            </Link>
+                            <Link to="/compare" className="icon-btn" title="So sánh">
+                                <FiRepeat size={20} />
+                            </Link>
                         </>
                     )}
 
-                    <div className="cart-icon" onClick={handleCartClick}>
-                        🛒
-                        <span className="cart-badge">{cartCount}</span>
+                    {isAuthenticated ? (
+                        <>
+                            <Link to="/profile" className="user-action">
+                                <FiUser />
+                                <span>{user?.fullName || user?.email}</span>
+                            </Link>
+                            {user?.role === 'admin' && (
+                                <Link to="/admin" className="admin-btn">
+                                    ⚙️ QUẢN TRỊ
+                                </Link>
+                            )}
+                            <button className="user-action logout-btn" onClick={handleLogout}>
+                                <FiLogOut />
+                                <span>Đăng Xuất</span>
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <Link to="/login" state={{ mode: 'register' }} className="header-link">
+                                📝 Đăng Ký
+                            </Link>
+                            <Link to="/login" state={{ mode: 'login' }} className="header-link">
+                                🔑 Đăng Nhập
+                            </Link>
+                        </>
+                    )}
+
+                    <div className="cart-icon-wrapper" onClick={handleCartClick}>
+                        <FiShoppingCart size={24} />
+                        {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
                     </div>
                 </div>
             </div>

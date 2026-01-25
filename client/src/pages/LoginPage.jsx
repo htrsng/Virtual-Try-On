@@ -1,21 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
-function LoginPage({ users, setUsers, onLogin, showToast }) {
+function LoginPage({ showToast }) {
     const navigate = useNavigate();
     const location = useLocation();
+    const { login, register, isAuthenticated } = useAuth();
+
     const [isRegister, setIsRegister] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPass, setConfirmPass] = useState('');
 
+    // Thông tin bổ sung cho đăng ký
+    const [fullName, setFullName] = useState('');
+    const [phone, setPhone] = useState('');
+    const [address, setAddress] = useState('');
+
     useEffect(() => {
+        // Nếu đã đăng nhập, chuyển về trang chủ
+        if (isAuthenticated) {
+            navigate('/');
+        }
+
         if (location.state && location.state.mode === 'register') {
             setIsRegister(true);
         } else {
             setIsRegister(false);
         }
-    }, [location]);
+    }, [location, isAuthenticated, navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -31,87 +44,147 @@ function LoginPage({ users, setUsers, onLogin, showToast }) {
                 return;
             }
 
-            // Gọi API Đăng ký để lưu vào Database
-            try {
-                const res = await fetch('http://localhost:3000/api/users', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password, role: 'user' })
-                });
+            if (password.length < 6) {
+                showToast("Mật khẩu phải có ít nhất 6 ký tự!", "warning");
+                return;
+            }
 
-                if (res.status === 400) {
-                    showToast("Tài khoản đã tồn tại!", "warning");
-                    return;
-                }
+            // Đăng ký
+            const result = await register(email, password, fullName, phone, address);
 
-                const newUser = await res.json();
-                const formattedUser = { ...newUser, id: newUser._id };
-
-                setUsers([...users, formattedUser]);
-                onLogin(formattedUser);
-                localStorage.setItem('currentUser', JSON.stringify(formattedUser));
-                showToast("Đăng ký thành công!", "success");
+            if (result.success) {
+                showToast(result.message, "success");
                 setTimeout(() => navigate('/'), 1000);
-
-            } catch (err) {
-                showToast("Lỗi kết nối Server!", "error");
+            } else {
+                showToast(result.message, "error");
             }
 
         } else {
-            // Đăng nhập: Kiểm tra trong danh sách users đã tải về
-            const foundUser = users.find(u => u.email === email && u.password === password);
+            // Đăng nhập
+            const result = await login(email, password);
 
-            if (foundUser) {
-                onLogin(foundUser);
-                localStorage.setItem('currentUser', JSON.stringify(foundUser));
-                showToast("Đăng nhập thành công!", "success");
-                if (foundUser.role === 'admin') {
-                    setTimeout(() => navigate('/admin'), 1000);
-                } else {
-                    setTimeout(() => navigate('/'), 1000);
-                }
+            if (result.success) {
+                showToast(result.message, "success");
+                setTimeout(() => navigate('/'), 1000);
             } else {
-                showToast("Sai tên đăng nhập hoặc mật khẩu!", "warning");
+                showToast(result.message, "error");
             }
         }
     };
 
+    const resetForm = () => {
+        setEmail('');
+        setPassword('');
+        setConfirmPass('');
+        setFullName('');
+        setPhone('');
+        setAddress('');
+    };
+
     return (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh', background: '#f5f5f5' }}>
-            <div style={{ background: 'white', padding: '30px', width: '350px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', borderRadius: '3px' }}>
-                <h2 style={{ fontSize: '20px', marginBottom: '25px', color: '#222' }}>
-                    {isRegister ? 'Đăng Ký Tài Khoản' : 'Đăng Nhập'}
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', padding: '20px' }}>
+            <div style={{
+                background: 'white',
+                padding: '40px',
+                width: '100%',
+                maxWidth: isRegister ? '500px' : '400px',
+                boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
+                borderRadius: '12px',
+                transition: 'all 0.3s ease'
+            }}>
+                <h2 style={{
+                    fontSize: '28px',
+                    marginBottom: '30px',
+                    color: '#333',
+                    textAlign: 'center',
+                    fontWeight: '700'
+                }}>
+                    {isRegister ? '🎉 Đăng Ký Tài Khoản' : '👋 Đăng Nhập'}
                 </h2>
 
                 <form onSubmit={handleSubmit}>
                     <input
-                        className="auth-input" type="text" placeholder="Tên đăng nhập / Email"
-                        value={email} onChange={e => setEmail(e.target.value)}
+                        className="auth-input"
+                        type="email"
+                        placeholder="Email"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        required
                     />
+
+                    {isRegister && (
+                        <>
+                            <input
+                                className="auth-input"
+                                type="text"
+                                placeholder="Họ và tên"
+                                value={fullName}
+                                onChange={e => setFullName(e.target.value)}
+                            />
+                            <input
+                                className="auth-input"
+                                type="tel"
+                                placeholder="Số điện thoại"
+                                value={phone}
+                                onChange={e => setPhone(e.target.value)}
+                            />
+                            <input
+                                className="auth-input"
+                                type="text"
+                                placeholder="Địa chỉ"
+                                value={address}
+                                onChange={e => setAddress(e.target.value)}
+                            />
+                        </>
+                    )}
+
                     <input
-                        className="auth-input" type="password" placeholder="Mật khẩu"
-                        value={password} onChange={e => setPassword(e.target.value)}
+                        className="auth-input"
+                        type="password"
+                        placeholder="Mật khẩu"
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        required
                     />
 
                     {isRegister && (
                         <input
-                            className="auth-input" type="password" placeholder="Nhập lại mật khẩu"
-                            value={confirmPass} onChange={e => setConfirmPass(e.target.value)}
+                            className="auth-input"
+                            type="password"
+                            placeholder="Nhập lại mật khẩu"
+                            value={confirmPass}
+                            onChange={e => setConfirmPass(e.target.value)}
+                            required
                         />
                     )}
 
-                    <button className="auth-btn" type="submit">
-                        {isRegister ? 'ĐĂNG KÝ' : 'ĐĂNG NHẬP'}
+                    <button
+                        className="auth-btn"
+                        type="submit"
+                        style={{
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            transition: 'transform 0.2s'
+                        }}
+                        onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
+                        onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
+                    >
+                        {isRegister ? '✨ ĐĂNG KÝ' : '🚀 ĐĂNG NHẬP'}
                     </button>
                 </form>
 
-                <div className="auth-switch">
+                <div className="auth-switch" style={{ marginTop: '20px', textAlign: 'center' }}>
                     {isRegister ? 'Bạn đã có tài khoản?' : 'Bạn mới biết đến Shopee?'}
                     <span
-                        style={{ marginLeft: '5px', color: '#ee4d2d', cursor: 'pointer', fontWeight: 'bold' }}
+                        style={{
+                            marginLeft: '5px',
+                            color: '#667eea',
+                            cursor: 'pointer',
+                            fontWeight: 'bold',
+                            textDecoration: 'underline'
+                        }}
                         onClick={() => {
                             setIsRegister(!isRegister);
-                            setEmail(''); setPassword(''); setConfirmPass('');
+                            resetForm();
                         }}>
                         {isRegister ? 'Đăng nhập ngay' : 'Đăng ký ngay'}
                     </span>

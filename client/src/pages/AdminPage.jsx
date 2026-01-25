@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 function AdminPage({
     products, setProducts,
@@ -8,20 +9,54 @@ function AdminPage({
     categories, setCategories,
     users, setUsers,
     bannerData, setBannerData,
+    flashSaleProducts, setFlashSaleProducts,
     currentUser, showToast
 }) {
     const navigate = useNavigate();
+    const { user, isAuthenticated } = useAuth();
     const [activeTab, setActiveTab] = useState('products');
     const [editingItem, setEditingItem] = useState(null);
 
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
 
-    if (!currentUser || currentUser.role !== 'admin') {
+    // Sử dụng user từ AuthContext, fallback về currentUser nếu cần
+    const adminUser = user || currentUser;
+
+    if (!isAuthenticated || !adminUser || adminUser.role !== 'admin') {
         return (
-            <div style={{ textAlign: 'center', marginTop: '50px' }}>
-                <h2>Bạn không có quyền truy cập trang này!</h2>
-                <button onClick={() => navigate('/')} className="pay-btn" style={{ width: '200px' }}>Về Trang Chủ</button>
+            <div style={{ textAlign: 'center', marginTop: '50px', padding: '40px' }}>
+                <h2 style={{
+                    fontSize: '28px',
+                    marginBottom: '20px',
+                    color: 'var(--text-primary)'
+                }}>
+                    ⚠️ Bạn không có quyền truy cập trang này!
+                </h2>
+                <p style={{
+                    fontSize: '16px',
+                    color: 'var(--text-secondary)',
+                    marginBottom: '30px'
+                }}>
+                    Chỉ quản trị viên mới có thể truy cập trang quản lý.
+                </p>
+                <button
+                    onClick={() => navigate('/')}
+                    className="pay-btn"
+                    style={{
+                        width: '200px',
+                        background: 'var(--accent-gradient)',
+                        border: 'none',
+                        color: 'white',
+                        padding: '12px 24px',
+                        borderRadius: 'var(--radius-md)',
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        cursor: 'pointer'
+                    }}
+                >
+                    Về Trang Chủ
+                </button>
             </div>
         );
     }
@@ -32,6 +67,7 @@ function AdminPage({
         if (activeTab === 'top_products_manage') return topProducts;
         if (activeTab === 'categories') return categories;
         if (activeTab === 'users') return users;
+        if (activeTab === 'flash_sale') return flashSaleProducts;
         return [];
     };
 
@@ -65,6 +101,7 @@ function AdminPage({
             if (activeTab === 'products') localStorage.setItem('products', JSON.stringify(updatedList));
             else if (activeTab === 'top_search') localStorage.setItem('topSearch', JSON.stringify(updatedList));
             else if (activeTab === 'top_products_manage') localStorage.setItem('topProducts', JSON.stringify(updatedList));
+            else if (activeTab === 'flash_sale') localStorage.setItem('flashSaleProducts', JSON.stringify(updatedList));
             else if (activeTab === 'categories') localStorage.setItem('categories', JSON.stringify(updatedList));
             else if (activeTab === 'users') localStorage.setItem('users', JSON.stringify(updatedList));
 
@@ -138,10 +175,20 @@ function AdminPage({
                 img: form.img.value || "https://placehold.co/200x200?text=No+Image",
                 sold: form.sold?.value,
                 price: form.price ? Number(form.price.value) : 0,
-                category: form.category?.value
+                category: form.category?.value,
+                description: form.description?.value,
+                discount: form.discount ? Number(form.discount.value) : 50,
+                stock: form.stock ? Number(form.stock.value) : 20,
+                originalPrice: form.price ? Math.round(Number(form.price.value) * (1 + (form.discount ? Number(form.discount.value) / 100 : 0.5))) : 0
             };
 
-            if (activeTab === 'top_search') {
+            if (activeTab === 'flash_sale') {
+                const updatedFlashSale = editingItem
+                    ? flashSaleProducts.map(p => p.id === newItem.id ? newItem : p)
+                    : [...flashSaleProducts, newItem];
+                setFlashSaleProducts(updatedFlashSale);
+                localStorage.setItem('flashSaleProducts', JSON.stringify(updatedFlashSale));
+            } else if (activeTab === 'top_search') {
                 const updatedTopSearch = editingItem
                     ? topSearch.map(p => p.id === newItem.id ? newItem : p)
                     : [...topSearch, newItem];
@@ -197,6 +244,7 @@ function AdminPage({
                 <div className={`admin-menu-item ${activeTab === 'products' ? 'active' : ''}`} onClick={() => { setActiveTab('products'); setEditingItem(null); setCurrentPage(1); }}>Gợi ý hôm nay</div>
                 <div className={`admin-menu-item ${activeTab === 'top_search' ? 'active' : ''}`} onClick={() => { setActiveTab('top_search'); setEditingItem(null); setCurrentPage(1); }}>Tìm kiếm hàng đầu</div>
                 <div className={`admin-menu-item ${activeTab === 'top_products_manage' ? 'active' : ''}`} onClick={() => { setActiveTab('top_products_manage'); setEditingItem(null); setCurrentPage(1); }}>Quản lý sản phẩm hàng đầu</div>
+                <div className={`admin-menu-item ${activeTab === 'flash_sale' ? 'active' : ''}`} onClick={() => { setActiveTab('flash_sale'); setEditingItem(null); setCurrentPage(1); }}>⚡ Flash Sale</div>
                 <div className={`admin-menu-item ${activeTab === 'categories' ? 'active' : ''}`} onClick={() => { setActiveTab('categories'); setEditingItem(null); setCurrentPage(1); }}>Danh mục</div>
                 <div className={`admin-menu-item ${activeTab === 'banner' ? 'active' : ''}`} onClick={() => { setActiveTab('banner'); setEditingItem(null); }}>Quản lý Banner</div>
                 <div className={`admin-menu-item ${activeTab === 'users' ? 'active' : ''}`} onClick={() => { setActiveTab('users'); setEditingItem(null); setCurrentPage(1); }}>Quản lý tài khoản</div>
@@ -208,8 +256,7 @@ function AdminPage({
                     <h2>
                         {activeTab === 'products' && 'Quản lý Sản Phẩm Gợi Ý'}
                         {activeTab === 'top_search' && 'Quản lý Tìm Kiếm Hàng Đầu'}
-                        {activeTab === 'top_products_manage' && 'Quản lý Sản Phẩm Hàng Đầu'}
-                        {activeTab === 'categories' && 'Quản lý Danh Mục'}
+                        {activeTab === 'top_products_manage' && 'Quản lý Sản Phẩm Hàng Đầu'}                        {activeTab === 'flash_sale' && '⚡ Quản lý Flash Sale'}                        {activeTab === 'categories' && 'Quản lý Danh Mục'}
                         {activeTab === 'banner' && 'Thay đổi Hình ảnh Banner'}
                         {activeTab === 'users' && 'Quản lý Người Dùng'}
                     </h2>
@@ -262,7 +309,7 @@ function AdminPage({
                             <input name="img" className="form-input" defaultValue={editingItem.img} placeholder="https://..." />
                         </div>
 
-                        {activeTab === 'products' && (
+                        {(activeTab === 'products' || activeTab === 'flash_sale') && (
                             <>
                                 <div className="form-group">
                                     <label className="form-label">Giá tiền (Nhập số):</label>
@@ -277,6 +324,23 @@ function AdminPage({
                                 <div className="form-group">
                                     <label className="form-label">Mô tả chi tiết:</label>
                                     <textarea name="description" className="form-input" rows="3" defaultValue={editingItem.description || "Chất liệu cao cấp, bền đẹp..."}></textarea>
+                                </div>
+                            </>
+                        )}
+
+                        {activeTab === 'flash_sale' && (
+                            <>
+                                <div className="form-group">
+                                    <label className="form-label">Giảm giá (%):</label>
+                                    <input name="discount" type="number" className="form-input" defaultValue={editingItem.discount || 50} min="1" max="99" required />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Số lượng trong kho:</label>
+                                    <input name="stock" type="number" className="form-input" defaultValue={editingItem.stock || 20} required />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Đã bán:</label>
+                                    <input name="sold" type="number" className="form-input" defaultValue={editingItem.sold || 0} required />
                                 </div>
                             </>
                         )}
@@ -336,7 +400,8 @@ function AdminPage({
                                     <th>ID</th>
                                     <th>Hình ảnh</th>
                                     <th>Tên</th>
-                                    {activeTab === 'products' && <th>Giá</th>}
+                                    {(activeTab === 'products' || activeTab === 'flash_sale') && <th>Giá</th>}
+                                    {activeTab === 'flash_sale' && <><th>Giảm</th><th>Kho</th><th>Bán</th></>}
                                     {(activeTab === 'top_search') && <th>Đã bán</th>}
                                     {activeTab === 'users' && <><th>Email</th><th>Vai trò</th></>}
                                     <th>Hành động</th>
@@ -363,7 +428,14 @@ function AdminPage({
                                             </>
                                         )}
 
-                                        {activeTab === 'products' && <td>{item.price ? item.price.toLocaleString('vi-VN') : 0} đ</td>}
+                                        {(activeTab === 'products' || activeTab === 'flash_sale') && <td>{item.price ? item.price.toLocaleString('vi-VN') : 0} đ</td>}
+                                        {activeTab === 'flash_sale' && (
+                                            <>
+                                                <td>{item.discount || 0}%</td>
+                                                <td>{item.stock || 0}</td>
+                                                <td>{item.sold || 0}</td>
+                                            </>
+                                        )}
                                         {activeTab === 'top_search' && <td>{item.sold}</td>}
 
                                         {activeTab === 'users' && (
