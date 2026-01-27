@@ -16,7 +16,8 @@ function ReviewCarousel() {
             rating: 5,
             comment: "Sản phẩm chất lượng tuyệt vời, giao hàng nhanh chóng. Tôi rất hài lòng với dịch vụ của Shopee Fashion!",
             date: "15/01/2026",
-            product: "Áo Sơ Mi Công Sở"
+            product: "Áo Sơ Mi Công Sở",
+            images: ["https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=300&h=300&fit=crop", "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=300&h=300&fit=crop&brightness=0.9"]
         },
         {
             id: 2,
@@ -25,7 +26,8 @@ function ReviewCarousel() {
             rating: 5,
             comment: "Đóng gói cẩn thận, sản phẩm đúng như mô tả. Giá cả hợp lý, sẽ quay lại ủng hộ shop!",
             date: "12/01/2026",
-            product: "Quần Jean Nam"
+            product: "Quần Jean Nam",
+            images: ["https://images.unsplash.com/photo-1542272604-787c3835535d?w=300&h=300&fit=crop"]
         },
         {
             id: 3,
@@ -124,6 +126,32 @@ function ReviewCarousel() {
                                 </div>
 
                                 <p className="review-comment">"{review.comment}"</p>
+
+                                {review.images && review.images.length > 0 && (
+                                    <div className="review-images" style={{
+                                        display: 'flex',
+                                        gap: '8px',
+                                        marginTop: '12px',
+                                        flexWrap: 'wrap'
+                                    }}>
+                                        {review.images.map((img, idx) => (
+                                            <img
+                                                key={idx}
+                                                src={img}
+                                                alt={`Review ${idx + 1}`}
+                                                style={{
+                                                    width: '80px',
+                                                    height: '80px',
+                                                    objectFit: 'cover',
+                                                    borderRadius: '8px',
+                                                    cursor: 'pointer',
+                                                    border: '2px solid #f0f0f0'
+                                                }}
+                                                onClick={() => window.open(img, '_blank')}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
 
                                 <div className="review-footer">
                                     <span className="review-product">Sản phẩm: {review.product}</span>

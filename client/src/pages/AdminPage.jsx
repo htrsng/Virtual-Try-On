@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import axios from 'axios';
 
 function AdminPage({
     products, setProducts,
@@ -20,8 +21,28 @@ function AdminPage({
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
 
+    // State cho banner content
+    const [bannerContents, setBannerContents] = useState([]);
+    const [editingBannerContent, setEditingBannerContent] = useState(null);
+
     // Sử dụng user từ AuthContext, fallback về currentUser nếu cần
     const adminUser = user || currentUser;
+
+    // Load banner contents
+    useEffect(() => {
+        if (activeTab === 'banner_content') {
+            fetchBannerContents();
+        }
+    }, [activeTab]);
+
+    const fetchBannerContents = async () => {
+        try {
+            const response = await axios.get('http://localhost:3000/api/banner-contents');
+            setBannerContents(response.data);
+        } catch (error) {
+            console.error('Error fetching banner contents:', error);
+        }
+    };
 
     if (!isAuthenticated || !adminUser || adminUser.role !== 'admin') {
         return (
@@ -97,13 +118,13 @@ function AdminPage({
             const updatedList = list.filter(item => item.id !== id);
             setList(updatedList);
 
-            // Lưu vào localStorage
+            // Lưu vào localStorage (KHÔNG lưu users vì đã load từ database)
             if (activeTab === 'products') localStorage.setItem('products', JSON.stringify(updatedList));
             else if (activeTab === 'top_search') localStorage.setItem('topSearch', JSON.stringify(updatedList));
             else if (activeTab === 'top_products_manage') localStorage.setItem('topProducts', JSON.stringify(updatedList));
             else if (activeTab === 'flash_sale') localStorage.setItem('flashSaleProducts', JSON.stringify(updatedList));
             else if (activeTab === 'categories') localStorage.setItem('categories', JSON.stringify(updatedList));
-            else if (activeTab === 'users') localStorage.setItem('users', JSON.stringify(updatedList));
+            // KHÔNG lưu users vào localStorage nữa, nó sẽ load từ database
 
             showToast("Đã xóa thành công!", "success");
         }
@@ -247,6 +268,7 @@ function AdminPage({
                 <div className={`admin-menu-item ${activeTab === 'flash_sale' ? 'active' : ''}`} onClick={() => { setActiveTab('flash_sale'); setEditingItem(null); setCurrentPage(1); }}>⚡ Flash Sale</div>
                 <div className={`admin-menu-item ${activeTab === 'categories' ? 'active' : ''}`} onClick={() => { setActiveTab('categories'); setEditingItem(null); setCurrentPage(1); }}>Danh mục</div>
                 <div className={`admin-menu-item ${activeTab === 'banner' ? 'active' : ''}`} onClick={() => { setActiveTab('banner'); setEditingItem(null); }}>Quản lý Banner</div>
+                <div className={`admin-menu-item ${activeTab === 'banner_content' ? 'active' : ''}`} onClick={() => { setActiveTab('banner_content'); setEditingItem(null); setCurrentPage(1); }}>Nội dung Banner</div>
                 <div className={`admin-menu-item ${activeTab === 'users' ? 'active' : ''}`} onClick={() => { setActiveTab('users'); setEditingItem(null); setCurrentPage(1); }}>Quản lý tài khoản</div>
                 <div className="admin-menu-item" onClick={() => navigate('/')}>← Về trang chủ</div>
             </div>
@@ -505,6 +527,163 @@ function AdminPage({
                                     Sau
                                 </button>
                             </div>
+                        )}
+                    </>
+                )}
+
+                {/* TAB NỘI DUNG BANNER */}
+                {activeTab === 'banner_content' && (
+                    <>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                            <h2>📝 Quản Lý Nội Dung Banner</h2>
+                            <button className="admin-btn btn-add" onClick={() => setEditingBannerContent({ bannerId: '', title: '', content: '', imageUrl: '' })}>+ Thêm Banner Content</button>
+                        </div>
+
+                        {editingBannerContent && (
+                            <form onSubmit={async (e) => {
+                                e.preventDefault();
+                                const formData = {
+                                    bannerId: e.target.bannerId.value,
+                                    title: e.target.title.value,
+                                    content: e.target.content.value,
+                                    imageUrl: e.target.imageUrl.value || '',
+                                    isActive: e.target.isActive?.checked ?? true
+                                };
+
+                                try {
+                                    if (editingBannerContent._id) {
+                                        // Update
+                                        await axios.put(`http://localhost:3000/api/banner-contents/${editingBannerContent.bannerId}`, formData);
+                                        showToast('Đã cập nhật nội dung banner!', 'success');
+                                    } else {
+                                        // Create
+                                        await axios.post('http://localhost:3000/api/banner-contents', formData);
+                                        showToast('Đã thêm nội dung banner mới!', 'success');
+                                    }
+                                    setEditingBannerContent(null);
+                                    fetchBannerContents();
+                                } catch (error) {
+                                    console.error('Error saving banner content:', error);
+                                    showToast(error.response?.data?.message || 'Có lỗi xảy ra!', 'error');
+                                }
+                            }} style={{ background: '#f9f9f9', padding: '20px', marginBottom: '20px', border: '1px solid #eee', borderRadius: '8px' }}>
+                                <h3>{editingBannerContent._id ? 'Sửa Nội Dung Banner' : 'Thêm Nội Dung Banner Mới'}</h3>
+
+                                <div className="form-group">
+                                    <label className="form-label">Banner ID (VD: banner1, banner2, banner3):</label>
+                                    <input
+                                        name="bannerId"
+                                        className="form-input"
+                                        defaultValue={editingBannerContent.bannerId}
+                                        required
+                                        disabled={!!editingBannerContent._id}
+                                        placeholder="banner1"
+                                    />
+                                    <small style={{ color: '#666', fontSize: '12px' }}>Banner chính: banner1, banner2, banner3. Banner phụ: banner4, banner5</small>
+                                </div>
+
+                                <div className="form-group">
+                                    <label className="form-label">Tiêu đề:</label>
+                                    <input name="title" className="form-input" defaultValue={editingBannerContent.title} required />
+                                </div>
+
+                                <div className="form-group">
+                                    <label className="form-label">Nội dung (HTML được hỗ trợ):</label>
+                                    <textarea
+                                        name="content"
+                                        className="form-input"
+                                        rows="8"
+                                        defaultValue={editingBannerContent.content}
+                                        required
+                                        placeholder="Nhập nội dung chi tiết. Hỗ trợ HTML như <h2>, <p>, <ul>, <li>, <strong>, v.v."
+                                    ></textarea>
+                                </div>
+
+                                <div className="form-group">
+                                    <label className="form-label">Link Ảnh (tùy chọn):</label>
+                                    <input name="imageUrl" className="form-input" defaultValue={editingBannerContent.imageUrl} placeholder="https://..." />
+                                </div>
+
+                                <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <input
+                                        type="checkbox"
+                                        name="isActive"
+                                        defaultChecked={editingBannerContent.isActive !== false}
+                                        style={{ width: 'auto', cursor: 'pointer' }}
+                                    />
+                                    <label style={{ margin: 0, cursor: 'pointer' }}>Hiển thị banner này</label>
+                                </div>
+
+                                <div className="form-actions" style={{ display: 'flex', gap: '10px' }}>
+                                    <button type="submit" className="admin-btn btn-add">💾 Lưu</button>
+                                    <button type="button" className="admin-btn btn-delete" onClick={() => setEditingBannerContent(null)}>❌ Hủy</button>
+                                </div>
+                            </form>
+                        )}
+
+                        <table className="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Banner ID</th>
+                                    <th>Tiêu đề</th>
+                                    <th>Nội dung (preview)</th>
+                                    <th>Ảnh</th>
+                                    <th>Trạng thái</th>
+                                    <th>Cập nhật</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {bannerContents.map((banner) => (
+                                    <tr key={banner._id}>
+                                        <td><strong>{banner.bannerId}</strong></td>
+                                        <td>{banner.title}</td>
+                                        <td style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                            {banner.content.substring(0, 50)}...
+                                        </td>
+                                        <td>
+                                            {banner.imageUrl ? (
+                                                <img src={banner.imageUrl} alt="" style={{ width: '60px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
+                                            ) : (
+                                                <span style={{ color: '#999' }}>Không có</span>
+                                            )}
+                                        </td>
+                                        <td>
+                                            <span style={{
+                                                padding: '4px 8px',
+                                                borderRadius: '4px',
+                                                fontSize: '12px',
+                                                background: banner.isActive ? '#52c41a' : '#999',
+                                                color: 'white'
+                                            }}>
+                                                {banner.isActive ? 'Hoạt động' : 'Ẩn'}
+                                            </span>
+                                        </td>
+                                        <td>{new Date(banner.updatedAt).toLocaleDateString('vi-VN')}</td>
+                                        <td>
+                                            <button className="admin-btn btn-edit" onClick={() => setEditingBannerContent(banner)}>Sửa</button>
+                                            <button className="admin-btn btn-delete" onClick={async () => {
+                                                if (window.confirm('Xóa nội dung banner này?')) {
+                                                    try {
+                                                        await axios.delete(`http://localhost:3000/api/banner-contents/${banner.bannerId}`);
+                                                        showToast('Đã xóa!', 'success');
+                                                        fetchBannerContents();
+                                                    } catch (error) {
+                                                        console.error('Error deleting:', error);
+                                                        showToast('Có lỗi xảy ra!', 'error');
+                                                    }
+                                                }
+                                            }}>Xóa</button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+
+                        {bannerContents.length === 0 && (
+                            <p style={{ textAlign: 'center', color: '#999', marginTop: '30px' }}>
+                                Chưa có nội dung banner nào. Nhấn "Thêm Banner Content" để bắt đầu!
+                            </p>
                         )}
                     </>
                 )}

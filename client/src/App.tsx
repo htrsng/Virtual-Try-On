@@ -20,6 +20,7 @@ import HelpPage from './pages/HelpPage';
 import AboutPage from './pages/AboutPage';
 import SearchResultsPage from './pages/SearchResultsPage';
 import PolicyPage from './pages/PolicyPage';
+import BannerContentPage from './pages/BannerContentPage';
 import Toast from './components/Toast';
 
 // --- 2. IMPORT TÍNH NĂNG 3D (MỚI) ---
@@ -991,7 +992,7 @@ function App() {
   const [topSearch, setTopSearch] = useState(initTopSearch);
   const [topProducts, setTopProducts] = useState(initTopSearch);
   const [categories, setCategories] = useState(initCategories);
-  const [users, setUsers] = useState(fallbackUsers);
+  const [users, setUsers] = useState<any[]>([]); // Bắt đầu với mảng rỗng
   const [bannerData, setBannerData] = useState(initBanners);
   const [flashSaleProducts, setFlashSaleProducts] = useState<any[]>([
     {
@@ -1236,11 +1237,35 @@ function App() {
     }
   ]);
 
-  const [cartItems, setCartItems] = useState<any[]>([]);
+  // Load cart từ localStorage ngay khi khởi tạo state
+  const [cartItems, setCartItems] = useState<any[]>(() => {
+    const savedCart = localStorage.getItem('cartItems');
+    if (savedCart) {
+      try {
+        const parsed = JSON.parse(savedCart);
+        console.log('🛒 Khởi tạo giỏ hàng từ localStorage:', parsed);
+        return parsed;
+      } catch (e) {
+        console.error("Lỗi parse cart:", e);
+        return [];
+      }
+    }
+    return [];
+  });
+  
   const [orders, setOrders] = useState<any[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [toast, setToast] = useState<{ message: string, type: string } | null>(null);
+
+  // Lưu cart vào localStorage mỗi khi thay đổi
+  useEffect(() => {
+    if (cartItems.length > 0) {
+      localStorage.setItem('cartItems', JSON.stringify(cartItems));
+      console.log('💾 Đã lưu giỏ hàng:', cartItems);
+    }
+    // Không xóa localStorage khi cart rỗng vì có thể đang loading
+  }, [cartItems]);
 
   // Debug search keyword changes
   useEffect(() => {
@@ -1257,6 +1282,8 @@ function App() {
         console.error("Lỗi parse currentUser:", e);
       }
     }
+
+    // Cart đã được load trong useState initializer, không cần load lại
 
     // Load categories từ localStorage
     const savedCategories = localStorage.getItem('categories');
@@ -1325,16 +1352,10 @@ function App() {
       localStorage.setItem('topSearch', JSON.stringify(initTopSearch));
     }
     
-    // Load users từ localStorage
-    const savedUsers = localStorage.getItem('users');
-    if (savedUsers) {
-      try {
-        const parsedUsers = JSON.parse(savedUsers);
-        setUsers(parsedUsers);
-      } catch (e) {
-        console.error("Lỗi parse users:", e);
-      }
-    }
+    // XÓA users cũ trong localStorage (dữ liệu rác)
+    // Users sẽ được load từ database thật
+    localStorage.removeItem('users');
+    console.log('🗑️ Đã xóa users cũ từ localStorage');
     
     // Load flashSaleProducts từ localStorage - NẾU KHÔNG CÓ THÌ DÙNG DEFAULT
     const savedFlashSale = localStorage.getItem('flashSaleProducts');
@@ -1368,20 +1389,44 @@ function App() {
       })
       .catch(err => console.error("Lỗi lấy sản phẩm (Có thể do chưa bật Server Nodejs):", err));
 
-    // 2. Lấy Người Dùng
+    // 2. Lấy Người Dùng (THAY THẾ HOÀN TOÀN từ database)
     fetch('http://localhost:3000/api/users')
       .then(res => res.json())
       .then(data => {
-        if (data && data.length > 0) {
-          const formattedUsers = data.map((u: any) => ({ ...u, id: u._id }));
-          setUsers(prev => {
-            const updated = [...prev, ...formattedUsers];
-            localStorage.setItem('users', JSON.stringify(updated));
-            return updated;
-          });
+        if (data && Array.isArray(data) && data.length > 0) {
+          // Lọc bỏ dữ liệu rỗng/undefined và loại duplicate
+          const validUsers = data.filter((u: any) => u && u._id && u.email);
+          const uniqueUsers = validUsers.reduce((acc: any[], current: any) => {
+            const exists = acc.find(item => item._id === current._id);
+            if (!exists) {
+              acc.push(current);
+            }
+            return acc;
+          }, []);
+
+          const formattedUsers = uniqueUsers.map((u: any) => ({ 
+            ...u, 
+            id: u._id,
+            email: u.email,
+            role: u.role,
+            fullName: u.fullName || '',
+            phone: u.phone || '',
+            address: u.address || ''
+          }));
+          
+          setUsers(formattedUsers);
+          console.log('✅ Đã load', formattedUsers.length, 'users từ database');
+          console.log('📋 Danh sách users:', formattedUsers.map(u => u.email));
+        } else {
+          // Nếu database trống, để mảng rỗng
+          setUsers([]);
+          console.log('⚠️ Database không có users');
         }
       })
-      .catch(err => console.error("Lỗi lấy user:", err));
+      .catch(err => {
+        console.error("Lỗi lấy user:", err);
+        setUsers([]);
+      });
   }, []);
 
   const showToast = (message: string, type = 'success') => { setToast({ message, type }); };
@@ -1528,6 +1573,9 @@ function App() {
             {/* TRANG 3D VIRTUAL TRY-ON */}
             <Route path="/try-on" element={<VirtualTryOn />} />
 
+            {/* TRANG NỘI DUNG BANNER */}
+            <Route path="/banner/:bannerId" element={<BannerContentPage />} />
+
             {/* TRANG TRUNG TÂM TRỢ GIÚP */}
             <Route path="/help" element={<HelpPage />} />
 
@@ -1548,7 +1596,7 @@ function App() {
 
           {/* Thông báo (Toast) hiển thị đè lên trên cùng */}
           {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-          
+
           {/* Footer luôn hiển thị ở cuối */}
           <Footer />
         </div>

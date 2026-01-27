@@ -5,7 +5,7 @@ import axios from 'axios';
 
 function CheckoutPage({ cartItems, onRemove, onUpdateQuantity, onCheckoutSuccess, showToast }) {
     const navigate = useNavigate();
-    const { user, isAuthenticated } = useAuth();
+    const { user, isAuthenticated, loading } = useAuth();
 
     // Thông tin giao hàng - auto-fill từ user profile
     const [fullName, setFullName] = useState('');
@@ -17,8 +17,38 @@ function CheckoutPage({ cartItems, onRemove, onUpdateQuantity, onCheckoutSuccess
     const [paymentMethod, setPaymentMethod] = useState('COD');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // State cho mã giảm giá
+    const [discountCode, setDiscountCode] = useState('');
+    const [appliedDiscount, setAppliedDiscount] = useState(null);
+    const [discountError, setDiscountError] = useState('');
+    const [showCouponList, setShowCouponList] = useState(false);
+    const [myCoupons, setMyCoupons] = useState([]);
+    const [usedCoupons, setUsedCoupons] = useState([]); // Mã đã sử dụng
+
+    // Danh sách mã giảm giá hợp lệ
+    const validCoupons = [
+        { code: 'GIAM10', discount: 10, minOrder: 0 },
+        { code: 'GIAM15', discount: 15, minOrder: 200000 },
+        { code: 'GIAM20', discount: 20, minOrder: 500000 },
+        { code: 'GIAM30', discount: 30, minOrder: 1000000 },
+        { code: 'GIAM50', discount: 50, minOrder: 2000000 },
+    ];
+
+    // Reset mã giảm giá khi vào trang checkout
+    useEffect(() => {
+        // Reset mã giảm giá mỗi khi vào trang checkout
+        setDiscountCode('');
+        setAppliedDiscount(null);
+        setDiscountError('');
+    }, []); // Chạy 1 lần khi component mount
+
     // Auto-fill thông tin từ user profile
     useEffect(() => {
+        // Đợi loading xong mới kiểm tra authentication
+        if (loading) {
+            return;
+        }
+
         if (!isAuthenticated) {
             showToast("Vui lòng đăng nhập để thanh toán!", "warning");
             navigate('/login');
@@ -33,7 +63,60 @@ function CheckoutPage({ cartItems, onRemove, onUpdateQuantity, onCheckoutSuccess
             setDistrict(user.district || '');
             setWard(user.ward || '');
         }
-    }, [user, isAuthenticated]);
+
+        // Load danh sách mã đã sử dụng từ server
+        const fetchUsedCoupons = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+
+                const response = await fetch('http://localhost:3000/api/used-coupons', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setUsedCoupons(data.coupons || []);
+                }
+            } catch (err) {
+                console.error('Lỗi load mã đã dùng:', err);
+            }
+        };
+
+        fetchUsedCoupons();
+
+        // Load mã giảm giá từ localStorage (chỉ mã từ vòng quay và newsletter)
+        const loadCoupons = () => {
+            const savedCoupons = JSON.parse(localStorage.getItem('myCoupons') || '[]');
+            console.log('📦 Load mã giảm giá từ localStorage:', savedCoupons);
+            setMyCoupons(savedCoupons);
+        };
+
+        loadCoupons();
+
+        // Lắng nghe sự kiện storage để cập nhật khi có mã mới từ vòng quay
+        const handleStorageChange = (e) => {
+            if (e.key === 'myCoupons') {
+                loadCoupons();
+            }
+        };
+
+        // Lắng nghe custom event từ vòng quay (trong cùng tab)
+        const handleCouponUpdate = () => {
+            console.log('🎯 Nhận event couponUpdated - đang reload mã...');
+            loadCoupons();
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+        window.addEventListener('couponUpdated', handleCouponUpdate);
+
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            window.removeEventListener('couponUpdated', handleCouponUpdate);
+        };
+    }, [user, isAuthenticated, loading, navigate, showToast]);
 
     const parsePrice = (price) => {
         if (typeof price === 'number') {
@@ -46,8 +129,152 @@ function CheckoutPage({ cartItems, onRemove, onUpdateQuantity, onCheckoutSuccess
         return acc + parsePrice(item.price) * item.quantity;
     }, 0);
 
+    // Tính toán giảm giá
+    const discountAmount = appliedDiscount ? (totalAmount * appliedDiscount.discount) / 100 : 0;
+    const finalAmount = totalAmount - discountAmount;
+
     const formatPrice = (price) => {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+    };
+
+    // Hàm áp dụng mã giảm giá
+    const applyDiscountCode = async () => {
+        if (!discountCode.trim()) {
+            setDiscountError('Vui lòng nhập mã giảm giá');
+            return;
+        }
+
+        // Kiểm tra mã cố định trước
+        const coupon = validCoupons.find(c => c.code.toUpperCase() === discountCode.toUpperCase());
+
+        if (coupon) {
+            // Mã cố định
+            if (totalAmount < coupon.minOrder) {
+                setDiscountError(`Đơn hàng tối thiểu ${formatPrice(coupon.minOrder)} để dùng mã này`);
+                setAppliedDiscount(null);
+                return;
+            }
+
+            // Kiểm tra mã đã sử dụng chưa (gọi API - BẮT BUỘC)
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    setDiscountError('Vui lòng đăng nhập để sử dụng mã giảm giá');
+                    setAppliedDiscount(null);
+                    return;
+                }
+
+                const checkResponse = await fetch('http://localhost:3000/api/check-coupon-used', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ couponCode: discountCode })
+                });
+
+                if (!checkResponse.ok) {
+                    setDiscountError('Không thể kiểm tra mã giảm giá. Vui lòng thử lại');
+                    setAppliedDiscount(null);
+                    return;
+                }
+
+                const checkData = await checkResponse.json();
+                if (checkData.used) {
+                    setDiscountError('Bạn đã sử dụng mã giảm giá này rồi');
+                    setAppliedDiscount(null);
+                    return;
+                }
+            } catch (err) {
+                console.error('Lỗi kiểm tra mã:', err);
+                setDiscountError('Lỗi kiểm tra mã giảm giá. Vui lòng thử lại');
+                setAppliedDiscount(null);
+                return; // Chặn không cho áp dụng nếu API lỗi
+            }
+
+            setAppliedDiscount(coupon);
+            setDiscountError('');
+            showToast(`Áp dụng mã giảm ${coupon.discount}% thành công! 🎉`, 'success');
+            return;
+        }
+
+        // Kiểm tra mã từ newsletter
+        if (discountCode.startsWith('NEWS10')) {
+            try {
+                // Kiểm tra mã đã dùng chưa trong UsedCouponModel
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    setDiscountError('Vui lòng đăng nhập để sử dụng mã giảm giá');
+                    setAppliedDiscount(null);
+                    return;
+                }
+
+                const checkUsedResponse = await fetch('http://localhost:3000/api/check-coupon-used', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ couponCode: discountCode })
+                });
+
+                if (checkUsedResponse.ok) {
+                    const checkData = await checkUsedResponse.json();
+                    if (checkData.used) {
+                        setDiscountError('Bạn đã sử dụng mã giảm giá này rồi');
+                        setAppliedDiscount(null);
+                        return;
+                    }
+                }
+
+                // Kiểm tra mã newsletter có hợp lệ không
+                const response = await fetch('http://localhost:3000/api/newsletter/validate-coupon', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ couponCode: discountCode })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.valid) {
+                    setAppliedDiscount({
+                        code: discountCode,
+                        discount: data.discount,
+                        minOrder: 0,
+                        isNewsletter: true
+                    });
+                    setDiscountError('');
+                    showToast(`Áp dụng mã newsletter giảm ${data.discount}% thành công! 🎉`, 'success');
+                } else {
+                    setDiscountError(data.message || 'Mã giảm giá không hợp lệ');
+                    setAppliedDiscount(null);
+                }
+            } catch (err) {
+                console.error('Lỗi kiểm tra mã newsletter:', err);
+                setDiscountError('Không thể kiểm tra mã giảm giá');
+                setAppliedDiscount(null);
+            }
+        } else {
+            setDiscountError('Mã giảm giá không hợp lệ');
+            setAppliedDiscount(null);
+        }
+    };
+
+    // Hàm xóa mã giảm giá
+    const removeDiscount = () => {
+        setAppliedDiscount(null);
+        setDiscountCode('');
+        setDiscountError('');
+    };
+
+    // Hàm chọn mã từ danh sách
+    const selectCoupon = (code) => {
+        setDiscountCode(code);
+        setShowCouponList(false);
+        // Tự động áp dụng
+        setTimeout(() => {
+            document.getElementById('apply-coupon-btn')?.click();
+        }, 100);
     };
 
     const handlePayment = async (e) => {
@@ -85,7 +312,9 @@ function CheckoutPage({ cartItems, onRemove, onUpdateQuantity, onCheckoutSuccess
                     quantity: item.quantity,
                     img: item.img
                 })),
-                totalAmount,
+                totalAmount: finalAmount, // Dùng finalAmount đã trừ giảm giá
+                discountCode: appliedDiscount?.code || null,
+                discountAmount: discountAmount,
                 shippingInfo: {
                     fullName,
                     phone,
@@ -108,8 +337,28 @@ function CheckoutPage({ cartItems, onRemove, onUpdateQuantity, onCheckoutSuccess
 
             console.log('✅ Response:', response.data);
 
+            // Đánh dấu mã newsletter đã sử dụng
+            if (appliedDiscount && appliedDiscount.isNewsletter) {
+                try {
+                    await fetch('http://localhost:3000/api/newsletter/use-coupon', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ couponCode: appliedDiscount.code })
+                    });
+                    console.log('✅ Đã đánh dấu mã newsletter đã sử dụng');
+                } catch (err) {
+                    console.error('Lỗi đánh dấu mã:', err);
+                }
+            }
+
             showToast("Đặt hàng thành công! 🎉", "success");
-            onCheckoutSuccess(totalAmount);
+
+            // Reset mã giảm giá sau khi đặt hàng thành công
+            setDiscountCode('');
+            setAppliedDiscount(null);
+            setDiscountError('');
+
+            onCheckoutSuccess(finalAmount); // Dùng finalAmount
 
             // Chuyển sang trang đơn hàng của tôi sau 1.5s
             setTimeout(() => {
@@ -120,11 +369,34 @@ function CheckoutPage({ cartItems, onRemove, onUpdateQuantity, onCheckoutSuccess
             console.error('❌ Lỗi đặt hàng:', error);
             console.error('❌ Error response:', error.response?.data);
             console.error('❌ Error status:', error.response?.status);
-            showToast(error.response?.data?.message || error.response?.data?.error || "Đặt hàng thất bại!", "error");
+            console.error('❌ Full error:', JSON.stringify(error.response, null, 2));
+
+            const errorMessage = error.response?.data?.message ||
+                error.response?.data?.error ||
+                error.response?.data?.details ||
+                "Đặt hàng thất bại!";
+
+            showToast(errorMessage, "error");
         } finally {
             setIsSubmitting(false);
         }
     };
+
+    // Hiển thị loading khi đang kiểm tra authentication
+    if (loading) {
+        return (
+            <div className="container" style={{
+                textAlign: 'center',
+                padding: '100px 20px',
+                background: 'white',
+                marginTop: '20px',
+                borderRadius: '8px'
+            }}>
+                <div style={{ fontSize: '40px', marginBottom: '20px' }}>⏳</div>
+                <p style={{ color: '#666' }}>Đang tải...</p>
+            </div>
+        );
+    }
 
     if (cartItems.length === 0) {
         return (
@@ -298,13 +570,221 @@ function CheckoutPage({ cartItems, onRemove, onUpdateQuantity, onCheckoutSuccess
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
+                        marginBottom: '15px',
+                        paddingBottom: '15px',
+                        borderBottom: '1px solid #f0f0f0'
+                    }}>
+                        <span style={{ color: '#666', fontSize: '16px' }}>Tạm tính:</span>
+                        <span style={{ fontSize: '18px', fontWeight: '600' }}>
+                            {formatPrice(totalAmount)}
+                        </span>
+                    </div>
+
+                    {/* Mã giảm giá */}
+                    <div style={{ marginBottom: '20px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                            <h4 style={{ margin: 0, fontSize: '15px', color: '#333' }}>Mã giảm giá</h4>
+                            {myCoupons.length > 0 && !appliedDiscount && (
+                                <button
+                                    type="button"
+                                    onClick={() => setShowCouponList(!showCouponList)}
+                                    style={{
+                                        background: 'none',
+                                        border: '1px solid #ee4d2d',
+                                        color: '#ee4d2d',
+                                        padding: '5px 12px',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        fontSize: '13px',
+                                        fontWeight: '600'
+                                    }}
+                                >
+                                    {showCouponList ? 'Ẩn danh sách' : `${myCoupons.filter(c => !usedCoupons.includes(c)).length} mã có sẵn`}
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Danh sách mã đã có */}
+                        {showCouponList && myCoupons.length > 0 && (
+                            (() => {
+                                // Filter ra mã đã sử dụng
+                                const availableCoupons = myCoupons.filter(coupon => !usedCoupons.includes(coupon));
+
+                                if (availableCoupons.length === 0) {
+                                    return (
+                                        <div style={{
+                                            background: '#f9f9f9',
+                                            border: '1px solid #e0e0e0',
+                                            borderRadius: '6px',
+                                            padding: '20px',
+                                            marginBottom: '12px',
+                                            textAlign: 'center',
+                                            color: '#999'
+                                        }}>
+                                            😔 Bạn đã sử dụng hết mã giảm giá
+                                        </div>
+                                    );
+                                }
+
+                                return (
+                                    <div style={{
+                                        background: '#f9f9f9',
+                                        border: '1px solid #e0e0e0',
+                                        borderRadius: '6px',
+                                        padding: '12px',
+                                        marginBottom: '12px',
+                                        maxHeight: '150px',
+                                        overflowY: 'auto'
+                                    }}>
+                                        {availableCoupons.map((coupon, index) => (
+                                            <div
+                                                key={index}
+                                                onClick={() => selectCoupon(coupon)}
+                                                style={{
+                                                    background: 'white',
+                                                    border: '1px solid #ddd',
+                                                    borderRadius: '4px',
+                                                    padding: '10px 12px',
+                                                    marginBottom: index < availableCoupons.length - 1 ? '8px' : 0,
+                                                    cursor: 'pointer',
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    alignItems: 'center',
+                                                    transition: 'all 0.2s'
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    e.currentTarget.style.borderColor = '#ee4d2d';
+                                                    e.currentTarget.style.background = '#fff5f5';
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.currentTarget.style.borderColor = '#ddd';
+                                                    e.currentTarget.style.background = 'white';
+                                                }}
+                                            >
+                                                <div>
+                                                    <div style={{ fontWeight: '600', fontSize: '14px', color: '#333', marginBottom: '3px' }}>
+                                                        {coupon}
+                                                    </div>
+                                                    <div style={{ fontSize: '12px', color: '#666' }}>
+                                                        {coupon.startsWith('NEWS10') ? 'Mã từ đăng ký nhận tin' : 'Mã giảm giá'}
+                                                    </div>
+                                                </div>
+                                                <div style={{
+                                                    background: '#ee4d2d',
+                                                    color: 'white',
+                                                    padding: '4px 10px',
+                                                    borderRadius: '12px',
+                                                    fontSize: '11px',
+                                                    fontWeight: '600'
+                                                }}>
+                                                    Chọn
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                );
+                            })()
+                        )}
+
+                        <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                            <input
+                                type="text"
+                                placeholder="Nhập mã giảm giá"
+                                value={discountCode}
+                                onChange={(e) => setDiscountCode(e.target.value)}
+                                disabled={appliedDiscount !== null}
+                                style={{
+                                    flex: 1,
+                                    padding: '10px 15px',
+                                    border: '1px solid #ddd',
+                                    borderRadius: '4px',
+                                    fontSize: '14px'
+                                }}
+                            />
+                            {appliedDiscount ? (
+                                <button
+                                    type="button"
+                                    onClick={removeDiscount}
+                                    style={{
+                                        padding: '10px 20px',
+                                        background: '#ff4d4f',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        fontSize: '14px',
+                                        fontWeight: '600'
+                                    }}
+                                >
+                                    Xóa
+                                </button>
+                            ) : (
+                                <button
+                                    id="apply-coupon-btn"
+                                    type="button"
+                                    onClick={applyDiscountCode}
+                                    style={{
+                                        padding: '10px 20px',
+                                        background: '#52c41a',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        fontSize: '14px',
+                                        fontWeight: '600'
+                                    }}
+                                >
+                                    Áp dụng
+                                </button>
+                            )}
+                        </div>
+                        {discountError && (
+                            <p style={{ color: '#ff4d4f', fontSize: '12px', margin: '5px 0 0 0' }}>
+                                {discountError}
+                            </p>
+                        )}
+                        {appliedDiscount && (
+                            <div style={{
+                                background: '#f6ffed',
+                                border: '1px solid #b7eb8f',
+                                borderRadius: '4px',
+                                padding: '10px',
+                                marginTop: '10px'
+                            }}>
+                                <p style={{ color: '#52c41a', fontSize: '13px', margin: 0 }}>
+                                    ✅ Đã áp dụng mã <strong>{appliedDiscount.code}</strong> - Giảm {appliedDiscount.discount}%
+                                </p>
+                            </div>
+                        )}
+                    </div>
+
+                    {appliedDiscount && (
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            marginBottom: '15px',
+                            paddingBottom: '15px',
+                            borderBottom: '1px solid #f0f0f0'
+                        }}>
+                            <span style={{ color: '#52c41a', fontSize: '14px' }}>Giảm giá ({appliedDiscount.discount}%):</span>
+                            <span style={{ fontSize: '16px', color: '#52c41a', fontWeight: '600' }}>
+                                -{formatPrice(discountAmount)}
+                            </span>
+                        </div>
+                    )}
+
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
                         marginBottom: '25px',
                         paddingBottom: '20px',
                         borderBottom: '2px solid #f0f0f0'
                     }}>
-                        <span style={{ color: '#666', fontSize: '16px' }}>Tổng thanh toán:</span>
+                        <span style={{ color: '#666', fontSize: '16px', fontWeight: 'bold' }}>Tổng thanh toán:</span>
                         <span style={{ fontSize: '28px', color: '#ee4d2d', fontWeight: 'bold' }}>
-                            {formatPrice(totalAmount)}
+                            {formatPrice(finalAmount)}
                         </span>
                     </div>
 

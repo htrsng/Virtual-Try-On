@@ -45,13 +45,66 @@ function UserProfilePage({ showToast }) {
     const fetchOrders = async () => {
         setLoadingOrders(true);
         try {
-            const response = await axios.get('http://localhost:3000/api/orders/my-orders');
+            const token = localStorage.getItem('token');
+            const response = await axios.get('http://localhost:3000/api/orders/my-orders', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             setOrders(response.data);
         } catch (error) {
             console.error('Lỗi lấy đơn hàng:', error);
             showToast('Không thể tải đơn hàng', 'error');
         } finally {
             setLoadingOrders(false);
+        }
+    };
+
+    const handleCancelOrder = async (orderId) => {
+        if (!window.confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')) {
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.put(
+                `http://localhost:3000/api/orders/${orderId}/cancel`,
+                { reason: 'Khách hàng hủy đơn' },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }
+            );
+
+            showToast('Đã hủy đơn hàng thành công', 'success');
+            fetchOrders(); // Reload danh sách đơn hàng
+        } catch (error) {
+            console.error('Lỗi hủy đơn hàng:', error);
+            const errorMessage = error.response?.data?.message || 'Không thể hủy đơn hàng';
+            showToast(errorMessage, 'error');
+        }
+    };
+
+    const handleDeleteOrder = async (orderId) => {
+        if (!window.confirm('Bạn có chắc chắn muốn xóa đơn hàng này?')) {
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+            await axios.delete(`http://localhost:3000/api/orders/${orderId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            showToast('Đã xóa đơn hàng thành công', 'success');
+            fetchOrders(); // Reload danh sách đơn hàng
+        } catch (error) {
+            console.error('Lỗi xóa đơn hàng:', error);
+            const errorMessage = error.response?.data?.message || 'Không thể xóa đơn hàng';
+            showToast(errorMessage, 'error');
         }
     };
 
@@ -494,6 +547,54 @@ function UserProfilePage({ showToast }) {
                                                     <div>🏠 {order.shippingInfo.address}, {order.shippingInfo.ward}, {order.shippingInfo.district}, {order.shippingInfo.city}</div>
                                                     <div>💳 {order.paymentMethod}</div>
                                                 </div>
+
+                                                {/* Nút hủy đơn hàng */}
+                                                {order.status === 'Đang xử lý' && (
+                                                    <div style={{ marginTop: '15px', textAlign: 'right' }}>
+                                                        <button
+                                                            onClick={() => handleCancelOrder(order._id)}
+                                                            style={{
+                                                                padding: '10px 25px',
+                                                                background: '#f44336',
+                                                                color: 'white',
+                                                                border: 'none',
+                                                                borderRadius: '4px',
+                                                                cursor: 'pointer',
+                                                                fontWeight: 'bold',
+                                                                fontSize: '14px',
+                                                                transition: 'background 0.3s'
+                                                            }}
+                                                            onMouseOver={(e) => e.target.style.background = '#d32f2f'}
+                                                            onMouseOut={(e) => e.target.style.background = '#f44336'}
+                                                        >
+                                                            ❌ Hủy đơn hàng
+                                                        </button>
+                                                    </div>
+                                                )}
+
+                                                {/* Nút xóa đơn hàng đã hủy */}
+                                                {order.status === 'Đã hủy' && (
+                                                    <div style={{ marginTop: '15px', textAlign: 'right' }}>
+                                                        <button
+                                                            onClick={() => handleDeleteOrder(order._id)}
+                                                            style={{
+                                                                padding: '10px 25px',
+                                                                background: '#757575',
+                                                                color: 'white',
+                                                                border: 'none',
+                                                                borderRadius: '4px',
+                                                                cursor: 'pointer',
+                                                                fontWeight: 'bold',
+                                                                fontSize: '14px',
+                                                                transition: 'background 0.3s'
+                                                            }}
+                                                            onMouseOver={(e) => e.target.style.background = '#616161'}
+                                                            onMouseOut={(e) => e.target.style.background = '#757575'}
+                                                        >
+                                                            🗑️ Xóa đơn hàng
+                                                        </button>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     ))}

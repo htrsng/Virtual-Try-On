@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Xóa LocalStorage</title>
+    <meta charset="UTF-8" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 600px;
+        margin: 50px auto;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      .box {
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      button {
+        background: #ee4d2d;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        margin: 10px 5px;
+      }
+      button:hover {
+        background: #d73211;
+      }
+      .info {
+        background: #f0f0f0;
+        padding: 15px;
+        border-radius: 4px;
+        margin: 15px 0;
+        font-family: monospace;
+        font-size: 14px;
+      }
+      .success {
+        color: green;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box">
+      <h1>🗑️ Xóa Dữ Liệu LocalStorage</h1>
+      <p>
+        Công cụ này giúp xóa tất cả dữ liệu rác trong localStorage của ứng dụng.
+      </p>
+
+      <button onclick="showStorage()">📋 Xem Dữ Liệu Hiện Tại</button>
+      <button onclick="clearUsersOnly()">🗑️ Xóa Chỉ Users</button>
+      <button onclick="clearAll()">💣 Xóa Tất Cả</button>
+
+      <div id="output" class="info" style="display: none"></div>
+    </div>
+
+    <script>
+      function showStorage() {
+        const output = document.getElementById("output");
+        let html = "<h3>📊 Dữ liệu trong LocalStorage:</h3>";
+
+        const keys = [
+          "users",
+          "products",
+          "topSearch",
+          "topProducts",
+          "categories",
+          "flashSaleProducts",
+        ];
+
+        keys.forEach((key) => {
+          const data = localStorage.getItem(key);
+          if (data) {
+            try {
+              const parsed = JSON.parse(data);
+              const count = Array.isArray(parsed) ? parsed.length : "N/A";
+              html += `<div><strong>${key}:</strong> ${count} items</div>`;
+            } catch (e) {
+              html += `<div><strong>${key}:</strong> Không parse được</div>`;
+            }
+          } else {
+            html += `<div><strong>${key}:</strong> Trống</div>`;
+          }
+        });
+
+        output.innerHTML = html;
+        output.style.display = "block";
+      }
+
+      function clearUsersOnly() {
+        localStorage.removeItem("users");
+        const output = document.getElementById("output");
+        output.innerHTML =
+          '<div class="success">✅ Đã xóa users từ localStorage!</div><div>Hãy refresh lại trang web.</div>';
+        output.style.display = "block";
+      }
+
+      function clearAll() {
+        if (confirm("⚠️ Bạn có chắc muốn xóa TẤT CẢ dữ liệu?")) {
+          localStorage.clear();
+          const output = document.getElementById("output");
+          output.innerHTML =
+            '<div class="success">✅ Đã xóa TẤT CẢ dữ liệu trong localStorage!</div><div>Hãy refresh lại trang web.</div>';
+          output.style.display = "block";
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './AuthModal.css';
 
 function AuthModal({ isOpen, onClose, onLogin }) {
     const [isRegister, setIsRegister] = useState(false);

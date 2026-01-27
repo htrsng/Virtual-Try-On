@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -11,9 +11,60 @@ import {
     FiMapPin,
     FiShoppingBag
 } from 'react-icons/fi';
+import './Footer.css';
 
 function Footer() {
     const currentYear = new Date().getFullYear();
+    const [email, setEmail] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState({ text: '', type: '' });
+
+    const handleNewsletterSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!email || !email.includes('@')) {
+            setMessage({ text: 'Vui lòng nhập email hợp lệ!', type: 'error' });
+            return;
+        }
+
+        setLoading(true);
+        setMessage({ text: '', type: '' });
+
+        try {
+            const response = await fetch('http://localhost:3000/api/newsletter/subscribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setMessage({
+                    text: `🎉 Đăng ký thành công! Mã giảm giá của bạn: ${data.couponCode}`,
+                    type: 'success'
+                });
+                setEmail('');
+
+                // Lưu mã vào localStorage
+                const existingCoupons = JSON.parse(localStorage.getItem('myCoupons') || '[]');
+                if (!existingCoupons.includes(data.couponCode)) {
+                    existingCoupons.push(data.couponCode);
+                    localStorage.setItem('myCoupons', JSON.stringify(existingCoupons));
+                }
+
+                // Xóa message sau 5s
+                setTimeout(() => setMessage({ text: '', type: '' }), 5000);
+            } else {
+                setMessage({ text: data.message || 'Đăng ký thất bại!', type: 'error' });
+            }
+        } catch (err) {
+            console.error('Lỗi đăng ký newsletter:', err);
+            setMessage({ text: 'Lỗi kết nối server!', type: 'error' });
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const footerLinks = {
         customerService: [
@@ -26,11 +77,9 @@ function Footer() {
         ],
         about: [
             { name: 'Giới thiệu Shopee Fashion', path: '/about' },
-            { name: 'Tuyển dụng', path: '/careers' },
             { name: 'Điều khoản', path: '/terms' },
             { name: 'Chính sách bảo mật', path: '/privacy' },
             { name: 'Chính sách cookie', path: '/cookies' },
-            { name: 'Flash Sales', path: '/flash-sales' }
         ],
         categories: [
             { name: 'Thời trang nữ', path: '/category/women' },
@@ -69,24 +118,47 @@ function Footer() {
                             <FiMail className="newsletter-icon" />
                             <div>
                                 <h3>Đăng ký nhận tin khuyến mãi</h3>
-                                <p>Nhận ngay ưu đãi 10% cho đơn hàng đầu tiên!</p>
+                                <p>Nhận ngay mã giảm 10% cho đơn hàng đầu tiên!</p>
                             </div>
                         </div>
-                        <form className="newsletter-form" onSubmit={(e) => e.preventDefault()}>
+                        <form className="newsletter-form" onSubmit={handleNewsletterSubmit}>
                             <input
                                 type="email"
                                 placeholder="Nhập email của bạn..."
                                 className="newsletter-input"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                disabled={loading}
                             />
                             <motion.button
                                 type="submit"
                                 className="newsletter-btn"
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
+                                whileHover={{ scale: loading ? 1 : 1.05 }}
+                                whileTap={{ scale: loading ? 1 : 0.95 }}
+                                disabled={loading}
+                                style={{ opacity: loading ? 0.6 : 1 }}
                             >
-                                Đăng ký
+                                {loading ? 'Đang xử lý...' : 'Đăng ký'}
                             </motion.button>
                         </form>
+                        {message.text && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                style={{
+                                    marginTop: '15px',
+                                    padding: '12px 20px',
+                                    borderRadius: '8px',
+                                    background: message.type === 'success' ? '#f6ffed' : '#fff2f0',
+                                    border: `1px solid ${message.type === 'success' ? '#b7eb8f' : '#ffccc7'}`,
+                                    color: message.type === 'success' ? '#52c41a' : '#ff4d4f',
+                                    fontSize: '14px',
+                                    textAlign: 'center'
+                                }}
+                            >
+                                {message.text}
+                            </motion.div>
+                        )}
                     </motion.div>
                 </div>
             </div>
@@ -163,22 +235,6 @@ function Footer() {
                         </motion.div>
 
                         {/* Categories */}
-                        <motion.div
-                            className="footer-column"
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6, delay: 0.4 }}
-                        >
-                            <h4 className="footer-title">Danh mục</h4>
-                            <ul className="footer-links">
-                                {footerLinks.categories.map((link, index) => (
-                                    <li key={index}>
-                                        <Link to={link.path}>{link.name}</Link>
-                                    </li>
-                                ))}
-                            </ul>
-                        </motion.div>
                     </div>
                 </div>
             </div>

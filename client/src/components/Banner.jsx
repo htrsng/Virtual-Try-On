@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css';
@@ -7,6 +8,8 @@ import 'swiper/css/pagination';
 import { motion } from 'framer-motion';
 
 function Banner({ bannerData }) {
+    const navigate = useNavigate();
+
     // Sử dụng dữ liệu từ props hoặc fallback
     const defaultBanners = {
         big: [
@@ -54,9 +57,13 @@ function Banner({ bannerData }) {
                             speed={800}
                             className="main-banner-swiper"
                         >
-                            {mainBanners.map((banner) => (
+                            {mainBanners.map((banner, index) => (
                                 <SwiperSlide key={banner.id}>
-                                    <a href={banner.link} className="banner-link">
+                                    <div
+                                        onClick={() => navigate(`/banner/banner${index + 1}`)}
+                                        className="banner-link"
+                                        style={{ cursor: 'pointer' }}
+                                    >
                                         <img
                                             src={banner.image}
                                             alt={`Banner ${banner.id}`}
@@ -66,7 +73,7 @@ function Banner({ bannerData }) {
                                                 e.target.src = "https://placehold.co/800x300/ee4d2d/white?text=Shopee+Fashion";
                                             }}
                                         />
-                                    </a>
+                                    </div>
                                 </SwiperSlide>
                             ))}
                         </Swiper>
@@ -75,12 +82,13 @@ function Banner({ bannerData }) {
                     {/* Side Banners - Bên phải */}
                     <div className="side-banners">
                         {sideBanners.map((banner, index) => (
-                            <motion.a
+                            <motion.div
                                 key={banner.id}
-                                href={banner.link}
+                                onClick={() => navigate(`/banner/banner${index + 4}`)}
                                 className="side-banner-item"
                                 whileHover={{ scale: 1.02 }}
                                 transition={{ duration: 0.2 }}
+                                style={{ cursor: 'pointer' }}
                             >
                                 <img
                                     src={banner.image}
@@ -91,7 +99,7 @@ function Banner({ bannerData }) {
                                         e.target.src = "https://placehold.co/400x150/ee4d2d/white?text=Banner";
                                     }}
                                 />
-                            </motion.a>
+                            </motion.div>
                         ))}
                     </div>
                 </div>

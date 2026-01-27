@@ -33,7 +33,7 @@ function FlashSale({ products = [] }) {
         return () => clearInterval(timer);
     }, []);
 
-    const flashSaleProducts = products.slice(0, 10).map(product => ({
+    const flashSaleProducts = products.slice(0, 6).map(product => ({
         ...product,
         originalPrice: Math.round(product.price * 1.5),
         discount: 50,

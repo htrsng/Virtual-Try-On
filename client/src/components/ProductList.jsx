@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiHeart, FiShoppingCart, FiEye, FiRepeat } from 'react-icons/fi';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import './ProductCard.css';
 
 function ProductList({ products, title = "GỢI Ý HÔM NAY", onBuy, loading = false }) {
     const [hoveredId, setHoveredId] = useState(null);
+    const navigate = useNavigate();
+
+    // Giới hạn sản phẩm hiển thị: 6 items x 6 rows = 36 items
+    const displayProducts = products?.slice(0, 36) || [];
 
     // Nếu đang loading, hiển thị skeleton
     if (loading) {
@@ -29,7 +34,7 @@ function ProductList({ products, title = "GỢI Ý HÔM NAY", onBuy, loading = f
     }
 
     // Kiểm tra xem có dữ liệu sản phẩm không
-    if (!products || products.length === 0) {
+    if (!displayProducts || displayProducts.length === 0) {
         return <div className="empty-state">Không có sản phẩm nào</div>;
     }
 
@@ -50,7 +55,7 @@ function ProductList({ products, title = "GỢI Ý HÔM NAY", onBuy, loading = f
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
             >
-                {products.map((product, index) => (
+                {displayProducts.map((product, index) => (
                     <motion.div
                         key={product.id}
                         initial={{ opacity: 0, y: 30 }}
@@ -127,10 +132,12 @@ function ProductList({ products, title = "GỢI Ý HÔM NAY", onBuy, loading = f
                                         whileTap={{ scale: 0.95 }}
                                         onClick={(e) => {
                                             e.preventDefault();
-                                            onBuy && onBuy(product);
+                                            e.stopPropagation();
+                                            // Chuyển đến trang chi tiết để chọn size
+                                            navigate(`/product/${product.id}`);
                                         }}
                                     >
-                                        <FiShoppingCart /> Thêm vào giỏ
+                                        <FiEye /> Xem sản phẩm
                                     </motion.button>
                                 </div>
                             </div>
