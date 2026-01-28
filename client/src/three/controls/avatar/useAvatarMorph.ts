@@ -1,52 +1,72 @@
+// src/three/controls/avatar/useAvatarMorph.ts
+
 import { useEffect } from 'react';
 import * as THREE from 'three';
-import type { BodyMorph } from './types';
+
+// ✅ FIX: Thêm 'type' vào import để thỏa mãn verbatimModuleSyntax
+import type { BodyMeasurements } from './types';
+
+const STANDARD = {
+    chest: 85,
+    waist: 68,
+    hips: 92,
+    shoulder: 38,
+    arm: 26,
+    thigh: 50,
+    belly: 70
+};
+
+const RANGE = {
+    chest: 15,
+    waist: 12,
+    hips: 15,
+    shoulder: 5,
+    arm: 6,
+    thigh: 10,
+    belly: 20
+};
 
 export const useAvatarMorph = (
-    mesh: THREE.Mesh | null,
-    body: BodyMorph
+    targetMesh: THREE.SkinnedMesh | undefined | null,
+    measurements: BodyMeasurements
 ) => {
     useEffect(() => {
-        // Kiểm tra xem mesh có hỗ trợ Morph không
-        if (!mesh?.morphTargetDictionary || !mesh.morphTargetInfluences) return;
+        if (!targetMesh || !targetMesh.morphTargetDictionary || !targetMesh.morphTargetInfluences) return;
 
-        const dict = mesh.morphTargetDictionary;
-        const infl = mesh.morphTargetInfluences;
+        const dict = targetMesh.morphTargetDictionary;
+        const influences = targetMesh.morphTargetInfluences;
 
-        // Hàm helper: Gán giá trị Morph an toàn
-        const set = (name: string, value: number) => {
-            const idx = dict[name];
-            // Chỉ gán nếu model có morph key đó
-            if (idx !== undefined) {
-                // Clamp: Đảm bảo giá trị luôn nằm trong khoảng 0 đến 1
-                // 0 = Trạng thái gốc (Gầy nhất/Mặc định)
-                // 1 = Biến đổi tối đa (Béo nhất/To nhất)
-                infl[idx] = THREE.MathUtils.clamp(value, 0, 1);
+        influences.fill(0);
+
+        const updateMorph = (name: string, currentValue: number, standardValue: number, range: number) => {
+            if (!currentValue) return;
+
+            const diff = currentValue - standardValue;
+            const factor = Math.min(Math.abs(diff) / range, 1.0);
+
+            if (diff > 0) {
+                const idx = dict[`${name}_Max`];
+                if (idx !== undefined) influences[idx] = factor;
+            } else {
+                const idx = dict[`${name}_Min`];
+                if (idx !== undefined) influences[idx] = factor;
             }
         };
 
-        // --- SỬA LỖI TẠI ĐÂY ---
-        // Bỏ hết các logic if/else cứng nhắc.
-        // Thay vào đó, map trực tiếp giá trị từ slider (body.weight) vào morph target.
+        updateMorph('Chest', measurements.chest, STANDARD.chest, RANGE.chest);
+        updateMorph('Waist', measurements.waist, STANDARD.waist, RANGE.waist);
+        updateMorph('Hip', measurements.hips, STANDARD.hips, RANGE.hips);
+        updateMorph('Shoulder', measurements.shoulder || STANDARD.shoulder, STANDARD.shoulder, RANGE.shoulder);
+        updateMorph('Arm', measurements.arm || STANDARD.arm, STANDARD.arm, RANGE.arm);
 
-        // 1. Độ béo (Fat):
-        // Nếu body.weight = 0 -> Model về dáng gốc (gầy).
-        // Nếu body.weight = 1 -> Model béo tối đa.
-        set('Fat_Full', body.weight);
+        const bmi = measurements.weight / ((measurements.height / 100) ** 2);
+        if (bmi > 22) {
+            const fatFactor = Math.min((bmi - 22) / 10, 1.0);
+            const bellyIdx = dict['Belly_Max'];
+            const thighIdx = dict['Thigh_Max'];
+            if (bellyIdx !== undefined) influences[bellyIdx] = fatFactor;
+            if (thighIdx !== undefined) influences[thighIdx] = fatFactor * 0.8;
+        }
 
-        // 2. Ngực (Chest):
-        // Bỏ Math.max(0.9...) đi để người dùng có thể chỉnh ngực nhỏ lại nếu muốn.
-        set('Chest_Big', body.chest);
-
-        // 3. Eo (Waist):
-        set('Waist_Big', body.waist);
-
-        // 4. Hông (Hips):
-        set('Hips_Wide', body.hips);
-
-        // 5. Các chỉ số mở rộng (nếu model có hỗ trợ như đã bàn trước đó)
-        // set('Shoulders_Wide', body.shoulders);
-        // set('Arms_Thick', body.arms);
-
-    }, [mesh, body]);
+    }, [targetMesh, measurements]);
 };
