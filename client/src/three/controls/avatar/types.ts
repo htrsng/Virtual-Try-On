@@ -1,17 +1,24 @@
 // src/three/controls/avatar/types.ts
 
 export interface BodyMeasurements {
+    // Nhóm 1: Cơ bản
     height: number; // cm
     weight: number; // kg
-    chest: number;  // cm
-    waist: number;  // cm
-    hips: number;   // cm (Lưu ý: code cũ bạn dùng 'hip' hay 'hips' thì thống nhất, ở đây tôi dùng 'hips')
-    shoulder?: number; // cm (Optional)
-    arm?: number;      // cm (Optional - Bắp tay)
+
+    // Nhóm 2: Thông số Chính (Vòng to)
+    chest: number;  // Vòng 1
+    waist: number;  // Vòng 2
+    hips: number;   // Vòng 3
+
+    // Nhóm 3: Thông số Chi tiết (Bộ phận nhỏ)
+    shoulder: number; // Vai
+    arm: number;      // Bắp tay
+    thigh: number;    // Bắp đùi
+    belly: number;    // Bụng (để chỉnh độ béo bụng riêng biệt với cân nặng)
 }
 
 export interface AvatarProps {
     body: BodyMeasurements;
-    clothingTexture?: string | null; // Tạm thời để null hoặc string
-    pose?: 'Idle' | 'Walk' | 'Pose'; // Khớp với tên Action trong Blender
+    clothingTexture?: string | null;
+    pose?: string;
 }
