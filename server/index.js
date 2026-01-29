@@ -36,6 +36,9 @@ mongoose
 // Theo dõi trạng thái database
 mongoose.connection.on("connected", () => {
   console.log("🟢 MongoDB connected");
+  seedBannerContents().catch((err) =>
+    console.error("❌ Seed banner contents error:", err),
+  );
 });
 
 mongoose.connection.on("error", (err) => {
@@ -143,6 +146,44 @@ const BannerContentModel = mongoose.model(
   "banner_contents",
   BannerContentSchema,
 );
+
+// --- SEED BANNER CONTENT (đảm bảo có dữ liệu mặc định) ---
+const seedBannerContents = async () => {
+  const defaults = [
+    {
+      bannerId: "banner1",
+      title: "Ưu đãi hôm nay",
+      content: "Giảm giá hấp dẫn cho các sản phẩm mới nhất.",
+      imageUrl: "",
+      isActive: true,
+    },
+    {
+      bannerId: "banner2",
+      title: "Bộ sưu tập mới",
+      content: "Khám phá phong cách mới cùng công nghệ thử đồ ảo.",
+      imageUrl: "",
+      isActive: true,
+    },
+    {
+      bannerId: "banner3",
+      title: "Miễn phí vận chuyển",
+      content: "Áp dụng cho đơn hàng từ 499K.",
+      imageUrl: "",
+      isActive: true,
+    },
+  ];
+
+  await Promise.all(
+    defaults.map((banner) =>
+      BannerContentModel.updateOne(
+        { bannerId: banner.bannerId },
+        { $setOnInsert: banner },
+        { upsert: true },
+      ),
+    ),
+  );
+  console.log("✅ Seed banner contents done");
+};
 
 // --- MIDDLEWARE XÁC THỰC JWT ---
 const authenticateToken = (req, res, next) => {
