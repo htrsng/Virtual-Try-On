@@ -120,10 +120,26 @@ function App() {
       }
     }
 
-    // Load products từ localStorage - LUÔN CẬP NHẬT TỪ FALLBACK ĐỂ CÓ SẢN PHẨM MỚI
-    // Luôn sử dụng fallbackSuggestions để đảm bảo có đủ sản phẩm mới nhất
-    setSuggestionProducts(fallbackSuggestions);
-    localStorage.setItem('products', JSON.stringify(fallbackSuggestions));
+    // Load products từ localStorage - GIỮ NGUYÊN SẢN PHẨM ĐÃ XÓA
+    const savedProducts = localStorage.getItem('products');
+    if (savedProducts) {
+      try {
+        const parsed = JSON.parse(savedProducts);
+        if (parsed && parsed.length > 0) {
+          setSuggestionProducts(parsed);
+        } else {
+          setSuggestionProducts(fallbackSuggestions);
+          localStorage.setItem('products', JSON.stringify(fallbackSuggestions));
+        }
+      } catch (e) {
+        console.error("Lỗi parse products:", e);
+        setSuggestionProducts(fallbackSuggestions);
+        localStorage.setItem('products', JSON.stringify(fallbackSuggestions));
+      }
+    } else {
+      setSuggestionProducts(fallbackSuggestions);
+      localStorage.setItem('products', JSON.stringify(fallbackSuggestions));
+    }
 
     // Load banner từ localStorage
     const savedBanner = localStorage.getItem('bannerData');
@@ -289,8 +305,9 @@ function App() {
 
   // Mua ngay 1 sản phẩm (Buy Now): chỉ chuyển sang checkout với đúng sản phẩm đó
   const handleBuyNow = (product: any, size?: string) => {
-    // Kiểm tra đăng nhập trước
-    if (!currentUser) {
+    // Kiểm tra đăng nhập trước - DÙNG LOCALSTORAGE ĐỂ CHECK CHÍNH XÁC
+    const isLoggedIn = localStorage.getItem('currentUser') || localStorage.getItem('token');
+    if (!isLoggedIn) {
       showToast("Vui lòng đăng nhập để mua hàng!", "warning");
       setTimeout(() => {
         window.location.href = '/login';

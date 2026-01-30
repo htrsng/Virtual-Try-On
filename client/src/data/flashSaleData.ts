@@ -9,7 +9,7 @@ export const initFlashSaleProducts = [
         description: 'Áo thun oversize phong cách Hàn Quốc, chất liệu cotton 100%',
         discount: 35,
         stock: 45,
-        sold: 18,
+        sold: 1,
         originalPrice: 377000
     },
     {
@@ -21,7 +21,7 @@ export const initFlashSaleProducts = [
         description: 'Váy babydoll ngọt ngào, chất vải lụa mềm mại',
         discount: 40,
         stock: 30,
-        sold: 22,
+        sold: 1,
         originalPrice: 650000
     },
     {
@@ -33,7 +33,7 @@ export const initFlashSaleProducts = [
         description: 'Quần jean straight fit phong cách Nhật, form dáng chuẩn',
         discount: 30,
         stock: 38,
-        sold: 15,
+        sold: 1,
         originalPrice: 686000
     },
     {
@@ -45,7 +45,7 @@ export const initFlashSaleProducts = [
         description: 'Áo khoác bomber phong cách ulzzang Hàn Quốc',
         discount: 45,
         stock: 25,
-        sold: 28,
+        sold: 1,
         originalPrice: 1129000
     },
     {
@@ -57,7 +57,7 @@ export const initFlashSaleProducts = [
         description: 'Túi đeo chéo mini size, thiết kế trẻ trung',
         discount: 25,
         stock: 60,
-        sold: 45,
+        sold: 1,
         originalPrice: 260000
     },
     {
@@ -69,7 +69,7 @@ export const initFlashSaleProducts = [
         description: 'Crop top dáng ngắn, chất vải thun co giãn tốt',
         discount: 30,
         stock: 50,
-        sold: 32,
+        sold: 1,
         originalPrice: 307000
     },
     {
@@ -81,7 +81,7 @@ export const initFlashSaleProducts = [
         description: 'Chân váy tennis cổ điển, phối đồ đa dạng',
         discount: 35,
         stock: 42,
-        sold: 27,
+        sold: 1,
         originalPrice: 477000
     },
     {
@@ -93,7 +93,7 @@ export const initFlashSaleProducts = [
         description: 'Hoodie nỉ bông form rộng thoải mái, giữ ấm tốt',
         discount: 40,
         stock: 35,
-        sold: 24,
+        sold: 1,
         originalPrice: 825000
     },
     {
@@ -105,7 +105,7 @@ export const initFlashSaleProducts = [
         description: 'Quần short jean rách phong cách vintage năng động',
         discount: 28,
         stock: 48,
-        sold: 19,
+        sold: 1,
         originalPrice: 396000
     },
     {
@@ -117,7 +117,7 @@ export const initFlashSaleProducts = [
         description: 'Áo len cardigan dáng dài thanh lịch',
         discount: 32,
         stock: 28,
-        sold: 21,
+        sold: 1,
         originalPrice: 654000
     },
     {
@@ -129,7 +129,7 @@ export const initFlashSaleProducts = [
         description: 'Giày sneaker đế platform tăng chiều cao tự nhiên',
         discount: 38,
         stock: 32,
-        sold: 26,
+        sold: 1,
         originalPrice: 935000
     },
     {
@@ -141,7 +141,7 @@ export const initFlashSaleProducts = [
         description: 'Đầm dài họa tiết hoa nhí phong cách vintage',
         discount: 42,
         stock: 22,
-        sold: 18,
+        sold: 1,
         originalPrice: 897000
     },
     {
@@ -153,7 +153,7 @@ export const initFlashSaleProducts = [
         description: 'Áo thun basic cổ tròn, chất liệu cotton thoáng mát',
         discount: 20,
         stock: 80,
-        sold: 56,
+        sold: 1,
         originalPrice: 206000
     },
     {
@@ -165,7 +165,7 @@ export const initFlashSaleProducts = [
         description: 'Balo canvas phong cách tối giản, nhiều ngăn tiện dụng',
         discount: 25,
         stock: 40,
-        sold: 31,
+        sold: 1,
         originalPrice: 453000
     },
     {
@@ -177,7 +177,7 @@ export const initFlashSaleProducts = [
         description: 'Áo khoác jeans wash nhẹ, phong cách retro',
         discount: 48,
         stock: 20,
-        sold: 16,
+        sold: 1,
         originalPrice: 1135000
     },
     {
@@ -189,7 +189,7 @@ export const initFlashSaleProducts = [
         description: 'Quần jean ống loe phong cách retro 70s',
         discount: 35,
         stock: 36,
-        sold: 23,
+        sold: 1,
         originalPrice: 716000
     },
     {
@@ -201,7 +201,7 @@ export const initFlashSaleProducts = [
         description: 'Áo sơ mi oversize unisex, phong cách streetwear',
         discount: 30,
         stock: 44,
-        sold: 29,
+        sold: 1,
         originalPrice: 550000
     },
     {
@@ -213,7 +213,7 @@ export const initFlashSaleProducts = [
         description: 'Chân váy bút chì công sở thanh lịch, dáng chuẩn',
         discount: 25,
         stock: 52,
-        sold: 34,
+        sold: 1,
         originalPrice: 433000
     },
     {
@@ -225,7 +225,7 @@ export const initFlashSaleProducts = [
         description: 'Hoodie zip cơ bản, dễ phối đồ hàng ngày',
         discount: 32,
         stock: 38,
-        sold: 25,
+        sold: 1,
         originalPrice: 699000
     },
     {
@@ -237,7 +237,7 @@ export const initFlashSaleProducts = [
         description: 'Áo sơ mi lụa cao cấp, sang trọng và mềm mại',
         discount: 40,
         stock: 26,
-        sold: 20,
+        sold: 1,
         originalPrice: 750000
     }
 ];

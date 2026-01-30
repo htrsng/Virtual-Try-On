@@ -361,6 +361,24 @@ function CheckoutPage({ cartItems, onRemove, onUpdateQuantity, onCheckoutSuccess
 
             showToast("Đặt hàng thành công! 🎉", "success");
 
+            // CẬP NHẬT SỐ "ĐÃ BÁN" CHO SẢN PHẨM FLASH SALE
+            const flashSaleProducts = JSON.parse(localStorage.getItem('flashSaleProducts') || '[]');
+            let hasFlashSaleUpdate = false;
+
+            cartItems.forEach(cartItem => {
+                const flashIndex = flashSaleProducts.findIndex(p => p.id === cartItem.id);
+                if (flashIndex !== -1) {
+                    flashSaleProducts[flashIndex].sold = (flashSaleProducts[flashIndex].sold || 0) + cartItem.quantity;
+                    flashSaleProducts[flashIndex].stock = Math.max(0, flashSaleProducts[flashIndex].stock - cartItem.quantity);
+                    hasFlashSaleUpdate = true;
+                }
+            });
+
+            if (hasFlashSaleUpdate) {
+                localStorage.setItem('flashSaleProducts', JSON.stringify(flashSaleProducts));
+                console.log('✅ Đã cập nhật số đã bán cho flash sale');
+            }
+
             // Reset mã giảm giá sau khi đặt hàng thành công
             setDiscountCode('');
             setAppliedDiscount(null);
