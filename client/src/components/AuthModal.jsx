@@ -48,6 +48,7 @@ function AuthModal({ isOpen, onClose, onLogin }) {
                                 placeholder="Nhập lại mật khẩu"
                             />
                         )}
+                        {/* Đã bỏ trường địa chỉ khỏi form đăng ký, chỉ nhập địa chỉ khi mua hàng */}
                         <button type="submit" className="auth-btn">
                             {isRegister ? 'ĐĂNG KÝ' : 'ĐĂNG NHẬP'}
                         </button>

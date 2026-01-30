@@ -128,13 +128,6 @@ function LoginPage({ showToast }) {
                                 value={phone}
                                 onChange={e => setPhone(e.target.value)}
                             />
-                            <input
-                                className="auth-input"
-                                type="text"
-                                placeholder="Địa chỉ"
-                                value={address}
-                                onChange={e => setAddress(e.target.value)}
-                            />
                         </>
                     )}
 

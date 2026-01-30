@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import MapPicker from '../components/MapPicker';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
@@ -6,6 +7,7 @@ import axios from 'axios';
 function CheckoutPage({ cartItems, onRemove, onUpdateQuantity, onCheckoutSuccess, showToast }) {
     const navigate = useNavigate();
     const { user, isAuthenticated, loading } = useAuth();
+    const hasRedirected = useRef(false); // Đánh dấu đã redirect chưa
 
     // Thông tin giao hàng - auto-fill từ user profile
     const [fullName, setFullName] = useState('');
@@ -42,19 +44,20 @@ function CheckoutPage({ cartItems, onRemove, onUpdateQuantity, onCheckoutSuccess
         setDiscountError('');
     }, []); // Chạy 1 lần khi component mount
 
-    // Auto-fill thông tin từ user profile
+    // Kiểm tra authentication - chỉ chạy 1 lần khi mount
     useEffect(() => {
-        // Đợi loading xong mới kiểm tra authentication
-        if (loading) {
-            return;
-        }
+        if (loading) return;
+        if (hasRedirected.current) return; // Đã redirect rồi thì không làm gì
 
         if (!isAuthenticated) {
+            hasRedirected.current = true; // Đánh dấu đã redirect
             showToast("Vui lòng đăng nhập để thanh toán!", "warning");
-            navigate('/login');
-            return;
+            navigate('/login', { replace: true });
         }
+    }, [loading, isAuthenticated]); // Bỏ navigate và showToast khỏi dependencies
 
+    // Auto-fill thông tin từ user profile
+    useEffect(() => {
         if (user) {
             setFullName(user.fullName || '');
             setPhone(user.phone || '');
@@ -63,6 +66,11 @@ function CheckoutPage({ cartItems, onRemove, onUpdateQuantity, onCheckoutSuccess
             setDistrict(user.district || '');
             setWard(user.ward || '');
         }
+    }, [user]);
+
+    // Load mã giảm giá và coupons đã dùng
+    useEffect(() => {
+        if (!isAuthenticated) return;
 
         // Load danh sách mã đã sử dụng từ server
         const fetchUsedCoupons = async () => {
@@ -116,7 +124,7 @@ function CheckoutPage({ cartItems, onRemove, onUpdateQuantity, onCheckoutSuccess
             window.removeEventListener('storage', handleStorageChange);
             window.removeEventListener('couponUpdated', handleCouponUpdate);
         };
-    }, [user, isAuthenticated, loading, navigate, showToast]);
+    }, [isAuthenticated]);
 
     const parsePrice = (price) => {
         if (typeof price === 'number') {
@@ -851,9 +859,12 @@ function CheckoutPage({ cartItems, onRemove, onUpdateQuantity, onCheckoutSuccess
                                     padding: '12px',
                                     border: '1px solid #ddd',
                                     borderRadius: '6px',
-                                    fontSize: '15px'
+                                    fontSize: '15px',
+                                    marginBottom: 8
                                 }}
                             />
+                            {/* Hiển thị bản đồ Google Maps preview */}
+                            <MapPicker address={address} />
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>

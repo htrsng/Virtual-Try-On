@@ -91,6 +91,8 @@ export const AuthProvider = ({ children }) => {
 
     const logout = () => {
         localStorage.removeItem('token');
+        localStorage.removeItem('cartItems'); // Xóa giỏ hàng khi đăng xuất
+        localStorage.removeItem('currentUser'); // Xóa thông tin user
         setToken(null);
         setUser(null);
         delete axios.defaults.headers.common['Authorization'];

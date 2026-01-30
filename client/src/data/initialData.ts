@@ -923,6 +923,96 @@ export const fallbackSuggestions = [
         img: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500&h=600&fit=crop',
         discount: 25,
         sold: 2134
+    },
+    {
+        id: 101,
+        category: "Áo Thun",
+        name: 'Áo Thun Y2K Retro Style',
+        price: 215000,
+        img: 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=500&h=600&fit=crop',
+        discount: 20,
+        sold: 1876
+    },
+    {
+        id: 102,
+        category: "Quần Jeans",
+        name: 'Quần Jean Rách Gối Phong Cách',
+        price: 425000,
+        img: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=500&h=600&fit=crop',
+        discount: 30,
+        sold: 1345
+    },
+    {
+        id: 103,
+        category: "Váy & Đầm",
+        name: 'Đầm Công Chúa Xòe Tiệc',
+        price: 750000,
+        img: 'https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=500&h=600&fit=crop',
+        discount: 40,
+        sold: 543
+    },
+    {
+        id: 104,
+        category: "Áo Khoác",
+        name: 'Áo Khoác Cardigan Mỏng Hè',
+        price: 295000,
+        img: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=500&h=600&fit=crop',
+        discount: 18,
+        sold: 2134
+    },
+    {
+        id: 105,
+        category: "Hoodie",
+        name: 'Hoodie Pullover Vintage 90s',
+        price: 545000,
+        img: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=500&h=600&fit=crop',
+        discount: 35,
+        sold: 987
+    },
+    {
+        id: 106,
+        category: "Áo Sơ Mi",
+        name: 'Áo Sơ Mi Caro Đi Biển',
+        price: 285000,
+        img: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=500&h=600&fit=crop',
+        discount: 22,
+        sold: 1654
+    },
+    {
+        id: 107,
+        category: "Chân Váy",
+        name: 'Chân Váy Da A-Line',
+        price: 420000,
+        img: 'https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=500&h=600&fit=crop',
+        discount: 28,
+        sold: 876
+    },
+    {
+        id: 108,
+        category: "Giày Sneaker",
+        name: 'Giày Thể Thao Running Air',
+        price: 720000,
+        img: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=600&fit=crop',
+        discount: 45,
+        sold: 1234
+    },
+    {
+        id: 109,
+        category: "Phụ Kiện",
+        name: 'Túi Xách Cói Đi Biển',
+        price: 165000,
+        img: 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=500&h=600&fit=crop',
+        discount: 15,
+        sold: 2567
+    },
+    {
+        id: 110,
+        category: "Áo Croptop",
+        name: 'Croptop Thể Thao Gym',
+        price: 195000,
+        img: 'https://images.unsplash.com/photo-1564859228273-274232fdb516?w=500&h=600&fit=crop',
+        discount: 20,
+        sold: 1789
     }
 ];
 

@@ -65,7 +65,7 @@ const styles = {
     }
 };
 
-const VirtualTryOnController = ({ body, setBody, products, onAddToCart, showToast }: any) => {
+const VirtualTryOnController = ({ body, setBody, products, onAddToCart, onBuyNow, showToast }: any) => {
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -202,7 +202,11 @@ const VirtualTryOnController = ({ body, setBody, products, onAddToCart, showToas
                     }}>
                         🛒 Thêm Giỏ
                     </button>
-                    <button style={styles.btnBuy} onClick={() => showToast('Chức năng mua ngay đang phát triển!', 'info')}>
+                    <button style={styles.btnBuy} onClick={() => {
+                        // Mua ngay: chỉ mua sản phẩm này
+                        const productToAdd = { ...currentProduct, color: selectedColor, size: selectedSize };
+                        onBuyNow(productToAdd, selectedSize);
+                    }}>
                         MUA NGAY
                     </button>
                 </div>

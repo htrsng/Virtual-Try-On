@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, showToast }) {
+function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, onBuyNow, showToast }) {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user, isAuthenticated } = useAuth();
@@ -134,10 +134,12 @@ function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, show
             variant: selectedVariant
         };
 
-        onAddToCart(productToAdd, selectedSize);
-
         if (isBuyNow) {
-            navigate('/checkout');
+            // Mua ngay: chỉ mua sản phẩm này, không gộp với giỏ hàng
+            onBuyNow(productToAdd, selectedSize);
+        } else {
+            // Thêm vào giỏ hàng bình thường
+            onAddToCart(productToAdd, selectedSize);
         }
     };
 

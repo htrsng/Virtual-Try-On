@@ -57,7 +57,10 @@ function Header({ cartCount, onSearch, showToast }) {
     const handleLogout = () => {
         logout();
         showToast("Đã đăng xuất thành công!", "success");
-        navigate('/');
+        // Reload trang để xóa sạch state giỏ hàng
+        setTimeout(() => {
+            window.location.href = '/';
+        }, 300);
     };
 
     return (

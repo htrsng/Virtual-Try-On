@@ -33,13 +33,8 @@ function FlashSale({ products = [] }) {
         return () => clearInterval(timer);
     }, []);
 
-    const flashSaleProducts = products.slice(0, 6).map(product => ({
-        ...product,
-        originalPrice: Math.round(product.price * 1.5),
-        discount: 50,
-        stock: Math.floor(Math.random() * 20) + 5,
-        sold: Math.floor(Math.random() * 50) + 10
-    }));
+    // Sử dụng dữ liệu truyền vào, không random hóa để tránh nhảy loạn
+    const flashSaleProducts = products.slice(0, 6);
 
     const formatTime = (value) => value.toString().padStart(2, '0');
 

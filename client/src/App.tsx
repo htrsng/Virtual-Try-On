@@ -120,26 +120,10 @@ function App() {
       }
     }
 
-    // Load products từ localStorage - NẾU KHÔNG CÓ THÌ DÙNG FALLBACK
-    const savedProducts = localStorage.getItem('products');
-    if (savedProducts) {
-      try {
-        const parsed = JSON.parse(savedProducts);
-        // Chỉ set nếu có ít nhất 1 sản phẩm
-        if (parsed && parsed.length > 0) {
-          setSuggestionProducts(parsed);
-        } else {
-          // Nếu rỗng, dùng fallback và lưu lại
-          localStorage.setItem('products', JSON.stringify(fallbackSuggestions));
-        }
-      } catch (e) {
-        console.error("Lỗi parse products:", e);
-        localStorage.setItem('products', JSON.stringify(fallbackSuggestions));
-      }
-    } else {
-      // Nếu chưa có, lưu fallback vào localStorage
-      localStorage.setItem('products', JSON.stringify(fallbackSuggestions));
-    }
+    // Load products từ localStorage - LUÔN CẬP NHẬT TỪ FALLBACK ĐỂ CÓ SẢN PHẨM MỚI
+    // Luôn sử dụng fallbackSuggestions để đảm bảo có đủ sản phẩm mới nhất
+    setSuggestionProducts(fallbackSuggestions);
+    localStorage.setItem('products', JSON.stringify(fallbackSuggestions));
 
     // Load banner từ localStorage
     const savedBanner = localStorage.getItem('bannerData');
@@ -198,7 +182,8 @@ function App() {
 
   // --- FETCH API TỪ SERVER ---
   useEffect(() => {
-    // 1. Lấy Sản Phẩm
+    // 1. Lấy Sản Phẩm - ĐANG TẮT ĐỂ DÙNG FALLBACK CÓ 110 SẢN PHẨM
+    /*
     fetch('http://localhost:3000/api/products')
       .then(res => res.json())
       .then(data => {
@@ -213,6 +198,7 @@ function App() {
         }
       })
       .catch(err => console.error("Lỗi lấy sản phẩm (Có thể do chưa bật Server Nodejs):", err));
+    */
 
     // 2. Lấy Người Dùng (THAY THẾ HOÀN TOÀN từ database)
     fetch('http://localhost:3000/api/users')
@@ -301,10 +287,31 @@ function App() {
     showToast("Đặt hàng thành công!", 'success');
   };
 
+  // Mua ngay 1 sản phẩm (Buy Now): chỉ chuyển sang checkout với đúng sản phẩm đó
+  const handleBuyNow = (product: any, size?: string) => {
+    // Kiểm tra đăng nhập trước
+    if (!currentUser) {
+      showToast("Vui lòng đăng nhập để mua hàng!", "warning");
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 500);
+      return;
+    }
+
+    const actualSize = size || 'M';
+    setCartItems([{ ...product, size: actualSize, quantity: 1, cartId: Date.now() }]);
+    setTimeout(() => {
+      window.location.href = '/checkout';
+    }, 100);
+  };
+
   const handleLogout = () => {
     setCurrentUser(null);
     localStorage.removeItem('currentUser');
-    showToast("Đã đăng xuất thành công!", "info");
+    // Xóa giỏ hàng khi đăng xuất
+    setCartItems([]);
+    localStorage.removeItem('cartItems');
+    // Không cần redirect ở đây, Header sẽ xử lý
   };
 
   const filteredProducts = displayProducts.filter(p => {
@@ -382,7 +389,7 @@ function App() {
               <Route path="/flash-sale" element={<FlashSalePage flashSaleProducts={flashSaleProducts} onBuy={handleAddToCart} />} />
 
               {/* TRANG CHI TIẾT SẢN PHẨM */}
-              <Route path="/product/:id" element={<ProductDetailPage products={allProducts} flashSaleProducts={flashSaleProducts} onAddToCart={handleAddToCart} showToast={showToast} />} />
+              <Route path="/product/:id" element={<ProductDetailPage products={allProducts} flashSaleProducts={flashSaleProducts} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} showToast={showToast} />} />
 
               {/* TRANG ĐĂNG NHẬP/ĐĂNG KÝ */}
               <Route path="/login" element={<LoginPage showToast={showToast} />} />
@@ -405,6 +412,7 @@ function App() {
                   setActiveTab={setActiveTab}
                   products={suggestionProducts}
                   onAddToCart={handleAddToCart}
+                  onBuyNow={handleBuyNow}
                   showToast={showToast}
                 />
               } />

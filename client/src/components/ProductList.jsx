@@ -10,8 +10,9 @@ function ProductList({ products, title = "GỢI Ý HÔM NAY", onBuy, loading = f
     const [hoveredId, setHoveredId] = useState(null);
     const navigate = useNavigate();
 
-    // Giới hạn sản phẩm hiển thị: 6 items x 6 rows = 36 items
-    const displayProducts = products?.slice(0, 36) || [];
+    // Nếu đã đăng nhập (có localStorage user), hiển thị nhiều sản phẩm hơn
+    const isLoggedIn = Boolean(localStorage.getItem('currentUser'));
+    const displayProducts = products?.slice(0, isLoggedIn ? 90 : 72) || [];
 
     // Nếu đang loading, hiển thị skeleton
     if (loading) {
