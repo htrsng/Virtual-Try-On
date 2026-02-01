@@ -1,29 +1,41 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 
-// Google Maps Embed API (iframe) component
-const MapPicker = ({ address, onSelect }) => {
-    const iframeRef = useRef(null);
-    // Chỉ hiển thị bản đồ khi có địa chỉ
-    const mapUrl = address
-        ? `https://www.google.com/maps?q=${encodeURIComponent(address)}&output=embed`
-        : 'https://www.google.com/maps?q=Hanoi&output=embed';
+// Component hiển thị bản đồ đơn giản qua iframe
+const MapPicker = ({ address }) => {
+    if (!address) {
+        return (
+            <div style={{
+                width: '100%',
+                height: 400,
+                borderRadius: 8,
+                border: '1px solid #ddd',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: '#f5f5f5'
+            }}>
+                <p style={{ color: '#999' }}>Chưa có địa chỉ để hiển thị</p>
+            </div>
+        );
+    }
 
-    useEffect(() => {
-        // Không có tương tác chọn vị trí thực sự, chỉ hiển thị bản đồ preview
-        // Nếu muốn chọn vị trí, cần dùng Google Maps JS API hoặc leaflet
-    }, [address]);
+    const encodedAddress = encodeURIComponent(address);
+    const mapUrl = `https://maps.google.com/maps?q=${encodedAddress}&output=embed`;
 
     return (
-        <div style={{ width: '100%', height: 300, borderRadius: 8, overflow: 'hidden', marginBottom: 16 }}>
+        <div style={{ width: '100%' }}>
             <iframe
-                ref={iframeRef}
-                title="Chọn vị trí giao hàng"
-                width="100%"
-                height="100%"
-                frameBorder="0"
                 src={mapUrl}
-                style={{ border: 0 }}
+                width="100%"
+                height="400"
+                style={{
+                    border: '1px solid #ddd',
+                    borderRadius: '8px'
+                }}
                 allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Google Maps"
             />
         </div>
     );

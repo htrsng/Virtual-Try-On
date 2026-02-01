@@ -42,6 +42,10 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => {
         try {
+            // KHÔNG XÓA products/bannerData vì sẽ mất ảnh đã thêm
+            // Chỉ xóa dữ liệu user cũ
+            localStorage.removeItem('currentUser');
+
             const response = await axios.post('http://localhost:3000/api/auth/login', {
                 email,
                 password
@@ -93,9 +97,16 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('token');
         localStorage.removeItem('cartItems'); // Xóa giỏ hàng khi đăng xuất
         localStorage.removeItem('currentUser'); // Xóa thông tin user
+
+        // KHÔNG XÓA products/bannerData/flashSaleProducts
+        // Vì đó là dữ liệu chung của website, không phải dữ liệu user
+
         setToken(null);
         setUser(null);
         delete axios.defaults.headers.common['Authorization'];
+
+        // Dispatch custom event để App.tsx biết và xóa cartItems state
+        window.dispatchEvent(new CustomEvent('userLogout'));
     };
 
     const updateProfile = async (profileData) => {

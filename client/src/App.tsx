@@ -12,6 +12,7 @@ import TopProductsPage from './pages/TopProductsPage';
 import FlashSalePage from './pages/FlashSalePage';
 import LoginPage from './pages/LoginPage';
 import CheckoutPage from './pages/CheckoutPage';
+import CheckoutSelectPage from './pages/CheckoutSelectPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import OrderPage from './pages/OrderPage';
 import AdminPage from './pages/AdminPage';
@@ -94,6 +95,20 @@ function App() {
       console.log('🗑️ Đã xóa giỏ hàng khỏi localStorage');
     }
   }, [cartItems]);
+
+  // Lắng nghe sự kiện logout và xóa giỏ hàng
+  useEffect(() => {
+    const handleLogout = () => {
+      console.log('🔄 Phát hiện logout - đang xóa giỏ hàng...');
+      setCartItems([]);
+    };
+
+    window.addEventListener('userLogout', handleLogout);
+
+    return () => {
+      window.removeEventListener('userLogout', handleLogout);
+    };
+  }, []);
 
   // Debug search keyword changes
   useEffect(() => {
@@ -319,9 +334,16 @@ function App() {
     }
 
     const actualSize = size || 'M';
-    setCartItems([{ ...product, size: actualSize, quantity: 1, cartId: Date.now() }]);
+    const newItem = { ...product, size: actualSize, quantity: 1, cartId: Date.now() };
+    
+    // Lưu sản phẩm "Mua ngay" vào localStorage
+    localStorage.setItem('selectedProductsForCheckout', JSON.stringify([newItem]));
+    console.log('🚀 MUA NGAY: Lưu sản phẩm và chuyển đến /checkout/cart');
+    
+    setCartItems([newItem]);
+    
     setTimeout(() => {
-      window.location.href = '/checkout';
+      window.location.href = '/checkout/cart';
     }, 100);
   };
 
@@ -414,8 +436,14 @@ function App() {
               {/* TRANG ĐĂNG NHẬP/ĐĂNG KÝ */}
               <Route path="/login" element={<LoginPage showToast={showToast} />} />
 
-              {/* TRANG GIỎ HÀNG & THANH TOÁN */}
-              <Route path="/checkout" element={<CheckoutPage cartItems={cartItems} onRemove={handleRemoveFromCart} onUpdateQuantity={handleUpdateQuantity} onCheckoutSuccess={handleCheckoutSuccess} showToast={showToast} />} />
+              {/* TRANG CHỌN SẢN PHẨM THANH TOÁN */}
+              <Route path="/checkout/choseproduct" element={<CheckoutSelectPage cartItems={cartItems} onRemove={handleRemoveFromCart} onUpdateQuantity={handleUpdateQuantity} showToast={showToast} />} />
+              
+              {/* TRANG THANH TOÁN */}
+              <Route path="/checkout/cart" element={<CheckoutPage cartItems={cartItems} onCheckoutSuccess={handleCheckoutSuccess} showToast={showToast} />} />
+              
+              {/* TRANG GIỎ HÀNG & THANH TOÁN (Redirect cũ) */}
+              <Route path="/checkout" element={<CheckoutSelectPage cartItems={cartItems} onRemove={handleRemoveFromCart} onUpdateQuantity={handleUpdateQuantity} showToast={showToast} />} />
 
               {/* TRANG CÁ NHÂN NGƯỜI DÙNG */}
               <Route path="/profile" element={<UserProfilePage showToast={showToast} />} />

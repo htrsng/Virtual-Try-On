@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import MapPicker from '../components/MapPicker';
+import { getCities, getDistricts, getWards } from '../data/vietnamAddress';
 import axios from 'axios';
 
 function UserProfilePage({ showToast }) {
@@ -20,6 +22,42 @@ function UserProfilePage({ showToast }) {
     const [ward, setWard] = useState('');
 
     const [isEditing, setIsEditing] = useState(false);
+    const [showMapPicker, setShowMapPicker] = useState(false);
+
+    // Danh sách dropdown
+    const [cities] = useState(getCities());
+    const [districts, setDistricts] = useState([]);
+    const [wards, setWards] = useState([]);
+
+    // Cập nhật districts khi chọn city
+    useEffect(() => {
+        if (city) {
+            const districtList = getDistricts(city);
+            setDistricts(districtList);
+            // Reset district và ward nếu không hợp lệ
+            if (!districtList.includes(district)) {
+                setDistrict('');
+                setWard('');
+            }
+        } else {
+            setDistricts([]);
+            setWards([]);
+        }
+    }, [city]);
+
+    // Cập nhật wards khi chọn district
+    useEffect(() => {
+        if (city && district) {
+            const wardList = getWards(city, district);
+            setWards(wardList);
+            // Reset ward nếu không hợp lệ
+            if (!wardList.includes(ward)) {
+                setWard('');
+            }
+        } else {
+            setWards([]);
+        }
+    }, [city, district]);
 
     useEffect(() => {
         if (!isAuthenticated) {
@@ -106,6 +144,29 @@ function UserProfilePage({ showToast }) {
             const errorMessage = error.response?.data?.message || 'Không thể xóa đơn hàng';
             showToast(errorMessage, 'error');
         }
+    };
+
+    const handleReorder = (order) => {
+        // Chuyển đổi các products từ đơn hàng sang format của selectedProducts
+        const selectedProducts = order.products.map(product => ({
+            productId: product.productId || product._id,
+            name: product.name,
+            image: product.img,
+            price: product.price,
+            size: product.size,
+            color: product.color,
+            quantity: product.quantity
+        }));
+
+        // Lưu vào localStorage để CheckoutPage có thể đọc
+        localStorage.setItem('selectedProductsForCheckout', JSON.stringify(selectedProducts));
+
+        // Navigate đến trang checkout với state
+        navigate('/checkout/cart', {
+            state: { selectedProducts }
+        });
+
+        showToast('Đã thêm sản phẩm vào giỏ hàng!', 'success');
     };
 
     const handleUpdateProfile = async (e) => {
@@ -297,31 +358,11 @@ function UserProfilePage({ showToast }) {
                                         />
                                     </div>
 
-                                    <div style={{ gridColumn: '1 / -1' }}>
-                                        <label style={{ display: 'block', marginBottom: '5px', color: '#666', fontWeight: '500' }}>
-                                            Địa chỉ
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={address}
-                                            onChange={(e) => setAddress(e.target.value)}
-                                            disabled={!isEditing}
-                                            style={{
-                                                width: '100%',
-                                                padding: '10px',
-                                                border: '1px solid #ddd',
-                                                borderRadius: '4px',
-                                                background: isEditing ? 'white' : '#f5f5f5'
-                                            }}
-                                        />
-                                    </div>
-
                                     <div>
                                         <label style={{ display: 'block', marginBottom: '5px', color: '#666', fontWeight: '500' }}>
-                                            Thành phố/Tỉnh
+                                            Tỉnh/Thành phố <span style={{ color: 'red' }}>*</span>
                                         </label>
-                                        <input
-                                            type="text"
+                                        <select
                                             value={city}
                                             onChange={(e) => setCity(e.target.value)}
                                             disabled={!isEditing}
@@ -330,47 +371,116 @@ function UserProfilePage({ showToast }) {
                                                 padding: '10px',
                                                 border: '1px solid #ddd',
                                                 borderRadius: '4px',
-                                                background: isEditing ? 'white' : '#f5f5f5'
+                                                background: isEditing ? 'white' : '#f5f5f5',
+                                                cursor: isEditing ? 'pointer' : 'default'
                                             }}
-                                        />
+                                        >
+                                            <option value="">-- Chọn Tỉnh/Thành phố --</option>
+                                            {cities.map(c => (
+                                                <option key={c} value={c}>{c}</option>
+                                            ))}
+                                        </select>
                                     </div>
 
                                     <div>
                                         <label style={{ display: 'block', marginBottom: '5px', color: '#666', fontWeight: '500' }}>
-                                            Quận/Huyện
+                                            Quận/Huyện <span style={{ color: 'red' }}>*</span>
                                         </label>
-                                        <input
-                                            type="text"
+                                        <select
                                             value={district}
                                             onChange={(e) => setDistrict(e.target.value)}
-                                            disabled={!isEditing}
+                                            disabled={!isEditing || !city}
                                             style={{
                                                 width: '100%',
                                                 padding: '10px',
                                                 border: '1px solid #ddd',
                                                 borderRadius: '4px',
-                                                background: isEditing ? 'white' : '#f5f5f5'
+                                                background: isEditing ? 'white' : '#f5f5f5',
+                                                cursor: isEditing && city ? 'pointer' : 'default'
                                             }}
-                                        />
+                                        >
+                                            <option value="">-- Chọn Quận/Huyện --</option>
+                                            {districts.map(d => (
+                                                <option key={d} value={d}>{d}</option>
+                                            ))}
+                                        </select>
                                     </div>
 
                                     <div>
                                         <label style={{ display: 'block', marginBottom: '5px', color: '#666', fontWeight: '500' }}>
-                                            Phường/Xã
+                                            Phường/Xã <span style={{ color: 'red' }}>*</span>
                                         </label>
-                                        <input
-                                            type="text"
+                                        <select
                                             value={ward}
                                             onChange={(e) => setWard(e.target.value)}
-                                            disabled={!isEditing}
+                                            disabled={!isEditing || !district}
                                             style={{
                                                 width: '100%',
                                                 padding: '10px',
                                                 border: '1px solid #ddd',
                                                 borderRadius: '4px',
-                                                background: isEditing ? 'white' : '#f5f5f5'
+                                                background: isEditing ? 'white' : '#f5f5f5',
+                                                cursor: isEditing && district ? 'pointer' : 'default'
                                             }}
-                                        />
+                                        >
+                                            <option value="">-- Chọn Phường/Xã --</option>
+                                            {wards.map(w => (
+                                                <option key={w} value={w}>{w}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div style={{ gridColumn: '1 / -1' }}>
+                                        <label style={{ display: 'block', marginBottom: '5px', color: '#666', fontWeight: '500' }}>
+                                            Số nhà, tên đường <span style={{ color: 'red' }}>*</span>
+                                        </label>
+                                        <div style={{ position: 'relative' }}>
+                                            <input
+                                                type="text"
+                                                value={address}
+                                                onChange={(e) => setAddress(e.target.value)}
+                                                disabled={!isEditing}
+                                                placeholder={isEditing ? "Ví dụ: Số 123, Đường Nguyễn Văn A" : ""}
+                                                style={{
+                                                    width: '100%',
+                                                    padding: '10px',
+                                                    paddingRight: !isEditing && address ? '45px' : '10px',
+                                                    border: '1px solid #ddd',
+                                                    borderRadius: '4px',
+                                                    background: isEditing ? 'white' : '#f5f5f5'
+                                                }}
+                                            />
+                                            {!isEditing && address && city && district && ward && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowMapPicker(!showMapPicker)}
+                                                    style={{
+                                                        position: 'absolute',
+                                                        right: '8px',
+                                                        top: '50%',
+                                                        transform: 'translateY(-50%)',
+                                                        background: '#667eea',
+                                                        border: 'none',
+                                                        borderRadius: '4px',
+                                                        padding: '8px 12px',
+                                                        cursor: 'pointer',
+                                                        fontSize: '16px',
+                                                        color: 'white',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '5px'
+                                                    }}
+                                                    title="Xem vị trí trên bản đồ"
+                                                >
+                                                    📍
+                                                </button>
+                                            )}
+                                        </div>
+                                        {showMapPicker && !isEditing && address && city && district && ward && (
+                                            <div style={{ marginTop: '10px' }}>
+                                                <MapPicker address={`${address}, ${ward}, ${district}, ${city}`} />
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
@@ -574,7 +684,25 @@ function UserProfilePage({ showToast }) {
 
                                                 {/* Nút xóa đơn hàng đã hủy */}
                                                 {order.status === 'Đã hủy' && (
-                                                    <div style={{ marginTop: '15px', textAlign: 'right' }}>
+                                                    <div style={{ marginTop: '15px', textAlign: 'right', display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                                                        <button
+                                                            onClick={() => handleReorder(order)}
+                                                            style={{
+                                                                padding: '10px 25px',
+                                                                background: '#4CAF50',
+                                                                color: 'white',
+                                                                border: 'none',
+                                                                borderRadius: '4px',
+                                                                cursor: 'pointer',
+                                                                fontWeight: 'bold',
+                                                                fontSize: '14px',
+                                                                transition: 'background 0.3s'
+                                                            }}
+                                                            onMouseOver={(e) => e.target.style.background = '#45a049'}
+                                                            onMouseOut={(e) => e.target.style.background = '#4CAF50'}
+                                                        >
+                                                            🔄 Đặt lại
+                                                        </button>
                                                         <button
                                                             onClick={() => handleDeleteOrder(order._id)}
                                                             style={{

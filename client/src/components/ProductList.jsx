@@ -4,15 +4,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiHeart, FiShoppingCart, FiEye, FiRepeat } from 'react-icons/fi';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import { useAuth } from '../contexts/AuthContext';
 import './ProductCard.css';
 
 function ProductList({ products, title = "GỢI Ý HÔM NAY", onBuy, loading = false }) {
     const [hoveredId, setHoveredId] = useState(null);
     const navigate = useNavigate();
+    const { isAuthenticated } = useAuth();
 
-    // Nếu đã đăng nhập (có localStorage user), hiển thị nhiều sản phẩm hơn
-    const isLoggedIn = Boolean(localStorage.getItem('currentUser'));
-    const displayProducts = products?.slice(0, isLoggedIn ? 90 : 72) || [];
+    // Hiển thị TẤT CẢ sản phẩm, không giới hạn theo login
+    // (Nếu muốn giới hạn, dùng isAuthenticated thay vì currentUser)
+    const displayProducts = products || [];
 
     // Nếu đang loading, hiển thị skeleton
     if (loading) {

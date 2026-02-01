@@ -47,7 +47,9 @@ function Header({ cartCount, onSearch, showToast }) {
 
     const handleCartClick = () => {
         if (isAuthenticated) {
-            navigate('/checkout');
+            // Xóa selectedProducts để đảm bảo vào trang chọn sản phẩm
+            localStorage.removeItem('selectedProductsForCheckout');
+            navigate('/checkout/choseproduct');
         } else {
             showToast("Vui lòng đăng nhập để xem Giỏ hàng!", "warning");
             navigate('/login');

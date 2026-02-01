@@ -54,7 +54,11 @@ function LoginPage({ showToast }) {
 
             if (result.success) {
                 showToast(result.message, "success");
-                setTimeout(() => navigate('/'), 1000);
+
+                // Reload trang để load lại sản phẩm từ đầu cho user mới
+                setTimeout(() => {
+                    window.location.href = '/'; // Force reload
+                }, 1000);
             } else {
                 showToast(result.message, "error");
             }
@@ -65,7 +69,11 @@ function LoginPage({ showToast }) {
 
             if (result.success) {
                 showToast(result.message, "success");
-                setTimeout(() => navigate('/'), 1000);
+
+                // Reload trang để load lại sản phẩm từ đầu cho user mới
+                setTimeout(() => {
+                    window.location.href = '/'; // Force reload
+                }, 1000);
             } else {
                 showToast(result.message, "error");
             }
