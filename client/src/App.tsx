@@ -88,8 +88,11 @@ function App() {
     if (cartItems.length > 0) {
       localStorage.setItem('cartItems', JSON.stringify(cartItems));
       console.log('💾 Đã lưu giỏ hàng:', cartItems);
+    } else {
+      // Xóa localStorage khi giỏ hàng rỗng
+      localStorage.removeItem('cartItems');
+      console.log('🗑️ Đã xóa giỏ hàng khỏi localStorage');
     }
-    // Không xóa localStorage khi cart rỗng vì có thể đang loading
   }, [cartItems]);
 
   // Debug search keyword changes
