@@ -38,7 +38,18 @@ const TryOnScene: React.FC<TryOnSceneProps> = ({
 
                 <Suspense fallback={<Loader />}>
                     <Avatar
-                        body={{ height: scaleY, weight: fat, chest, waist, hips }}
+                        body={{
+                            height: scaleY,
+                            weight: fat,
+                            chest: chest,
+                            waist: waist,
+                            hips: hips,
+                            // Giá trị mặc định cho các thuộc tính bị thiếu
+                            shoulder: scaleY * 0.22, // Vai ~22% chiều cao
+                            arm: chest * 0.25, // Bắp tay ~25% vòng ngực
+                            thigh: hips * 0.55, // Bắp đùi ~55% vòng hông
+                            belly: waist * 1.1 // Bụng ~110% vòng eo
+                        }}
                         clothingTexture={clothingTexture}
                         pose={pose as 'idle' | 'walking'}
                     />

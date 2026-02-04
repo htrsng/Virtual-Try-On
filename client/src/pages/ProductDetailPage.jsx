@@ -147,7 +147,7 @@ function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, onBu
     const handleTryOn = () => {
         navigate('/try-on', {
             state: {
-                selectedProduct: {
+                product: {
                     ...finalProduct,
                     // Quan trọng: Gửi kèm biến thể đang chọn để trang 3D biết load màu gì
                     currentVariant: selectedVariant

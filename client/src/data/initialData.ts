@@ -19,17 +19,36 @@ export const fallbackSuggestions = [
     {
         id: 1,
         category: "Áo Thun",
-        name: 'Áo Thun Cotton Premium',
+        name: 'Áo Thun Cotton Premium (Có 3D)',
         price: 299000,
         img: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=600&fit=crop',
         discount: 30,
         sold: 1234,
+        model3D: {
+            enable: true,                    // Bật tính năng 3D
+            url: "/models/tshirt_base.glb",  // Đảm bảo bạn đã copy file vào public/models/
+            scale: 0.085,                    // Tỉ lệ file Blender của bạn
+            nodeName: "Ao_Phong",            // Tên Mesh trong file Blender của bạn
+            position: [0, -0.7, 0]           // Vị trí đặt áo
+        },
         variants: [
             {
                 color: 'grey',
-                hex: '#E0E0E0',
+                hex: '#E0E0E0',        // Mã màu Xám
                 name: 'Xám',
                 img: '/assets/clothes/ao_xam.png'
+            },
+            {
+                color: 'red',
+                hex: '#FF0000',        // Mã màu Đỏ (Thêm vào để test đổi màu)
+                name: 'Đỏ',
+                img: '/assets/clothes/ao_do.png'
+            },
+            {
+                color: 'blue',
+                hex: '#0000FF',        // Mã màu Xanh (Thêm vào để test đổi màu)
+                name: 'Xanh',
+                img: '/assets/clothes/ao_xanh.png'
             }
         ]
     },

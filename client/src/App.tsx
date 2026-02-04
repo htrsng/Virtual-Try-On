@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 // --- 1. IMPORT CÁC COMPONENT CỦA WEB BÁN HÀNG ---
+import { MODEL_INJECTION } from './data/ThreeDConfig';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
@@ -34,12 +34,6 @@ import { ThemeProvider } from './contexts/ThemeContext';
 // --- 4. IMPORT DỮ LIỆU MẪU (INITIAL DATA) ---
 import { initTopSearch, fallbackSuggestions, initCategories, initBanners } from './data/initialData';
 import { initFlashSaleProducts } from './data/flashSaleData';
-
-// --- DỮ LIỆU MẪU (FALLBACK DATA) ---
-const fallbackUsers = [
-  { id: 1, email: "admin", password: "123", role: "admin" },
-  { id: 2, email: "user", password: "123", role: "user" },
-];
 
 const formatPrice = (price: any) => {
   if (typeof price === 'string') return price;
@@ -216,25 +210,47 @@ function App() {
 
   // --- FETCH API TỪ SERVER ---
   useEffect(() => {
-    // 1. Lấy Sản Phẩm - ĐANG TẮT ĐỂ DÙNG FALLBACK CÓ 110 SẢN PHẨM
-    /*
+    // --- 1. LẤY SẢN PHẨM TỪ SERVER VÀ GHÉP 3D ---
     fetch('http://localhost:3000/api/products')
       .then(res => res.json())
       .then(data => {
         if (data && data.length > 0) {
-          const formattedData = data.map((item: any) => ({
-            ...item,
-            id: item._id, // Map _id của Mongo sang id
-            price: item.price
-          }));
+          console.log("🔥 DANH SÁCH ID SẢN PHẨM TỪ CLOUD (Copy ID ở đây):");
+
+          // MAP DỮ LIỆU: Ghép thông tin từ Server + Config 3D ở Frontend
+          const formattedData = data.map((item: any) => {
+            // In ra tên và ID để bạn dễ tìm
+            console.log(`- ${item.name}: ${item._id}`);
+
+            // Chuẩn bị object cơ bản
+            const product = {
+              ...item,
+              id: item._id, // Map _id của Mongo sang id dùng trong App
+              price: item.price
+            };
+
+            // KIỂM TRA VÀ TIÊM DỮ LIỆU 3D
+            // Nếu ID của sản phẩm này có trong file cấu hình ThreeDConfig
+            if (MODEL_INJECTION[item._id]) {
+              console.log(`=> Đã kích hoạt 3D cho sản phẩm: ${item.name}`);
+              product.model3D = MODEL_INJECTION[item._id];
+            }
+
+            return product;
+          });
+
+          // Cập nhật State và Cache
           setSuggestionProducts(formattedData);
           localStorage.setItem('products', JSON.stringify(formattedData));
         }
       })
-      .catch(err => console.error("Lỗi lấy sản phẩm (Có thể do chưa bật Server Nodejs):", err));
-    */
+      .catch(err => {
+        console.error("Lỗi lấy sản phẩm:", err);
+        // Nếu lỗi server thì dùng tạm dữ liệu mẫu
+        // setSuggestionProducts(fallbackSuggestions); 
+      });
 
-    // 2. Lấy Người Dùng (THAY THẾ HOÀN TOÀN từ database)
+    // --- 2. Lấy Người Dùng (THAY THẾ HOÀN TOÀN từ database) ---
     fetch('http://localhost:3000/api/users')
       .then(res => res.json())
       .then(data => {
@@ -335,25 +351,16 @@ function App() {
 
     const actualSize = size || 'M';
     const newItem = { ...product, size: actualSize, quantity: 1, cartId: Date.now() };
-    
+
     // Lưu sản phẩm "Mua ngay" vào localStorage
     localStorage.setItem('selectedProductsForCheckout', JSON.stringify([newItem]));
     console.log('🚀 MUA NGAY: Lưu sản phẩm và chuyển đến /checkout/cart');
-    
+
     setCartItems([newItem]);
-    
+
     setTimeout(() => {
       window.location.href = '/checkout/cart';
     }, 100);
-  };
-
-  const handleLogout = () => {
-    setCurrentUser(null);
-    localStorage.removeItem('currentUser');
-    // Xóa giỏ hàng khi đăng xuất
-    setCartItems([]);
-    localStorage.removeItem('cartItems');
-    // Không cần redirect ở đây, Header sẽ xử lý
   };
 
   const filteredProducts = displayProducts.filter(p => {
@@ -438,10 +445,10 @@ function App() {
 
               {/* TRANG CHỌN SẢN PHẨM THANH TOÁN */}
               <Route path="/checkout/choseproduct" element={<CheckoutSelectPage cartItems={cartItems} onRemove={handleRemoveFromCart} onUpdateQuantity={handleUpdateQuantity} showToast={showToast} />} />
-              
+
               {/* TRANG THANH TOÁN */}
               <Route path="/checkout/cart" element={<CheckoutPage cartItems={cartItems} onCheckoutSuccess={handleCheckoutSuccess} showToast={showToast} />} />
-              
+
               {/* TRANG GIỎ HÀNG & THANH TOÁN (Redirect cũ) */}
               <Route path="/checkout" element={<CheckoutSelectPage cartItems={cartItems} onRemove={handleRemoveFromCart} onUpdateQuantity={handleUpdateQuantity} showToast={showToast} />} />
 
