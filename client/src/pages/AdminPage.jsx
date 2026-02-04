@@ -115,7 +115,8 @@ function AdminPage({
                 await fetch(`http://localhost:3000/api/users/${id}`, { method: 'DELETE' });
             }
 
-            const updatedList = list.filter(item => item.id !== id);
+            // So sánh id bằng String() để tránh lỗi type mismatch
+            const updatedList = list.filter(item => String(item.id) !== String(id));
             setList(updatedList);
 
             // Lưu vào localStorage (KHÔNG lưu users vì đã load từ database)
@@ -184,14 +185,19 @@ function AdminPage({
                         body: JSON.stringify(newItemData)
                     });
                 }
-                const updatedProducts = products.map(p => p.id === editingItem.id ? { ...p, ...newItemData } : p);
+                // So sánh id bằng String() để tránh lỗi type mismatch
+                const updatedProducts = products.map(p => String(p.id) === String(editingItem.id) ? { ...p, ...newItemData } : p);
                 setProducts(updatedProducts);
                 localStorage.setItem('products', JSON.stringify(updatedProducts));
                 showToast("Đã cập nhật sản phẩm!", "success");
             }
         } else {
+            // Kiểm tra xem có phải sản phẩm được chọn từ dropdown không
+            // Nếu có _fromExisting = true và có id, dùng id đó thay vì tạo mới
+            const useExistingId = editingItem._fromExisting && editingItem.id;
+
             const newItem = {
-                id: editingItem ? editingItem.id : Date.now(),
+                id: useExistingId ? editingItem.id : (editingItem.id || Date.now()),
                 name: form.name.value,
                 img: form.img.value || "https://placehold.co/200x200?text=No+Image",
                 sold: form.sold?.value,
@@ -205,25 +211,25 @@ function AdminPage({
 
             if (activeTab === 'flash_sale') {
                 const updatedFlashSale = editingItem
-                    ? flashSaleProducts.map(p => p.id === newItem.id ? newItem : p)
+                    ? flashSaleProducts.map(p => String(p.id) === String(newItem.id) ? newItem : p)
                     : [...flashSaleProducts, newItem];
                 setFlashSaleProducts(updatedFlashSale);
                 localStorage.setItem('flashSaleProducts', JSON.stringify(updatedFlashSale));
             } else if (activeTab === 'top_search') {
                 const updatedTopSearch = editingItem
-                    ? topSearch.map(p => p.id === newItem.id ? newItem : p)
+                    ? topSearch.map(p => String(p.id) === String(newItem.id) ? newItem : p)
                     : [...topSearch, newItem];
                 setTopSearch(updatedTopSearch);
                 localStorage.setItem('topSearch', JSON.stringify(updatedTopSearch));
             } else if (activeTab === 'top_products_manage') {
                 const updatedTopProducts = editingItem
-                    ? topProducts.map(p => p.id === newItem.id ? newItem : p)
+                    ? topProducts.map(p => String(p.id) === String(newItem.id) ? newItem : p)
                     : [...topProducts, newItem];
                 setTopProducts(updatedTopProducts);
                 localStorage.setItem('topProducts', JSON.stringify(updatedTopProducts));
             } else if (activeTab === 'categories') {
                 const updatedCategories = editingItem
-                    ? categories.map(c => c.id === newItem.id ? newItem : c)
+                    ? categories.map(c => String(c.id) === String(newItem.id) ? newItem : c)
                     : [...categories, newItem];
                 setCategories(updatedCategories);
                 localStorage.setItem('categories', JSON.stringify(updatedCategories));
@@ -237,7 +243,7 @@ function AdminPage({
     };
 
     const toggleAdminRole = async (userId) => {
-        const user = users.find(u => u.id === userId);
+        const user = users.find(u => String(u.id) === String(userId));
         const newRole = user.role === 'admin' ? 'user' : 'admin';
 
         // Cập nhật Server nếu là user thật
@@ -250,7 +256,7 @@ function AdminPage({
         }
 
         setUsers(users.map(u => {
-            if (u.id === userId) {
+            if (String(u.id) === String(userId)) {
                 return { ...u, role: newRole };
             }
             return u;
@@ -322,6 +328,51 @@ function AdminPage({
                 {editingItem && activeTab !== 'users' && activeTab !== 'banner' && (
                     <form onSubmit={handleSave} style={{ background: '#f9f9f9', padding: '20px', marginBottom: '20px', border: '1px solid #eee' }}>
                         <h3>{editingItem.id ? 'Sửa thông tin' : 'Thêm mới'}</h3>
+
+                        {/* Dropdown chọn từ sản phẩm có sẵn (chỉ khi thêm mới vào topSearch, topProducts, flashSale) */}
+                        {!editingItem.id && (activeTab === 'top_search' || activeTab === 'top_products_manage' || activeTab === 'flash_sale') && (
+                            <div className="form-group" style={{ background: '#fff3cd', padding: '15px', borderRadius: '8px', marginBottom: '15px' }}>
+                                <label className="form-label" style={{ fontWeight: 'bold', color: '#856404' }}>
+                                    📌 Chọn nhanh từ sản phẩm có sẵn (ID sẽ đồng bộ với database):
+                                </label>
+                                <select
+                                    className="form-input"
+                                    onChange={(e) => {
+                                        if (e.target.value) {
+                                            const selectedProduct = products.find(p => String(p.id) === e.target.value);
+                                            if (selectedProduct) {
+                                                // Auto-fill form
+                                                document.querySelector('input[name="name"]').value = selectedProduct.name;
+                                                document.querySelector('input[name="img"]').value = selectedProduct.img;
+                                                if (document.querySelector('input[name="price"]')) {
+                                                    document.querySelector('input[name="price"]').value = selectedProduct.price;
+                                                }
+                                                if (document.querySelector('select[name="category"]')) {
+                                                    document.querySelector('select[name="category"]').value = selectedProduct.category;
+                                                }
+                                                if (document.querySelector('textarea[name="description"]')) {
+                                                    document.querySelector('textarea[name="description"]').value = selectedProduct.description || '';
+                                                }
+                                                // Lưu id gốc để dùng sau
+                                                setEditingItem({ ...editingItem, id: selectedProduct.id, _fromExisting: true });
+                                            }
+                                        }
+                                    }}
+                                    style={{ background: 'white' }}
+                                >
+                                    <option value="">-- Chọn sản phẩm từ database --</option>
+                                    {products.map(p => (
+                                        <option key={p.id} value={p.id}>
+                                            {p.name} (ID: {String(p.id).substring(0, 8)}...)
+                                        </option>
+                                    ))}
+                                </select>
+                                <small style={{ color: '#856404', display: 'block', marginTop: '5px' }}>
+                                    💡 Khuyến nghị: Chọn từ danh sách này để ID đồng bộ với "Gợi ý hôm nay"
+                                </small>
+                            </div>
+                        )}
+
                         <div className="form-group">
                             <label className="form-label">Tên:</label>
                             <input name="name" className="form-input" defaultValue={editingItem.name} required />

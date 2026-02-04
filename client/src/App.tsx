@@ -218,14 +218,15 @@ function App() {
           console.log("🔥 DANH SÁCH ID SẢN PHẨM TỪ CLOUD (Copy ID ở đây):");
 
           // MAP DỮ LIỆU: Ghép thông tin từ Server + Config 3D ở Frontend
+          // QUAN TRỌNG: MongoDB trả về _id, phải chuyển sang id để thống nhất frontend
           const formattedData = data.map((item: any) => {
             // In ra tên và ID để bạn dễ tìm
             console.log(`- ${item.name}: ${item._id}`);
 
-            // Chuẩn bị object cơ bản
+            // Chuẩn bị object cơ bản - LUÔN CHUYỂN _id THÀNH id
             const product = {
               ...item,
-              id: item._id, // Map _id của Mongo sang id dùng trong App
+              id: item._id, // Map _id của Mongo sang id dùng trong App (THỐNG NHẤT)
               price: item.price
             };
 
@@ -265,9 +266,10 @@ function App() {
             return acc;
           }, []);
 
+          // QUAN TRỌNG: Chuyển _id thành id để thống nhất với frontend
           const formattedUsers = uniqueUsers.map((u: any) => ({
             ...u,
-            id: u._id,
+            id: u._id, // Map _id của Mongo sang id (THỐNG NHẤT)
             email: u.email,
             role: u.role,
             fullName: u.fullName || '',
@@ -309,9 +311,10 @@ function App() {
   const handleAddToCart = (product: any, size?: string) => {
     const actualSize = size || 'M'; // Sử dụng size mặc định nếu không được cung cấp
     setCartItems(prev => {
-      const exist = prev.find(item => item.id === product.id && item.size === actualSize);
+      // So sánh id bằng String() để tránh lỗi giữa MongoDB _id và id số
+      const exist = prev.find(item => String(item.id) === String(product.id) && item.size === actualSize);
       if (exist) {
-        return prev.map(item => (item.id === product.id && item.size === actualSize) ? { ...item, quantity: item.quantity + 1 } : item);
+        return prev.map(item => (String(item.id) === String(product.id) && item.size === actualSize) ? { ...item, quantity: item.quantity + 1 } : item);
       }
       return [...prev, { ...product, size: actualSize, quantity: 1, cartId: Date.now() }];
     });

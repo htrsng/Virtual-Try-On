@@ -8,8 +8,9 @@ function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, onBu
     const { user, isAuthenticated } = useAuth();
 
     // Tìm sản phẩm theo ID - tìm trong cả products và flashSaleProducts
-    const product = products ? products.find(p => p.id == id) : null;
-    const flashProduct = !product && flashSaleProducts ? flashSaleProducts.find(p => p.id == id) : null;
+    // Chuyển id về string để so sánh chính xác giữa MongoDB _id và id số
+    const product = products ? products.find(p => String(p.id) === String(id)) : null;
+    const flashProduct = !product && flashSaleProducts ? flashSaleProducts.find(p => String(p.id) === String(id)) : null;
     const finalProduct = product || flashProduct;
 
     // --- STATE QUẢN LÝ ---

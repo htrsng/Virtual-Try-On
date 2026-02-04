@@ -443,7 +443,8 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
             let hasFlashSaleUpdate = false;
 
             selectedProducts.forEach(item => {
-                const flashIndex = flashSaleProducts.findIndex(p => p.id === item.id);
+                // So sánh id bằng String() để tránh lỗi type mismatch
+                const flashIndex = flashSaleProducts.findIndex(p => String(p.id) === String(item.id));
                 if (flashIndex !== -1) {
                     flashSaleProducts[flashIndex].sold = (flashSaleProducts[flashIndex].sold || 0) + item.quantity;
                     flashSaleProducts[flashIndex].stock = Math.max(0, flashSaleProducts[flashIndex].stock - item.quantity);

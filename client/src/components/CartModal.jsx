@@ -4,10 +4,13 @@ function CartModal({ isOpen, onClose, cartItems, onRemove, onCheckout }) {
     const [selectedItems, setSelectedItems] = useState({});
 
     // Initialize all items as selected when cart changes
+    // Dùng cartId thay vì id vì cart có thể có cùng sản phẩm nhưng khác size
     useEffect(() => {
         const initialSelected = {};
         cartItems.forEach(item => {
-            initialSelected[item.id] = true;
+            // Dùng cartId nếu có, fallback về id
+            const key = item.cartId || item.id;
+            initialSelected[key] = true;
         });
         setSelectedItems(initialSelected);
     }, [cartItems]);
@@ -25,13 +28,15 @@ function CartModal({ isOpen, onClose, cartItems, onRemove, onCheckout }) {
         const allSelected = Object.values(selectedItems).every(val => val);
         const newSelected = {};
         cartItems.forEach(item => {
-            newSelected[item.id] = !allSelected;
+            const key = item.cartId || item.id;
+            newSelected[key] = !allSelected;
         });
         setSelectedItems(newSelected);
     };
 
     const total = cartItems.reduce((sum, item) => {
-        if (selectedItems[item.id]) {
+        const key = item.cartId || item.id;
+        if (selectedItems[key]) {
             const price = parseInt(item.price.replace(/\./g, '').replace(' đ', ''));
             return sum + price * item.quantity;
         }
@@ -70,47 +75,50 @@ function CartModal({ isOpen, onClose, cartItems, onRemove, onCheckout }) {
                                 />
                                 <span style={{ fontWeight: '500' }}>Chọn tất cả ({cartItems.length} sản phẩm)</span>
                             </div>
-                            {cartItems.map((item) => (
-                                <div key={item.id} className="cart-item" style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '15px',
-                                    padding: '15px',
-                                    borderBottom: '1px solid #f0f0f0',
-                                    backgroundColor: selectedItems[item.id] ? '#fff' : '#f9f9f9'
-                                }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedItems[item.id] || false}
-                                        onChange={() => handleSelectItem(item.id)}
-                                        style={{ width: '18px', height: '18px', cursor: 'pointer', flexShrink: 0 }}
-                                    />
-                                    <div className="cart-item-info" style={{ flex: 1, display: 'flex', gap: '12px' }}>
-                                        <img src={item.img} alt="" className="cart-img" style={{ flexShrink: 0 }} />
-                                        <div style={{ flex: 1 }}>
-                                            <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>{item.name}</div>
-                                            <div style={{ color: '#888', fontSize: '12px', marginBottom: '5px' }}>{item.price}</div>
-                                            <div style={{ fontSize: '14px', color: '#666' }}>Số lượng: {item.quantity}</div>
+                            {cartItems.map((item) => {
+                                const key = item.cartId || item.id;
+                                return (
+                                    <div key={key} className="cart-item" style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '15px',
+                                        padding: '15px',
+                                        borderBottom: '1px solid #f0f0f0',
+                                        backgroundColor: selectedItems[key] ? '#fff' : '#f9f9f9'
+                                    }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedItems[key] || false}
+                                            onChange={() => handleSelectItem(key)}
+                                            style={{ width: '18px', height: '18px', cursor: 'pointer', flexShrink: 0 }}
+                                        />
+                                        <div className="cart-item-info" style={{ flex: 1, display: 'flex', gap: '12px' }}>
+                                            <img src={item.img} alt="" className="cart-img" style={{ flexShrink: 0 }} />
+                                            <div style={{ flex: 1 }}>
+                                                <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>{item.name}</div>
+                                                <div style={{ color: '#888', fontSize: '12px', marginBottom: '5px' }}>{item.price}</div>
+                                                <div style={{ fontSize: '14px', color: '#666' }}>Số lượng: {item.quantity}</div>
+                                            </div>
+                                        </div>
+                                        <div className="cart-actions">
+                                            <button
+                                                style={{
+                                                    color: 'red',
+                                                    border: '1px solid #ffcdd2',
+                                                    background: '#fff',
+                                                    padding: '6px 12px',
+                                                    borderRadius: '4px',
+                                                    cursor: 'pointer',
+                                                    fontSize: '13px'
+                                                }}
+                                                onClick={() => onRemove(item.cartId || item.id)}
+                                            >
+                                                Xóa
+                                            </button>
                                         </div>
                                     </div>
-                                    <div className="cart-actions">
-                                        <button
-                                            style={{
-                                                color: 'red',
-                                                border: '1px solid #ffcdd2',
-                                                background: '#fff',
-                                                padding: '6px 12px',
-                                                borderRadius: '4px',
-                                                cursor: 'pointer',
-                                                fontSize: '13px'
-                                            }}
-                                            onClick={() => onRemove(item.id)}
-                                        >
-                                            Xóa
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                             <div className="cart-total" style={{
                                 padding: '20px 15px',
                                 display: 'flex',
@@ -126,7 +134,10 @@ function CartModal({ isOpen, onClose, cartItems, onRemove, onCheckout }) {
                             <button
                                 className="checkout-btn"
                                 onClick={() => {
-                                    const selected = cartItems.filter(item => selectedItems[item.id]);
+                                    const selected = cartItems.filter(item => {
+                                        const key = item.cartId || item.id;
+                                        return selectedItems[key];
+                                    });
                                     if (selected.length === 0) {
                                         alert('Vui lòng chọn ít nhất một sản phẩm để mua hàng!');
                                         return;
