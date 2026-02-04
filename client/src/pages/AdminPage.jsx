@@ -182,9 +182,9 @@ function AdminPage({
                     });
                     const savedProduct = await res.json();
                     // Ưu tiên id numeric từ server, fallback về _id
-                    const formattedProduct = { 
-                        ...savedProduct, 
-                        id: savedProduct.id || savedProduct._id 
+                    const formattedProduct = {
+                        ...savedProduct,
+                        id: savedProduct.id || savedProduct._id
                     };
 
                     const updatedProducts = [...products, formattedProduct];

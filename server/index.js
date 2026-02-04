@@ -223,19 +223,19 @@ app.post("/api/products", async (req, res) => {
     // Tìm ID lớn nhất hiện có
     const maxProduct = await ProductModel.findOne().sort({ id: -1 }).limit(1);
     const nextId = maxProduct && maxProduct.id ? maxProduct.id + 1 : 1;
-    
-    console.log('🆕 Tạo sản phẩm mới với ID:', nextId);
+
+    console.log("🆕 Tạo sản phẩm mới với ID:", nextId);
 
     const newProduct = new ProductModel({
       ...req.body,
       id: nextId, // Gán ID numeric tự động tăng
     });
     await newProduct.save();
-    
-    console.log('✅ Đã lưu với ID:', newProduct.id);
+
+    console.log("✅ Đã lưu với ID:", newProduct.id);
     res.json(newProduct);
   } catch (err) {
-    console.error('❌ Lỗi POST:', err.message);
+    console.error("❌ Lỗi POST:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
