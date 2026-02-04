@@ -104,15 +104,28 @@ function AdminPage({
 
     const handleDelete = async (list, setList, id) => {
         if (window.confirm("Bạn chắc chắn muốn xóa?")) {
-            const isMongoId = typeof id === 'string' && id.length > 20;
-
-            // Xóa Sản Phẩm
-            if (activeTab === 'products' && isMongoId) {
-                await fetch(`http://localhost:3000/api/products/${id}`, { method: 'DELETE' });
+            // Xóa Sản Phẩm từ database (luôn gọi API vì tất cả sản phẩm đều lưu trong DB)
+            if (activeTab === 'products') {
+                try {
+                    // Tìm sản phẩm để lấy _id
+                    const product = list.find(p => String(p.id) === String(id));
+                    if (product && product._id) {
+                        await fetch(`http://localhost:3000/api/products/${product._id}`, { method: 'DELETE' });
+                    }
+                } catch (err) {
+                    console.error('Lỗi xóa sản phẩm:', err);
+                }
             }
-            // Xóa User (MỚI)
-            if (activeTab === 'users' && isMongoId) {
-                await fetch(`http://localhost:3000/api/users/${id}`, { method: 'DELETE' });
+            // Xóa User
+            if (activeTab === 'users') {
+                try {
+                    const user = list.find(u => String(u.id) === String(id));
+                    if (user && user._id) {
+                        await fetch(`http://localhost:3000/api/users/${user._id}`, { method: 'DELETE' });
+                    }
+                } catch (err) {
+                    console.error('Lỗi xóa user:', err);
+                }
             }
 
             // So sánh id bằng String() để tránh lỗi type mismatch
@@ -168,7 +181,11 @@ function AdminPage({
                         body: JSON.stringify(newItemData)
                     });
                     const savedProduct = await res.json();
-                    const formattedProduct = { ...savedProduct, id: savedProduct._id };
+                    // Ưu tiên id numeric từ server, fallback về _id
+                    const formattedProduct = { 
+                        ...savedProduct, 
+                        id: savedProduct.id || savedProduct._id 
+                    };
 
                     const updatedProducts = [...products, formattedProduct];
                     setProducts(updatedProducts);
@@ -363,7 +380,7 @@ function AdminPage({
                                     <option value="">-- Chọn sản phẩm từ database --</option>
                                     {products.map(p => (
                                         <option key={p.id} value={p.id}>
-                                            {p.name} (ID: {String(p.id).substring(0, 8)}...)
+                                            {p.name} (ID: {p.id})
                                         </option>
                                     ))}
                                 </select>
@@ -483,7 +500,7 @@ function AdminPage({
                             <tbody>
                                 {currentItems.map((item, index) => (
                                     <tr key={`${item.id}-${activeTab}-${index}`}>
-                                        <td>{String(item.id).substring(0, 6)}...</td>
+                                        <td>{item.id}</td>
                                         {activeTab === 'users' ? (
                                             <>
                                                 <td>-</td>

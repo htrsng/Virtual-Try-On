@@ -51,6 +51,7 @@ mongoose.connection.on("disconnected", () => {
 
 // --- SCHEMA SẢN PHẨM ---
 const ProductSchema = new mongoose.Schema({
+  id: Number, // ID numeric tự tăng
   name: String,
   price: Number,
   img: String,
@@ -61,6 +62,7 @@ const ProductModel = mongoose.model("products", ProductSchema);
 
 // --- SCHEMA NGƯỜI DÙNG ---
 const UserSchema = new mongoose.Schema({
+  id: Number, // ID numeric tự tăng
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, default: "user" }, // 'admin' hoặc 'user'
@@ -218,10 +220,22 @@ app.get("/api/products", async (req, res) => {
 
 app.post("/api/products", async (req, res) => {
   try {
-    const newProduct = new ProductModel(req.body);
+    // Tìm ID lớn nhất hiện có
+    const maxProduct = await ProductModel.findOne().sort({ id: -1 }).limit(1);
+    const nextId = maxProduct && maxProduct.id ? maxProduct.id + 1 : 1;
+    
+    console.log('🆕 Tạo sản phẩm mới với ID:', nextId);
+
+    const newProduct = new ProductModel({
+      ...req.body,
+      id: nextId, // Gán ID numeric tự động tăng
+    });
     await newProduct.save();
+    
+    console.log('✅ Đã lưu với ID:', newProduct.id);
     res.json(newProduct);
   } catch (err) {
+    console.error('❌ Lỗi POST:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
@@ -453,12 +467,17 @@ app.post("/api/auth/register", async (req, res) => {
     // Mã hóa mật khẩu
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Tìm ID lớn nhất hiện có
+    const maxUser = await UserModel.findOne().sort({ id: -1 }).limit(1);
+    const nextId = maxUser && maxUser.id ? maxUser.id + 1 : 1;
+
     const newUser = new UserModel({
       email,
       password: hashedPassword,
       fullName: fullName || "",
       phone: phone || "",
       address: address || "",
+      id: nextId, // Gán ID numeric tự động tăng
     });
     await newUser.save();
 

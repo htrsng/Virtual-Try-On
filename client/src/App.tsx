@@ -218,23 +218,24 @@ function App() {
           console.log("🔥 DANH SÁCH ID SẢN PHẨM TỪ CLOUD (Copy ID ở đây):");
 
           // MAP DỮ LIỆU: Ghép thông tin từ Server + Config 3D ở Frontend
-          // QUAN TRỌNG: MongoDB trả về _id, phải chuyển sang id để thống nhất frontend
+          // QUAN TRỌNG: Ưu tiên dùng id numeric từ database, fallback về _id nếu không có
           const formattedData = data.map((item: any) => {
             // In ra tên và ID để bạn dễ tìm
-            console.log(`- ${item.name}: ${item._id}`);
+            console.log(`- ${item.name}: ID=${item.id || item._id}`);
 
-            // Chuẩn bị object cơ bản - LUÔN CHUYỂN _id THÀNH id
+            // Chuẩn bị object cơ bản - Ưu tiên id numeric từ database
             const product = {
               ...item,
-              id: item._id, // Map _id của Mongo sang id dùng trong App (THỐNG NHẤT)
+              id: item.id || item._id, // Dùng id numeric nếu có, không thì dùng _id
               price: item.price
             };
 
             // KIỂM TRA VÀ TIÊM DỮ LIỆU 3D
             // Nếu ID của sản phẩm này có trong file cấu hình ThreeDConfig
-            if (MODEL_INJECTION[item._id]) {
+            const productId = item.id || item._id;
+            if (MODEL_INJECTION[productId]) {
               console.log(`=> Đã kích hoạt 3D cho sản phẩm: ${item.name}`);
-              product.model3D = MODEL_INJECTION[item._id];
+              product.model3D = MODEL_INJECTION[productId];
             }
 
             return product;
@@ -266,10 +267,10 @@ function App() {
             return acc;
           }, []);
 
-          // QUAN TRỌNG: Chuyển _id thành id để thống nhất với frontend
+          // QUAN TRỌNG: Ưu tiên dùng id numeric từ database, fallback về _id nếu không có
           const formattedUsers = uniqueUsers.map((u: any) => ({
             ...u,
-            id: u._id, // Map _id của Mongo sang id (THỐNG NHẤT)
+            id: u.id || u._id, // Ưu tiên id numeric từ database, không thì dùng _id
             email: u.email,
             role: u.role,
             fullName: u.fullName || '',
