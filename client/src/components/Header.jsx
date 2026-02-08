@@ -68,12 +68,6 @@ function Header({ cartCount, onSearch, showToast }) {
     return (
         <div className={`shopee-header ${scrolled ? 'header-scrolled' : ''}`}>
             <div className="container header-content">
-                <Link to="/" className="logo">
-                    <span className="logo-shopee">Shopee</span>
-                    <span className="logo-divider">|</span>
-                    <span className="logo-subtitle">Thời Trang</span>
-                </Link>
-
                 <div className="search-box">
                     <FiSearch className="search-icon" />
                     <input

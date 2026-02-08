@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { FiX, FiZoomIn, FiPackage, FiTruck, FiShield, FiCheckCircle } from 'react-icons/fi';
 import axios from 'axios';
+import './CheckoutPage.css';
 
 function CheckoutPage({ onCheckoutSuccess, showToast }) {
     const navigate = useNavigate();
@@ -12,6 +14,40 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
 
     // Load sản phẩm đã chọn từ localStorage hoặc state
     const [selectedProducts, setSelectedProducts] = useState([]);
+
+    // State cho modal xem ảnh
+    const [imageModalOpen, setImageModalOpen] = useState(false);
+    const [selectedImage, setSelectedImage] = useState('');
+
+    // State cho modal xác nhận đơn hàng
+    const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+
+    // State cho phương thức vận chuyển
+    const [shippingMethod, setShippingMethod] = useState('standard');
+    const shippingOptions = [
+        { id: 'standard', name: 'Giao hàng tiêu chuẩn', time: '3-5 ngày', price: 30000 },
+        { id: 'express', name: 'Giao hàng nhanh', time: '1-2 ngày', price: 50000 },
+        { id: 'super', name: 'Giao hàng siêu tốc', time: 'Trong ngày', price: 100000 }
+    ];
+
+    useEffect(() => {
+        if (!imageModalOpen && !confirmModalOpen) return;
+
+        const handleKeyDown = (event) => {
+            if (event.key === 'Escape') {
+                setImageModalOpen(false);
+                setConfirmModalOpen(false);
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        document.body.style.overflow = 'hidden';
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+            document.body.style.overflow = '';
+        };
+    }, [imageModalOpen, confirmModalOpen]);
 
     useEffect(() => {
         // Tránh load nhiều lần
@@ -203,22 +239,54 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
     }, 0);
 
     // Tính toán giảm giá
+    const selectedShipping = shippingOptions.find(opt => opt.id === shippingMethod);
+    const shippingFee = selectedShipping?.price || 0;
     const discountAmount = appliedDiscount ? (totalAmount * appliedDiscount.discount) / 100 : 0;
-    const finalAmount = totalAmount - discountAmount;
+    const finalAmount = totalAmount + shippingFee - discountAmount;
 
     const formatPrice = (price) => {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
     };
 
+    const getDeliveryRange = (methodId) => {
+        switch (methodId) {
+            case 'express':
+                return { from: 1, to: 2 };
+            case 'super':
+                return { from: 0, to: 0 };
+            default:
+                return { from: 3, to: 5 };
+        }
+    };
+
+    const formatDate = (date) => {
+        return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+    };
+
+    const getDeliveryRangeText = (methodId) => {
+        const { from, to } = getDeliveryRange(methodId);
+        const start = new Date();
+        const end = new Date();
+        start.setDate(start.getDate() + from);
+        end.setDate(end.getDate() + to);
+
+        if (from === 0 && to === 0) {
+            return 'Hôm nay';
+        }
+
+        return `${formatDate(start)} - ${formatDate(end)}`;
+    };
+
     // Hàm áp dụng mã giảm giá
     const applyDiscountCode = async () => {
-        if (!discountCode.trim()) {
+        const normalizedCode = discountCode.trim().toUpperCase();
+        if (!normalizedCode) {
             setDiscountError('Vui lòng nhập mã giảm giá');
             return;
         }
 
         // Kiểm tra mã cố định trước
-        const coupon = validCoupons.find(c => c.code.toUpperCase() === discountCode.toUpperCase());
+        const coupon = validCoupons.find(c => c.code.toUpperCase() === normalizedCode);
 
         if (coupon) {
             // Mã cố định
@@ -243,7 +311,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({ couponCode: discountCode })
+                    body: JSON.stringify({ couponCode: normalizedCode })
                 });
 
                 if (!checkResponse.ok) {
@@ -272,7 +340,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
         }
 
         // Kiểm tra mã từ newsletter
-        if (discountCode.startsWith('NEWS10')) {
+        if (normalizedCode.startsWith('NEWS10')) {
             try {
                 // Kiểm tra mã đã dùng chưa trong UsedCouponModel
                 const token = localStorage.getItem('token');
@@ -288,7 +356,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({ couponCode: discountCode })
+                    body: JSON.stringify({ couponCode: normalizedCode })
                 });
 
                 if (checkUsedResponse.ok) {
@@ -304,14 +372,14 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                 const response = await fetch('http://localhost:3000/api/newsletter/validate-coupon', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ couponCode: discountCode })
+                    body: JSON.stringify({ couponCode: normalizedCode })
                 });
 
                 const data = await response.json();
 
                 if (response.ok && data.valid) {
                     setAppliedDiscount({
-                        code: discountCode,
+                        code: normalizedCode,
                         discount: data.discount,
                         minOrder: 0,
                         isNewsletter: true
@@ -375,6 +443,13 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
             return;
         }
 
+        // Mở modal xác nhận thay vì đặt hàng ngay
+        setConfirmModalOpen(true);
+    };
+
+    // Hàm xác nhận và thực sự đặt hàng
+    const confirmAndPlaceOrder = async () => {
+        setConfirmModalOpen(false);
         setIsSubmitting(true);
 
         try {
@@ -397,7 +472,9 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                     quantity: item.quantity,
                     img: item.img
                 })),
-                totalAmount: finalAmount, // Dùng finalAmount đã trừ giảm giá
+                totalAmount: finalAmount, // Dùng finalAmount đã trừ giảm giá và cộng phí ship
+                shippingFee: shippingFee,
+                shippingMethod: selectedShipping.name,
                 discountCode: appliedDiscount?.code || null,
                 discountAmount: discountAmount,
                 shippingInfo: {
@@ -507,29 +584,11 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
 
     if (selectedProducts.length === 0 && !loading) {
         return (
-            <div className="container" style={{
-                textAlign: 'center',
-                padding: '80px 20px',
-                background: 'white',
-                marginTop: '20px',
-                borderRadius: '8px'
-            }}>
-                <div style={{ fontSize: '80px', marginBottom: '20px' }}>🛒</div>
-                <h2 style={{ marginBottom: '10px' }}>Chưa có sản phẩm nào được chọn</h2>
-                <p style={{ color: '#666', marginBottom: '30px' }}>Vui lòng chọn sản phẩm để thanh toán!</p>
-                <Link
-                    to="/checkout/choseproduct"
-                    style={{
-                        textDecoration: 'none',
-                        display: 'inline-block',
-                        padding: '12px 40px',
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                        color: 'white',
-                        borderRadius: '6px',
-                        fontWeight: 'bold',
-                        fontSize: '16px'
-                    }}
-                >
+            <div className="empty-state container">
+                <div className="empty-icon">🛒</div>
+                <h2 className="empty-title">Chưa có sản phẩm nào được chọn</h2>
+                <p className="empty-description">Vui lòng chọn sản phẩm để thanh toán!</p>
+                <Link to="/checkout/choseproduct" className="empty-btn">
                     🛍️ CHỌN SẢN PHẨM
                 </Link>
             </div>
@@ -537,522 +596,427 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
     }
 
     return (
-        <div className="container" style={{ marginTop: '20px', marginBottom: '40px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <div style={{ width: '100%' }}>
-                    <div style={{
-                        background: 'white',
-                        padding: '20px',
-                        borderRadius: '8px',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                    }}>
-                        <h2 style={{ fontSize: '22px', color: '#333', fontWeight: '700', marginBottom: '20px' }}>
-                            📦 Sản phẩm đã chọn ({selectedProducts.length})
+        <>
+            {/* Modal xem ảnh */}
+            {imageModalOpen && (
+                <div className="image-modal" role="dialog" aria-modal="true" aria-label="Xem ảnh sản phẩm" onClick={() => setImageModalOpen(false)}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <button className="modal-close" type="button" aria-label="Đóng ảnh" onClick={() => setImageModalOpen(false)}>
+                            <FiX size={20} /> Đóng
+                        </button>
+                        <img src={selectedImage} alt="Product" className="modal-image" />
+                    </div>
+                </div>
+            )}
+
+            {/* Modal xác nhận đơn hàng */}
+            {confirmModalOpen && (
+                <div className="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title" onClick={() => setConfirmModalOpen(false)}>
+                    <div className="confirm-modal-content" onClick={(e) => e.stopPropagation()}>
+                        <h2 className="confirm-header" id="confirm-modal-title">
+                            <FiCheckCircle size={28} color="#22c55e" />
+                            Xác nhận đơn hàng
                         </h2>
-                        <div style={{ overflowX: 'auto' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <div className="confirm-body">
+                            <p style={{ marginBottom: '16px' }}>Vui lòng kiểm tra lại thông tin đơn hàng của bạn:</p>
+                            <div className="confirm-summary-item">
+                                <span>Sản phẩm:</span>
+                                <strong>{selectedProducts.length} sản phẩm</strong>
+                            </div>
+                            <div className="confirm-summary-item">
+                                <span>Tạm tính:</span>
+                                <strong>{formatPrice(totalAmount)}</strong>
+                            </div>
+                            <div className="confirm-summary-item">
+                                <span>Phí vận chuyển:</span>
+                                <strong>{formatPrice(shippingFee)}</strong>
+                            </div>
+                            {appliedDiscount && (
+                                <div className="confirm-summary-item" style={{ color: 'var(--success)' }}>
+                                    <span>Giảm giá ({appliedDiscount.discount}%):</span>
+                                    <strong>-{formatPrice(discountAmount)}</strong>
+                                </div>
+                            )}
+                            <div className="confirm-summary-item" style={{ borderTop: '2px solid var(--accent-primary)', paddingTop: '16px' }}>
+                                <span style={{ fontSize: '18px', fontWeight: '700' }}>Tổng thanh toán:</span>
+                                <strong style={{ fontSize: '24px', color: 'var(--accent-primary)' }}>{formatPrice(finalAmount)}</strong>
+                            </div>
+                            <div className="confirm-summary-item" style={{ border: 'none' }}>
+                                <span>Phương thức thanh toán:</span>
+                                <strong>{paymentMethod === 'COD' ? '💵 Thanh toán khi nhận hàng' : '🏦 Chuyển khoản'}</strong>
+                            </div>
+                            <div className="confirm-summary-item" style={{ border: 'none' }}>
+                                <span>Vận chuyển:</span>
+                                <strong>{selectedShipping.name}</strong>
+                            </div>
+                            <div className="confirm-summary-item" style={{ border: 'none' }}>
+                                <span>Giao dự kiến:</span>
+                                <strong>{getDeliveryRangeText(selectedShipping.id)}</strong>
+                            </div>
+                        </div>
+                        <div className="confirm-actions">
+                            <button className="confirm-btn confirm-btn-secondary" type="button" onClick={() => setConfirmModalOpen(false)}>
+                                Hủy
+                            </button>
+                            <button className="confirm-btn confirm-btn-primary" type="button" onClick={confirmAndPlaceOrder}>
+                                Xác nhận đặt hàng
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className="checkout-container">
+                <div className="checkout-steps" aria-label="Tiến trình thanh toán">
+                    <div className="checkout-step completed">1. Giỏ hàng</div>
+                    <div className="checkout-step completed">2. Vận chuyển</div>
+                    <div className="checkout-step active">3. Thanh toán</div>
+                </div>
+                <div className="checkout-wrapper">
+                    {/* Left Side - Products List */}
+                    <div className="checkout-left">
+                        <div className="checkout-card">
+                            <h2 className="section-header">
+                                <span className="section-icon"><FiPackage /></span>
+                                Sản phẩm đã chọn ({selectedProducts.length})
+                            </h2>
+                            <table className="product-table">
                                 <thead>
-                                    <tr style={{ borderBottom: '2px solid #f0f0f0', color: '#666', fontSize: '14px' }}>
-                                        <th style={{ textAlign: 'left', paddingBottom: '15px', fontWeight: '600' }}>Sản Phẩm</th>
-                                        <th style={{ paddingBottom: '15px', fontWeight: '600', textAlign: 'center' }}>Đơn Giá</th>
-                                        <th style={{ paddingBottom: '15px', fontWeight: '600', textAlign: 'center' }}>Số Lượng</th>
-                                        <th style={{ paddingBottom: '15px', fontWeight: '600', textAlign: 'center' }}>Tổng</th>
+                                    <tr>
+                                        <th>Sản Phẩm</th>
+                                        <th style={{ textAlign: 'center' }}>Đơn Giá</th>
+                                        <th style={{ textAlign: 'center' }}>Số Lượng</th>
+                                        <th style={{ textAlign: 'center' }}>Tổng</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {selectedProducts.map((item) => (
-                                        <tr key={item.cartId} style={{ borderBottom: '1px solid #f5f5f5' }}>
-                                            <td style={{ padding: '15px 10px 15px 0', display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                                <img
-                                                    src={item.img}
-                                                    alt={item.name}
-                                                    style={{
-                                                        width: '70px',
-                                                        height: '70px',
-                                                        objectFit: 'cover',
-                                                        borderRadius: '6px',
-                                                        border: '1px solid #e8e8e8'
-                                                    }}
-                                                />
-                                                <div>
-                                                    <div style={{
-                                                        fontSize: '15px',
-                                                        marginBottom: '5px',
-                                                        fontWeight: '500'
-                                                    }}>
-                                                        {item.name}
+                                        <tr key={item.cartId}>
+                                            <td className="product-cell">
+                                                <div className="product-info">
+                                                    <div
+                                                        className="product-image-wrapper"
+                                                        onClick={() => {
+                                                            setSelectedImage(item.img);
+                                                            setImageModalOpen(true);
+                                                        }}
+                                                    >
+                                                        <img
+                                                            src={item.img}
+                                                            alt={item.name}
+                                                            className="product-image"
+                                                        />
+                                                        <div className="zoom-icon">
+                                                            <FiZoomIn size={20} />
+                                                        </div>
                                                     </div>
-                                                    <div style={{ fontSize: '13px', color: '#888' }}>
-                                                        Size: {item.size}
+                                                    <div className="product-details">
+                                                        <div className="product-name">{item.name}</div>
+                                                        <span className="product-size">Size: {item.size}</span>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td style={{ textAlign: 'center', fontSize: '15px', padding: '15px 5px' }}>
-                                                {formatPrice(parsePrice(item.price))}
+                                            <td className="product-cell" style={{ textAlign: 'center' }}>
+                                                <span className="product-price">{formatPrice(parsePrice(item.price))}</span>
                                             </td>
-                                            <td style={{ textAlign: 'center', fontSize: '15px', padding: '15px 5px' }}>
-                                                x{item.quantity}
+                                            <td className="product-cell" style={{ textAlign: 'center' }}>
+                                                <span className="product-quantity">x{item.quantity}</span>
                                             </td>
-                                            <td style={{ textAlign: 'center', color: '#ee4d2d', fontWeight: 'bold', fontSize: '16px', padding: '15px 5px' }}>
-                                                {formatPrice(parsePrice(item.price) * item.quantity)}
+                                            <td className="product-cell" style={{ textAlign: 'center' }}>
+                                                <span className="product-total">{formatPrice(parsePrice(item.price) * item.quantity)}</span>
                                             </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                         </div>
-                    </div>
-                </div>
 
-                {/* Thông tin thanh toán */}
-                <div style={{ width: '100%' }}>
-                    <div style={{
-                        background: 'white',
-                        padding: '25px',
-                        borderRadius: '8px',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                    }}>
-                        <div style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            marginBottom: '15px',
-                            paddingBottom: '15px',
-                            borderBottom: '1px solid #f0f0f0'
-                        }}>
-                            <span style={{ color: '#666', fontSize: '16px' }}>Tạm tính:</span>
-                            <span style={{ fontSize: '18px', fontWeight: '600' }}>
-                                {formatPrice(totalAmount)}
-                            </span>
-                        </div>
-
-                        {/* Mã giảm giá */}
-                        <div style={{ marginBottom: '20px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-                                <h4 style={{ margin: 0, fontSize: '15px', color: '#333' }}>Mã giảm giá</h4>
-                                {myCoupons.length > 0 && !appliedDiscount && (
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowCouponList(!showCouponList)}
-                                        style={{
-                                            background: 'none',
-                                            border: '1px solid #ee4d2d',
-                                            color: '#ee4d2d',
-                                            padding: '5px 12px',
-                                            borderRadius: '4px',
-                                            cursor: 'pointer',
-                                            fontSize: '13px',
-                                            fontWeight: '600'
-                                        }}
+                        {/* Shipping Options */}
+                        <div className="checkout-card">
+                            <h3 className="section-header">
+                                <span className="section-icon"><FiTruck /></span>
+                                Phương thức vận chuyển
+                            </h3>
+                            <div className="shipping-info-box">
+                                <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)' }}>
+                                    💡 Chọn phương thức giao hàng phù hợp với bạn
+                                </p>
+                            </div>
+                            <div className="shipping-options">
+                                {shippingOptions.map((option) => (
+                                    <label
+                                        key={option.id}
+                                        className={`shipping-option ${shippingMethod === option.id ? 'selected' : ''}`}
                                     >
-                                        {showCouponList ? 'Ẩn danh sách' : `${myCoupons.filter(c => !usedCoupons.includes(c)).length} mã có sẵn`}
-                                    </button>
-                                )}
+                                        <input
+                                            type="radio"
+                                            name="shipping"
+                                            value={option.id}
+                                            checked={shippingMethod === option.id}
+                                            onChange={(e) => setShippingMethod(e.target.value)}
+                                        />
+                                        <div className="shipping-details">
+                                            <div className="shipping-name">{option.name}</div>
+                                            <div className="shipping-time">⏱️ {option.time} • Dự kiến {getDeliveryRangeText(option.id)}</div>
+                                        </div>
+                                        <div className="shipping-price">{formatPrice(option.price)}</div>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right Side - Summary & Payment */}
+                    <div className="checkout-right">
+                        <div className="checkout-card">
+                            <h3 className="section-header">
+                                <span className="section-icon">💰</span>
+                                Thanh toán
+                            </h3>
+
+                            <div className="summary-row">
+                                <span className="summary-label">Tạm tính:</span>
+                                <span className="summary-value">{formatPrice(totalAmount)}</span>
                             </div>
 
-                            {/* Danh sách mã đã có */}
-                            {showCouponList && myCoupons.length > 0 && (
-                                (() => {
-                                    // Filter ra mã đã sử dụng
-                                    const availableCoupons = myCoupons.filter(coupon => !usedCoupons.includes(coupon));
+                            <div className="summary-row">
+                                <span className="summary-label">Phí vận chuyển:</span>
+                                <span className="summary-value">{formatPrice(shippingFee)}</span>
+                            </div>
 
-                                    if (availableCoupons.length === 0) {
+                            <div className="summary-row">
+                                <span className="summary-label">Giao dự kiến:</span>
+                                <span className="summary-value">{getDeliveryRangeText(selectedShipping.id)}</span>
+                            </div>
+
+                            {/* Discount Section */}
+                            <div className="discount-section">
+                                <div className="discount-header">
+                                    <h4 className="discount-title">
+                                        🎟️ Mã giảm giá
+                                    </h4>
+                                    {myCoupons.length > 0 && !appliedDiscount && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowCouponList(!showCouponList)}
+                                            className="view-coupons-btn"
+                                        >
+                                            {showCouponList ? 'Ẩn' : `${myCoupons.filter(c => !usedCoupons.includes(c)).length} mã`}
+                                        </button>
+                                    )}
+                                </div>
+
+                                {/* Coupon List */}
+                                {showCouponList && myCoupons.length > 0 && (
+                                    (() => {
+                                        const availableCoupons = myCoupons.filter(coupon => !usedCoupons.includes(coupon));
+
+                                        if (availableCoupons.length === 0) {
+                                            return (
+                                                <div className="coupon-list" style={{ textAlign: 'center', color: 'var(--text-tertiary)' }}>
+                                                    😔 Bạn đã sử dụng hết mã giảm giá
+                                                </div>
+                                            );
+                                        }
+
                                         return (
-                                            <div style={{
-                                                background: '#f9f9f9',
-                                                border: '1px solid #e0e0e0',
-                                                borderRadius: '6px',
-                                                padding: '20px',
-                                                marginBottom: '12px',
-                                                textAlign: 'center',
-                                                color: '#999'
-                                            }}>
-                                                😔 Bạn đã sử dụng hết mã giảm giá
+                                            <div className="coupon-list">
+                                                {availableCoupons.map((coupon, index) => (
+                                                    <div
+                                                        key={index}
+                                                        onClick={() => selectCoupon(coupon)}
+                                                        className="coupon-item"
+                                                    >
+                                                        <div className="coupon-info">
+                                                            <div className="coupon-code">{coupon}</div>
+                                                            <div className="coupon-desc">
+                                                                {coupon.startsWith('NEWS10') ? 'Mã từ đăng ký nhận tin' : 'Mã giảm giá'}
+                                                            </div>
+                                                        </div>
+                                                        <button className="coupon-select-btn">Chọn</button>
+                                                    </div>
+                                                ))}
                                             </div>
                                         );
-                                    }
+                                    })()
+                                )}
 
-                                    return (
-                                        <div style={{
-                                            background: '#f9f9f9',
-                                            border: '1px solid #e0e0e0',
-                                            borderRadius: '6px',
-                                            padding: '12px',
-                                            marginBottom: '12px',
-                                            maxHeight: '150px',
-                                            overflowY: 'auto'
-                                        }}>
-                                            {availableCoupons.map((coupon, index) => (
-                                                <div
-                                                    key={index}
-                                                    onClick={() => selectCoupon(coupon)}
-                                                    style={{
-                                                        background: 'white',
-                                                        border: '1px solid #ddd',
-                                                        borderRadius: '4px',
-                                                        padding: '10px 12px',
-                                                        marginBottom: index < availableCoupons.length - 1 ? '8px' : 0,
-                                                        cursor: 'pointer',
-                                                        display: 'flex',
-                                                        justifyContent: 'space-between',
-                                                        alignItems: 'center',
-                                                        transition: 'all 0.2s'
-                                                    }}
-                                                    onMouseEnter={(e) => {
-                                                        e.currentTarget.style.borderColor = '#ee4d2d';
-                                                        e.currentTarget.style.background = '#fff5f5';
-                                                    }}
-                                                    onMouseLeave={(e) => {
-                                                        e.currentTarget.style.borderColor = '#ddd';
-                                                        e.currentTarget.style.background = 'white';
-                                                    }}
-                                                >
-                                                    <div>
-                                                        <div style={{ fontWeight: '600', fontSize: '14px', color: '#333', marginBottom: '3px' }}>
-                                                            {coupon}
-                                                        </div>
-                                                        <div style={{ fontSize: '12px', color: '#666' }}>
-                                                            {coupon.startsWith('NEWS10') ? 'Mã từ đăng ký nhận tin' : 'Mã giảm giá'}
-                                                        </div>
-                                                    </div>
-                                                    <div style={{
-                                                        background: '#ee4d2d',
-                                                        color: 'white',
-                                                        padding: '4px 10px',
-                                                        borderRadius: '12px',
-                                                        fontSize: '11px',
-                                                        fontWeight: '600'
-                                                    }}>
-                                                        Chọn
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    );
-                                })()
-                            )}
+                                <div className="discount-input-wrapper">
+                                    <input
+                                        type="text"
+                                        placeholder="Nhập mã giảm giá"
+                                        value={discountCode}
+                                        onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                                        disabled={appliedDiscount !== null}
+                                        className="discount-input"
+                                    />
+                                    {appliedDiscount ? (
+                                        <button
+                                            type="button"
+                                            onClick={removeDiscount}
+                                            className="remove-btn"
+                                        >
+                                            Xóa
+                                        </button>
+                                    ) : (
+                                        <button
+                                            id="apply-coupon-btn"
+                                            type="button"
+                                            onClick={applyDiscountCode}
+                                            className="apply-btn"
+                                        >
+                                            Áp dụng
+                                        </button>
+                                    )}
+                                </div>
 
-                            <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-                                <input
-                                    type="text"
-                                    placeholder="Nhập mã giảm giá"
-                                    value={discountCode}
-                                    onChange={(e) => setDiscountCode(e.target.value)}
-                                    disabled={appliedDiscount !== null}
-                                    style={{
-                                        flex: 1,
-                                        padding: '10px 15px',
-                                        border: '1px solid #ddd',
-                                        borderRadius: '4px',
-                                        fontSize: '14px'
-                                    }}
-                                />
-                                {appliedDiscount ? (
-                                    <button
-                                        type="button"
-                                        onClick={removeDiscount}
-                                        style={{
-                                            padding: '10px 20px',
-                                            background: '#ff4d4f',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '4px',
-                                            cursor: 'pointer',
-                                            fontSize: '14px',
-                                            fontWeight: '600'
-                                        }}
-                                    >
-                                        Xóa
-                                    </button>
-                                ) : (
-                                    <button
-                                        id="apply-coupon-btn"
-                                        type="button"
-                                        onClick={applyDiscountCode}
-                                        style={{
-                                            padding: '10px 20px',
-                                            background: '#52c41a',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '4px',
-                                            cursor: 'pointer',
-                                            fontSize: '14px',
-                                            fontWeight: '600'
-                                        }}
-                                    >
-                                        Áp dụng
-                                    </button>
+                                {discountError && (
+                                    <p className="discount-error">{discountError}</p>
+                                )}
+
+                                {appliedDiscount && (
+                                    <div className="discount-success">
+                                        <p className="discount-success-text">
+                                            <FiCheckCircle size={16} />
+                                            Đã áp dụng mã <strong>{appliedDiscount.code}</strong> - Giảm {appliedDiscount.discount}%
+                                        </p>
+                                    </div>
                                 )}
                             </div>
-                            {discountError && (
-                                <p style={{ color: '#ff4d4f', fontSize: '12px', margin: '5px 0 0 0' }}>
-                                    {discountError}
-                                </p>
-                            )}
+
                             {appliedDiscount && (
-                                <div style={{
-                                    background: '#f6ffed',
-                                    border: '1px solid #b7eb8f',
-                                    borderRadius: '4px',
-                                    padding: '10px',
-                                    marginTop: '10px'
-                                }}>
-                                    <p style={{ color: '#52c41a', fontSize: '13px', margin: 0 }}>
-                                        ✅ Đã áp dụng mã <strong>{appliedDiscount.code}</strong> - Giảm {appliedDiscount.discount}%
-                                    </p>
+                                <div className="summary-row">
+                                    <span className="summary-label summary-discount">Giảm giá ({appliedDiscount.discount}%):</span>
+                                    <span className="summary-value summary-discount">-{formatPrice(discountAmount)}</span>
                                 </div>
                             )}
-                        </div>
 
-                        {appliedDiscount && (
-                            <div style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                marginBottom: '15px',
-                                paddingBottom: '15px',
-                                borderBottom: '1px solid #f0f0f0'
-                            }}>
-                                <span style={{ color: '#52c41a', fontSize: '14px' }}>Giảm giá ({appliedDiscount.discount}%):</span>
-                                <span style={{ fontSize: '16px', color: '#52c41a', fontWeight: '600' }}>
-                                    -{formatPrice(discountAmount)}
-                                </span>
-                            </div>
-                        )}
-
-                        <div style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            marginBottom: '25px',
-                            paddingBottom: '20px',
-                            borderBottom: '2px solid #f0f0f0'
-                        }}>
-                            <div>
-                                <div style={{ color: '#666', fontSize: '16px', fontWeight: 'bold' }}>Tổng thanh toán:</div>
-                                <div style={{ color: '#999', fontSize: '13px', marginTop: '4px' }}>
-                                    ({selectedProducts.length} sản phẩm)
+                            <div className="summary-row summary-total">
+                                <div className="summary-label">
+                                    Tổng thanh toán
+                                    <span className="item-count">({selectedProducts.length} sản phẩm)</span>
                                 </div>
-                            </div>
-                            <span style={{ fontSize: '28px', color: '#ee4d2d', fontWeight: 'bold' }}>
-                                {formatPrice(finalAmount)}
-                            </span>
-                        </div>
-
-                        <h3 style={{ fontSize: '18px', marginBottom: '20px', fontWeight: '700' }}>
-                            📦 Thông tin nhận hàng
-                        </h3>
-
-                        <form onSubmit={handlePayment}>
-                            <div style={{ marginBottom: '15px' }}>
-                                <label style={{ display: 'block', marginBottom: '5px', color: '#666', fontSize: '14px' }}>
-                                    Họ và tên *
-                                </label>
-                                <input
-                                    className="pay-input"
-                                    type="text"
-                                    placeholder="Nhập họ và tên"
-                                    value={fullName}
-                                    readOnly
-                                    style={{
-                                        width: '100%',
-                                        padding: '12px',
-                                        border: '1px solid #ddd',
-                                        borderRadius: '6px',
-                                        fontSize: '15px',
-                                        backgroundColor: '#f5f5f5',
-                                        cursor: 'not-allowed'
-                                    }}
-                                />
+                                <span className="summary-value">{formatPrice(finalAmount)}</span>
                             </div>
 
-                            <div style={{ marginBottom: '15px' }}>
-                                <label style={{ display: 'block', marginBottom: '5px', color: '#666', fontSize: '14px' }}>
-                                    Số điện thoại *
-                                </label>
-                                <input
-                                    className="pay-input"
-                                    type="tel"
-                                    placeholder="Nhập số điện thoại"
-                                    value={phone}
-                                    readOnly
-                                    style={{
-                                        width: '100%',
-                                        padding: '12px',
-                                        border: '1px solid #ddd',
-                                        borderRadius: '6px',
-                                        fontSize: '15px',
-                                        backgroundColor: '#f5f5f5',
-                                        cursor: 'not-allowed'
-                                    }}
-                                />
-                            </div>
+                            {/* Shipping Info */}
+                            <div className="shipping-section">
+                                <h3 className="section-header" style={{ fontSize: '16px', marginBottom: '16px' }}>
+                                    <span className="section-icon">📦</span>
+                                    Thông tin nhận hàng
+                                </h3>
 
-                            <div style={{ marginBottom: '15px' }}>
-                                <label style={{ display: 'block', marginBottom: '5px', color: '#666', fontSize: '14px' }}>
-                                    Địa chỉ *
-                                </label>
-                                <input
-                                    className="pay-input"
-                                    type="text"
-                                    placeholder="Số nhà, tên đường"
-                                    value={address}
-                                    readOnly
-                                    style={{
-                                        width: '100%',
-                                        padding: '12px',
-                                        border: '1px solid #ddd',
-                                        borderRadius: '6px',
-                                        fontSize: '15px',
-                                        backgroundColor: '#f5f5f5',
-                                        cursor: 'not-allowed',
-                                        marginBottom: '8px'
-                                    }}
-                                />
-                                <p style={{ fontSize: '12px', color: '#999', marginTop: '0', marginBottom: '8px' }}>
-                                    💡 Để thay đổi địa chỉ, vui lòng cập nhật trong <a href="/profile" style={{ color: '#667eea', textDecoration: 'underline' }}>Hồ sơ của bạn</a>
-                                </p>
-                            </div>
-
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '5px', color: '#666', fontSize: '14px' }}>
-                                        Phường/Xã *
-                                    </label>
-                                    <input
-                                        className="pay-input"
-                                        type="text"
-                                        placeholder="Phường/Xã"
-                                        value={ward}
-                                        readOnly
-                                        style={{
-                                            width: '100%',
-                                            padding: '12px',
-                                            border: '1px solid #ddd',
-                                            borderRadius: '6px',
-                                            fontSize: '15px',
-                                            backgroundColor: '#f5f5f5',
-                                            cursor: 'not-allowed'
-                                        }}
-                                    />
-                                </div>
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '5px', color: '#666', fontSize: '14px' }}>
-                                        Quận/Huyện *
-                                    </label>
-                                    <input
-                                        className="pay-input"
-                                        type="text"
-                                        placeholder="Quận/Huyện"
-                                        value={district}
-                                        readOnly
-                                        style={{
-                                            width: '100%',
-                                            padding: '12px',
-                                            border: '1px solid #ddd',
-                                            borderRadius: '6px',
-                                            fontSize: '15px',
-                                            backgroundColor: '#f5f5f5',
-                                            cursor: 'not-allowed'
-                                        }}
-                                    />
-                                </div>
-                            </div>
-
-                            <div style={{ marginBottom: '20px' }}>
-                                <label style={{ display: 'block', marginBottom: '5px', color: '#666', fontSize: '14px' }}>
-                                    Tỉnh/Thành phố *
-                                </label>
-                                <input
-                                    className="pay-input"
-                                    type="text"
-                                    placeholder="Tỉnh/Thành phố"
-                                    value={city}
-                                    readOnly
-                                    style={{
-                                        width: '100%',
-                                        padding: '12px',
-                                        border: '1px solid #ddd',
-                                        borderRadius: '6px',
-                                        fontSize: '15px',
-                                        backgroundColor: '#f5f5f5',
-                                        cursor: 'not-allowed'
-                                    }}
-                                />
-                            </div>
-
-                            <div style={{ marginBottom: '25px' }}>
-                                <label style={{ display: 'block', marginBottom: '10px', color: '#666', fontSize: '14px', fontWeight: '600' }}>
-                                    Phương thức thanh toán
-                                </label>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                    <label style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        padding: '12px',
-                                        border: '2px solid ' + (paymentMethod === 'COD' ? '#667eea' : '#ddd'),
-                                        borderRadius: '6px',
-                                        cursor: 'pointer',
-                                        background: paymentMethod === 'COD' ? '#f0f4ff' : 'white'
-                                    }}>
+                                <form onSubmit={handlePayment}>
+                                    <div className="form-group">
+                                        <label className="form-label">Họ và tên *</label>
                                         <input
-                                            type="radio"
-                                            name="payment"
-                                            value="COD"
-                                            checked={paymentMethod === 'COD'}
-                                            onChange={(e) => setPaymentMethod(e.target.value)}
-                                            style={{ marginRight: '10px' }}
+                                            type="text"
+                                            className="form-input"
+                                            value={fullName}
+                                            readOnly
                                         />
-                                        💵 Thanh toán khi nhận hàng (COD)
-                                    </label>
-                                    <label style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        padding: '12px',
-                                        border: '2px solid ' + (paymentMethod === 'Banking' ? '#667eea' : '#ddd'),
-                                        borderRadius: '6px',
-                                        cursor: 'pointer',
-                                        background: paymentMethod === 'Banking' ? '#f0f4ff' : 'white'
-                                    }}>
-                                        <input
-                                            type="radio"
-                                            name="payment"
-                                            value="Banking"
-                                            checked={paymentMethod === 'Banking'}
-                                            onChange={(e) => setPaymentMethod(e.target.value)}
-                                            style={{ marginRight: '10px' }}
-                                        />
-                                        🏦 Chuyển khoản ngân hàng
-                                    </label>
-                                </div>
-                            </div>
+                                    </div>
 
-                            <button
-                                className="pay-btn"
-                                type="submit"
-                                disabled={isSubmitting}
-                                style={{
-                                    width: '100%',
-                                    padding: '15px',
-                                    background: isSubmitting
-                                        ? '#ccc'
-                                        : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '6px',
-                                    fontSize: '16px',
-                                    fontWeight: 'bold',
-                                    cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                                    transition: 'all 0.3s'
-                                }}
-                            >
-                                {isSubmitting ? '⏳ Đang xử lý...' : `🎉 ĐẶT HÀNG NGAY (${selectedProducts.length} sản phẩm)`}
-                            </button>
-                        </form>
+                                    <div className="form-group">
+                                        <label className="form-label">Số điện thoại *</label>
+                                        <input
+                                            type="tel"
+                                            className="form-input"
+                                            value={phone}
+                                            readOnly
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label">Địa chỉ *</label>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            value={address}
+                                            readOnly
+                                        />
+                                        <p className="form-hint">
+                                            💡 Để thay đổi địa chỉ, vui lòng cập nhật trong <a href="/profile">Hồ sơ của bạn</a>
+                                        </p>
+                                    </div>
+
+                                    <div className="form-row">
+                                        <div className="form-group">
+                                            <label className="form-label">Phường/Xã *</label>
+                                            <input type="text" className="form-input" value={ward} readOnly />
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Quận/Huyện *</label>
+                                            <input type="text" className="form-input" value={district} readOnly />
+                                        </div>
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label">Tỉnh/Thành phố *</label>
+                                        <input type="text" className="form-input" value={city} readOnly />
+                                    </div>
+
+                                    {/* Payment Methods */}
+                                    <div className="form-group">
+                                        <label className="form-label">Phương thức thanh toán</label>
+                                        <div className="payment-methods">
+                                            <label className={`payment-option ${paymentMethod === 'COD' ? 'selected' : ''}`}>
+                                                <input
+                                                    type="radio"
+                                                    name="payment"
+                                                    value="COD"
+                                                    checked={paymentMethod === 'COD'}
+                                                    onChange={(e) => setPaymentMethod(e.target.value)}
+                                                />
+                                                <span className="payment-label">💵 Thanh toán khi nhận hàng (COD)</span>
+                                            </label>
+                                            <label className={`payment-option ${paymentMethod === 'Banking' ? 'selected' : ''}`}>
+                                                <input
+                                                    type="radio"
+                                                    name="payment"
+                                                    value="Banking"
+                                                    checked={paymentMethod === 'Banking'}
+                                                    onChange={(e) => setPaymentMethod(e.target.value)}
+                                                />
+                                                <span className="payment-label">🏦 Chuyển khoản ngân hàng</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    {/* Security Notice */}
+                                    <div className="security-notice">
+                                        <div className="security-icon"><FiShield /></div>
+                                        <p className="security-text">
+                                            <strong>Bảo mật thông tin:</strong> Thông tin của bạn được mã hóa và bảo mật tuyệt đối.
+                                            Chúng tôi cam kết không chia sẻ dữ liệu cá nhân với bên thứ ba.
+                                        </p>
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        className="checkout-btn"
+                                    >
+                                        <span className="checkout-btn-content">
+                                            {isSubmitting ? (
+                                                <>
+                                                    <span className="loading-spinner"></span>
+                                                    Đang xử lý...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    🎉 Đặt hàng ngay ({selectedProducts.length} sản phẩm)
+                                                </>
+                                            )}
+                                        </span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 }
 

@@ -3,22 +3,47 @@
    ====================== */
 .modern-product-card {
   background: #ffffff;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
   position: relative;
-  border: 1px solid #e5e7eb;
+  border: none;
+  outline: none;
   text-decoration: none;
   color: inherit;
   display: block;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-section .modern-product-card {
+  background: #ffffff;
+  border: none !important;
+  outline: none !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.product-section .modern-product-card:hover {
+  background: #ffffff;
+  border: none !important;
+  outline: none !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.06);
+}
+
+.product-section .product-grid a,
+.product-section .product-grid a:focus,
+.product-section .product-grid a:hover {
+  outline: none !important;
+  border: none !important;
 }
 
 .modern-product-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 2px 8px rgba(238, 77, 45, 0.15);
-  border-color: rgba(102, 126, 234, 0.3);
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.06);
+  border: none !important;
 }
 
 .modern-product-card .product-badge {
@@ -82,6 +107,29 @@
   transition: transform 0.3s ease;
 }
 
+.modern-product-card .product-image-wrapper {
+  height: 240px;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border: none;
+}
+
+.modern-product-card .product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 14px;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+}
+
+.modern-product-card:hover .product-image {
+  transform: scale(1.05);
+}
+
 .modern-product-card:hover .product-overlay {
   transform: translateY(0);
 }
@@ -107,11 +155,15 @@
 }
 
 .modern-product-card .product-info {
-  padding: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
 }
 
 .modern-product-card .product-name {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: #222222;
   margin-bottom: 8px;
@@ -120,7 +172,7 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   line-height: 1.4;
-  min-height: 40px;
+  min-height: 42px;
 }
 
 .modern-product-card .product-meta {
@@ -158,7 +210,7 @@
 }
 
 .modern-product-card .product-price {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
   color: #ef4444;
 }
