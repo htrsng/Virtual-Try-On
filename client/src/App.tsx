@@ -22,6 +22,8 @@ import AboutPage from './pages/AboutPage';
 import SearchResultsPage from './pages/SearchResultsPage';
 import PolicyPage from './pages/PolicyPage';
 import BannerContentPage from './pages/BannerContentPage';
+import WishlistPage from './pages/WishlistPage';
+import ComparePage from './pages/ComparePage';
 import Toast from './components/Toast';
 
 // --- 2. IMPORT TÍNH NĂNG 3D (MỚI) ---
@@ -30,6 +32,8 @@ import VirtualTryOnController from "./features/virtual-tryon/VirtualTryOnControl
 // --- 3. IMPORT CONTEXTS ---
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { WishlistProvider } from './contexts/WishlistContext';
+import { CompareProvider } from './contexts/CompareContext';
 
 // --- 4. IMPORT DỮ LIỆU MẪU (INITIAL DATA) ---
 import { initTopSearch, fallbackSuggestions, initCategories, initBanners } from './data/initialData';
@@ -385,7 +389,9 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <BrowserRouter>
+        <WishlistProvider>
+          <CompareProvider>
+            <BrowserRouter>
           <ScrollToTop />
           <div>
             {/* Header luôn hiển thị ở trên cùng */}
@@ -447,6 +453,12 @@ function App() {
               {/* TRANG ĐĂNG NHẬP/ĐĂNG KÝ */}
               <Route path="/login" element={<LoginPage showToast={showToast} />} />
 
+              {/* TRANG YÊU THÍCH */}
+              <Route path="/wishlist" element={<WishlistPage onAddToCart={handleAddToCart} showToast={showToast} />} />
+
+              {/* TRANG SO SÁNH */}
+              <Route path="/compare" element={<ComparePage onAddToCart={handleAddToCart} showToast={showToast} />} />
+
               {/* TRANG CHỌN SẢN PHẨM THANH TOÁN */}
               <Route path="/checkout/choseproduct" element={<CheckoutSelectPage cartItems={cartItems} onRemove={handleRemoveFromCart} onUpdateQuantity={handleUpdateQuantity} showToast={showToast} />} />
 
@@ -504,6 +516,8 @@ function App() {
             <Footer />
           </div>
         </BrowserRouter>
+          </CompareProvider>
+        </WishlistProvider>
       </AuthProvider>
     </ThemeProvider>
   );

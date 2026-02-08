@@ -5,12 +5,18 @@ import { FiHeart, FiShoppingCart, FiEye, FiRepeat } from 'react-icons/fi';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { useAuth } from '../contexts/AuthContext';
+import { useWishlist } from '../contexts/WishlistContext';
+import { useCompare } from '../contexts/CompareContext';
+import QuickViewModal from './QuickViewModal';
 import './ProductCard.css';
 
 function ProductList({ products, title = "GỢI Ý HÔM NAY", onBuy, loading = false }) {
     const [hoveredId, setHoveredId] = useState(null);
+    const [quickViewProduct, setQuickViewProduct] = useState(null);
     const navigate = useNavigate();
     const { isAuthenticated } = useAuth();
+    const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+    const { addToCompare, isInCompare } = useCompare();
 
     // Hiển thị TẤT CẢ sản phẩm, không giới hạn theo login
     // (Nếu muốn giới hạn, dùng isAuthenticated thay vì currentUser)
@@ -44,8 +50,18 @@ function ProductList({ products, title = "GỢI Ý HÔM NAY", onBuy, loading = f
     const handleQuickAction = (e, action, product) => {
         e.preventDefault();
         e.stopPropagation();
-        console.log(action, product);
-        // TODO: Implement wishlist, compare, quick view
+        
+        if (action === 'wishlist') {
+            if (isInWishlist(product.id)) {
+                removeFromWishlist(product.id);
+            } else {
+                addToWishlist(product);
+            }
+        } else if (action === 'compare') {
+            addToCompare(product);
+        } else if (action === 'quickview') {
+            setQuickViewProduct(product);
+        }
     };
 
     return (
@@ -90,13 +106,13 @@ function ProductList({ products, title = "GỢI Ý HÔM NAY", onBuy, loading = f
                                         transition={{ duration: 0.2 }}
                                     >
                                         <motion.button
-                                            className="quick-action-btn"
+                                            className={`quick-action-btn ${isInWishlist(product.id) ? 'active' : ''}`}
                                             whileHover={{ scale: 1.1 }}
                                             whileTap={{ scale: 0.9 }}
                                             onClick={(e) => handleQuickAction(e, 'wishlist', product)}
-                                            title="Thêm vào yêu thích"
+                                            title={isInWishlist(product.id) ? "Bỏ yêu thích" : "Thêm vào yêu thích"}
                                         >
-                                            <FiHeart />
+                                            <FiHeart fill={isInWishlist(product.id) ? "currentColor" : "none"} />
                                         </motion.button>
                                         <motion.button
                                             className="quick-action-btn"
@@ -170,6 +186,15 @@ function ProductList({ products, title = "GỢI Ý HÔM NAY", onBuy, loading = f
                     </motion.div>
                 ))}
             </motion.div>
+
+            {/* Quick View Modal */}
+            {quickViewProduct && (
+                <QuickViewModal
+                    product={quickViewProduct}
+                    onClose={() => setQuickViewProduct(null)}
+                    onAddToCart={onBuy}
+                />
+            )}
         </div>
     );
 }

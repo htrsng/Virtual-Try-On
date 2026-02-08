@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useWishlist } from '../contexts/WishlistContext';
+import { useCompare } from '../contexts/CompareContext';
 import { FiShoppingCart, FiUser, FiLogOut, FiHeart, FiSearch, FiSun, FiMoon, FiRepeat, FiX } from 'react-icons/fi';
+import logo from '../assets/logo.svg';
 
 function Header({ cartCount, onSearch, showToast }) {
     const [inputValue, setInputValue] = useState("");
@@ -10,6 +13,8 @@ function Header({ cartCount, onSearch, showToast }) {
     const navigate = useNavigate();
     const { user, logout, isAuthenticated } = useAuth();
     const { theme, toggleTheme } = useTheme();
+    const { wishlistCount } = useWishlist();
+    const { compareCount } = useCompare();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -68,6 +73,10 @@ function Header({ cartCount, onSearch, showToast }) {
     return (
         <div className={`shopee-header ${scrolled ? 'header-scrolled' : ''}`}>
             <div className="container header-content">
+                <Link to="/" className="logo">
+                    <img src={logo} alt="Beauty Clothes" className="brand-logo" />
+                </Link>
+                
                 <div className="search-box">
                     <FiSearch className="search-icon" />
                     <input
@@ -98,10 +107,16 @@ function Header({ cartCount, onSearch, showToast }) {
                     {isAuthenticated && (
                         <>
                             <Link to="/wishlist" className="icon-btn" title="Yêu thích">
-                                <FiHeart size={20} />
+                                <div style={{ position: 'relative' }}>
+                                    <FiHeart size={20} />
+                                    {wishlistCount > 0 && <span className="cart-badge">{wishlistCount}</span>}
+                                </div>
                             </Link>
                             <Link to="/compare" className="icon-btn" title="So sánh">
-                                <FiRepeat size={20} />
+                                <div style={{ position: 'relative' }}>
+                                    <FiRepeat size={20} />
+                                    {compareCount > 0 && <span className="cart-badge">{compareCount}</span>}
+                                </div>
                             </Link>
                         </>
                     )}

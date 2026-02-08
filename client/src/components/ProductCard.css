@@ -96,6 +96,15 @@
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
+.modern-product-card .quick-action-btn.active {
+  background: #ee4d2d;
+  color: white;
+}
+
+.modern-product-card .quick-action-btn.active:hover {
+  background: #d73211;
+}
+
 .modern-product-card .product-overlay {
   position: absolute;
   bottom: 0;

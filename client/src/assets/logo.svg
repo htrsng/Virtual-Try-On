@@ -23,7 +23,7 @@
     </g>
 
     <text x="74" y="30" font-family="Poppins, Inter, Arial, sans-serif" font-size="22" font-weight="800"
-        fill="#0f172a">Beauty Clothes</text>
-    <text x="74" y="48" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="#6b7280">Everyday
+        fill="white">Beauty Shop</text>
+    <text x="74" y="48" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="white">Everyday
         elegance</text>
 </svg>
