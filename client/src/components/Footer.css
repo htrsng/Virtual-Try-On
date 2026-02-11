@@ -2,13 +2,13 @@
    MODERN FOOTER STYLES
    ====================== */
 .modern-footer {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--footer-gradient);
   color: white;
   margin-top: 80px;
 }
 
 .footer-newsletter {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(10px);
   padding: 40px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -57,7 +57,7 @@
 .newsletter-input {
   flex: 1;
   padding: 14px 20px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 8px;
   font-size: 15px;
   background: rgba(255, 255, 255, 0.1);
@@ -72,14 +72,14 @@
 
 .newsletter-input:focus {
   outline: none;
-  border-color: white;
-  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .newsletter-btn {
   padding: 14px 32px;
-  background: white;
-  color: #667eea;
+  background: var(--accent-gradient);
+  color: var(--button-text);
   border: none;
   border-radius: 8px;
   font-size: 15px;
@@ -87,12 +87,18 @@
   cursor: pointer;
   transition: all 0.3s ease;
   white-space: nowrap;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
 }
 
 .newsletter-btn:hover {
-  background: #f0f0f0;
+  background: var(--accent-gradient-4);
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.25);
+}
+
+.newsletter-btn:focus-visible {
+  outline: 2px solid rgba(var(--accent-rgb), 0.7);
+  outline-offset: 3px;
 }
 
 .footer-main {
@@ -208,7 +214,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
@@ -216,13 +222,20 @@
   color: white;
   text-decoration: none;
   transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .social-link:hover {
-  background: var(--social-color, white);
-  color: white;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), var(--social-color, #ffffff));
+  color: #1f1a17;
   transform: translateY(-3px);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.social-link:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.7);
+  outline-offset: 3px;
 }
 
 .footer-payment {
@@ -243,14 +256,22 @@
 }
 
 .payment-badge {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   padding: 6px 12px;
-  border-radius: 6px;
+  border-radius: 999px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  letter-spacing: 0.2px;
+  transition: all 0.3s ease;
+}
+
+.payment-badge:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .footer-copyright {
@@ -293,26 +314,26 @@
   .newsletter-content {
     flex-direction: column;
   }
-  
+
   .newsletter-text {
     text-align: center;
     flex-direction: column;
   }
-  
+
   .newsletter-form {
     max-width: 100%;
   }
-  
+
   .footer-grid {
     grid-template-columns: 1fr;
     gap: 30px;
   }
-  
+
   .footer-bottom-content {
     flex-direction: column;
     text-align: center;
   }
-  
+
   .footer-social,
   .footer-payment {
     flex-direction: column;

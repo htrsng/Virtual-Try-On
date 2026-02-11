@@ -242,8 +242,13 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .modal-content {
@@ -372,6 +377,7 @@
     opacity: 0;
     max-height: 0;
   }
+
   to {
     opacity: 1;
     max-height: 200px;
@@ -397,7 +403,7 @@
 
 .coupon-item:hover {
   border-color: var(--accent-primary);
-  background: #fff5f5;
+  background: var(--accent-gradient-5);
   transform: translateX(4px);
 }
 
@@ -456,7 +462,7 @@
 
 .discount-input:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.2);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.25);
 }
 
 .discount-input:disabled {
@@ -465,7 +471,8 @@
   opacity: 0.6;
 }
 
-.apply-btn, .remove-btn {
+.apply-btn,
+.remove-btn {
   padding: 14px 28px;
   border: none;
   border-radius: var(--radius-md);
@@ -482,7 +489,7 @@
 }
 
 .apply-btn:hover {
-  background: #16a34a;
+  background: #2f6b57;
   transform: scale(1.05);
 }
 
@@ -492,7 +499,7 @@
 }
 
 .remove-btn:hover {
-  background: #dc2626;
+  background: #9b3f34;
   transform: scale(1.05);
 }
 
@@ -520,6 +527,7 @@
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -873,6 +881,7 @@
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1019,7 +1028,7 @@
   .checkout-wrapper {
     grid-template-columns: 1fr;
   }
-  
+
   .checkout-right {
     position: static;
   }
@@ -1029,49 +1038,50 @@
   .checkout-container {
     padding: 20px 12px;
   }
-  
+
   .checkout-card {
     padding: 16px;
   }
-  
+
   .section-header {
     font-size: 18px;
   }
-  
+
   .product-table {
     font-size: 14px;
   }
-  
+
   .product-image {
     width: 60px;
     height: 60px;
   }
-  
+
   .product-info {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .discount-input-wrapper {
     flex-direction: column;
   }
-  
-  .apply-btn, .remove-btn {
+
+  .apply-btn,
+  .remove-btn {
     width: 100%;
   }
-  
+
   .form-row {
     grid-template-columns: 1fr;
   }
-  
+
   .summary-total .summary-value {
     font-size: 24px;
   }
-  
+
   .confirm-modal-content {
     padding: 24px;
   }
-  
+
   .confirm-actions {
     flex-direction: column;
   }
@@ -1081,18 +1091,18 @@
   .product-table thead {
     display: none;
   }
-  
+
   .product-table tbody tr {
     display: flex;
     flex-direction: column;
     padding: 12px;
     margin-bottom: 12px;
   }
-  
+
   .product-cell {
     padding: 8px 0 !important;
   }
-  
+
   .checkout-btn {
     font-size: 15px;
     padding: 16px 24px;

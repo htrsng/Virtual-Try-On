@@ -90,23 +90,9 @@ function LoginPage({ showToast }) {
     };
 
     return (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', padding: '20px' }}>
-            <div style={{
-                background: 'white',
-                padding: '40px',
-                width: '100%',
-                maxWidth: isRegister ? '500px' : '400px',
-                boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
-                borderRadius: '12px',
-                transition: 'all 0.3s ease'
-            }}>
-                <h2 style={{
-                    fontSize: '28px',
-                    marginBottom: '30px',
-                    color: '#333',
-                    textAlign: 'center',
-                    fontWeight: '700'
-                }}>
+        <div className="auth-container auth-page">
+            <div className={`auth-card ${isRegister ? 'auth-card-wide' : ''}`}>
+                <h2 className="auth-title">
                     {isRegister ? '🎉 Đăng Ký Tài Khoản' : '👋 Đăng Nhập'}
                 </h2>
 
@@ -162,27 +148,15 @@ function LoginPage({ showToast }) {
                     <button
                         className="auth-btn"
                         type="submit"
-                        style={{
-                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                            transition: 'transform 0.2s'
-                        }}
-                        onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
-                        onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
                     >
                         {isRegister ? '✨ ĐĂNG KÝ' : '🚀 ĐĂNG NHẬP'}
                     </button>
                 </form>
 
-                <div className="auth-switch" style={{ marginTop: '20px', textAlign: 'center' }}>
+                <div className="auth-switch">
                     {isRegister ? 'Bạn đã có tài khoản?' : 'Bạn mới biết đến Shopee?'}
                     <span
-                        style={{
-                            marginLeft: '5px',
-                            color: '#667eea',
-                            cursor: 'pointer',
-                            fontWeight: 'bold',
-                            textDecoration: 'underline'
-                        }}
+                        className="auth-switch-link"
                         onClick={() => {
                             setIsRegister(!isRegister);
                             resetForm();

@@ -26,25 +26,15 @@ function TopProductsPage({ products, onBuy, categories }) {
     }, [products, selectedCategory]);
 
     return (
-        <div className="container" style={{ marginTop: '20px' }}>
-            <h2 style={{ color: '#ee4d2d', borderBottom: '1px solid #ddd', paddingBottom: '10px' }}>
-                Sản Phẩm Bán Chạy
-            </h2>
+        <div className="container list-page">
+            <h2 className="list-page-title">Sản Phẩm Bán Chạy</h2>
 
             {/* Danh mục filter */}
             {categories && categories.length > 0 && (
-                <div style={{ marginTop: '15px', marginBottom: '20px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <div className="list-page-filters">
                     <button
                         onClick={() => setSelectedCategory(null)}
-                        style={{
-                            padding: '8px 15px',
-                            border: selectedCategory === null ? '2px solid #ee4d2d' : '1px solid #ddd',
-                            background: selectedCategory === null ? '#ee4d2d' : 'white',
-                            color: selectedCategory === null ? 'white' : '#333',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontWeight: selectedCategory === null ? 'bold' : 'normal'
-                        }}
+                        className={`filter-btn ${selectedCategory === null ? 'active' : ''}`}
                     >
                         Tất cả
                     </button>
@@ -52,15 +42,7 @@ function TopProductsPage({ products, onBuy, categories }) {
                         <button
                             key={cat.id}
                             onClick={() => setSelectedCategory(cat.name)}
-                            style={{
-                                padding: '8px 15px',
-                                border: selectedCategory === cat.name ? '2px solid #ee4d2d' : '1px solid #ddd',
-                                background: selectedCategory === cat.name ? '#ee4d2d' : 'white',
-                                color: selectedCategory === cat.name ? 'white' : '#333',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                fontWeight: selectedCategory === cat.name ? 'bold' : 'normal'
-                            }}
+                            className={`filter-btn ${selectedCategory === cat.name ? 'active' : ''}`}
                         >
                             {cat.name}
                         </button>
@@ -71,7 +53,7 @@ function TopProductsPage({ products, onBuy, categories }) {
             {filteredProducts && filteredProducts.length > 0 ? (
                 <ProductList products={filteredProducts} onBuy={onBuy} title="" />
             ) : (
-                <div style={{ textAlign: 'center', padding: '50px' }}>Chưa có sản phẩm bán chạy nào.</div>
+                <div className="list-page-empty">Chưa có sản phẩm bán chạy nào.</div>
             )}
         </div>
     );

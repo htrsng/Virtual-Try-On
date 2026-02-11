@@ -214,114 +214,53 @@ function UserProfilePage({ showToast }) {
     };
 
     return (
-        <div className="container" style={{ marginTop: '20px', marginBottom: '50px' }}>
-            <div style={{
-                background: 'white',
-                borderRadius: '8px',
-                overflow: 'hidden',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-            }}>
+        <div className="container user-profile-page">
+            <div className="user-profile-shell">
                 {/* Header */}
-                <div style={{
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    padding: '30px',
-                    color: 'white'
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                        <div style={{
-                            width: '80px',
-                            height: '80px',
-                            borderRadius: '50%',
-                            background: 'white',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '40px'
-                        }}>
-                            👤
-                        </div>
-                        <div>
-                            <h2 style={{ margin: '0 0 5px 0', fontSize: '28px' }}>
-                                {user?.fullName || user?.email}
-                            </h2>
-                            <p style={{ margin: 0, opacity: 0.9 }}>
-                                📧 {user?.email}
-                            </p>
+                <div className="user-profile-hero">
+                    <div className="user-profile-hero-inner">
+                        <div className="user-profile-avatar">👤</div>
+                        <div className="user-profile-info">
+                            <h2>{user?.fullName || user?.email}</h2>
+                            <p>📧 {user?.email}</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Tabs */}
-                <div style={{
-                    display: 'flex',
-                    borderBottom: '2px solid #f0f0f0',
-                    background: '#fafafa'
-                }}>
+                <div className="user-profile-tabs">
                     <button
                         onClick={() => setActiveTab('profile')}
-                        style={{
-                            flex: 1,
-                            padding: '15px',
-                            border: 'none',
-                            background: activeTab === 'profile' ? 'white' : 'transparent',
-                            color: activeTab === 'profile' ? '#667eea' : '#666',
-                            fontWeight: activeTab === 'profile' ? 'bold' : 'normal',
-                            cursor: 'pointer',
-                            fontSize: '16px',
-                            borderBottom: activeTab === 'profile' ? '3px solid #667eea' : 'none'
-                        }}
+                        className={`user-profile-tab ${activeTab === 'profile' ? 'active' : ''}`}
                     >
                         📝 Thông tin cá nhân
                     </button>
                     <button
                         onClick={() => setActiveTab('orders')}
-                        style={{
-                            flex: 1,
-                            padding: '15px',
-                            border: 'none',
-                            background: activeTab === 'orders' ? 'white' : 'transparent',
-                            color: activeTab === 'orders' ? '#667eea' : '#666',
-                            fontWeight: activeTab === 'orders' ? 'bold' : 'normal',
-                            cursor: 'pointer',
-                            fontSize: '16px',
-                            borderBottom: activeTab === 'orders' ? '3px solid #667eea' : 'none'
-                        }}
+                        className={`user-profile-tab ${activeTab === 'orders' ? 'active' : ''}`}
                     >
                         📦 Đơn hàng của tôi ({orders.length})
                     </button>
                 </div>
 
                 {/* Content */}
-                <div style={{ padding: '30px' }}>
+                <div className="user-profile-content">
                     {activeTab === 'profile' && (
                         <div>
-                            <div style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                marginBottom: '20px'
-                            }}>
-                                <h3 style={{ margin: 0 }}>Thông tin cá nhân</h3>
+                            <div className="profile-section-header">
+                                <h3 className="profile-section-title">Thông tin cá nhân</h3>
                                 <button
                                     onClick={() => setIsEditing(!isEditing)}
-                                    style={{
-                                        padding: '8px 20px',
-                                        background: isEditing ? '#f44336' : '#667eea',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '4px',
-                                        cursor: 'pointer',
-                                        fontWeight: 'bold'
-                                    }}
+                                    className={`profile-edit-btn ${isEditing ? 'danger' : ''}`}
                                 >
                                     {isEditing ? '❌ Hủy' : '✏️ Chỉnh sửa'}
                                 </button>
                             </div>
 
                             <form onSubmit={handleUpdateProfile}>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                                    <div>
-                                        <label style={{ display: 'block', marginBottom: '5px', color: '#666', fontWeight: '500' }}>
+                                <div className="profile-grid">
+                                    <div className="profile-field">
+                                        <label className="profile-label">
                                             Họ và tên
                                         </label>
                                         <input
@@ -329,18 +268,12 @@ function UserProfilePage({ showToast }) {
                                             value={fullName}
                                             onChange={(e) => setFullName(e.target.value)}
                                             disabled={!isEditing}
-                                            style={{
-                                                width: '100%',
-                                                padding: '10px',
-                                                border: '1px solid #ddd',
-                                                borderRadius: '4px',
-                                                background: isEditing ? 'white' : '#f5f5f5'
-                                            }}
+                                            className="profile-input"
                                         />
                                     </div>
 
-                                    <div>
-                                        <label style={{ display: 'block', marginBottom: '5px', color: '#666', fontWeight: '500' }}>
+                                    <div className="profile-field">
+                                        <label className="profile-label">
                                             Số điện thoại
                                         </label>
                                         <input
@@ -348,32 +281,19 @@ function UserProfilePage({ showToast }) {
                                             value={phone}
                                             onChange={(e) => setPhone(e.target.value)}
                                             disabled={!isEditing}
-                                            style={{
-                                                width: '100%',
-                                                padding: '10px',
-                                                border: '1px solid #ddd',
-                                                borderRadius: '4px',
-                                                background: isEditing ? 'white' : '#f5f5f5'
-                                            }}
+                                            className="profile-input"
                                         />
                                     </div>
 
-                                    <div>
-                                        <label style={{ display: 'block', marginBottom: '5px', color: '#666', fontWeight: '500' }}>
+                                    <div className="profile-field">
+                                        <label className="profile-label">
                                             Tỉnh/Thành phố <span style={{ color: 'red' }}>*</span>
                                         </label>
                                         <select
                                             value={city}
                                             onChange={(e) => setCity(e.target.value)}
                                             disabled={!isEditing}
-                                            style={{
-                                                width: '100%',
-                                                padding: '10px',
-                                                border: '1px solid #ddd',
-                                                borderRadius: '4px',
-                                                background: isEditing ? 'white' : '#f5f5f5',
-                                                cursor: isEditing ? 'pointer' : 'default'
-                                            }}
+                                            className="profile-select"
                                         >
                                             <option value="">-- Chọn Tỉnh/Thành phố --</option>
                                             {cities.map(c => (
@@ -382,22 +302,15 @@ function UserProfilePage({ showToast }) {
                                         </select>
                                     </div>
 
-                                    <div>
-                                        <label style={{ display: 'block', marginBottom: '5px', color: '#666', fontWeight: '500' }}>
+                                    <div className="profile-field">
+                                        <label className="profile-label">
                                             Quận/Huyện <span style={{ color: 'red' }}>*</span>
                                         </label>
                                         <select
                                             value={district}
                                             onChange={(e) => setDistrict(e.target.value)}
                                             disabled={!isEditing || !city}
-                                            style={{
-                                                width: '100%',
-                                                padding: '10px',
-                                                border: '1px solid #ddd',
-                                                borderRadius: '4px',
-                                                background: isEditing ? 'white' : '#f5f5f5',
-                                                cursor: isEditing && city ? 'pointer' : 'default'
-                                            }}
+                                            className="profile-select"
                                         >
                                             <option value="">-- Chọn Quận/Huyện --</option>
                                             {districts.map(d => (
@@ -406,22 +319,15 @@ function UserProfilePage({ showToast }) {
                                         </select>
                                     </div>
 
-                                    <div>
-                                        <label style={{ display: 'block', marginBottom: '5px', color: '#666', fontWeight: '500' }}>
+                                    <div className="profile-field">
+                                        <label className="profile-label">
                                             Phường/Xã <span style={{ color: 'red' }}>*</span>
                                         </label>
                                         <select
                                             value={ward}
                                             onChange={(e) => setWard(e.target.value)}
                                             disabled={!isEditing || !district}
-                                            style={{
-                                                width: '100%',
-                                                padding: '10px',
-                                                border: '1px solid #ddd',
-                                                borderRadius: '4px',
-                                                background: isEditing ? 'white' : '#f5f5f5',
-                                                cursor: isEditing && district ? 'pointer' : 'default'
-                                            }}
+                                            className="profile-select"
                                         >
                                             <option value="">-- Chọn Phường/Xã --</option>
                                             {wards.map(w => (
@@ -430,46 +336,24 @@ function UserProfilePage({ showToast }) {
                                         </select>
                                     </div>
 
-                                    <div style={{ gridColumn: '1 / -1' }}>
-                                        <label style={{ display: 'block', marginBottom: '5px', color: '#666', fontWeight: '500' }}>
+                                    <div className="profile-field full">
+                                        <label className="profile-label">
                                             Số nhà, tên đường <span style={{ color: 'red' }}>*</span>
                                         </label>
-                                        <div style={{ position: 'relative' }}>
+                                        <div className="profile-input-wrapper">
                                             <input
                                                 type="text"
                                                 value={address}
                                                 onChange={(e) => setAddress(e.target.value)}
                                                 disabled={!isEditing}
                                                 placeholder={isEditing ? "Ví dụ: Số 123, Đường Nguyễn Văn A" : ""}
-                                                style={{
-                                                    width: '100%',
-                                                    padding: '10px',
-                                                    paddingRight: !isEditing && address ? '45px' : '10px',
-                                                    border: '1px solid #ddd',
-                                                    borderRadius: '4px',
-                                                    background: isEditing ? 'white' : '#f5f5f5'
-                                                }}
+                                                className={`profile-input ${!isEditing && address ? 'has-action' : ''}`}
                                             />
                                             {!isEditing && address && city && district && ward && (
                                                 <button
                                                     type="button"
                                                     onClick={() => setShowMapPicker(!showMapPicker)}
-                                                    style={{
-                                                        position: 'absolute',
-                                                        right: '8px',
-                                                        top: '50%',
-                                                        transform: 'translateY(-50%)',
-                                                        background: '#667eea',
-                                                        border: 'none',
-                                                        borderRadius: '4px',
-                                                        padding: '8px 12px',
-                                                        cursor: 'pointer',
-                                                        fontSize: '16px',
-                                                        color: 'white',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: '5px'
-                                                    }}
+                                                    className="profile-map-btn"
                                                     title="Xem vị trí trên bản đồ"
                                                 >
                                                     📍
@@ -477,7 +361,7 @@ function UserProfilePage({ showToast }) {
                                             )}
                                         </div>
                                         {showMapPicker && !isEditing && address && city && district && ward && (
-                                            <div style={{ marginTop: '10px' }}>
+                                            <div className="profile-map">
                                                 <MapPicker address={`${address}, ${ward}, ${district}, ${city}`} />
                                             </div>
                                         )}
@@ -487,17 +371,7 @@ function UserProfilePage({ showToast }) {
                                 {isEditing && (
                                     <button
                                         type="submit"
-                                        style={{
-                                            marginTop: '20px',
-                                            padding: '12px 40px',
-                                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '4px',
-                                            cursor: 'pointer',
-                                            fontWeight: 'bold',
-                                            fontSize: '16px'
-                                        }}
+                                        className="profile-save-btn"
                                     >
                                         💾 Lưu thông tin
                                     </button>
@@ -508,148 +382,87 @@ function UserProfilePage({ showToast }) {
 
                     {activeTab === 'orders' && (
                         <div>
-                            <h3 style={{ marginTop: 0 }}>Đơn hàng của tôi</h3>
+                            <h3 className="profile-section-title">Đơn hàng của tôi</h3>
 
                             {loadingOrders ? (
-                                <div style={{ textAlign: 'center', padding: '40px' }}>
+                                <div className="profile-orders-loading">
                                     Đang tải đơn hàng...
                                 </div>
                             ) : orders.length === 0 ? (
-                                <div style={{
-                                    textAlign: 'center',
-                                    padding: '60px 20px',
-                                    background: '#f9f9f9',
-                                    borderRadius: '8px'
-                                }}>
-                                    <div style={{ fontSize: '60px', marginBottom: '20px' }}>📦</div>
-                                    <p style={{ fontSize: '18px', color: '#666' }}>
-                                        Bạn chưa có đơn hàng nào
-                                    </p>
+                                <div className="profile-orders-empty">
+                                    <div className="profile-orders-empty-icon">📦</div>
+                                    <p>Bạn chưa có đơn hàng nào</p>
                                     <button
                                         onClick={() => navigate('/')}
-                                        style={{
-                                            marginTop: '20px',
-                                            padding: '12px 30px',
-                                            background: '#667eea',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '4px',
-                                            cursor: 'pointer',
-                                            fontWeight: 'bold'
-                                        }}
+                                        className="profile-orders-cta"
                                     >
                                         🛍️ Mua sắm ngay
                                     </button>
                                 </div>
                             ) : (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                <div className="profile-order-list">
                                     {orders.map((order) => (
                                         <div
                                             key={order._id}
-                                            style={{
-                                                border: '1px solid #e0e0e0',
-                                                borderRadius: '8px',
-                                                overflow: 'hidden'
-                                            }}
+                                            className="profile-order-card"
                                         >
                                             {/* Order Header */}
-                                            <div style={{
-                                                background: '#f5f5f5',
-                                                padding: '15px 20px',
-                                                display: 'flex',
-                                                justifyContent: 'space-between',
-                                                alignItems: 'center'
-                                            }}>
-                                                <div>
-                                                    <span style={{ fontWeight: 'bold', marginRight: '15px' }}>
+                                            <div className="profile-order-header">
+                                                <div className="profile-order-meta">
+                                                    <span className="profile-order-id">
                                                         Đơn hàng: #{order._id.slice(-8)}
                                                     </span>
-                                                    <span style={{ color: '#666' }}>
+                                                    <span className="profile-order-date">
                                                         {formatDate(order.createdAt)}
                                                     </span>
                                                 </div>
-                                                <div style={{
-                                                    padding: '5px 15px',
-                                                    borderRadius: '20px',
-                                                    background: getStatusColor(order.status),
-                                                    color: 'white',
-                                                    fontWeight: 'bold',
-                                                    fontSize: '14px'
-                                                }}>
+                                                <div
+                                                    className="profile-order-status"
+                                                    style={{ background: getStatusColor(order.status) }}
+                                                >
                                                     {order.status}
                                                 </div>
                                             </div>
 
                                             {/* Order Products */}
-                                            <div style={{ padding: '20px' }}>
+                                            <div className="profile-order-body">
                                                 {order.products.map((product, index) => (
                                                     <div
                                                         key={index}
-                                                        style={{
-                                                            display: 'flex',
-                                                            gap: '15px',
-                                                            marginBottom: index < order.products.length - 1 ? '15px' : '0',
-                                                            paddingBottom: index < order.products.length - 1 ? '15px' : '0',
-                                                            borderBottom: index < order.products.length - 1 ? '1px solid #f0f0f0' : 'none'
-                                                        }}
+                                                        className={`profile-order-item ${index < order.products.length - 1 ? 'with-divider' : ''}`}
                                                     >
                                                         <img
                                                             src={product.img}
                                                             alt={product.name}
-                                                            style={{
-                                                                width: '80px',
-                                                                height: '80px',
-                                                                objectFit: 'cover',
-                                                                borderRadius: '4px',
-                                                                border: '1px solid #e0e0e0'
-                                                            }}
+                                                            className="profile-order-image"
                                                         />
-                                                        <div style={{ flex: 1 }}>
-                                                            <div style={{ fontWeight: '500', marginBottom: '5px' }}>
+                                                        <div className="profile-order-info">
+                                                            <div className="profile-order-name">
                                                                 {product.name}
                                                             </div>
-                                                            <div style={{ color: '#666', fontSize: '14px' }}>
+                                                            <div className="profile-order-qty">
                                                                 Số lượng: {product.quantity}
                                                             </div>
                                                         </div>
-                                                        <div style={{
-                                                            color: '#ee4d2d',
-                                                            fontWeight: 'bold',
-                                                            alignSelf: 'center'
-                                                        }}>
+                                                        <div className="profile-order-price">
                                                             {formatPrice(product.price)}
                                                         </div>
                                                     </div>
                                                 ))}
 
                                                 {/* Order Total */}
-                                                <div style={{
-                                                    marginTop: '20px',
-                                                    paddingTop: '15px',
-                                                    borderTop: '2px solid #f0f0f0',
-                                                    textAlign: 'right'
-                                                }}>
-                                                    <span style={{ fontSize: '16px', marginRight: '10px' }}>
+                                                <div className="profile-order-total">
+                                                    <span className="profile-order-total-label">
                                                         Tổng tiền:
                                                     </span>
-                                                    <span style={{
-                                                        fontSize: '24px',
-                                                        fontWeight: 'bold',
-                                                        color: '#ee4d2d'
-                                                    }}>
+                                                    <span className="profile-order-total-value">
                                                         {formatPrice(order.totalAmount)}
                                                     </span>
                                                 </div>
 
                                                 {/* Shipping Info */}
-                                                <div style={{
-                                                    marginTop: '15px',
-                                                    padding: '15px',
-                                                    background: '#f9f9f9',
-                                                    borderRadius: '4px',
-                                                    fontSize: '14px'
-                                                }}>
-                                                    <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>
+                                                <div className="profile-shipping">
+                                                    <div className="profile-shipping-title">
                                                         📍 Thông tin giao hàng
                                                     </div>
                                                     <div>👤 {order.shippingInfo.fullName}</div>
@@ -660,22 +473,10 @@ function UserProfilePage({ showToast }) {
 
                                                 {/* Nút hủy đơn hàng */}
                                                 {order.status === 'Đang xử lý' && (
-                                                    <div style={{ marginTop: '15px', textAlign: 'right' }}>
+                                                    <div className="profile-order-actions">
                                                         <button
                                                             onClick={() => handleCancelOrder(order._id)}
-                                                            style={{
-                                                                padding: '10px 25px',
-                                                                background: '#f44336',
-                                                                color: 'white',
-                                                                border: 'none',
-                                                                borderRadius: '4px',
-                                                                cursor: 'pointer',
-                                                                fontWeight: 'bold',
-                                                                fontSize: '14px',
-                                                                transition: 'background 0.3s'
-                                                            }}
-                                                            onMouseOver={(e) => e.target.style.background = '#d32f2f'}
-                                                            onMouseOut={(e) => e.target.style.background = '#f44336'}
+                                                            className="btn-danger"
                                                         >
                                                             ❌ Hủy đơn hàng
                                                         </button>
@@ -684,40 +485,16 @@ function UserProfilePage({ showToast }) {
 
                                                 {/* Nút xóa đơn hàng đã hủy */}
                                                 {order.status === 'Đã hủy' && (
-                                                    <div style={{ marginTop: '15px', textAlign: 'right', display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                                                    <div className="profile-order-actions">
                                                         <button
                                                             onClick={() => handleReorder(order)}
-                                                            style={{
-                                                                padding: '10px 25px',
-                                                                background: '#4CAF50',
-                                                                color: 'white',
-                                                                border: 'none',
-                                                                borderRadius: '4px',
-                                                                cursor: 'pointer',
-                                                                fontWeight: 'bold',
-                                                                fontSize: '14px',
-                                                                transition: 'background 0.3s'
-                                                            }}
-                                                            onMouseOver={(e) => e.target.style.background = '#45a049'}
-                                                            onMouseOut={(e) => e.target.style.background = '#4CAF50'}
+                                                            className="btn-success"
                                                         >
                                                             🔄 Đặt lại
                                                         </button>
                                                         <button
                                                             onClick={() => handleDeleteOrder(order._id)}
-                                                            style={{
-                                                                padding: '10px 25px',
-                                                                background: '#757575',
-                                                                color: 'white',
-                                                                border: 'none',
-                                                                borderRadius: '4px',
-                                                                cursor: 'pointer',
-                                                                fontWeight: 'bold',
-                                                                fontSize: '14px',
-                                                                transition: 'background 0.3s'
-                                                            }}
-                                                            onMouseOver={(e) => e.target.style.background = '#616161'}
-                                                            onMouseOut={(e) => e.target.style.background = '#757575'}
+                                                            className="btn-muted"
                                                         >
                                                             🗑️ Xóa đơn hàng
                                                         </button>
