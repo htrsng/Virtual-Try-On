@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 function CartModal({ isOpen, onClose, cartItems, onRemove, onCheckout }) {
     const [selectedItems, setSelectedItems] = useState({});
+    const { t } = useLanguage();
 
     // Initialize all items as selected when cart changes
     // Dùng cartId thay vì id vì cart có thể có cùng sản phẩm nhưng khác size
@@ -50,13 +52,13 @@ function CartModal({ isOpen, onClose, cartItems, onRemove, onCheckout }) {
         <div className="modal-overlay">
             <div className="modal-content large">
                 <div className="modal-header">
-                    <div className="modal-title">Giỏ Hàng Của Bạn</div>
+                    <div className="modal-title">{t('your_cart')}</div>
                     <button className="close-btn" onClick={onClose}>&times;</button>
                 </div>
                 <div className="modal-body">
                     {cartItems.length === 0 ? (
                         <div style={{ textAlign: 'center', padding: '20px' }}>
-                            Chưa có sản phẩm nào trong giỏ.
+                            {t('empty_cart')}
                         </div>
                     ) : (
                         <>
@@ -73,7 +75,7 @@ function CartModal({ isOpen, onClose, cartItems, onRemove, onCheckout }) {
                                     onChange={handleSelectAll}
                                     style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                                 />
-                                <span style={{ fontWeight: '500' }}>Chọn tất cả ({cartItems.length} sản phẩm)</span>
+                                <span style={{ fontWeight: '500' }}>{t('select_all')} ({cartItems.length} {t('products_unit')})</span>
                             </div>
                             {cartItems.map((item) => {
                                 const key = item.cartId || item.id;
@@ -97,7 +99,7 @@ function CartModal({ isOpen, onClose, cartItems, onRemove, onCheckout }) {
                                             <div style={{ flex: 1 }}>
                                                 <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>{item.name}</div>
                                                 <div style={{ color: '#888', fontSize: '12px', marginBottom: '5px' }}>{item.price}</div>
-                                                <div style={{ fontSize: '14px', color: '#666' }}>Số lượng: {item.quantity}</div>
+                                                <div style={{ fontSize: '14px', color: '#666' }}>{t('quantity_label')} {item.quantity}</div>
                                             </div>
                                         </div>
                                         <div className="cart-actions">
@@ -113,7 +115,7 @@ function CartModal({ isOpen, onClose, cartItems, onRemove, onCheckout }) {
                                                 }}
                                                 onClick={() => onRemove(item.cartId || item.id)}
                                             >
-                                                Xóa
+                                                {t('delete')}
                                             </button>
                                         </div>
                                     </div>
@@ -126,7 +128,7 @@ function CartModal({ isOpen, onClose, cartItems, onRemove, onCheckout }) {
                                 alignItems: 'center',
                                 borderTop: '2px solid #eee'
                             }}>
-                                <span>Tổng thanh toán ({selectedCount} sản phẩm):</span>
+                                <span>{t('total_payment')} ({selectedCount} {t('products_unit')}):</span>
                                 <span style={{ fontSize: '20px', fontWeight: 'bold', color: '#e53935' }}>
                                     {total.toLocaleString('vi-VN')} đ
                                 </span>
@@ -139,7 +141,7 @@ function CartModal({ isOpen, onClose, cartItems, onRemove, onCheckout }) {
                                         return selectedItems[key];
                                     });
                                     if (selected.length === 0) {
-                                        alert('Vui lòng chọn ít nhất một sản phẩm để mua hàng!');
+                                        alert(t('select_item_warning'));
                                         return;
                                     }
                                     onCheckout(selected);
@@ -147,7 +149,7 @@ function CartModal({ isOpen, onClose, cartItems, onRemove, onCheckout }) {
                                 disabled={selectedCount === 0}
                                 style={{ opacity: selectedCount === 0 ? 0.5 : 1 }}
                             >
-                                Mua Hàng ({selectedCount})
+                                {t('buy_items')} ({selectedCount})
                             </button>
                         </>
                     )}

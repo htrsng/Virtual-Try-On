@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
+import ProductRecommendations from '../components/ProductRecommendations';
+import axios from 'axios';
 
 function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, onBuyNow, showToast }) {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user, isAuthenticated } = useAuth();
+    const { t } = useLanguage();
 
     // Tìm sản phẩm theo ID - tìm trong cả products và flashSaleProducts
     // Chuyển id về string để so sánh chính xác giữa MongoDB _id và id số
@@ -35,6 +39,21 @@ function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, onBu
         }
     }, [finalProduct]);
 
+    // Ghi lịch sử xem để gợi ý sản phẩm
+    useEffect(() => {
+        if (finalProduct) {
+            const token = localStorage.getItem('token');
+            if (token) {
+                axios.post('http://localhost:3000/api/view-history', {
+                    productId: String(finalProduct.id),
+                    category: finalProduct.category || 'Khác',
+                }, {
+                    headers: { Authorization: `Bearer ${token}` }
+                }).catch(() => { });
+            }
+        }
+    }, [finalProduct]);
+
     // Filter reviews based on selected criteria
     const filteredReviews = [...allReviews, ...userReviews].filter(review => {
         if (reviewFilter === 'all') return true;
@@ -61,9 +80,9 @@ function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, onBu
 
         if (!isAuthenticated) {
             if (showToast) {
-                showToast('Vui lòng đăng nhập để đánh giá sản phẩm', 'error');
+                showToast(t('please_login_review'), 'error');
             } else {
-                alert('Vui lòng đăng nhập để đánh giá sản phẩm');
+                alert(t('please_login_review'));
             }
             setTimeout(() => navigate('/login'), 1500);
             return;
@@ -71,9 +90,9 @@ function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, onBu
 
         if (!newReview.comment.trim()) {
             if (showToast) {
-                showToast('Vui lòng nhập nội dung đánh giá', 'error');
+                showToast(t('please_enter_review'), 'error');
             } else {
-                alert('Vui lòng nhập nội dung đánh giá');
+                alert(t('please_enter_review'));
             }
             return;
         }
@@ -84,7 +103,7 @@ function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, onBu
             avatar: (user?.fullName?.[0] || user?.email?.[0] || 'U').toUpperCase(),
             rating: newReview.rating,
             date: new Date().toISOString().split('T')[0],
-            variant: selectedVariant ? `${selectedVariant.color}, Size ${selectedSize || 'M'}` : 'Chưa chọn',
+            variant: selectedVariant ? `${selectedVariant.color}, Size ${selectedSize || 'M'}` : t('not_selected'),
             comment: newReview.comment,
             images: newReview.images,
             shopReply: null,
@@ -96,14 +115,14 @@ function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, onBu
         setNewReview({ rating: 5, comment: '', images: [] });
 
         if (showToast) {
-            showToast('✅ Đánh giá của bạn đã được gửi thành công!', 'success');
+            showToast(`✅ ${t('review_submitted')}`, 'success');
         } else {
-            alert('✅ Đánh giá của bạn đã được gửi thành công!');
+            alert(`✅ ${t('review_submitted')}`);
         }
     };
 
-    if (!products && !flashSaleProducts) return <div style={{ padding: '50px', textAlign: 'center' }}>Đang tải...</div>;
-    if (!finalProduct) return <div style={{ padding: '50px', textAlign: 'center' }}>Không tìm thấy sản phẩm</div>;
+    if (!products && !flashSaleProducts) return <div style={{ padding: '50px', textAlign: 'center' }}>{t('loading')}</div>;
+    if (!finalProduct) return <div style={{ padding: '50px', textAlign: 'center' }}>{t('product_not_found')}</div>;
 
     // Xác định ảnh đang hiển thị (Nếu chọn biến thể thì lấy ảnh biến thể, ko thì lấy ảnh gốc)
     const currentImage = selectedVariant ? selectedVariant.img : finalProduct.img;
@@ -117,13 +136,13 @@ function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, onBu
     // --- HÀM XỬ LÝ MUA HÀNG ---
     const handleAction = (isBuyNow) => {
         if (!isAuthenticated) {
-            showToast("Bạn cần đăng nhập để mua hàng!", "warning");
+            showToast(t('need_login_buy'), "warning");
             setTimeout(() => navigate('/login'), 1000);
             return;
         }
 
         if (!selectedSize) {
-            showToast("Vui lòng chọn Size!", "warning");
+            showToast(t('please_select_size'), "warning");
             return;
         }
 
@@ -183,7 +202,7 @@ function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, onBu
                         {/* --- 1. CHỌN MÀU SẮC / BIẾN THỂ (MỚI) --- */}
                         {finalProduct.variants && finalProduct.variants.length > 0 && (
                             <div className="product-detail-section">
-                                <div className="section-label">Màu Sắc</div>
+                                <div className="section-label">{t('color_label')}</div>
                                 <div className="option-list">
                                     {finalProduct.variants.map((variant, index) => (
                                         <button
@@ -208,7 +227,7 @@ function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, onBu
 
                         {/* --- 2. CHỌN SIZE --- */}
                         <div className="product-detail-section">
-                            <div className="section-label">Kích thước (Size)</div>
+                            <div className="section-label">{t('size_label')}</div>
                             <div className="option-list">
                                 {['S', 'M', 'L', 'XL'].map(size => (
                                     <button
@@ -228,21 +247,21 @@ function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, onBu
                                 onClick={() => handleAction(false)}
                                 className="action-btn primary"
                             >
-                                Thêm Vào Giỏ
+                                {t('add_to_cart_btn')}
                             </button>
 
                             <button
                                 onClick={() => handleAction(true)}
                                 className="action-btn outline"
                             >
-                                Mua Ngay
+                                {t('buy_now_btn')}
                             </button>
 
                             <button
                                 onClick={handleTryOn}
                                 className="action-btn tryon"
                             >
-                                <span className="action-icon">🕴️</span> Thử lên người mẫu 3D
+                                <span className="action-icon">🕴️</span> {t('try_3d_btn')}
                             </button>
                         </div>
                     </div>
@@ -251,37 +270,37 @@ function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, onBu
 
             {/* Chi tiết sản phẩm */}
             <div className="product-detail-block">
-                <h3 className="product-detail-block-title">CHI TIẾT SẢN PHẨM</h3>
+                <h3 className="product-detail-block-title">{t('product_specs')}</h3>
                 <div className="product-specs">
                     <div className="product-spec-row">
-                        <div className="product-spec-label">Danh Mục</div>
-                        <div className="product-spec-value">Shopee {'>'} Thời Trang {'>'} {finalProduct.category}</div>
+                        <div className="product-spec-label">{t('category_label')}</div>
+                        <div className="product-spec-value">Shopee {'>'} {t('fashion_breadcrumb')} {'>'} {finalProduct.category}</div>
                     </div>
                     <div className="product-spec-row">
-                        <div className="product-spec-label">Chất liệu</div>
-                        <div className="product-spec-value">Denim, Cotton cao cấp</div>
+                        <div className="product-spec-label">{t('material_label')}</div>
+                        <div className="product-spec-value">{t('material_value')}</div>
                     </div>
                     <div className="product-spec-row">
-                        <div className="product-spec-label">Mẫu</div>
-                        <div className="product-spec-value">Trơn / Họa tiết</div>
+                        <div className="product-spec-label">{t('pattern_label')}</div>
+                        <div className="product-spec-value">{t('pattern_value')}</div>
                     </div>
                     <div className="product-spec-row">
-                        <div className="product-spec-label">Xuất xứ</div>
-                        <div className="product-spec-value">Việt Nam</div>
+                        <div className="product-spec-label">{t('origin_label')}</div>
+                        <div className="product-spec-value">{t('origin_value')}</div>
                     </div>
                 </div>
             </div>
 
             {/* ĐÁNH GIÁ VÀ BÌNH LUẬN */}
             <div className="product-detail-block reviews-block">
-                <h3 className="product-detail-block-title">ĐÁNH GIÁ SẢN PHẨM</h3>
+                <h3 className="product-detail-block-title">{t('product_reviews_title')}</h3>
 
                 {/* Tổng quan đánh giá */}
                 <div className="review-summary">
                     <div className="review-score">
                         <div className="review-score-value">4.8</div>
                         <div className="review-stars">⭐⭐⭐⭐⭐</div>
-                        <div className="review-count">(1.2k đánh giá)</div>
+                        <div className="review-count">(1.2k {t('review_count_label')})</div>
                     </div>
                     <div className="review-breakdown">
                         {[5, 4, 3, 2, 1].map(star => (
@@ -305,41 +324,41 @@ function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, onBu
                         onClick={() => setReviewFilter('all')}
                         className={`review-filter-btn ${reviewFilter === 'all' ? 'active' : ''}`}
                     >
-                        Tất Cả ({reviewCounts.all})
+                        {t('all_filter')} ({reviewCounts.all})
                     </button>
                     <button
                         onClick={() => setReviewFilter('5')}
                         className={`review-filter-btn ${reviewFilter === '5' ? 'active' : ''}`}
                     >
-                        5 Sao ({reviewCounts[5]})
+                        5 {t('star_label')} ({reviewCounts[5]})
                     </button>
                     <button
                         onClick={() => setReviewFilter('4')}
                         className={`review-filter-btn ${reviewFilter === '4' ? 'active' : ''}`}
                     >
-                        4 Sao ({reviewCounts[4]})
+                        4 {t('star_label')} ({reviewCounts[4]})
                     </button>
                     <button
                         onClick={() => setReviewFilter('comment')}
                         className={`review-filter-btn ${reviewFilter === 'comment' ? 'active' : ''}`}
                     >
-                        Có Bình Luận ({reviewCounts.comment})
+                        {t('has_comments')} ({reviewCounts.comment})
                     </button>
                     <button
                         onClick={() => setReviewFilter('images')}
                         className={`review-filter-btn ${reviewFilter === 'images' ? 'active' : ''}`}
                     >
-                        Có Hình Ảnh ({reviewCounts.images})
+                        {t('has_images')} ({reviewCounts.images})
                     </button>
                 </div>
 
                 {/* Form đánh giá cho người dùng đã đăng nhập */}
                 {isAuthenticated ? (
                     <div className="review-form">
-                        <h4 className="review-form-title">Viết Đánh Giá Của Bạn</h4>
+                        <h4 className="review-form-title">{t('write_your_review')}</h4>
                         <form onSubmit={handleSubmitReview}>
                             <div className="review-form-group">
-                                <label className="review-form-label">Đánh giá của bạn</label>
+                                <label className="review-form-label">{t('your_rating')}</label>
                                 <div className="review-star-group">
                                     {[5, 4, 3, 2, 1].map(star => (
                                         <button
@@ -355,31 +374,31 @@ function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, onBu
                             </div>
 
                             <div className="review-form-group">
-                                <label className="review-form-label">Nhận xét của bạn</label>
+                                <label className="review-form-label">{t('your_comment')}</label>
                                 <textarea
                                     value={newReview.comment}
                                     onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
-                                    placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm này..."
+                                    placeholder={t('share_experience')}
                                     className="review-textarea"
                                     required
                                 />
                             </div>
 
                             <button type="submit" className="review-submit-btn">
-                                Gửi Đánh Giá
+                                {t('submit_review_btn')}
                             </button>
                         </form>
                     </div>
                 ) : (
                     <div className="review-login-prompt">
                         <div className="review-login-icon">🔒</div>
-                        <h4 className="review-login-title">Bạn cần đăng nhập để đánh giá</h4>
-                        <p className="review-login-text">Vui lòng đăng nhập để chia sẻ trải nghiệm của bạn về sản phẩm này</p>
+                        <h4 className="review-login-title">{t('login_to_review')}</h4>
+                        <p className="review-login-text">{t('login_to_review_desc')}</p>
                         <button
                             onClick={() => navigate('/login')}
                             className="review-login-btn"
                         >
-                            Đăng Nhập Ngay
+                            {t('login_now')}
                         </button>
                     </div>
                 )}
@@ -389,7 +408,7 @@ function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, onBu
                     {filteredReviews.length === 0 ? (
                         <div className="review-empty">
                             <div className="review-empty-icon">📝</div>
-                            <div>Chưa có đánh giá nào phù hợp với bộ lọc</div>
+                            <div>{t('no_matching_reviews')}</div>
                         </div>
                     ) : (
                         filteredReviews.map((review, index) => (
@@ -404,7 +423,7 @@ function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, onBu
                                     </div>
                                 </div>
                                 <div className="review-meta">
-                                    {review.date} | Phân loại: {review.variant}
+                                    {review.date} | {t('classification')} {review.variant}
                                 </div>
                                 <div className="review-comment">{review.comment}</div>
                                 {review.images.length > 0 && (
@@ -416,7 +435,7 @@ function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, onBu
                                 )}
                                 {review.shopReply && (
                                     <div className="review-reply">
-                                        <strong>Phản Hồi Của Shop:</strong> {review.shopReply}
+                                        <strong>{t('shop_reply')}</strong> {review.shopReply}
                                     </div>
                                 )}
                             </div>
@@ -426,9 +445,12 @@ function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, onBu
 
                 {/* Xem thêm */}
                 <div className="review-more">
-                    <button className="review-more-btn">Xem Thêm Đánh Giá</button>
+                    <button className="review-more-btn">{t('view_more_reviews')}</button>
                 </div>
             </div>
+
+            {/* GỢI Ý SẢN PHẨM */}
+            <ProductRecommendations currentProductId={String(finalProduct.id)} />
         </div>
     );
 }

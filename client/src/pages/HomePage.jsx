@@ -7,9 +7,11 @@ import ProductList from '../components/ProductList';
 import FlashSale from '../components/FlashSale';
 import ReviewCarousel from '../components/ReviewCarousel';
 import BrandPartners from '../components/BrandPartners';
+import { useLanguage } from '../contexts/LanguageContext';
 
 function HomePage({ products, categories, topSearch, bannerData, flashSaleProducts, onBuy }) {
     const [isLoading, setIsLoading] = useState(true);
+    const { t } = useLanguage();
 
     // Debug products received
     useEffect(() => {
@@ -90,7 +92,7 @@ function HomePage({ products, categories, topSearch, bannerData, flashSaleProduc
                 <div className="container">
                     <ProductList
                         products={products}
-                        title="GỢI Ý HÔM NAY"
+                        title={t('suggestions').toUpperCase()}
                         onBuy={onBuy}
                         loading={isLoading}
                     />

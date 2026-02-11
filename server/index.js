@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const nodemailer = require("nodemailer");
 
 const app = express();
 app.use(cors());
@@ -16,6 +17,129 @@ app.use((req, res, next) => {
 
 // JWT Secret Key
 const JWT_SECRET = "your-secret-key-change-this-in-production";
+
+// --- CẤU HÌNH EMAIL (Nodemailer) ---
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "thanhtb2005@gmail.com",
+    pass: "xndu nxcu wuea aizn",
+  },
+});
+
+// Verify email transporter khi server khởi động
+transporter.verify((error, success) => {
+  if (error) {
+    console.error("❌ Email transporter lỗi:", error.message);
+  } else {
+    console.log("✅ Email transporter sẵn sàng gửi mail!");
+  }
+});
+
+// Hàm gửi email xác nhận đơn hàng
+async function sendOrderConfirmationEmail(userEmail, order, shippingInfo) {
+  const productRows = order.products
+    .map(
+      (p) => `
+    <tr>
+      <td style="padding: 12px; border-bottom: 1px solid #eee;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          ${p.img ? `<img src="${p.img}" alt="${p.name}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;"/>` : ""}
+          <span>${p.name}</span>
+        </div>
+      </td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center;">${p.quantity}</td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">${Number(p.price).toLocaleString("vi-VN")}đ</td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; font-weight: 600;">${(p.price * p.quantity).toLocaleString("vi-VN")}đ</td>
+    </tr>
+  `,
+    )
+    .join("");
+
+  const discountRow =
+    order.discountAmount > 0
+      ? `
+    <tr>
+      <td colspan="3" style="padding: 8px 12px; text-align: right; color: #e74c3c;">Giảm giá (${order.discountCode}):</td>
+      <td style="padding: 8px 12px; text-align: right; color: #e74c3c; font-weight: 600;">-${Number(order.discountAmount).toLocaleString("vi-VN")}đ</td>
+    </tr>
+  `
+      : "";
+
+  const htmlContent = `
+  <!DOCTYPE html>
+  <html>
+  <head><meta charset="UTF-8"></head>
+  <body style="margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif;background:#f5f5f5;">
+    <div style="max-width:600px;margin:20px auto;background:white;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.1);">
+      
+      <!-- Header -->
+      <div style="background: linear-gradient(135deg, #c8956c, #a0714f);padding:30px;text-align:center;">
+        <h1 style="color:white;margin:0;font-size:24px;">✅ ĐẶT HÀNG THÀNH CÔNG!</h1>
+        <p style="color:rgba(255,255,255,0.9);margin:8px 0 0;font-size:14px;">Cảm ơn bạn đã mua sắm tại Shopee Fashion</p>
+      </div>
+
+      <!-- Order Info -->
+      <div style="padding:25px;">
+        <div style="background:#f8f9fa;border-radius:8px;padding:15px;margin-bottom:20px;">
+          <p style="margin:0 0 5px;"><strong>Mã đơn hàng:</strong> ${order._id}</p>
+          <p style="margin:0 0 5px;"><strong>Ngày đặt:</strong> ${new Date(order.createdAt).toLocaleString("vi-VN")}</p>
+          <p style="margin:0 0 5px;"><strong>Phương thức thanh toán:</strong> ${order.paymentMethod === "COD" ? "Thanh toán khi nhận hàng (COD)" : order.paymentMethod === "banking" ? "Chuyển khoản ngân hàng" : "Thanh toán online"}</p>
+          <p style="margin:0;"><strong>Trạng thái:</strong> <span style="color:#27ae60;font-weight:600;">Đang xử lý</span></p>
+        </div>
+
+        <!-- Products Table -->
+        <h3 style="color:#333;margin:0 0 10px;">📦 Chi tiết đơn hàng</h3>
+        <table style="width:100%;border-collapse:collapse;">
+          <thead>
+            <tr style="background:#f8f9fa;">
+              <th style="padding:12px;text-align:left;">Sản phẩm</th>
+              <th style="padding:12px;text-align:center;">SL</th>
+              <th style="padding:12px;text-align:right;">Đơn giá</th>
+              <th style="padding:12px;text-align:right;">Thành tiền</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${productRows}
+          </tbody>
+          <tfoot>
+            ${discountRow}
+            <tr>
+              <td colspan="3" style="padding:12px;text-align:right;font-size:16px;font-weight:700;color:#c8956c;">Tổng cộng:</td>
+              <td style="padding:12px;text-align:right;font-size:18px;font-weight:700;color:#c8956c;">${Number(order.totalAmount).toLocaleString("vi-VN")}đ</td>
+            </tr>
+          </tfoot>
+        </table>
+
+        <!-- Shipping Info -->
+        <div style="margin-top:20px;background:#f0f7ff;border-radius:8px;padding:15px;border-left:4px solid #3498db;">
+          <h3 style="color:#333;margin:0 0 10px;">🚚 Thông tin giao hàng</h3>
+          <p style="margin:4px 0;"><strong>Người nhận:</strong> ${shippingInfo.fullName}</p>
+          <p style="margin:4px 0;"><strong>SĐT:</strong> ${shippingInfo.phone}</p>
+          <p style="margin:4px 0;"><strong>Địa chỉ:</strong> ${shippingInfo.address}${shippingInfo.ward ? ", " + shippingInfo.ward : ""}${shippingInfo.district ? ", " + shippingInfo.district : ""}${shippingInfo.city ? ", " + shippingInfo.city : ""}</p>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div style="background:#f8f9fa;padding:20px;text-align:center;border-top:1px solid #eee;">
+        <p style="color:#888;font-size:13px;margin:0;">Nếu bạn có bất kỳ thắc mắc nào, vui lòng liên hệ với chúng tôi.</p>
+        <p style="color:#aaa;font-size:12px;margin:8px 0 0;">Shopee Fashion Vietnam © ${new Date().getFullYear()}</p>
+      </div>
+    </div>
+  </body>
+  </html>
+  `;
+
+  const mailOptions = {
+    from: '"Shopee Fashion" <thanhtb2005@gmail.com>',
+    to: userEmail,
+    subject: `✅ Đặt hàng thành công - Đơn hàng #${order._id.toString().slice(-8).toUpperCase()}`,
+    html: htmlContent,
+  };
+
+  await transporter.sendMail(mailOptions);
+  console.log(`✉️ Email xác nhận đã gửi tới: ${userEmail}`);
+}
 
 // Kết nối MongoDB với kiểm tra chi tiết
 mongoose
@@ -110,6 +234,85 @@ const OrderSchema = new mongoose.Schema({
   cancelReason: { type: String },
 });
 const OrderModel = mongoose.model("orders", OrderSchema);
+
+// --- SCHEMA WISHLIST (ĐỒNG BỘ SERVER) ---
+const WishlistSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "users",
+    required: true,
+  },
+  products: [
+    {
+      productId: { type: mongoose.Schema.Types.Mixed },
+      name: String,
+      price: Number,
+      img: String,
+      category: String,
+      addedAt: { type: Date, default: Date.now },
+    },
+  ],
+  updatedAt: { type: Date, default: Date.now },
+});
+WishlistSchema.index({ userId: 1 }, { unique: true });
+const WishlistModel = mongoose.model("wishlists", WishlistSchema);
+
+// --- SCHEMA ĐÁNH GIÁ SẢN PHẨM (REVIEW) ---
+const ReviewSchema = new mongoose.Schema({
+  productId: { type: mongoose.Schema.Types.Mixed, required: true },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "users",
+    required: true,
+  },
+  userName: { type: String, default: "Ẩn danh" },
+  rating: { type: Number, required: true, min: 1, max: 5 },
+  comment: { type: String, default: "" },
+  images: [String],
+  likes: { type: Number, default: 0 },
+  createdAt: { type: Date, default: Date.now },
+});
+ReviewSchema.index({ productId: 1, userId: 1 }, { unique: true });
+const ReviewModel = mongoose.model("reviews", ReviewSchema);
+
+// --- SCHEMA CHAT (HỖ TRỢ KHÁCH HÀNG) ---
+const ChatMessageSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
+  sender: { type: String, enum: ["user", "bot", "admin"], default: "user" },
+  message: { type: String, required: true },
+  type: { type: String, enum: ["text", "image", "product"], default: "text" },
+  metadata: { type: mongoose.Schema.Types.Mixed },
+  isRead: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now },
+});
+const ChatMessageModel = mongoose.model("chat_messages", ChatMessageSchema);
+
+// --- SCHEMA THÔNG BÁO (NOTIFICATION) ---
+const NotificationSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
+  title: { type: String, required: true },
+  message: { type: String, required: true },
+  type: {
+    type: String,
+    enum: ["order", "promo", "system", "cart_reminder"],
+    default: "system",
+  },
+  link: { type: String, default: "" },
+  isRead: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now },
+});
+const NotificationModel = mongoose.model("notifications", NotificationSchema);
+
+// --- SCHEMA LỊCH SỬ XEM SẢN PHẨM (cho gợi ý thông minh) ---
+const ViewHistorySchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
+  productId: { type: mongoose.Schema.Types.Mixed, required: true },
+  category: { type: String },
+  viewCount: { type: Number, default: 1 },
+  lastViewedAt: { type: Date, default: Date.now },
+});
+ViewHistorySchema.index({ userId: 1, productId: 1 }, { unique: true });
+const ViewHistoryModel = mongoose.model("view_histories", ViewHistorySchema);
 
 // --- SCHEMA NEWSLETTER (MỚI) ---
 const NewsletterSchema = new mongoose.Schema({
@@ -772,6 +975,22 @@ app.post("/api/orders", authenticateToken, async (req, res) => {
       }
     }
 
+    // Gửi email xác nhận đơn hàng
+    try {
+      const user = await UserModel.findById(req.user.id);
+      console.log("📧 User email:", user?.email);
+      if (user && user.email) {
+        await sendOrderConfirmationEmail(user.email, newOrder, shippingInfo);
+        console.log("✉️ Đã gửi email xác nhận đơn hàng tới:", user.email);
+      } else {
+        console.log("⚠️ Không tìm thấy email user, user:", user);
+      }
+    } catch (emailErr) {
+      console.error("⚠️ Không gửi được email:", emailErr.message);
+      console.error("⚠️ Chi tiết lỗi email:", emailErr);
+      // Không block response nếu gửi email lỗi
+    }
+
     res.json({
       message: "Đặt hàng thành công",
       order: newOrder,
@@ -811,7 +1030,7 @@ app.get("/api/orders", async (req, res) => {
   }
 });
 
-// 4. Cập nhật trạng thái đơn hàng (admin)
+// 4. Cập nhật trạng thái đơn hàng (admin) + gửi notification
 app.put("/api/orders/:id", async (req, res) => {
   try {
     const { status } = req.body;
@@ -820,6 +1039,22 @@ app.put("/api/orders/:id", async (req, res) => {
       { status },
       { new: true },
     );
+    // Gửi thông báo cho user
+    if (updatedOrder && updatedOrder.userId) {
+      const statusMessages = {
+        "Đang xử lý": "Đơn hàng của bạn đang được xử lý",
+        "Đang giao": "Đơn hàng của bạn đã được giao cho đơn vị vận chuyển",
+        "Đã giao": "Đơn hàng đã được giao thành công. Cảm ơn bạn!",
+        "Đã hủy": "Đơn hàng đã bị hủy",
+      };
+      await createNotification(
+        updatedOrder.userId,
+        `Cập nhật đơn hàng`,
+        statusMessages[status] || `Trạng thái đơn hàng: ${status}`,
+        "order",
+        "/profile",
+      );
+    }
     res.json(updatedOrder);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -987,6 +1222,451 @@ app.delete("/api/banner-contents/:bannerId", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// =============================================
+// API WISHLIST (ĐỒNG BỘ SERVER)
+// =============================================
+// 1. Lấy wishlist của user
+app.get("/api/wishlist", authenticateToken, async (req, res) => {
+  try {
+    const wishlist = await WishlistModel.findOne({ userId: req.user.id });
+    res.json(wishlist ? wishlist.products : []);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 2. Thêm sản phẩm vào wishlist
+app.post("/api/wishlist/add", authenticateToken, async (req, res) => {
+  try {
+    const { product } = req.body;
+    let wishlist = await WishlistModel.findOne({ userId: req.user.id });
+    if (!wishlist) {
+      wishlist = new WishlistModel({ userId: req.user.id, products: [] });
+    }
+    const exists = wishlist.products.find(
+      (p) => String(p.productId) === String(product.id || product.productId),
+    );
+    if (exists) {
+      return res
+        .status(400)
+        .json({ message: "Sản phẩm đã có trong danh sách yêu thích" });
+    }
+    wishlist.products.push({
+      productId: product.id || product.productId,
+      name: product.name,
+      price: product.price,
+      img: product.img,
+      category: product.category,
+    });
+    wishlist.updatedAt = new Date();
+    await wishlist.save();
+    res.json({ message: "Đã thêm vào yêu thích", products: wishlist.products });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 3. Xóa sản phẩm khỏi wishlist
+app.post("/api/wishlist/remove", authenticateToken, async (req, res) => {
+  try {
+    const { productId } = req.body;
+    const wishlist = await WishlistModel.findOne({ userId: req.user.id });
+    if (!wishlist) return res.json({ message: "OK", products: [] });
+    wishlist.products = wishlist.products.filter(
+      (p) => String(p.productId) !== String(productId),
+    );
+    wishlist.updatedAt = new Date();
+    await wishlist.save();
+    res.json({ message: "Đã xóa khỏi yêu thích", products: wishlist.products });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 4. Đồng bộ wishlist (merge localStorage + server)
+app.post("/api/wishlist/sync", authenticateToken, async (req, res) => {
+  try {
+    const { localProducts } = req.body;
+    let wishlist = await WishlistModel.findOne({ userId: req.user.id });
+    if (!wishlist) {
+      wishlist = new WishlistModel({ userId: req.user.id, products: [] });
+    }
+    // Merge: thêm sản phẩm từ local chưa có trên server
+    if (localProducts && Array.isArray(localProducts)) {
+      for (const lp of localProducts) {
+        const exists = wishlist.products.find(
+          (p) => String(p.productId) === String(lp.id || lp.productId),
+        );
+        if (!exists) {
+          wishlist.products.push({
+            productId: lp.id || lp.productId,
+            name: lp.name,
+            price: lp.price,
+            img: lp.img,
+            category: lp.category,
+          });
+        }
+      }
+    }
+    wishlist.updatedAt = new Date();
+    await wishlist.save();
+    res.json({ message: "Đã đồng bộ", products: wishlist.products });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// =============================================
+// API ĐÁNH GIÁ SẢN PHẨM (REVIEW)
+// =============================================
+// 1. Lấy đánh giá theo sản phẩm
+app.get("/api/reviews/:productId", async (req, res) => {
+  try {
+    const reviews = await ReviewModel.find({
+      productId: req.params.productId,
+    }).sort({ createdAt: -1 });
+    const avgRating =
+      reviews.length > 0
+        ? (
+            reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+          ).toFixed(1)
+        : 0;
+    res.json({
+      reviews,
+      avgRating: parseFloat(avgRating),
+      totalReviews: reviews.length,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 2. Thêm đánh giá (cần đăng nhập)
+app.post("/api/reviews", authenticateToken, async (req, res) => {
+  try {
+    const { productId, rating, comment, images } = req.body;
+    if (!productId || !rating) {
+      return res.status(400).json({ message: "Thiếu thông tin đánh giá" });
+    }
+    // Kiểm tra đã review chưa
+    const existing = await ReviewModel.findOne({
+      productId,
+      userId: req.user.id,
+    });
+    if (existing) {
+      return res
+        .status(400)
+        .json({ message: "Bạn đã đánh giá sản phẩm này rồi" });
+    }
+    const user = await UserModel.findById(req.user.id);
+    const review = new ReviewModel({
+      productId,
+      userId: req.user.id,
+      userName: user ? user.fullName || user.email : "Ẩn danh",
+      rating,
+      comment: comment || "",
+      images: images || [],
+    });
+    await review.save();
+    res.json({ message: "Đánh giá thành công", review });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 3. Like đánh giá
+app.post("/api/reviews/:id/like", async (req, res) => {
+  try {
+    const review = await ReviewModel.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { likes: 1 } },
+      { new: true },
+    );
+    res.json(review);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// =============================================
+// API CHAT HỖ TRỢ KHÁCH HÀNG
+// =============================================
+// Câu trả lời tự động cho chatbot
+const FAQ_ANSWERS = {
+  "giao hàng":
+    "Nội thành: 1-2 ngày. Ngoại thành: 3-5 ngày. Miễn phí ship cho đơn từ 300k.",
+  "đổi trả":
+    "Đổi trả trong 7 ngày nếu sản phẩm lỗi hoặc không đúng mô tả. Sản phẩm phải còn nguyên tem mác.",
+  "thanh toán":
+    "Chúng tôi hỗ trợ: COD, chuyển khoản ngân hàng, Momo, ZaloPay, VNPAY, Visa/MasterCard.",
+  "đơn hàng":
+    "Bạn có thể theo dõi đơn hàng tại mục 'Đơn hàng của tôi' trong trang cá nhân.",
+  size: "Bạn có thể sử dụng tính năng 'Thử đồ 3D' để tìm size phù hợp nhất với cơ thể.",
+  "giảm giá":
+    "Đăng ký nhận tin để nhận mã giảm giá 10%. Theo dõi Flash Sale hàng ngày để săn ưu đãi!",
+  "tài khoản":
+    "Bạn có thể đăng ký/đăng nhập bằng email. Tất cả thông tin được bảo mật tuyệt đối.",
+  "liên hệ":
+    "Hotline: 1900-xxxx | Email: support@vfitai.com | Chat trực tiếp tại đây 24/7.",
+  "3d": "Tính năng thử đồ 3D cho phép bạn nhập chiều cao, cân nặng để tạo avatar và thử quần áo ảo.",
+  "khuyến mãi":
+    "Flash Sale mỗi ngày từ 12h-14h. Giảm đến 50% nhiều sản phẩm hot!",
+};
+
+function getBotReply(message) {
+  const lower = message.toLowerCase();
+  for (const [keyword, answer] of Object.entries(FAQ_ANSWERS)) {
+    if (lower.includes(keyword)) return answer;
+  }
+  return "Cảm ơn bạn đã liên hệ! Nhân viên tư vấn sẽ phản hồi sớm nhất. Bạn có thể hỏi về: giao hàng, đổi trả, thanh toán, size, giảm giá, 3D...";
+}
+
+// 1. Gửi tin nhắn chat
+app.post("/api/chat/send", async (req, res) => {
+  try {
+    const { message, userId } = req.body;
+    if (!message || !message.trim()) {
+      return res.status(400).json({ error: "Message is required" });
+    }
+
+    // Validate userId - chỉ dùng nếu là ObjectId hợp lệ (24 hex chars)
+    let validUserId = null;
+    if (userId && /^[0-9a-fA-F]{24}$/.test(String(userId))) {
+      validUserId = userId;
+    }
+
+    // Lưu tin nhắn user
+    const userMsgData = { sender: "user", message: message.trim() };
+    if (validUserId) userMsgData.userId = validUserId;
+    const userMsg = new ChatMessageModel(userMsgData);
+    await userMsg.save();
+
+    // Bot tự động trả lời
+    const botReply = getBotReply(message);
+    const botMsgData = { sender: "bot", message: botReply };
+    if (validUserId) botMsgData.userId = validUserId;
+    const botMsg = new ChatMessageModel(botMsgData);
+    await botMsg.save();
+
+    res.json({ userMessage: userMsg, botReply: botMsg });
+  } catch (err) {
+    console.error("Chat send error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 2. Lấy lịch sử chat
+app.get("/api/chat/history", authenticateToken, async (req, res) => {
+  try {
+    const messages = await ChatMessageModel.find({ userId: req.user.id })
+      .sort({ createdAt: 1 })
+      .limit(100);
+    res.json(messages);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// =============================================
+// API THÔNG BÁO (NOTIFICATION)
+// =============================================
+// 1. Lấy thông báo của user
+app.get("/api/notifications", authenticateToken, async (req, res) => {
+  try {
+    const notifications = await NotificationModel.find({ userId: req.user.id })
+      .sort({ createdAt: -1 })
+      .limit(50);
+    const unreadCount = await NotificationModel.countDocuments({
+      userId: req.user.id,
+      isRead: false,
+    });
+    res.json({ notifications, unreadCount });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 2. Đánh dấu đã đọc
+app.put("/api/notifications/read", authenticateToken, async (req, res) => {
+  try {
+    await NotificationModel.updateMany(
+      { userId: req.user.id, isRead: false },
+      { isRead: true },
+    );
+    res.json({ message: "Đã đánh dấu tất cả đã đọc" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 3. Tạo thông báo (hệ thống gọi nội bộ)
+async function createNotification(
+  userId,
+  title,
+  message,
+  type = "system",
+  link = "",
+) {
+  try {
+    const notif = new NotificationModel({ userId, title, message, type, link });
+    await notif.save();
+    return notif;
+  } catch (err) {
+    console.error("Lỗi tạo thông báo:", err);
+  }
+}
+
+// =============================================
+// API GỢI Ý SẢN PHẨM THÔNG MINH (RECOMMENDATIONS)
+// =============================================
+// 1. Ghi nhận lượt xem sản phẩm
+app.post("/api/view-history", async (req, res) => {
+  try {
+    const { userId, productId, category } = req.body;
+    if (!productId) return res.status(400).json({ message: "Thiếu productId" });
+
+    if (userId) {
+      await ViewHistoryModel.findOneAndUpdate(
+        { userId, productId },
+        { $inc: { viewCount: 1 }, lastViewedAt: new Date(), category },
+        { upsert: true, new: true },
+      );
+    }
+    res.json({ message: "OK" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 2. Lấy sản phẩm gợi ý cho user
+app.get("/api/recommendations", async (req, res) => {
+  try {
+    const { userId, productId, category, limit = 8 } = req.query;
+    let recommendedIds = [];
+
+    // Chiến lược 1: Dựa trên lịch sử xem của user
+    if (userId) {
+      const history = await ViewHistoryModel.find({ userId })
+        .sort({ viewCount: -1, lastViewedAt: -1 })
+        .limit(20);
+      const favCategories = [
+        ...new Set(history.map((h) => h.category).filter(Boolean)),
+      ];
+
+      if (favCategories.length > 0) {
+        const products = await ProductModel.find({
+          category: { $in: favCategories },
+        }).limit(parseInt(limit));
+        recommendedIds = products.map((p) => p);
+      }
+    }
+
+    // Chiến lược 2: Sản phẩm cùng danh mục
+    if (recommendedIds.length < limit && category) {
+      const sameCat = await ProductModel.find({
+        category,
+        id: { $ne: parseInt(productId) },
+      }).limit(parseInt(limit) - recommendedIds.length);
+      recommendedIds.push(...sameCat);
+    }
+
+    // Chiến lược 3: Sản phẩm bán chạy (fallback)
+    if (recommendedIds.length < limit) {
+      const popular = await ProductModel.find()
+        .sort({ sold: -1 })
+        .limit(parseInt(limit) - recommendedIds.length);
+      recommendedIds.push(...popular);
+    }
+
+    // Loại bỏ trùng lặp
+    const uniqueProducts = [];
+    const seenIds = new Set();
+    for (const p of recommendedIds) {
+      const pid = String(p.id || p._id);
+      if (!seenIds.has(pid)) {
+        seenIds.add(pid);
+        uniqueProducts.push(p);
+      }
+    }
+
+    res.json(uniqueProducts.slice(0, parseInt(limit)));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// =============================================
+// API THANH TOÁN TRỰC TUYẾN (PAYMENT GATEWAY - Mô phỏng)
+// =============================================
+// 1. Tạo giao dịch thanh toán
+app.post("/api/payment/create", authenticateToken, async (req, res) => {
+  try {
+    const { orderId, amount, method } = req.body;
+    // Mô phỏng tạo link thanh toán
+    const paymentId =
+      "PAY_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
+    const paymentData = {
+      paymentId,
+      orderId,
+      amount,
+      method, // momo, zalopay, vnpay, stripe
+      status: "pending",
+      createdAt: new Date(),
+      // Mô phỏng URL thanh toán
+      paymentUrl: `https://payment.vfitai.com/pay/${paymentId}`,
+      qrCode:
+        method === "momo"
+          ? `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=momo://pay?amount=${amount}&id=${paymentId}`
+          : null,
+    };
+
+    // Mô phỏng: sau 3 giây tự động xác nhận thành công
+    setTimeout(async () => {
+      try {
+        const order = await OrderModel.findById(orderId);
+        if (order && order.status === "Đang xử lý") {
+          order.paymentMethod = method;
+          await order.save();
+          // Tạo thông báo
+          await createNotification(
+            req.user.id,
+            "Thanh toán thành công",
+            `Đơn hàng #${orderId} đã được thanh toán qua ${method}`,
+            "order",
+            "/profile",
+          );
+        }
+      } catch (e) {
+        console.error("Lỗi xác nhận thanh toán:", e);
+      }
+    }, 3000);
+
+    res.json(paymentData);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 2. Kiểm tra trạng thái thanh toán
+app.get("/api/payment/status/:paymentId", async (req, res) => {
+  try {
+    // Mô phỏng: luôn trả về thành công
+    res.json({
+      paymentId: req.params.paymentId,
+      status: "success",
+      message: "Thanh toán thành công",
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// =============================================
+// THÊM THÔNG BÁO KHI ĐƠN HÀNG THAY ĐỔI TRẠNG THÁI
+// =============================================
+// Override API cập nhật trạng thái đơn hàng để gửi notification
+const originalOrderUpdate = app.put;
 
 app.listen(3000, () => {
   console.log("Server đang chạy tại cloud");

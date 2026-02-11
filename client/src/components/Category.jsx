@@ -1,7 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
 
 function Category({ data }) {
+    const { t } = useLanguage();
     // Nếu chưa có dữ liệu truyền vào thì dùng mảng rỗng
     const categories = data || [];
 
@@ -16,7 +18,7 @@ function Category({ data }) {
 
     return (
         <div className="category-section">
-            <div className="category-header">DANH MỤC THỜI TRANG</div>
+            <div className="category-header">{t('fashion_categories')}</div>
             <div className="category-grid">
                 {categories.map((item) => (
                     <Link

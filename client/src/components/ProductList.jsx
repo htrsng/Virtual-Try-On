@@ -7,16 +7,20 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import { useAuth } from '../contexts/AuthContext';
 import { useWishlist } from '../contexts/WishlistContext';
 import { useCompare } from '../contexts/CompareContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import QuickViewModal from './QuickViewModal';
 import './ProductCard.css';
 
-function ProductList({ products, title = "GỢI Ý HÔM NAY", onBuy, loading = false }) {
+function ProductList({ products, title, onBuy, loading = false }) {
     const [hoveredId, setHoveredId] = useState(null);
     const [quickViewProduct, setQuickViewProduct] = useState(null);
     const navigate = useNavigate();
     const { isAuthenticated } = useAuth();
     const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
     const { addToCompare, isInCompare } = useCompare();
+    const { t } = useLanguage();
+
+    const displayTitle = title || t('suggestions').toUpperCase();
 
     // Hiển thị TẤT CẢ sản phẩm, không giới hạn theo login
     // (Nếu muốn giới hạn, dùng isAuthenticated thay vì currentUser)
@@ -26,7 +30,7 @@ function ProductList({ products, title = "GỢI Ý HÔM NAY", onBuy, loading = f
     if (loading) {
         return (
             <div className="product-section">
-                <h3 className="section-title">{title}</h3>
+                <h3 className="section-title">{displayTitle}</h3>
                 <div className="product-grid">
                     {[...Array(8)].map((_, index) => (
                         <div key={index} className="product-card-skeleton">
@@ -44,13 +48,13 @@ function ProductList({ products, title = "GỢI Ý HÔM NAY", onBuy, loading = f
 
     // Kiểm tra xem có dữ liệu sản phẩm không
     if (!displayProducts || displayProducts.length === 0) {
-        return <div className="empty-state">Không có sản phẩm nào</div>;
+        return <div className="empty-state">{t('no_products')}</div>;
     }
 
     const handleQuickAction = (e, action, product) => {
         e.preventDefault();
         e.stopPropagation();
-        
+
         if (action === 'wishlist') {
             if (isInWishlist(product.id)) {
                 removeFromWishlist(product.id);
@@ -66,7 +70,7 @@ function ProductList({ products, title = "GỢI Ý HÔM NAY", onBuy, loading = f
 
     return (
         <div className="product-section">
-            <div className="product-header">{title}</div>
+            <div className="product-header">{displayTitle}</div>
 
             <motion.div
                 className="product-grid"
@@ -110,7 +114,7 @@ function ProductList({ products, title = "GỢI Ý HÔM NAY", onBuy, loading = f
                                             whileHover={{ scale: 1.1 }}
                                             whileTap={{ scale: 0.9 }}
                                             onClick={(e) => handleQuickAction(e, 'wishlist', product)}
-                                            title={isInWishlist(product.id) ? "Bỏ yêu thích" : "Thêm vào yêu thích"}
+                                            title={isInWishlist(product.id) ? t('remove_wishlist') : t('add_wishlist')}
                                         >
                                             <FiHeart fill={isInWishlist(product.id) ? "currentColor" : "none"} />
                                         </motion.button>
@@ -119,7 +123,7 @@ function ProductList({ products, title = "GỢI Ý HÔM NAY", onBuy, loading = f
                                             whileHover={{ scale: 1.1 }}
                                             whileTap={{ scale: 0.9 }}
                                             onClick={(e) => handleQuickAction(e, 'compare', product)}
-                                            title="So sánh"
+                                            title={t('compare')}
                                         >
                                             <FiRepeat />
                                         </motion.button>
@@ -128,7 +132,7 @@ function ProductList({ products, title = "GỢI Ý HÔM NAY", onBuy, loading = f
                                             whileHover={{ scale: 1.1 }}
                                             whileTap={{ scale: 0.9 }}
                                             onClick={(e) => handleQuickAction(e, 'quickview', product)}
-                                            title="Xem nhanh"
+                                            title={t('quick_view')}
                                         >
                                             <FiEye />
                                         </motion.button>
@@ -156,7 +160,7 @@ function ProductList({ products, title = "GỢI Ý HÔM NAY", onBuy, loading = f
                                             navigate(`/product/${product.id}`);
                                         }}
                                     >
-                                        <FiEye /> Xem sản phẩm
+                                        <FiEye /> {t('view_product')}
                                     </motion.button>
                                 </div>
                             </div>
@@ -167,7 +171,7 @@ function ProductList({ products, title = "GỢI Ý HÔM NAY", onBuy, loading = f
                                 <div className="product-meta">
                                     <div className="product-rating">
                                         <span className="stars">⭐⭐⭐⭐⭐</span>
-                                        <span className="sold-count">Đã bán {product.sold || 0}</span>
+                                        <span className="sold-count">{t('sold')} {product.sold || 0}</span>
                                     </div>
                                     <div className="product-price-wrapper">
                                         {product.oldPrice && (

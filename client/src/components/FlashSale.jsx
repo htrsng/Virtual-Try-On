@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { FiShoppingCart, FiHeart, FiZap } from 'react-icons/fi';
+import { useLanguage } from '../contexts/LanguageContext';
 
 function FlashSale({ products = [] }) {
+    const { t } = useLanguage();
     const [timeLeft, setTimeLeft] = useState({
         hours: 2,
         minutes: 45,
@@ -66,7 +68,7 @@ function FlashSale({ products = [] }) {
                     </div>
 
                     <div className="countdown-timer">
-                        <span className="timer-label">Kết thúc sau:</span>
+                        <span className="timer-label">{t('ends_in')}</span>
                         <div className="timer-display">
                             <motion.div
                                 className="timer-box"
@@ -95,7 +97,7 @@ function FlashSale({ products = [] }) {
                     </div>
 
                     <Link to="/flash-sale" className="view-all-link">
-                        Xem tất cả
+                        {t('view_all')}
                     </Link>
                 </motion.div>
 
@@ -145,8 +147,8 @@ function FlashSale({ products = [] }) {
 
                                         <div className="stock-progress">
                                             <div className="stock-info">
-                                                <span>Đã bán {product.sold}</span>
-                                                <span>Còn {product.stock}</span>
+                                                <span>{t('sold')} {product.sold}</span>
+                                                <span>{t('in_stock')} {product.stock}</span>
                                             </div>
                                             <div className="progress-bar">
                                                 <motion.div
@@ -173,7 +175,7 @@ function FlashSale({ products = [] }) {
                     transition={{ delay: 0.5 }}
                 >
                     <Link to="/flash-sale" className="view-all-btn">
-                        Xem Tất Cả Flash Sale
+                        {t('view_all_flash')}
                     </Link>
                 </motion.div>
             </div>

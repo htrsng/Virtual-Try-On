@@ -1,14 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { FiX, FiZoomIn, FiPackage, FiTruck, FiShield, FiCheckCircle } from 'react-icons/fi';
 import axios from 'axios';
+import OnlinePaymentModal from '../components/OnlinePaymentModal';
 import './CheckoutPage.css';
 
 function CheckoutPage({ onCheckoutSuccess, showToast }) {
     const navigate = useNavigate();
     const location = useLocation();
     const { user, isAuthenticated, loading } = useAuth();
+    const { t } = useLanguage();
     const hasRedirected = useRef(false);
     const hasLoadedProducts = useRef(false);
 
@@ -25,9 +28,9 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
     // State cho phương thức vận chuyển
     const [shippingMethod, setShippingMethod] = useState('standard');
     const shippingOptions = [
-        { id: 'standard', name: 'Giao hàng tiêu chuẩn', time: '3-5 ngày', price: 30000 },
-        { id: 'express', name: 'Giao hàng nhanh', time: '1-2 ngày', price: 50000 },
-        { id: 'super', name: 'Giao hàng siêu tốc', time: 'Trong ngày', price: 100000 }
+        { id: 'standard', nameKey: 'standard_shipping', timeKey: 'standard_time', price: 30000 },
+        { id: 'express', nameKey: 'express_shipping', timeKey: 'express_time', price: 50000 },
+        { id: 'super', nameKey: 'super_shipping', timeKey: 'super_time', price: 100000 }
     ];
 
     useEffect(() => {
@@ -85,7 +88,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                     console.warn('⚠️ Products array is empty');
                     if (!hasRedirected.current) {
                         hasRedirected.current = true;
-                        showToast("Không tìm thấy sản phẩm!", "error");
+                        showToast(t('no_product_found'), "error");
                         setTimeout(() => navigate('/checkout/choseproduct', { replace: true }), 100);
                     }
                 }
@@ -93,7 +96,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                 console.error('❌ Error parsing selectedProducts:', e);
                 if (!hasRedirected.current) {
                     hasRedirected.current = true;
-                    showToast("Không tìm thấy sản phẩm!", "error");
+                    showToast(t('no_product_found'), "error");
                     setTimeout(() => navigate('/checkout/choseproduct', { replace: true }), 100);
                 }
             }
@@ -101,7 +104,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
             console.warn('⚠️ No data in localStorage');
             if (!hasRedirected.current) {
                 hasRedirected.current = true;
-                showToast("Vui lòng chọn sản phẩm trước!", "warning");
+                showToast(t('please_select_products'), "warning");
                 setTimeout(() => navigate('/checkout/choseproduct', { replace: true }), 100);
             }
         }
@@ -117,6 +120,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
     const [ward, setWard] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('COD');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showOnlinePayment, setShowOnlinePayment] = useState(false);
 
     // State cho mã giảm giá
     const [discountCode, setDiscountCode] = useState('');
@@ -149,7 +153,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
 
         if (!isAuthenticated) {
             hasRedirected.current = true; // Đánh dấu đã redirect
-            showToast("Vui lòng đăng nhập để thanh toán!", "warning");
+            showToast(t('please_login_checkout'), "warning");
             navigate('/login', { replace: true });
         }
     }, [loading, isAuthenticated]); // Bỏ navigate và showToast khỏi dependencies
@@ -271,7 +275,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
         end.setDate(end.getDate() + to);
 
         if (from === 0 && to === 0) {
-            return 'Hôm nay';
+            return t('today_text');
         }
 
         return `${formatDate(start)} - ${formatDate(end)}`;
@@ -281,7 +285,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
     const applyDiscountCode = async () => {
         const normalizedCode = discountCode.trim().toUpperCase();
         if (!normalizedCode) {
-            setDiscountError('Vui lòng nhập mã giảm giá');
+            setDiscountError(t('enter_discount_error'));
             return;
         }
 
@@ -291,7 +295,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
         if (coupon) {
             // Mã cố định
             if (totalAmount < coupon.minOrder) {
-                setDiscountError(`Đơn hàng tối thiểu ${formatPrice(coupon.minOrder)} để dùng mã này`);
+                setDiscountError(`${t('subtotal')} ${formatPrice(coupon.minOrder)}`);
                 setAppliedDiscount(null);
                 return;
             }
@@ -300,7 +304,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
             try {
                 const token = localStorage.getItem('token');
                 if (!token) {
-                    setDiscountError('Vui lòng đăng nhập để sử dụng mã giảm giá');
+                    setDiscountError(t('please_login_coupon'));
                     setAppliedDiscount(null);
                     return;
                 }
@@ -315,27 +319,27 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                 });
 
                 if (!checkResponse.ok) {
-                    setDiscountError('Không thể kiểm tra mã giảm giá. Vui lòng thử lại');
+                    setDiscountError(t('cannot_check_coupon'));
                     setAppliedDiscount(null);
                     return;
                 }
 
                 const checkData = await checkResponse.json();
                 if (checkData.used) {
-                    setDiscountError('Bạn đã sử dụng mã giảm giá này rồi');
+                    setDiscountError(t('coupon_already_used'));
                     setAppliedDiscount(null);
                     return;
                 }
             } catch (err) {
                 console.error('Lỗi kiểm tra mã:', err);
-                setDiscountError('Lỗi kiểm tra mã giảm giá. Vui lòng thử lại');
+                setDiscountError(t('coupon_check_error'));
                 setAppliedDiscount(null);
                 return; // Chặn không cho áp dụng nếu API lỗi
             }
 
             setAppliedDiscount(coupon);
             setDiscountError('');
-            showToast(`Áp dụng mã giảm ${coupon.discount}% thành công! 🎉`, 'success');
+            showToast(`${t('apply')} -${coupon.discount}% ${t('success')} 🎉`, 'success');
             return;
         }
 
@@ -345,7 +349,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                 // Kiểm tra mã đã dùng chưa trong UsedCouponModel
                 const token = localStorage.getItem('token');
                 if (!token) {
-                    setDiscountError('Vui lòng đăng nhập để sử dụng mã giảm giá');
+                    setDiscountError(t('please_login_coupon'));
                     setAppliedDiscount(null);
                     return;
                 }
@@ -362,7 +366,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                 if (checkUsedResponse.ok) {
                     const checkData = await checkUsedResponse.json();
                     if (checkData.used) {
-                        setDiscountError('Bạn đã sử dụng mã giảm giá này rồi');
+                        setDiscountError(t('coupon_already_used'));
                         setAppliedDiscount(null);
                         return;
                     }
@@ -385,18 +389,18 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                         isNewsletter: true
                     });
                     setDiscountError('');
-                    showToast(`Áp dụng mã newsletter giảm ${data.discount}% thành công! 🎉`, 'success');
+                    showToast(`${t('apply')} -${data.discount}% ${t('success')} 🎉`, 'success');
                 } else {
-                    setDiscountError(data.message || 'Mã giảm giá không hợp lệ');
+                    setDiscountError(data.message || t('coupon_invalid'));
                     setAppliedDiscount(null);
                 }
             } catch (err) {
                 console.error('Lỗi kiểm tra mã newsletter:', err);
-                setDiscountError('Không thể kiểm tra mã giảm giá');
+                setDiscountError(t('cannot_check_coupon'));
                 setAppliedDiscount(null);
             }
         } else {
-            setDiscountError('Mã giảm giá không hợp lệ');
+            setDiscountError(t('coupon_invalid'));
             setAppliedDiscount(null);
         }
     };
@@ -422,13 +426,13 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
         e.preventDefault();
 
         if (selectedProducts.length === 0) {
-            showToast("Không có sản phẩm nào được chọn!", "warning");
+            showToast(t('no_products_warning'), "warning");
             return;
         }
 
         // Kiểm tra xem user đã có địa chỉ đầy đủ chưa
         if (!user?.address || !user?.city || !user?.district || !user?.ward) {
-            showToast("Vui lòng cập nhật địa chỉ giao hàng trong Hồ sơ của bạn!", "warning");
+            showToast(t('update_address_warning'), "warning");
             setTimeout(() => {
                 navigate('/profile');
             }, 1500);
@@ -436,7 +440,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
         }
 
         if (!fullName || !phone || !address || !city || !district || !ward) {
-            showToast("Vui lòng cập nhật đầy đủ thông tin giao hàng trong Hồ sơ!", "warning");
+            showToast(t('update_full_info'), "warning");
             setTimeout(() => {
                 navigate('/profile');
             }, 1500);
@@ -450,6 +454,24 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
     // Hàm xác nhận và thực sự đặt hàng
     const confirmAndPlaceOrder = async () => {
         setConfirmModalOpen(false);
+
+        // Nếu chọn thanh toán online, mở modal thanh toán
+        if (paymentMethod === 'Online') {
+            setShowOnlinePayment(true);
+            return;
+        }
+
+        await placeOrderToServer();
+    };
+
+    // Xử lý khi thanh toán online thành công
+    const handleOnlinePaymentSuccess = async (paymentData) => {
+        setShowOnlinePayment(false);
+        await placeOrderToServer(paymentData);
+    };
+
+    // Gửi đơn hàng lên server
+    const placeOrderToServer = async (paymentData = null) => {
         setIsSubmitting(true);
 
         try {
@@ -458,7 +480,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
             console.log('🔑 Token:', token ? 'Có token' : 'Không có token');
 
             if (!token) {
-                showToast("Vui lòng đăng nhập lại!", "error");
+                showToast(t('please_login_again'), "error");
                 navigate('/login');
                 return;
             }
@@ -474,7 +496,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                 })),
                 totalAmount: finalAmount, // Dùng finalAmount đã trừ giảm giá và cộng phí ship
                 shippingFee: shippingFee,
-                shippingMethod: selectedShipping.name,
+                shippingMethod: t(selectedShipping.nameKey),
                 discountCode: appliedDiscount?.code || null,
                 discountAmount: discountAmount,
                 shippingInfo: {
@@ -513,7 +535,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                 }
             }
 
-            showToast("Đặt hàng thành công! 🎉", "success");
+            showToast(`${t('order_success')} 🎉`, "success");
 
             // CẬP NHẬT SỐ "ĐÃ BÁN" CHO SẢN PHẨM FLASH SALE
             const flashSaleProducts = JSON.parse(localStorage.getItem('flashSaleProducts') || '[]');
@@ -577,7 +599,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                 borderRadius: '8px'
             }}>
                 <div style={{ fontSize: '40px', marginBottom: '20px' }}>⏳</div>
-                <p style={{ color: '#666' }}>Đang tải...</p>
+                <p style={{ color: '#666' }}>{t('loading')}</p>
             </div>
         );
     }
@@ -586,10 +608,10 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
         return (
             <div className="empty-state container">
                 <div className="empty-icon">🛒</div>
-                <h2 className="empty-title">Chưa có sản phẩm nào được chọn</h2>
-                <p className="empty-description">Vui lòng chọn sản phẩm để thanh toán!</p>
+                <h2 className="empty-title">{t('no_products_selected')}</h2>
+                <p className="empty-description">{t('select_products_hint')}</p>
                 <Link to="/checkout/choseproduct" className="empty-btn">
-                    🛍️ CHỌN SẢN PHẨM
+                    🛍️ {t('select_products_btn')}
                 </Link>
             </div>
         );
@@ -602,7 +624,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                 <div className="image-modal" role="dialog" aria-modal="true" aria-label="Xem ảnh sản phẩm" onClick={() => setImageModalOpen(false)}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                         <button className="modal-close" type="button" aria-label="Đóng ảnh" onClick={() => setImageModalOpen(false)}>
-                            <FiX size={20} /> Đóng
+                            <FiX size={20} /> {t('close')}
                         </button>
                         <img src={selectedImage} alt="Product" className="modal-image" />
                     </div>
@@ -615,51 +637,51 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                     <div className="confirm-modal-content" onClick={(e) => e.stopPropagation()}>
                         <h2 className="confirm-header" id="confirm-modal-title">
                             <FiCheckCircle size={28} color="#22c55e" />
-                            Xác nhận đơn hàng
+                            {t('confirm_order_title')}
                         </h2>
                         <div className="confirm-body">
-                            <p style={{ marginBottom: '16px' }}>Vui lòng kiểm tra lại thông tin đơn hàng của bạn:</p>
+                            <p style={{ marginBottom: '16px' }}>{t('confirm_check_info')}</p>
                             <div className="confirm-summary-item">
-                                <span>Sản phẩm:</span>
-                                <strong>{selectedProducts.length} sản phẩm</strong>
+                                <span>{t('product_col')}:</span>
+                                <strong>{selectedProducts.length} {t('products_unit')}</strong>
                             </div>
                             <div className="confirm-summary-item">
-                                <span>Tạm tính:</span>
+                                <span>{t('subtotal')}</span>
                                 <strong>{formatPrice(totalAmount)}</strong>
                             </div>
                             <div className="confirm-summary-item">
-                                <span>Phí vận chuyển:</span>
+                                <span>{t('shipping_fee_label')}</span>
                                 <strong>{formatPrice(shippingFee)}</strong>
                             </div>
                             {appliedDiscount && (
                                 <div className="confirm-summary-item" style={{ color: 'var(--success)' }}>
-                                    <span>Giảm giá ({appliedDiscount.discount}%):</span>
+                                    <span>{t('discount_code')} ({appliedDiscount.discount}%):</span>
                                     <strong>-{formatPrice(discountAmount)}</strong>
                                 </div>
                             )}
                             <div className="confirm-summary-item" style={{ borderTop: '2px solid var(--accent-primary)', paddingTop: '16px' }}>
-                                <span style={{ fontSize: '18px', fontWeight: '700' }}>Tổng thanh toán:</span>
+                                <span style={{ fontSize: '18px', fontWeight: '700' }}>{t('total_payment')}:</span>
                                 <strong style={{ fontSize: '24px', color: 'var(--accent-primary)' }}>{formatPrice(finalAmount)}</strong>
                             </div>
                             <div className="confirm-summary-item" style={{ border: 'none' }}>
-                                <span>Phương thức thanh toán:</span>
-                                <strong>{paymentMethod === 'COD' ? '💵 Thanh toán khi nhận hàng' : '🏦 Chuyển khoản'}</strong>
+                                <span>{t('payment_method')}:</span>
+                                <strong>{paymentMethod === 'COD' ? `💵 ${t('cod_full')}` : paymentMethod === 'Online' ? `💳 ${t('online_full')}` : `🏦 ${t('banking_full')}`}</strong>
                             </div>
                             <div className="confirm-summary-item" style={{ border: 'none' }}>
-                                <span>Vận chuyển:</span>
-                                <strong>{selectedShipping.name}</strong>
+                                <span>{t('shipping_method_label')}:</span>
+                                <strong>{t(selectedShipping.nameKey)}</strong>
                             </div>
                             <div className="confirm-summary-item" style={{ border: 'none' }}>
-                                <span>Giao dự kiến:</span>
+                                <span>{t('expected_delivery')}</span>
                                 <strong>{getDeliveryRangeText(selectedShipping.id)}</strong>
                             </div>
                         </div>
                         <div className="confirm-actions">
                             <button className="confirm-btn confirm-btn-secondary" type="button" onClick={() => setConfirmModalOpen(false)}>
-                                Hủy
+                                {t('cancel')}
                             </button>
                             <button className="confirm-btn confirm-btn-primary" type="button" onClick={confirmAndPlaceOrder}>
-                                Xác nhận đặt hàng
+                                {t('confirm_order_btn')}
                             </button>
                         </div>
                     </div>
@@ -667,10 +689,10 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
             )}
 
             <div className="checkout-container">
-                <div className="checkout-steps" aria-label="Tiến trình thanh toán">
-                    <div className="checkout-step completed">1. Giỏ hàng</div>
-                    <div className="checkout-step completed">2. Vận chuyển</div>
-                    <div className="checkout-step active">3. Thanh toán</div>
+                <div className="checkout-steps" aria-label={t('payment_step')}>
+                    <div className="checkout-step completed">{t('cart_step')}</div>
+                    <div className="checkout-step completed">{t('shipping_step')}</div>
+                    <div className="checkout-step active">{t('payment_step')}</div>
                 </div>
                 <div className="checkout-wrapper">
                     {/* Left Side - Products List */}
@@ -678,15 +700,15 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                         <div className="checkout-card">
                             <h2 className="section-header">
                                 <span className="section-icon"><FiPackage /></span>
-                                Sản phẩm đã chọn ({selectedProducts.length})
+                                {t('selected_products')} ({selectedProducts.length})
                             </h2>
                             <table className="product-table">
                                 <thead>
                                     <tr>
-                                        <th>Sản Phẩm</th>
-                                        <th style={{ textAlign: 'center' }}>Đơn Giá</th>
-                                        <th style={{ textAlign: 'center' }}>Số Lượng</th>
-                                        <th style={{ textAlign: 'center' }}>Tổng</th>
+                                        <th>{t('product_col')}</th>
+                                        <th style={{ textAlign: 'center' }}>{t('unit_price')}</th>
+                                        <th style={{ textAlign: 'center' }}>{t('quantity_col')}</th>
+                                        <th style={{ textAlign: 'center' }}>{t('total_col')}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -735,11 +757,11 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                         <div className="checkout-card">
                             <h3 className="section-header">
                                 <span className="section-icon"><FiTruck /></span>
-                                Phương thức vận chuyển
+                                {t('shipping_method_label')}
                             </h3>
                             <div className="shipping-info-box">
                                 <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)' }}>
-                                    💡 Chọn phương thức giao hàng phù hợp với bạn
+                                    💡 {t('shipping_hint')}
                                 </p>
                             </div>
                             <div className="shipping-options">
@@ -756,8 +778,8 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                                             onChange={(e) => setShippingMethod(e.target.value)}
                                         />
                                         <div className="shipping-details">
-                                            <div className="shipping-name">{option.name}</div>
-                                            <div className="shipping-time">⏱️ {option.time} • Dự kiến {getDeliveryRangeText(option.id)}</div>
+                                            <div className="shipping-name">{t(option.nameKey)}</div>
+                                            <div className="shipping-time">⏱️ {t(option.timeKey)} • {t('expected_label')} {getDeliveryRangeText(option.id)}</div>
                                         </div>
                                         <div className="shipping-price">{formatPrice(option.price)}</div>
                                     </label>
@@ -771,21 +793,21 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                         <div className="checkout-card">
                             <h3 className="section-header">
                                 <span className="section-icon">💰</span>
-                                Thanh toán
+                                {t('payment_title')}
                             </h3>
 
                             <div className="summary-row">
-                                <span className="summary-label">Tạm tính:</span>
+                                <span className="summary-label">{t('subtotal')}</span>
                                 <span className="summary-value">{formatPrice(totalAmount)}</span>
                             </div>
 
                             <div className="summary-row">
-                                <span className="summary-label">Phí vận chuyển:</span>
+                                <span className="summary-label">{t('shipping_fee_label')}</span>
                                 <span className="summary-value">{formatPrice(shippingFee)}</span>
                             </div>
 
                             <div className="summary-row">
-                                <span className="summary-label">Giao dự kiến:</span>
+                                <span className="summary-label">{t('expected_delivery')}</span>
                                 <span className="summary-value">{getDeliveryRangeText(selectedShipping.id)}</span>
                             </div>
 
@@ -793,7 +815,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                             <div className="discount-section">
                                 <div className="discount-header">
                                     <h4 className="discount-title">
-                                        🎟️ Mã giảm giá
+                                        🎟️ {t('discount_code_label')}
                                     </h4>
                                     {myCoupons.length > 0 && !appliedDiscount && (
                                         <button
@@ -801,7 +823,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                                             onClick={() => setShowCouponList(!showCouponList)}
                                             className="view-coupons-btn"
                                         >
-                                            {showCouponList ? 'Ẩn' : `${myCoupons.filter(c => !usedCoupons.includes(c)).length} mã`}
+                                            {showCouponList ? t('hide_btn') : `${myCoupons.filter(c => !usedCoupons.includes(c)).length} ${t('codes_count')}`}
                                         </button>
                                     )}
                                 </div>
@@ -814,7 +836,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                                         if (availableCoupons.length === 0) {
                                             return (
                                                 <div className="coupon-list" style={{ textAlign: 'center', color: 'var(--text-tertiary)' }}>
-                                                    😔 Bạn đã sử dụng hết mã giảm giá
+                                                    😔 {t('used_all_coupons')}
                                                 </div>
                                             );
                                         }
@@ -830,10 +852,10 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                                                         <div className="coupon-info">
                                                             <div className="coupon-code">{coupon}</div>
                                                             <div className="coupon-desc">
-                                                                {coupon.startsWith('NEWS10') ? 'Mã từ đăng ký nhận tin' : 'Mã giảm giá'}
+                                                                {coupon.startsWith('NEWS10') ? t('coupon_from_newsletter') : t('discount_code_text')}
                                                             </div>
                                                         </div>
-                                                        <button className="coupon-select-btn">Chọn</button>
+                                                        <button className="coupon-select-btn">{t('select_btn')}</button>
                                                     </div>
                                                 ))}
                                             </div>
@@ -844,7 +866,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                                 <div className="discount-input-wrapper">
                                     <input
                                         type="text"
-                                        placeholder="Nhập mã giảm giá"
+                                        placeholder={t('enter_discount')}
                                         value={discountCode}
                                         onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
                                         disabled={appliedDiscount !== null}
@@ -856,7 +878,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                                             onClick={removeDiscount}
                                             className="remove-btn"
                                         >
-                                            Xóa
+                                            {t('delete')}
                                         </button>
                                     ) : (
                                         <button
@@ -865,7 +887,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                                             onClick={applyDiscountCode}
                                             className="apply-btn"
                                         >
-                                            Áp dụng
+                                            {t('apply')}
                                         </button>
                                     )}
                                 </div>
@@ -886,15 +908,15 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
 
                             {appliedDiscount && (
                                 <div className="summary-row">
-                                    <span className="summary-label summary-discount">Giảm giá ({appliedDiscount.discount}%):</span>
+                                    <span className="summary-label summary-discount">{t('discount_code')} ({appliedDiscount.discount}%):</span>
                                     <span className="summary-value summary-discount">-{formatPrice(discountAmount)}</span>
                                 </div>
                             )}
 
                             <div className="summary-row summary-total">
                                 <div className="summary-label">
-                                    Tổng thanh toán
-                                    <span className="item-count">({selectedProducts.length} sản phẩm)</span>
+                                    {t('total_payment')}
+                                    <span className="item-count">({selectedProducts.length} {t('products_unit')})</span>
                                 </div>
                                 <span className="summary-value">{formatPrice(finalAmount)}</span>
                             </div>
@@ -903,12 +925,12 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                             <div className="shipping-section">
                                 <h3 className="section-header" style={{ fontSize: '16px', marginBottom: '16px' }}>
                                     <span className="section-icon">📦</span>
-                                    Thông tin nhận hàng
+                                    {t('receiver_info')}
                                 </h3>
 
                                 <form onSubmit={handlePayment}>
                                     <div className="form-group">
-                                        <label className="form-label">Họ và tên *</label>
+                                        <label className="form-label">{t('full_name_star')}</label>
                                         <input
                                             type="text"
                                             className="form-input"
@@ -918,7 +940,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                                     </div>
 
                                     <div className="form-group">
-                                        <label className="form-label">Số điện thoại *</label>
+                                        <label className="form-label">{t('phone_star')}</label>
                                         <input
                                             type="tel"
                                             className="form-input"
@@ -928,7 +950,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                                     </div>
 
                                     <div className="form-group">
-                                        <label className="form-label">Địa chỉ *</label>
+                                        <label className="form-label">{t('address_star')}</label>
                                         <input
                                             type="text"
                                             className="form-input"
@@ -936,29 +958,29 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                                             readOnly
                                         />
                                         <p className="form-hint">
-                                            💡 Để thay đổi địa chỉ, vui lòng cập nhật trong <a href="/profile">Hồ sơ của bạn</a>
+                                            💡 {t('address_hint')} <a href="/profile">{t('your_profile_link')}</a>
                                         </p>
                                     </div>
 
                                     <div className="form-row">
                                         <div className="form-group">
-                                            <label className="form-label">Phường/Xã *</label>
+                                            <label className="form-label">{t('ward_star')}</label>
                                             <input type="text" className="form-input" value={ward} readOnly />
                                         </div>
                                         <div className="form-group">
-                                            <label className="form-label">Quận/Huyện *</label>
+                                            <label className="form-label">{t('district_star')}</label>
                                             <input type="text" className="form-input" value={district} readOnly />
                                         </div>
                                     </div>
 
                                     <div className="form-group">
-                                        <label className="form-label">Tỉnh/Thành phố *</label>
+                                        <label className="form-label">{t('city_star')}</label>
                                         <input type="text" className="form-input" value={city} readOnly />
                                     </div>
 
                                     {/* Payment Methods */}
                                     <div className="form-group">
-                                        <label className="form-label">Phương thức thanh toán</label>
+                                        <label className="form-label">{t('payment_method')}</label>
                                         <div className="payment-methods">
                                             <label className={`payment-option ${paymentMethod === 'COD' ? 'selected' : ''}`}>
                                                 <input
@@ -968,7 +990,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                                                     checked={paymentMethod === 'COD'}
                                                     onChange={(e) => setPaymentMethod(e.target.value)}
                                                 />
-                                                <span className="payment-label">💵 Thanh toán khi nhận hàng (COD)</span>
+                                                <span className="payment-label">💵 {t('cod_full')}</span>
                                             </label>
                                             <label className={`payment-option ${paymentMethod === 'Banking' ? 'selected' : ''}`}>
                                                 <input
@@ -978,7 +1000,17 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                                                     checked={paymentMethod === 'Banking'}
                                                     onChange={(e) => setPaymentMethod(e.target.value)}
                                                 />
-                                                <span className="payment-label">🏦 Chuyển khoản ngân hàng</span>
+                                                <span className="payment-label">🏦 {t('banking_full')}</span>
+                                            </label>
+                                            <label className={`payment-option ${paymentMethod === 'Online' ? 'selected' : ''}`}>
+                                                <input
+                                                    type="radio"
+                                                    name="payment"
+                                                    value="Online"
+                                                    checked={paymentMethod === 'Online'}
+                                                    onChange={(e) => setPaymentMethod(e.target.value)}
+                                                />
+                                                <span className="payment-label">💳 {t('online_full')}</span>
                                             </label>
                                         </div>
                                     </div>
@@ -987,8 +1019,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                                     <div className="security-notice">
                                         <div className="security-icon"><FiShield /></div>
                                         <p className="security-text">
-                                            <strong>Bảo mật thông tin:</strong> Thông tin của bạn được mã hóa và bảo mật tuyệt đối.
-                                            Chúng tôi cam kết không chia sẻ dữ liệu cá nhân với bên thứ ba.
+                                            <strong>{t('security_title')}</strong> {t('security_desc')}
                                         </p>
                                     </div>
 
@@ -1001,11 +1032,11 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                                             {isSubmitting ? (
                                                 <>
                                                     <span className="loading-spinner"></span>
-                                                    Đang xử lý...
+                                                    {t('processing_order')}
                                                 </>
                                             ) : (
                                                 <>
-                                                    🎉 Đặt hàng ngay ({selectedProducts.length} sản phẩm)
+                                                    🎉 {t('place_order_now')} ({selectedProducts.length} {t('products_unit')})
                                                 </>
                                             )}
                                         </span>
@@ -1016,6 +1047,15 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                     </div>
                 </div>
             </div>
+
+            {/* Modal Thanh toán Online */}
+            {showOnlinePayment && (
+                <OnlinePaymentModal
+                    amount={finalAmount}
+                    onSuccess={handleOnlinePaymentSuccess}
+                    onClose={() => setShowOnlinePayment(false)}
+                />
+            )}
         </>
     );
 }

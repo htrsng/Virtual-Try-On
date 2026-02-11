@@ -11,25 +11,27 @@ import {
     FiMapPin,
     FiShoppingBag
 } from 'react-icons/fi';
+import { useLanguage } from '../contexts/LanguageContext';
 import './Footer.css';
 
 function Footer() {
     const currentYear = new Date().getFullYear();
+    const { t } = useLanguage();
 
     const footerLinks = {
         customerService: [
-            { name: 'Trung tâm trợ giúp', path: '/help' },
-            { name: 'Hướng dẫn mua hàng', path: '/guide' },
-            { name: 'Hướng dẫn bán hàng', path: '/sell-guide' },
-            { name: 'Thanh toán', path: '/payment' },
-            { name: 'Vận chuyển', path: '/shipping' },
-            { name: 'Chính sách đổi trả', path: '/return-policy' }
+            { name: t('help_center_link'), path: '/help' },
+            { name: t('buy_guide'), path: '/guide' },
+            { name: t('sell_guide'), path: '/sell-guide' },
+            { name: t('payment_link'), path: '/payment' },
+            { name: t('shipping_link'), path: '/shipping' },
+            { name: t('return_policy'), path: '/return-policy' }
         ],
         about: [
-            { name: 'Giới thiệu Shopee Fashion', path: '/about' },
-            { name: 'Điều khoản', path: '/terms' },
-            { name: 'Chính sách bảo mật', path: '/privacy' },
-            { name: 'Chính sách cookie', path: '/cookies' },
+            { name: t('intro_shopee'), path: '/about' },
+            { name: t('terms'), path: '/terms' },
+            { name: t('privacy_policy'), path: '/privacy' },
+            { name: t('cookie_policy'), path: '/cookies' },
         ],
         categories: [
             { name: 'Thời trang nữ', path: '/category/women' },
@@ -71,7 +73,7 @@ function Footer() {
                                 <h3>Shopee Fashion</h3>
                             </div>
                             <p className="footer-description">
-                                Nền tảng thương mại điện tử hàng đầu Việt Nam, mang đến trải nghiệm mua sắm tuyệt vời với hàng triệu sản phẩm chất lượng.
+                                {t('footer_desc')}
                             </p>
                             <div className="footer-contact">
                                 <div className="contact-item">
@@ -97,7 +99,7 @@ function Footer() {
                             viewport={{ once: true }}
                             transition={{ duration: 0.6, delay: 0.2 }}
                         >
-                            <h4 className="footer-title">Chăm sóc khách hàng</h4>
+                            <h4 className="footer-title">{t('customer_service')}</h4>
                             <ul className="footer-links">
                                 {footerLinks.customerService.map((link, index) => (
                                     <li key={index}>
@@ -115,7 +117,7 @@ function Footer() {
                             viewport={{ once: true }}
                             transition={{ duration: 0.6, delay: 0.3 }}
                         >
-                            <h4 className="footer-title">Về Shopee Fashion</h4>
+                            <h4 className="footer-title">{t('about_shopee')}</h4>
                             <ul className="footer-links">
                                 {footerLinks.about.map((link, index) => (
                                     <li key={index}>
@@ -135,7 +137,7 @@ function Footer() {
                 <div className="container">
                     <div className="footer-bottom-content">
                         <div className="footer-social">
-                            <span>Kết nối với chúng tôi:</span>
+                            <span>{t('connect_with_us')}</span>
                             <div className="social-links">
                                 {socialLinks.map((social, index) => (
                                     <motion.a
@@ -156,7 +158,7 @@ function Footer() {
                         </div>
 
                         <div className="footer-payment">
-                            <span>Phương thức thanh toán:</span>
+                            <span>{t('payment_methods_label')}</span>
                             <div className="payment-methods">
                                 {paymentMethods.map((method, index) => (
                                     <div key={index} className="payment-badge">
@@ -168,8 +170,8 @@ function Footer() {
                     </div>
 
                     <div className="footer-copyright">
-                        <p>© {currentYear} Shopee Fashion. Bản quyền thuộc về Công ty TNHH Shopee Fashion Việt Nam.</p>
-                        <p className="footer-country">Quốc gia & Khu vực:
+                        <p>© {currentYear} Shopee Fashion. {t('copyright')}</p>
+                        <p className="footer-country">{t('country_region')}
                             <a href="#sg">Singapore</a> |
                             <a href="#id">Indonesia</a> |
                             <a href="#th">Thái Lan</a> |

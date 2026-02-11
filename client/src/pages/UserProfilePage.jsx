@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import MapPicker from '../components/MapPicker';
+import OrderTracking from '../components/OrderTracking';
 import { getCities, getDistricts, getWards } from '../data/vietnamAddress';
 import axios from 'axios';
 
 function UserProfilePage({ showToast }) {
     const navigate = useNavigate();
     const { user, isAuthenticated, updateProfile } = useAuth();
+    const { t } = useLanguage();
 
     const [activeTab, setActiveTab] = useState('profile'); // profile, orders
     const [orders, setOrders] = useState([]);
@@ -61,7 +64,7 @@ function UserProfilePage({ showToast }) {
 
     useEffect(() => {
         if (!isAuthenticated) {
-            showToast("Vui lòng đăng nhập để xem trang này!", "warning");
+            showToast(t('please_login_page'), "warning");
             navigate('/login');
             return;
         }
@@ -92,14 +95,14 @@ function UserProfilePage({ showToast }) {
             setOrders(response.data);
         } catch (error) {
             console.error('Lỗi lấy đơn hàng:', error);
-            showToast('Không thể tải đơn hàng', 'error');
+            showToast(t('cannot_load_orders'), 'error');
         } finally {
             setLoadingOrders(false);
         }
     };
 
     const handleCancelOrder = async (orderId) => {
-        if (!window.confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')) {
+        if (!window.confirm(t('confirm_cancel'))) {
             return;
         }
 
@@ -115,7 +118,7 @@ function UserProfilePage({ showToast }) {
                 }
             );
 
-            showToast('Đã hủy đơn hàng thành công', 'success');
+            showToast(t('cancel_success'), 'success');
             fetchOrders(); // Reload danh sách đơn hàng
         } catch (error) {
             console.error('Lỗi hủy đơn hàng:', error);
@@ -125,7 +128,7 @@ function UserProfilePage({ showToast }) {
     };
 
     const handleDeleteOrder = async (orderId) => {
-        if (!window.confirm('Bạn có chắc chắn muốn xóa đơn hàng này?')) {
+        if (!window.confirm(t('confirm_delete'))) {
             return;
         }
 
@@ -137,7 +140,7 @@ function UserProfilePage({ showToast }) {
                 }
             });
 
-            showToast('Đã xóa đơn hàng thành công', 'success');
+            showToast(t('delete_success'), 'success');
             fetchOrders(); // Reload danh sách đơn hàng
         } catch (error) {
             console.error('Lỗi xóa đơn hàng:', error);
@@ -166,7 +169,7 @@ function UserProfilePage({ showToast }) {
             state: { selectedProducts }
         });
 
-        showToast('Đã thêm sản phẩm vào giỏ hàng!', 'success');
+        showToast(t('added_to_cart_msg'), 'success');
     };
 
     const handleUpdateProfile = async (e) => {
@@ -233,13 +236,13 @@ function UserProfilePage({ showToast }) {
                         onClick={() => setActiveTab('profile')}
                         className={`user-profile-tab ${activeTab === 'profile' ? 'active' : ''}`}
                     >
-                        📝 Thông tin cá nhân
+                        📝 {t('personal_info')}
                     </button>
                     <button
                         onClick={() => setActiveTab('orders')}
                         className={`user-profile-tab ${activeTab === 'orders' ? 'active' : ''}`}
                     >
-                        📦 Đơn hàng của tôi ({orders.length})
+                        📦 {t('my_orders_tab')} ({orders.length})
                     </button>
                 </div>
 
@@ -248,12 +251,12 @@ function UserProfilePage({ showToast }) {
                     {activeTab === 'profile' && (
                         <div>
                             <div className="profile-section-header">
-                                <h3 className="profile-section-title">Thông tin cá nhân</h3>
+                                <h3 className="profile-section-title">{t('personal_info')}</h3>
                                 <button
                                     onClick={() => setIsEditing(!isEditing)}
                                     className={`profile-edit-btn ${isEditing ? 'danger' : ''}`}
                                 >
-                                    {isEditing ? '❌ Hủy' : '✏️ Chỉnh sửa'}
+                                    {isEditing ? `❌ ${t('cancel')}` : `✏️ ${t('edit')}`}
                                 </button>
                             </div>
 
@@ -261,7 +264,7 @@ function UserProfilePage({ showToast }) {
                                 <div className="profile-grid">
                                     <div className="profile-field">
                                         <label className="profile-label">
-                                            Họ và tên
+                                            {t('full_name')}
                                         </label>
                                         <input
                                             type="text"
@@ -274,7 +277,7 @@ function UserProfilePage({ showToast }) {
 
                                     <div className="profile-field">
                                         <label className="profile-label">
-                                            Số điện thoại
+                                            {t('phone')}
                                         </label>
                                         <input
                                             type="tel"
@@ -287,7 +290,7 @@ function UserProfilePage({ showToast }) {
 
                                     <div className="profile-field">
                                         <label className="profile-label">
-                                            Tỉnh/Thành phố <span style={{ color: 'red' }}>*</span>
+                                            {t('city')} <span style={{ color: 'red' }}>*</span>
                                         </label>
                                         <select
                                             value={city}
@@ -295,7 +298,7 @@ function UserProfilePage({ showToast }) {
                                             disabled={!isEditing}
                                             className="profile-select"
                                         >
-                                            <option value="">-- Chọn Tỉnh/Thành phố --</option>
+                                            <option value="">{t('select_city')}</option>
                                             {cities.map(c => (
                                                 <option key={c} value={c}>{c}</option>
                                             ))}
@@ -304,7 +307,7 @@ function UserProfilePage({ showToast }) {
 
                                     <div className="profile-field">
                                         <label className="profile-label">
-                                            Quận/Huyện <span style={{ color: 'red' }}>*</span>
+                                            {t('district')} <span style={{ color: 'red' }}>*</span>
                                         </label>
                                         <select
                                             value={district}
@@ -312,7 +315,7 @@ function UserProfilePage({ showToast }) {
                                             disabled={!isEditing || !city}
                                             className="profile-select"
                                         >
-                                            <option value="">-- Chọn Quận/Huyện --</option>
+                                            <option value="">{t('select_district')}</option>
                                             {districts.map(d => (
                                                 <option key={d} value={d}>{d}</option>
                                             ))}
@@ -321,7 +324,7 @@ function UserProfilePage({ showToast }) {
 
                                     <div className="profile-field">
                                         <label className="profile-label">
-                                            Phường/Xã <span style={{ color: 'red' }}>*</span>
+                                            {t('ward')} <span style={{ color: 'red' }}>*</span>
                                         </label>
                                         <select
                                             value={ward}
@@ -329,7 +332,7 @@ function UserProfilePage({ showToast }) {
                                             disabled={!isEditing || !district}
                                             className="profile-select"
                                         >
-                                            <option value="">-- Chọn Phường/Xã --</option>
+                                            <option value="">{t('select_ward')}</option>
                                             {wards.map(w => (
                                                 <option key={w} value={w}>{w}</option>
                                             ))}
@@ -338,7 +341,7 @@ function UserProfilePage({ showToast }) {
 
                                     <div className="profile-field full">
                                         <label className="profile-label">
-                                            Số nhà, tên đường <span style={{ color: 'red' }}>*</span>
+                                            {t('street_address')} <span style={{ color: 'red' }}>*</span>
                                         </label>
                                         <div className="profile-input-wrapper">
                                             <input
@@ -346,7 +349,7 @@ function UserProfilePage({ showToast }) {
                                                 value={address}
                                                 onChange={(e) => setAddress(e.target.value)}
                                                 disabled={!isEditing}
-                                                placeholder={isEditing ? "Ví dụ: Số 123, Đường Nguyễn Văn A" : ""}
+                                                placeholder={isEditing ? t('street_placeholder') : ""}
                                                 className={`profile-input ${!isEditing && address ? 'has-action' : ''}`}
                                             />
                                             {!isEditing && address && city && district && ward && (
@@ -354,7 +357,7 @@ function UserProfilePage({ showToast }) {
                                                     type="button"
                                                     onClick={() => setShowMapPicker(!showMapPicker)}
                                                     className="profile-map-btn"
-                                                    title="Xem vị trí trên bản đồ"
+                                                    title={t('view_on_map')}
                                                 >
                                                     📍
                                                 </button>
@@ -373,7 +376,7 @@ function UserProfilePage({ showToast }) {
                                         type="submit"
                                         className="profile-save-btn"
                                     >
-                                        💾 Lưu thông tin
+                                        💾 {t('save_info')}
                                     </button>
                                 )}
                             </form>
@@ -382,21 +385,21 @@ function UserProfilePage({ showToast }) {
 
                     {activeTab === 'orders' && (
                         <div>
-                            <h3 className="profile-section-title">Đơn hàng của tôi</h3>
+                            <h3 className="profile-section-title">{t('my_orders_tab')}</h3>
 
                             {loadingOrders ? (
                                 <div className="profile-orders-loading">
-                                    Đang tải đơn hàng...
+                                    {t('loading_orders')}
                                 </div>
                             ) : orders.length === 0 ? (
                                 <div className="profile-orders-empty">
                                     <div className="profile-orders-empty-icon">📦</div>
-                                    <p>Bạn chưa có đơn hàng nào</p>
+                                    <p>{t('no_orders_yet')}</p>
                                     <button
                                         onClick={() => navigate('/')}
                                         className="profile-orders-cta"
                                     >
-                                        🛍️ Mua sắm ngay
+                                        🛍️ {t('shop_now')}
                                     </button>
                                 </div>
                             ) : (
@@ -410,7 +413,7 @@ function UserProfilePage({ showToast }) {
                                             <div className="profile-order-header">
                                                 <div className="profile-order-meta">
                                                     <span className="profile-order-id">
-                                                        Đơn hàng: #{order._id.slice(-8)}
+                                                        {t('order_label')} #{order._id.slice(-8)}
                                                     </span>
                                                     <span className="profile-order-date">
                                                         {formatDate(order.createdAt)}
@@ -423,6 +426,9 @@ function UserProfilePage({ showToast }) {
                                                     {order.status}
                                                 </div>
                                             </div>
+
+                                            {/* Theo dõi đơn hàng */}
+                                            <OrderTracking status={order.status} />
 
                                             {/* Order Products */}
                                             <div className="profile-order-body">
@@ -441,7 +447,7 @@ function UserProfilePage({ showToast }) {
                                                                 {product.name}
                                                             </div>
                                                             <div className="profile-order-qty">
-                                                                Số lượng: {product.quantity}
+                                                                {t('quantity_label')} {product.quantity}
                                                             </div>
                                                         </div>
                                                         <div className="profile-order-price">
@@ -453,7 +459,7 @@ function UserProfilePage({ showToast }) {
                                                 {/* Order Total */}
                                                 <div className="profile-order-total">
                                                     <span className="profile-order-total-label">
-                                                        Tổng tiền:
+                                                        {t('total_amount_label')}
                                                     </span>
                                                     <span className="profile-order-total-value">
                                                         {formatPrice(order.totalAmount)}
@@ -463,7 +469,7 @@ function UserProfilePage({ showToast }) {
                                                 {/* Shipping Info */}
                                                 <div className="profile-shipping">
                                                     <div className="profile-shipping-title">
-                                                        📍 Thông tin giao hàng
+                                                        📍 {t('shipping_info_title')}
                                                     </div>
                                                     <div>👤 {order.shippingInfo.fullName}</div>
                                                     <div>📞 {order.shippingInfo.phone}</div>
@@ -478,7 +484,7 @@ function UserProfilePage({ showToast }) {
                                                             onClick={() => handleCancelOrder(order._id)}
                                                             className="btn-danger"
                                                         >
-                                                            ❌ Hủy đơn hàng
+                                                            ❌ {t('cancel_order')}
                                                         </button>
                                                     </div>
                                                 )}
@@ -490,13 +496,13 @@ function UserProfilePage({ showToast }) {
                                                             onClick={() => handleReorder(order)}
                                                             className="btn-success"
                                                         >
-                                                            🔄 Đặt lại
+                                                            🔄 {t('reorder_btn')}
                                                         </button>
                                                         <button
                                                             onClick={() => handleDeleteOrder(order._id)}
                                                             className="btn-muted"
                                                         >
-                                                            🗑️ Xóa đơn hàng
+                                                            🗑️ {t('delete_order_btn')}
                                                         </button>
                                                     </div>
                                                 )}

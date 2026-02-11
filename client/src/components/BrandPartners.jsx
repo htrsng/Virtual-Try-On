@@ -1,7 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '../contexts/LanguageContext';
 
 function BrandPartners() {
+    const { t } = useLanguage();
     const brands = [
         {
             id: 1,
@@ -70,8 +72,8 @@ function BrandPartners() {
                     transition={{ duration: 0.6 }}
                     className="section-header"
                 >
-                    <h2 className="section-title gradient-text">🤝 Đối Tác Thương Hiệu</h2>
-                    <p className="section-subtitle">Hợp tác với các thương hiệu hàng đầu thế giới</p>
+                    <h2 className="section-title gradient-text">{t('brand_partners_title')}</h2>
+                    <p className="section-subtitle">{t('brand_partners_subtitle')}</p>
                 </motion.div>
 
                 <motion.div

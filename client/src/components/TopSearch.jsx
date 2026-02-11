@@ -1,8 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
 
 function TopSearch({ products }) {
     const navigate = useNavigate();
+    const { t } = useLanguage();
 
     const handleProductClick = (item) => {
         navigate('/top-products', { state: { selectedCategory: item.category } });
@@ -11,7 +13,7 @@ function TopSearch({ products }) {
     return (
         <div className="top-search-section">
             <div className="top-header">
-                <div className="top-title">TÌM KIẾM HÀNG ĐẦU</div>
+                <div className="top-title">{t('top_search_title')}</div>
             </div>
             <div className="top-grid">
                 {/* Kiểm tra mảng tồn tại và có dữ liệu */}
@@ -36,7 +38,7 @@ function TopSearch({ products }) {
                                 }}
                             />
 
-                            <div className="sales-bar">Đã bán {item.sold}</div>
+                            <div className="sales-bar">{t('sold_count_monthly')} {item.sold}</div>
                         </div>
                         <div className="top-item-name">{item.name}</div>
                     </div>

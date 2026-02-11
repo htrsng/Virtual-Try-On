@@ -6,8 +6,10 @@ import 'swiper/css/pagination';
 import 'swiper/css/effect-coverflow';
 import { motion } from 'framer-motion';
 import { FiStar } from 'react-icons/fi';
+import { useLanguage } from '../contexts/LanguageContext';
 
 function ReviewCarousel() {
+    const { t } = useLanguage();
     const reviews = [
         {
             id: 1,
@@ -77,8 +79,8 @@ function ReviewCarousel() {
                     transition={{ duration: 0.6 }}
                     className="section-header"
                 >
-                    <h2 className="section-title gradient-text">💬 Khách Hàng Nói Gì Về Chúng Tôi</h2>
-                    <p className="section-subtitle">Hơn 100,000+ khách hàng hài lòng</p>
+                    <h2 className="section-title gradient-text">{t('customer_reviews_title')}</h2>
+                    <p className="section-subtitle">{t('customer_reviews_subtitle')}</p>
                 </motion.div>
 
                 <Swiper
@@ -154,7 +156,7 @@ function ReviewCarousel() {
                                 )}
 
                                 <div className="review-footer">
-                                    <span className="review-product">Sản phẩm: {review.product}</span>
+                                    <span className="review-product">{t('review_product_label')} {review.product}</span>
                                     <span className="review-date">{review.date}</span>
                                 </div>
                             </motion.div>

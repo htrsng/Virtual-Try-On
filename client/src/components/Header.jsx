@@ -5,6 +5,9 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useWishlist } from '../contexts/WishlistContext';
 import { useCompare } from '../contexts/CompareContext';
 import { FiShoppingCart, FiUser, FiLogOut, FiHeart, FiSearch, FiSun, FiMoon, FiRepeat, FiX } from 'react-icons/fi';
+import NotificationBell from './NotificationBell';
+import LanguageSwitcher from './LanguageSwitcher';
+import { useLanguage } from '../contexts/LanguageContext';
 import logo from '../assets/logo.svg';
 
 function Header({ cartCount, onSearch, showToast }) {
@@ -15,6 +18,7 @@ function Header({ cartCount, onSearch, showToast }) {
     const { theme, toggleTheme } = useTheme();
     const { wishlistCount } = useWishlist();
     const { compareCount } = useCompare();
+    const { t } = useLanguage();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -76,26 +80,28 @@ function Header({ cartCount, onSearch, showToast }) {
                 <Link to="/" className="logo">
                     <img src={logo} alt="Beauty Clothes" className="brand-logo" />
                 </Link>
-                
+
                 <div className="search-box">
                     <FiSearch className="search-icon" />
                     <input
                         type="text"
                         className="search-input"
-                        placeholder="Tìm sản phẩm, thương hiệu..."
+                        placeholder={t('search_placeholder')}
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         onKeyDown={handleKeyDown}
                     />
                     {inputValue && (
-                        <button className="clear-search-btn" onClick={handleClearSearch} title="Xóa">
+                        <button className="clear-search-btn" onClick={handleClearSearch} title={t('close')}>
                             <FiX />
                         </button>
                     )}
-                    <button className="search-btn" onClick={handleSearchClick}>Tìm kiếm</button>
+                    <button className="search-btn" onClick={handleSearchClick}>{t('search_btn')}</button>
                 </div>
 
                 <div className="header-actions">
+                    <LanguageSwitcher />
+
                     <button
                         className="icon-btn theme-toggle"
                         onClick={toggleTheme}
@@ -106,13 +112,14 @@ function Header({ cartCount, onSearch, showToast }) {
 
                     {isAuthenticated && (
                         <>
-                            <Link to="/wishlist" className="icon-btn" title="Yêu thích">
+                            <NotificationBell />
+                            <Link to="/wishlist" className="icon-btn" title={t('wishlist')}>
                                 <div style={{ position: 'relative' }}>
                                     <FiHeart size={20} />
                                     {wishlistCount > 0 && <span className="cart-badge">{wishlistCount}</span>}
                                 </div>
                             </Link>
-                            <Link to="/compare" className="icon-btn" title="So sánh">
+                            <Link to="/compare" className="icon-btn" title={t('compare')}>
                                 <div style={{ position: 'relative' }}>
                                     <FiRepeat size={20} />
                                     {compareCount > 0 && <span className="cart-badge">{compareCount}</span>}
@@ -129,21 +136,21 @@ function Header({ cartCount, onSearch, showToast }) {
                             </Link>
                             {user?.role === 'admin' && (
                                 <Link to="/admin" className="admin-btn">
-                                    ⚙️ QUẢN TRỊ
+                                    ⚙️ {t('admin')}
                                 </Link>
                             )}
                             <button className="user-action logout-btn" onClick={handleLogout}>
                                 <FiLogOut />
-                                <span>Đăng Xuất</span>
+                                <span>{t('logout')}</span>
                             </button>
                         </>
                     ) : (
                         <>
                             <Link to="/login" state={{ mode: 'register' }} className="header-link">
-                                📝 Đăng Ký
+                                📝 {t('register')}
                             </Link>
                             <Link to="/login" state={{ mode: 'login' }} className="header-link">
-                                🔑 Đăng Nhập
+                                🔑 {t('login')}
                             </Link>
                         </>
                     )}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 // --- 1. IMPORT CÁC COMPONENT CỦA WEB BÁN HÀNG ---
@@ -6,25 +6,28 @@ import { MODEL_INJECTION } from './data/ThreeDConfig';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
-import HomePage from './pages/HomePage';
-import CategoryPage from './pages/CategoryPage';
-import TopProductsPage from './pages/TopProductsPage';
-import FlashSalePage from './pages/FlashSalePage';
-import LoginPage from './pages/LoginPage';
-import CheckoutPage from './pages/CheckoutPage';
-import CheckoutSelectPage from './pages/CheckoutSelectPage';
-import ProductDetailPage from './pages/ProductDetailPage';
-import OrderPage from './pages/OrderPage';
-import AdminPage from './pages/AdminPage';
-import UserProfilePage from './pages/UserProfilePage';
-import HelpPage from './pages/HelpPage';
-import AboutPage from './pages/AboutPage';
-import SearchResultsPage from './pages/SearchResultsPage';
-import PolicyPage from './pages/PolicyPage';
-import BannerContentPage from './pages/BannerContentPage';
-import WishlistPage from './pages/WishlistPage';
-import ComparePage from './pages/ComparePage';
 import Toast from './components/Toast';
+import ChatWidget from './components/ChatWidget';
+
+// --- LAZY LOAD CÁC TRANG (Performance Optimization) ---
+const HomePage = lazy(() => import('./pages/HomePage'));
+const CategoryPage = lazy(() => import('./pages/CategoryPage'));
+const TopProductsPage = lazy(() => import('./pages/TopProductsPage'));
+const FlashSalePage = lazy(() => import('./pages/FlashSalePage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
+const CheckoutSelectPage = lazy(() => import('./pages/CheckoutSelectPage'));
+const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'));
+const OrderPage = lazy(() => import('./pages/OrderPage'));
+const AdminPage = lazy(() => import('./pages/AdminPage'));
+const UserProfilePage = lazy(() => import('./pages/UserProfilePage'));
+const HelpPage = lazy(() => import('./pages/HelpPage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
+const SearchResultsPage = lazy(() => import('./pages/SearchResultsPage'));
+const PolicyPage = lazy(() => import('./pages/PolicyPage'));
+const BannerContentPage = lazy(() => import('./pages/BannerContentPage'));
+const WishlistPage = lazy(() => import('./pages/WishlistPage'));
+const ComparePage = lazy(() => import('./pages/ComparePage'));
 
 // --- 2. IMPORT TÍNH NĂNG 3D (MỚI) ---
 import VirtualTryOnController from "./features/virtual-tryon/VirtualTryOnController";
@@ -34,10 +37,27 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { WishlistProvider } from './contexts/WishlistContext';
 import { CompareProvider } from './contexts/CompareContext';
+import { LanguageProvider } from './contexts/LanguageContext';
 
 // --- 4. IMPORT DỮ LIỆU MẪU (INITIAL DATA) ---
 import { initTopSearch, fallbackSuggestions, initCategories, initBanners } from './data/initialData';
 import { initFlashSaleProducts } from './data/flashSaleData';
+
+// --- LOADING FALLBACK COMPONENT ---
+const PageLoader = () => (
+  <div style={{
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    minHeight: '60vh', flexDirection: 'column', gap: '16px',
+  }}>
+    <div style={{
+      width: '48px', height: '48px', borderRadius: '50%',
+      border: '4px solid #f0f0f0', borderTopColor: '#ee4d2d',
+      animation: 'spin 1s linear infinite',
+    }} />
+    <span style={{ color: '#999', fontSize: '14px' }}>Đang tải...</span>
+    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+  </div>
+);
 
 const formatPrice = (price: any) => {
   if (typeof price === 'string') return price;
@@ -391,6 +411,7 @@ function App() {
       <AuthProvider>
         <WishlistProvider>
           <CompareProvider>
+            <LanguageProvider>
             <BrowserRouter>
           <ScrollToTop />
           <div>
@@ -402,6 +423,7 @@ function App() {
             />
 
             {/* --- CẤU HÌNH ROUTER (ĐỊNH TUYẾN) --- */}
+            <Suspense fallback={<PageLoader />}>
             <Routes>
               {/* 1. TRANG CHỦ */}
               <Route path="/" element={
@@ -508,14 +530,19 @@ function App() {
               <Route path="/cookies" element={<PolicyPage />} />
 
             </Routes>
+            </Suspense>
 
             {/* Thông báo (Toast) hiển thị đè lên trên cùng */}
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+
+            {/* Chat Widget - Hiển thị trên mọi trang */}
+            <ChatWidget />
 
             {/* Footer luôn hiển thị ở cuối */}
             <Footer />
           </div>
         </BrowserRouter>
+            </LanguageProvider>
           </CompareProvider>
         </WishlistProvider>
       </AuthProvider>
