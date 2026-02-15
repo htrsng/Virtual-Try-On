@@ -15,6 +15,7 @@ export interface BodyMeasurements {
     arm: number;      // Bắp tay
     thigh: number;    // Bắp đùi
     belly: number;    // Bụng (để chỉnh độ béo bụng riêng biệt với cân nặng)
+    legLength: number;
 }
 
 export interface AvatarProps {

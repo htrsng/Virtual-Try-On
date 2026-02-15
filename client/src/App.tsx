@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 
 // --- 1. IMPORT CÁC COMPONENT CỦA WEB BÁN HÀNG ---
 import { MODEL_INJECTION } from './data/ThreeDConfig';
@@ -8,6 +8,7 @@ import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import Toast from './components/Toast';
 import ChatWidget from './components/ChatWidget';
+import { FittingRoomProvider } from './contexts/FittingRoomContext';
 
 // --- LAZY LOAD CÁC TRANG (Performance Optimization) ---
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -30,7 +31,7 @@ const WishlistPage = lazy(() => import('./pages/WishlistPage'));
 const ComparePage = lazy(() => import('./pages/ComparePage'));
 
 // --- 2. IMPORT TÍNH NĂNG 3D (MỚI) ---
-import VirtualTryOnController from "./features/virtual-tryon/VirtualTryOnController";
+import VirtualTryOn from "./features/virtual-tryon/VirtualTryOn";
 
 // --- 3. IMPORT CONTEXTS ---
 import { AuthProvider } from './contexts/AuthContext';
@@ -95,12 +96,6 @@ function App() {
   const [searchKeyword, setSearchKeyword] = useState("");
   const [toast, setToast] = useState<{ message: string, type: string } | null>(null);
 
-  // --- STATE VIRTUAL TRY-ON ---
-  const [activeTab, setActiveTab] = useState<'BODY' | 'PRODUCT'>('BODY');
-  const [body, setBody] = useState({
-    height: 165, weight: 55, chest: 85, waist: 68, hips: 92,
-    shoulder: 38, arm: 26, thigh: 50, belly: 70
-  });
 
   // Lưu cart vào localStorage mỗi khi thay đổi
   useEffect(() => {
@@ -405,146 +400,155 @@ function App() {
     console.log('Sample filtered products:', filteredProducts.slice(0, 3).map(p => p.name));
   }
 
+  const AppShell = () => {
+    const location = useLocation();
+    const isTryOnPage = location.pathname === '/try-on';
+
+    return (
+      <div>
+        {!isTryOnPage && (
+          <Header
+            cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
+            onSearch={setSearchKeyword}
+            showToast={showToast}
+          />
+        )}
+
+        {/* --- CẤU HÌNH ROUTER (ĐỊNH TUYẾN) --- */}
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            {/* 1. TRANG CHỦ */}
+            <Route path="/" element={
+              <HomePage
+                products={filteredProducts}
+                categories={categories}
+                topSearch={topSearch}
+                bannerData={bannerData}
+                flashSaleProducts={flashSaleProducts}
+                onBuy={handleAddToCart}
+              />
+            } />
+
+            {/* Tạo trang tìm kiếm */}
+            <Route path="/search" element={
+              <SearchResultsPage
+                allProducts={allProducts}
+                onBuy={handleAddToCart}
+                showToast={showToast}
+              />
+            } />
+
+            {/* 2. TRANG ADMIN */}
+            <Route path="/admin" element={
+              <AdminPage
+                products={suggestionProducts} setProducts={setSuggestionProducts}
+                topSearch={topSearch} setTopSearch={setTopSearch}
+                topProducts={topProducts} setTopProducts={setTopProducts}
+                categories={categories} setCategories={setCategories}
+                users={users} setUsers={setUsers}
+                bannerData={bannerData} setBannerData={setBannerData}
+                flashSaleProducts={flashSaleProducts} setFlashSaleProducts={setFlashSaleProducts}
+                currentUser={currentUser} showToast={showToast}
+              />
+            } />
+
+            {/* 3. CÁC TRANG CHỨC NĂNG KHÁC */}
+            <Route path="/category/:id" element={<CategoryPage products={displayProducts} categories={categories} />} />
+
+            {/* 3a. TRANG SẢN PHẨM BÁN CHẠY */}
+            <Route path="/top-products" element={<TopProductsPage products={topProducts} onBuy={handleAddToCart} categories={categories} />} />
+
+            {/* 3b. TRANG FLASH SALE */}
+            <Route path="/flash-sale" element={<FlashSalePage flashSaleProducts={flashSaleProducts} onBuy={handleAddToCart} />} />
+
+            {/* TRANG CHI TIẾT SẢN PHẨM */}
+            <Route path="/product/:id" element={<ProductDetailPage products={allProducts} flashSaleProducts={flashSaleProducts} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} showToast={showToast} />} />
+
+            {/* TRANG ĐĂNG NHẬP/ĐĂNG KÝ */}
+            <Route path="/login" element={<LoginPage showToast={showToast} />} />
+
+            {/* TRANG YÊU THÍCH */}
+            <Route path="/wishlist" element={<WishlistPage onAddToCart={handleAddToCart} showToast={showToast} />} />
+
+            {/* TRANG SO SÁNH */}
+            <Route path="/compare" element={<ComparePage onAddToCart={handleAddToCart} showToast={showToast} />} />
+
+            {/* TRANG CHỌN SẢN PHẨM THANH TOÁN */}
+            <Route path="/checkout/choseproduct" element={<CheckoutSelectPage cartItems={cartItems} onRemove={handleRemoveFromCart} onUpdateQuantity={handleUpdateQuantity} showToast={showToast} />} />
+
+            {/* TRANG THANH TOÁN */}
+            <Route path="/checkout/cart" element={<CheckoutPage cartItems={cartItems} onCheckoutSuccess={handleCheckoutSuccess} showToast={showToast} />} />
+
+            {/* TRANG GIỎ HÀNG & THANH TOÁN (Redirect cũ) */}
+            <Route path="/checkout" element={<CheckoutSelectPage cartItems={cartItems} onRemove={handleRemoveFromCart} onUpdateQuantity={handleUpdateQuantity} showToast={showToast} />} />
+
+            {/* TRANG CÁ NHÂN NGƯỜI DÙNG */}
+            <Route path="/profile" element={<UserProfilePage showToast={showToast} />} />
+
+            {/* TRANG ĐƠN HÀNG (CŨ - GIỮ LẠI ĐỂ TƯƠNG THÍCH) */}
+            <Route path="/orders" element={<OrderPage orders={orders} />} />
+
+            {/* TRANG 3D VIRTUAL TRY-ON */}
+            <Route path="/try-on" element={
+              <VirtualTryOn
+                // Lấy sản phẩm đầu tiên làm mặc định hoặc truyền object sản phẩm cụ thể
+                product={suggestionProducts[0]}
+                onAddToCart={handleAddToCart}
+                onBuyNow={handleBuyNow}
+                handleBack={() => window.history.back()} // Hàm quay lại shop
+                showToast={showToast}
+              />
+            } />
+
+            {/* TRANG NỘI DUNG BANNER */}
+            <Route path="/banner/:bannerId" element={<BannerContentPage />} />
+
+            {/* TRANG TRUNG TÂM TRỢ GIÚP */}
+            <Route path="/help" element={<HelpPage />} />
+
+            {/* TRANG GIỚI THIỆU */}
+            <Route path="/about" element={<AboutPage />} />
+
+            {/* TRANG CHÍNH SÁCH */}
+            <Route path="/guide" element={<PolicyPage />} />
+            <Route path="/sell-guide" element={<PolicyPage />} />
+            <Route path="/payment" element={<PolicyPage />} />
+            <Route path="/shipping" element={<PolicyPage />} />
+            <Route path="/return-policy" element={<PolicyPage />} />
+            <Route path="/privacy" element={<PolicyPage />} />
+            <Route path="/terms" element={<PolicyPage />} />
+            <Route path="/cookies" element={<PolicyPage />} />
+
+          </Routes>
+        </Suspense>
+
+        {/* Thông báo (Toast) hiển thị đè lên trên cùng */}
+        {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+
+        {/* Chat Widget - Hiển thị trên mọi trang */}
+        <ChatWidget />
+
+        {!isTryOnPage && <Footer />}
+      </div>
+    );
+  };
+
   // --- RENDER GIAO DIỆN ---
   return (
     <ThemeProvider>
       <AuthProvider>
-        <WishlistProvider>
-          <CompareProvider>
-            <LanguageProvider>
-            <BrowserRouter>
-          <ScrollToTop />
-          <div>
-            {/* Header luôn hiển thị ở trên cùng */}
-            <Header
-              cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
-              onSearch={setSearchKeyword}
-              showToast={showToast}
-            />
-
-            {/* --- CẤU HÌNH ROUTER (ĐỊNH TUYẾN) --- */}
-            <Suspense fallback={<PageLoader />}>
-            <Routes>
-              {/* 1. TRANG CHỦ */}
-              <Route path="/" element={
-                <HomePage
-                  products={filteredProducts}
-                  categories={categories}
-                  topSearch={topSearch}
-                  bannerData={bannerData}
-                  flashSaleProducts={flashSaleProducts}
-                  onBuy={handleAddToCart}
-                />
-              } />
-
-              {/* Tạo trang tìm kiếm */}
-              <Route path="/search" element={
-                <SearchResultsPage
-                  allProducts={allProducts}
-                  onBuy={handleAddToCart}
-                  showToast={showToast}
-                />
-              } />
-
-              {/* 2. TRANG ADMIN */}
-              <Route path="/admin" element={
-                <AdminPage
-                  products={suggestionProducts} setProducts={setSuggestionProducts}
-                  topSearch={topSearch} setTopSearch={setTopSearch}
-                  topProducts={topProducts} setTopProducts={setTopProducts}
-                  categories={categories} setCategories={setCategories}
-                  users={users} setUsers={setUsers}
-                  bannerData={bannerData} setBannerData={setBannerData}
-                  flashSaleProducts={flashSaleProducts} setFlashSaleProducts={setFlashSaleProducts}
-                  currentUser={currentUser} showToast={showToast}
-                />
-              } />
-
-              {/* 3. CÁC TRANG CHỨC NĂNG KHÁC */}
-              <Route path="/category/:id" element={<CategoryPage products={displayProducts} categories={categories} />} />
-
-              {/* 3a. TRANG SẢN PHẨM BÁN CHẠY */}
-              <Route path="/top-products" element={<TopProductsPage products={topProducts} onBuy={handleAddToCart} categories={categories} />} />
-
-              {/* 3b. TRANG FLASH SALE */}
-              <Route path="/flash-sale" element={<FlashSalePage flashSaleProducts={flashSaleProducts} onBuy={handleAddToCart} />} />
-
-              {/* TRANG CHI TIẾT SẢN PHẨM */}
-              <Route path="/product/:id" element={<ProductDetailPage products={allProducts} flashSaleProducts={flashSaleProducts} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} showToast={showToast} />} />
-
-              {/* TRANG ĐĂNG NHẬP/ĐĂNG KÝ */}
-              <Route path="/login" element={<LoginPage showToast={showToast} />} />
-
-              {/* TRANG YÊU THÍCH */}
-              <Route path="/wishlist" element={<WishlistPage onAddToCart={handleAddToCart} showToast={showToast} />} />
-
-              {/* TRANG SO SÁNH */}
-              <Route path="/compare" element={<ComparePage onAddToCart={handleAddToCart} showToast={showToast} />} />
-
-              {/* TRANG CHỌN SẢN PHẨM THANH TOÁN */}
-              <Route path="/checkout/choseproduct" element={<CheckoutSelectPage cartItems={cartItems} onRemove={handleRemoveFromCart} onUpdateQuantity={handleUpdateQuantity} showToast={showToast} />} />
-
-              {/* TRANG THANH TOÁN */}
-              <Route path="/checkout/cart" element={<CheckoutPage cartItems={cartItems} onCheckoutSuccess={handleCheckoutSuccess} showToast={showToast} />} />
-
-              {/* TRANG GIỎ HÀNG & THANH TOÁN (Redirect cũ) */}
-              <Route path="/checkout" element={<CheckoutSelectPage cartItems={cartItems} onRemove={handleRemoveFromCart} onUpdateQuantity={handleUpdateQuantity} showToast={showToast} />} />
-
-              {/* TRANG CÁ NHÂN NGƯỜI DÙNG */}
-              <Route path="/profile" element={<UserProfilePage showToast={showToast} />} />
-
-              {/* TRANG ĐƠN HÀNG (CŨ - GIỮ LẠI ĐỂ TƯƠNG THÍCH) */}
-              <Route path="/orders" element={<OrderPage orders={orders} />} />
-
-              {/* TRANG 3D VIRTUAL TRY-ON */}
-              <Route path="/try-on" element={
-                <VirtualTryOnController
-                  body={body}
-                  setBody={setBody}
-                  activeTab={activeTab}
-                  setActiveTab={setActiveTab}
-                  products={suggestionProducts}
-                  onAddToCart={handleAddToCart}
-                  onBuyNow={handleBuyNow}
-                  showToast={showToast}
-                />
-              } />
-
-              {/* TRANG NỘI DUNG BANNER */}
-              <Route path="/banner/:bannerId" element={<BannerContentPage />} />
-
-              {/* TRANG TRUNG TÂM TRỢ GIÚP */}
-              <Route path="/help" element={<HelpPage />} />
-
-              {/* TRANG GIỚI THIỆU */}
-              <Route path="/about" element={<AboutPage />} />
-
-              {/* TRANG CHÍNH SÁCH */}
-              <Route path="/guide" element={<PolicyPage />} />
-              <Route path="/sell-guide" element={<PolicyPage />} />
-              <Route path="/payment" element={<PolicyPage />} />
-              <Route path="/shipping" element={<PolicyPage />} />
-              <Route path="/return-policy" element={<PolicyPage />} />
-              <Route path="/privacy" element={<PolicyPage />} />
-              <Route path="/terms" element={<PolicyPage />} />
-              <Route path="/cookies" element={<PolicyPage />} />
-
-            </Routes>
-            </Suspense>
-
-            {/* Thông báo (Toast) hiển thị đè lên trên cùng */}
-            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-
-            {/* Chat Widget - Hiển thị trên mọi trang */}
-            <ChatWidget />
-
-            {/* Footer luôn hiển thị ở cuối */}
-            <Footer />
-          </div>
-        </BrowserRouter>
-            </LanguageProvider>
-          </CompareProvider>
-        </WishlistProvider>
+        <FittingRoomProvider>
+          <WishlistProvider>
+            <CompareProvider>
+              <LanguageProvider>
+                <BrowserRouter>
+                  <ScrollToTop />
+                  <AppShell />
+                </BrowserRouter>
+              </LanguageProvider>
+            </CompareProvider>
+          </WishlistProvider>
+        </FittingRoomProvider>
       </AuthProvider>
     </ThemeProvider>
   );

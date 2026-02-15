@@ -1,355 +1,194 @@
-import { Suspense, useState, useRef } from 'react';
+import { Suspense, useState, useEffect, useRef, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Environment, ContactShadows, Html, useProgress } from '@react-three/drei';
+import { OrbitControls, Environment, ContactShadows, Html, useProgress, Grid } from '@react-three/drei';
 import { Avatar } from '../../three/controls/avatar/Avatar';
+import { useFittingRoom } from '../../contexts/FittingRoomContext';
 import './VirtualTryOn.css';
 
-// Component hiển thị loading đẹp hơn
 function Loader() {
     const { progress } = useProgress();
     return (
         <Html center>
-            <div className="loader-container">
-                <div className="loader-spinner"></div>
-                <div className="loader-text">Đang tải mô hình 3D</div>
-                <div className="loader-progress">
-                    <div className="progress-bar">
-                        <div className="progress-fill" style={{ width: `${progress}%` }}></div>
-                    </div>
-                    <span className="progress-percentage">{progress.toFixed(0)}%</span>
-                </div>
+            <div className="loader-studio">
+                <div className="spinner"></div>
+                <div className="text">Đang cân bằng tỷ lệ cơ thể... {progress.toFixed(0)}%</div>
             </div>
         </Html>
     );
 }
 
-export default function VirtualTryOn({ body, clothingTexture, skinColor }: any) {
-    const [showHelp, setShowHelp] = useState(false);
+const SidebarSlider = ({ label, value, min, max, onChange }: any) => (
+    <div className="custom-slider-block">
+        <div className="slider-text"><span>{label}</span><b>{value}cm</b></div>
+        <input
+            type="range" min={min} max={max} value={value}
+            onChange={(e) => onChange(Number(e.target.value))}
+            className="modern-range"
+        />
+    </div>
+);
+
+export default function VirtualTryOn({ product, onAddToCart, onBuyNow, handleBack, showToast }: any) {
+    const {
+        profiles, activeProfile, activeProfileId, setActiveProfileId,
+        selectedSize, setSelectedSize, isHeatmapOpen, toggleHeatmap, updateProfile
+    } = useFittingRoom();
+
     const [isRotating, setIsRotating] = useState(false);
-    const [bodyMeasurements, setBodyMeasurements] = useState({
-        height: body?.height || 165,
-        weight: body?.weight || 55,
-        chest: body?.chest || 85,
-        waist: body?.waist || 68,
-        hips: body?.hips || 92,
-        shoulder: body?.shoulder || 38,
-        arm: body?.arm || 26,
-        thigh: body?.thigh || 50,
-        belly: body?.belly || 70
-    });
-    const controlsRef = useRef<any>(null);
-    const canvasRef = useRef<any>(null);
+    const [isBodyRoomOpen, setIsBodyRoomOpen] = useState(false);
+    const [tempProfile, setTempProfile] = useState<any>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
 
-    // Hàm reset camera về vị trí ban đầu
-    const handleResetCamera = () => {
-        if (controlsRef.current) {
-            controlsRef.current.reset();
+    // Đồng bộ tempProfile khi đổi người dùng
+    useEffect(() => {
+        if (activeProfile) {
+            setTempProfile({
+                ...activeProfile,
+                legLength: activeProfile.legLength || Math.round(activeProfile.height * 0.58)
+            });
         }
+    }, [activeProfileId, activeProfile]);
+
+    // CHỐT DỮ LIỆU: Luôn ưu tiên tempProfile khi đang ở chế độ chỉnh sửa
+    const currentBodyData = useMemo(() => {
+        return isBodyRoomOpen ? tempProfile : activeProfile;
+    }, [isBodyRoomOpen, tempProfile, activeProfile]);
+
+    if (!activeProfile || !tempProfile || !currentBodyData) return null;
+
+    const handleSaveAndExit = () => {
+        updateProfile(activeProfileId, tempProfile);
+        setIsBodyRoomOpen(false);
+        showToast("Đã lưu cấu trúc xương mới!");
     };
-
-    // Hàm bật/tắt tự động xoay
-    const toggleAutoRotate = () => {
-        setIsRotating(!isRotating);
-    };
-
-    // Hàm chụp ảnh
-    const handleScreenshot = async () => {
-        if (canvasRef.current) {
-            const canvas = canvasRef.current.querySelector('canvas');
-            if (canvas) {
-                const link = document.createElement('a');
-                link.href = canvas.toDataURL('image/png');
-                link.download = `virtual-tryon-${Date.now()}.png`;
-                link.click();
-            }
-        }
-    };
-
-
 
     return (
-        <div className="virtual-tryon-container">
-            {/* Header */}
-            <div className="tryon-header">
-                <div className="header-content">
-                    <h2 className="header-title">
-                        <span className="title-icon">👔</span>
-                        Phòng Thử Đồ 3D
-                    </h2>
-                    <p className="header-subtitle">Công nghệ thử đồ ảo - Xem từ mọi góc độ</p>
+        <div className={`studio-master-container ${isBodyRoomOpen ? 'body-room-active' : 'tryon-room-active'}`}>
+            <div className="studio-top-nav">
+                <button className="nav-back-btn" onClick={handleBack}>⬅ Shop</button>
+                <div className="profile-switcher">
+                    {profiles.map(p => (
+                        <button key={p.id} className={`profile-pill ${activeProfileId === p.id ? 'active' : ''}`}
+                            onClick={() => { setActiveProfileId(p.id); setIsBodyRoomOpen(false); }}>
+                            👤 {p.name}
+                        </button>
+                    ))}
+                    <button className="nav-add-btn" onClick={() => setIsBodyRoomOpen(true)}>+</button>
                 </div>
             </div>
 
-            {/* Main Canvas Area */}
-            <div className="canvas-wrapper" ref={canvasRef}>
-                <Canvas
-                    shadows
-                    camera={{ position: [0, 0.2, 2.8], fov: 45 }}
-                    style={{ background: '#ffffff' }}
-                >
-                    <ambientLight intensity={0.5} />
-                    <directionalLight
-                        position={[2, 5, 2]}
-                        intensity={1.0}
-                        castShadow
-                        shadow-mapSize={1024}
-                    />
-                    <pointLight position={[-2, 3, 3]} intensity={0.4} />
-                    <Environment preset="city" />
+            <div className="studio-workspace">
+                <div className="studio-preview-area">
+                    {/* TRỌNG YẾU: Không dùng 'key' ngẫu nhiên ở Canvas để tránh Context Lost */}
+                    <Canvas
+                        ref={canvasRef}
+                        camera={{ position: [0, 0.7, 4.5], fov: 32 }}
+                        shadows
+                        gl={{ antialias: true, preserveDrawingBuffer: true, powerPreference: "high-performance" }}
+                    >
+                        <ambientLight intensity={0.6} />
+                        <directionalLight position={[2, 5, 2]} intensity={1.2} castShadow />
+                        <Environment preset="city" />
 
-                    <Suspense fallback={<Loader />}>
-                        <group>
-                            <gridHelper args={[10, 10, '#cccccc', '#eeeeee']} position={[0, -0.9, 0]} />
-                            <ContactShadows
-                                position={[0, -0.9, 0]}
-                                resolution={1024}
-                                scale={10}
-                                blur={1.5}
-                                opacity={0.4}
-                                far={10}
-                                color="#000000"
-                            />
-                            <Avatar
-                                body={bodyMeasurements}
-                                pose={'Idle'}
-                                skinColor={skinColor}
-                            />
-                        </group>
-                    </Suspense>
+                        <Suspense fallback={<Loader />}>
+                            {/* Khóa gót chân tại y=0 trên sàn lưới */}
+                            <group position={[0, -1.15, 0]}>
+                                <Grid position={[0, 0, 0]} args={[10, 10]} cellColor="#d1d5db" sectionColor="#9ca3af" fadeDistance={20} />
+                                <Avatar body={currentBodyData} pose={'Idle'} skinColor="#F2C9AC" />
+                                <ContactShadows position={[0, 0.01, 0]} opacity={0.4} blur={2.5} />
+                            </group>
+                        </Suspense>
 
-                    <OrbitControls
-                        ref={controlsRef}
-                        target={[0, 0.0, 0]}
-                        minPolarAngle={Math.PI / 4}
-                        maxPolarAngle={Math.PI / 2}
-                        minDistance={1.5}
-                        maxDistance={4}
-                        enablePan={false}
-                        autoRotate={isRotating}
-                        autoRotateSpeed={2}
-                    />
-                </Canvas>
-
-                {/* Help Tooltip */}
-                {showHelp && (
-                    <div className="help-tooltip">
-                        <button className="help-close" onClick={() => setShowHelp(false)}>×</button>
-                        <h4>💡 Hướng dẫn sử dụng</h4>
-                        <ul>
-                            <li>🖱️ <strong>Kéo chuột</strong> để xoay mô hình</li>
-                            <li>🔍 <strong>Cuộn chuột</strong> để phóng to/thu nhỏ</li>
-                            <li>🎯 <strong>Nhấp đúp</strong> để focus</li>
-                            <li>📸 Dùng nút <strong>Chụp ảnh</strong> để lưu kết quả</li>
-                        </ul>
-                    </div>
-                )}
-            </div>
-
-            {/* Control Panel */}
-            <div className="control-panel">
-                {/* Control Buttons Section */}
-                <div className="control-section">
-                    <h3 className="control-title">⚙️ Điều khiển</h3>
-                    <div className="control-buttons">
-                        <button className="control-btn primary" onClick={handleResetCamera} title="Đặt lại góc nhìn">
-                            <span className="btn-icon">🔄</span>
-                            <span className="btn-text">Reset Camera</span>
-                        </button>
-                        <button
-                            className={`control-btn ${isRotating ? 'active' : ''}`}
-                            onClick={toggleAutoRotate}
-                            title="Tự động xoay mô hình"
-                        >
-                            <span className="btn-icon">{isRotating ? '⏸️' : '▶️'}</span>
-                            <span className="btn-text">{isRotating ? 'Dừng xoay' : 'Tự động xoay'}</span>
-                        </button>
-                        <button className="control-btn" onClick={handleScreenshot} title="Chụp ảnh">
-                            <span className="btn-icon">📸</span>
-                            <span className="btn-text">Chụp ảnh</span>
+                        <OrbitControls
+                            target={[0, 0.4, 0]}
+                            autoRotate={isRotating}
+                            enablePan={false}
+                            enableDamping={true}
+                            minDistance={2.5} maxDistance={5.5}
+                        />
+                    </Canvas>
+                    <div className="view-tools">
+                        <button className={`tool-btn ${isRotating ? 'active' : ''}`} onClick={() => setIsRotating(!isRotating)}>
+                            {isRotating ? '⏸ Dừng xoay' : '▶ Tự động xoay'}
                         </button>
                     </div>
                 </div>
 
-                {/* Info Section */}
-                <div className="info-section">
-                    <h3 className="info-title">📊 Thông tin cơ thể</h3>
-                    <div className="info-grid">
-                        <div className="info-item">
-                            <span className="info-label">Chiều cao:</span>
-                            <span className="info-value">{bodyMeasurements?.height ? `${bodyMeasurements.height} cm` : 'N/A'}</span>
+                <div className="studio-sidebar">
+                    {isBodyRoomOpen ? (
+                        <div className="body-room-panel fade-in">
+                            <div className="panel-header-sticky">
+                                <span className="badge yellow">CÂN BẰNG TỶ LỆ XƯƠNG</span>
+                                <h3>Hồ sơ: {tempProfile.name}</h3>
+                                <button className="save-exit-btn" onClick={handleSaveAndExit}>Xác nhận ✓</button>
+                            </div>
+                            <div className="scrollable-body-controls">
+                                <div className="stat-card">
+                                    <label className="stat-title">📐 KÍCH THƯỚC TỔNG</label>
+                                    <div className="stat-row">
+                                        <div className="stat-col"><label>CAO (CM)</label><input type="number" value={tempProfile.height} onChange={(e) => setTempProfile({ ...tempProfile, height: Number(e.target.value) })} /></div>
+                                        <div className="stat-col"><label>NẶNG (KG)</label><input type="number" value={tempProfile.weight} onChange={(e) => setTempProfile({ ...tempProfile, weight: Number(e.target.value) })} /></div>
+                                    </div>
+                                </div>
+
+                                <div className="stat-card highlighted-box">
+                                    <label className="stat-title">🦵 ĐIỀU CHỈNH XƯƠNG (BONES)</label>
+                                    <SidebarSlider
+                                        label="Chiều dài chân"
+                                        value={tempProfile.legLength}
+                                        min={Math.round(tempProfile.height * 0.45)}
+                                        max={Math.round(tempProfile.height * 0.65)}
+                                        onChange={(v: number) => setTempProfile({ ...tempProfile, legLength: v })}
+                                    />
+                                    <div className="proportion-hint">
+                                        <span>Tỷ lệ chân: {((tempProfile.legLength / tempProfile.height) * 100).toFixed(1)}%</span>
+                                    </div>
+                                </div>
+
+                                <div className="stat-card">
+                                    <label className="stat-title">📏 CHI TIẾT HÌNH THỂ (SHAPE KEYS)</label>
+                                    <SidebarSlider label="Vòng Ngực" value={tempProfile.chest} min={70} max={120} onChange={(v: any) => setTempProfile({ ...tempProfile, chest: v })} />
+                                    <SidebarSlider label="Vòng Eo" value={tempProfile.waist} min={55} max={100} onChange={(v: any) => setTempProfile({ ...tempProfile, waist: v })} />
+                                    <SidebarSlider label="Vòng Hông" value={tempProfile.hips} min={80} max={120} onChange={(v: any) => setTempProfile({ ...tempProfile, hips: v })} />
+                                    <SidebarSlider label="Chiều rộng Vai" value={tempProfile.shoulder} min={30} max={50} onChange={(v: any) => setTempProfile({ ...tempProfile, shoulder: v })} />
+                                    <SidebarSlider label="Vòng Bắp tay" value={tempProfile.arm} min={20} max={40} onChange={(v: any) => setTempProfile({ ...tempProfile, arm: v })} />
+                                    <SidebarSlider label="Vòng Đùi" value={tempProfile.thigh} min={40} max={80} onChange={(v: any) => setTempProfile({ ...tempProfile, thigh: v })} />
+                                    <SidebarSlider label="Vòng Bụng" value={tempProfile.belly} min={60} max={120} onChange={(v: any) => setTempProfile({ ...tempProfile, belly: v })} />
+                                </div>
+                            </div>
                         </div>
-                        <div className="info-item">
-                            <span className="info-label">Cân nặng:</span>
-                            <span className="info-value">{bodyMeasurements?.weight ? `${bodyMeasurements.weight} kg` : 'N/A'}</span>
+                    ) : (
+                        <div className="tryon-panel fade-in">
+                            <div className="panel-header">
+                                <span className="badge">PHÒNG THỬ ĐỒ</span>
+                                <h3>{product.name}</h3>
+                            </div>
+                            <div className="panel-body">
+                                <div className="product-preview-card">
+                                    <img src={product.img || product.image} alt="" />
+                                    <div className="price-tag">{product.price?.toLocaleString()} đ</div>
+                                </div>
+                                <div className="option-section">
+                                    <label>KÍCH CỠ HIỆN TẠI</label>
+                                    <div className="full-width-size-grid">
+                                        {['S', 'M', 'L', 'XL'].map(s => (
+                                            <button key={s} className={selectedSize === s ? 'selected' : ''} onClick={() => setSelectedSize(s)}>{s}</button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="utility-buttons">
+                                    <button className="util-btn-white" onClick={() => alert("Tính năng so sánh size đang phát triển")}>⚖️ So sánh Size</button>
+                                    <button className={`util-btn-white ${isHeatmapOpen ? 'active' : ''}`} onClick={toggleHeatmap}>🔥 Xem Heatmap</button>
+                                    <button className="util-btn-dark" onClick={() => setIsBodyRoomOpen(true)}>⚙️ Chỉnh sửa cơ thể</button>
+                                </div>
+                            </div>
+                            <div className="panel-footer">
+                                <button className="add-to-cart-btn" onClick={() => onAddToCart(product)}>🛒 Giỏ hàng</button>
+                                <button className="buy-now-btn" onClick={() => onBuyNow(product, selectedSize)}>MUA NGAY</button>
+                            </div>
                         </div>
-                        <div className="info-item">
-                            <span className="info-label">Vòng ngực:</span>
-                            <span className="info-value">{bodyMeasurements?.chest ? `${bodyMeasurements.chest} cm` : 'N/A'}</span>
-                        </div>
-                        <div className="info-item">
-                            <span className="info-label">Vòng eo:</span>
-                            <span className="info-value">{bodyMeasurements?.waist ? `${bodyMeasurements.waist} cm` : 'N/A'}</span>
-                        </div>
-                        <div className="info-item">
-                            <span className="info-label">Vòng hông:</span>
-                            <span className="info-value">{bodyMeasurements?.hips ? `${bodyMeasurements.hips} cm` : 'N/A'}</span>
-                        </div>
-                        <div className="info-item full-width">
-                            <span className="info-label">Trạng thái:</span>
-                            <span className="info-value status-active">✓ Sẵn sàng</span>
-                        </div>
-                    </div>
+                    )}
                 </div>
-
-                {/* Body Customization Section */}
-                <div className="body-custom-section">
-                    <h3 className="control-title">👕 Chỉnh sửa kích thước</h3>
-
-                    <div className="body-measurements-container">
-                        {/* Row 1: Chiều cao, Cân nặng */}
-                        <div className="measurement-row">
-                            <div className="measurement-item">
-                                <label>Chiều cao (cm)</label>
-                                <input
-                                    type="range"
-                                    min="150"
-                                    max="200"
-                                    value={bodyMeasurements.height}
-                                    onChange={(e) => setBodyMeasurements({ ...bodyMeasurements, height: parseInt(e.target.value) })}
-                                    className="body-slider"
-                                />
-                                <span className="measurement-value">{bodyMeasurements.height} cm</span>
-                            </div>
-                            <div className="measurement-item">
-                                <label>Cân nặng (kg)</label>
-                                <input
-                                    type="range"
-                                    min="40"
-                                    max="100"
-                                    value={bodyMeasurements.weight}
-                                    onChange={(e) => setBodyMeasurements({ ...bodyMeasurements, weight: parseInt(e.target.value) })}
-                                    className="body-slider"
-                                />
-                                <span className="measurement-value">{bodyMeasurements.weight} kg</span>
-                            </div>
-                        </div>
-
-                        {/* Row 2: Vòng ngực, Vòng eo */}
-                        <div className="measurement-row">
-                            <div className="measurement-item">
-                                <label>Vòng ngực (cm)</label>
-                                <input
-                                    type="range"
-                                    min="70"
-                                    max="120"
-                                    value={bodyMeasurements.chest}
-                                    onChange={(e) => setBodyMeasurements({ ...bodyMeasurements, chest: parseInt(e.target.value) })}
-                                    className="body-slider"
-                                />
-                                <span className="measurement-value">{bodyMeasurements.chest} cm</span>
-                            </div>
-                            <div className="measurement-item">
-                                <label>Vòng eo (cm)</label>
-                                <input
-                                    type="range"
-                                    min="55"
-                                    max="110"
-                                    value={bodyMeasurements.waist}
-                                    onChange={(e) => setBodyMeasurements({ ...bodyMeasurements, waist: parseInt(e.target.value) })}
-                                    className="body-slider"
-                                />
-                                <span className="measurement-value">{bodyMeasurements.waist} cm</span>
-                            </div>
-                        </div>
-
-                        {/* Row 3: Vòng hông, Kiểu vai */}
-                        <div className="measurement-row">
-                            <div className="measurement-item">
-                                <label>Vòng hông (cm)</label>
-                                <input
-                                    type="range"
-                                    min="80"
-                                    max="130"
-                                    value={bodyMeasurements.hips}
-                                    onChange={(e) => setBodyMeasurements({ ...bodyMeasurements, hips: parseInt(e.target.value) })}
-                                    className="body-slider"
-                                />
-                                <span className="measurement-value">{bodyMeasurements.hips} cm</span>
-                            </div>
-                            <div className="measurement-item">
-                                <label>Kiểu vai (cm)</label>
-                                <input
-                                    type="range"
-                                    min="30"
-                                    max="50"
-                                    value={bodyMeasurements.shoulder}
-                                    onChange={(e) => setBodyMeasurements({ ...bodyMeasurements, shoulder: parseInt(e.target.value) })}
-                                    className="body-slider"
-                                />
-                                <span className="measurement-value">{bodyMeasurements.shoulder} cm</span>
-                            </div>
-                        </div>
-
-                        {/* Row 4: Bắp tay, Đùi */}
-                        <div className="measurement-row">
-                            <div className="measurement-item">
-                                <label>Bắp tay (cm)</label>
-                                <input
-                                    type="range"
-                                    min="20"
-                                    max="40"
-                                    value={bodyMeasurements.arm}
-                                    onChange={(e) => setBodyMeasurements({ ...bodyMeasurements, arm: parseInt(e.target.value) })}
-                                    className="body-slider"
-                                />
-                                <span className="measurement-value">{bodyMeasurements.arm} cm</span>
-                            </div>
-                            <div className="measurement-item">
-                                <label>Đùi (cm)</label>
-                                <input
-                                    type="range"
-                                    min="40"
-                                    max="70"
-                                    value={bodyMeasurements.thigh}
-                                    onChange={(e) => setBodyMeasurements({ ...bodyMeasurements, thigh: parseInt(e.target.value) })}
-                                    className="body-slider"
-                                />
-                                <span className="measurement-value">{bodyMeasurements.thigh} cm</span>
-                            </div>
-                        </div>
-
-                        {/* Row 5: Bụng */}
-                        <div className="measurement-row">
-                            <div className="measurement-item full-width-item">
-                                <label>Vòng bụng (cm)</label>
-                                <input
-                                    type="range"
-                                    min="60"
-                                    max="120"
-                                    value={bodyMeasurements.belly}
-                                    onChange={(e) => setBodyMeasurements({ ...bodyMeasurements, belly: parseInt(e.target.value) })}
-                                    className="body-slider"
-                                />
-                                <span className="measurement-value">{bodyMeasurements.belly} cm</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Help Button */}
-                <button
-                    className="help-button"
-                    onClick={() => setShowHelp(!showHelp)}
-                    title="Hiện/ẩn hướng dẫn"
-                >
-                    <span>❓</span>
-                </button>
-            </div>
-
-            {/* Footer Badge */}
-            <div className="tryon-badge">
-                <span className="badge-icon">✨</span>
-                <span className="badge-text">Công nghệ 3D HD</span>
             </div>
         </div>
     );
