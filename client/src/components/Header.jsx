@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useWishlist } from '../contexts/WishlistContext';
 import { useCompare } from '../contexts/CompareContext';
-import { FiShoppingCart, FiUser, FiLogOut, FiHeart, FiSearch, FiSun, FiMoon, FiRepeat, FiX } from 'react-icons/fi';
+import { FiShoppingCart, FiUser, FiLogOut, FiHeart, FiSearch, FiSun, FiMoon, FiRepeat, FiX, FiChevronDown, FiPackage, FiSettings } from 'react-icons/fi';
 import NotificationBell from './NotificationBell';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -13,6 +13,8 @@ import logo from '../assets/logo.svg';
 function Header({ cartCount, onSearch, showToast }) {
     const [inputValue, setInputValue] = useState("");
     const [scrolled, setScrolled] = useState(false);
+    const [showUserMenu, setShowUserMenu] = useState(false);
+    const userMenuRef = useRef(null);
     const navigate = useNavigate();
     const { user, logout, isAuthenticated } = useAuth();
     const { theme, toggleTheme } = useTheme();
@@ -26,6 +28,16 @@ function Header({ cartCount, onSearch, showToast }) {
         };
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+                setShowUserMenu(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
     const handleSearchClick = () => {
@@ -100,64 +112,93 @@ function Header({ cartCount, onSearch, showToast }) {
                 </div>
 
                 <div className="header-actions">
-                    <LanguageSwitcher />
+                    {/* Group 1: Settings */}
+                    <div className="header-actions-group">
+                        <LanguageSwitcher />
+                        <button
+                            className="icon-btn theme-toggle"
+                            onClick={toggleTheme}
+                            title={theme === 'light' ? 'Chuyển sang Dark Mode' : 'Chuyển sang Light Mode'}
+                        >
+                            {theme === 'light' ? <FiMoon size={20} /> : <FiSun size={20} />}
+                        </button>
+                    </div>
+                    <div className="header-actions-divider"></div>
 
-                    <button
-                        className="icon-btn theme-toggle"
-                        onClick={toggleTheme}
-                        title={theme === 'light' ? 'Chuyển sang Dark Mode' : 'Chuyển sang Light Mode'}
-                    >
-                        {theme === 'light' ? <FiMoon size={20} /> : <FiSun size={20} />}
-                    </button>
-
+                    {/* Group 2: Actions - Only show if authenticated */}
                     {isAuthenticated && (
                         <>
-                            <NotificationBell />
-                            <Link to="/wishlist" className="icon-btn" title={t('wishlist')}>
-                                <div style={{ position: 'relative' }}>
-                                    <FiHeart size={20} />
-                                    {wishlistCount > 0 && <span className="cart-badge">{wishlistCount}</span>}
-                                </div>
-                            </Link>
-                            <Link to="/compare" className="icon-btn" title={t('compare')}>
-                                <div style={{ position: 'relative' }}>
-                                    <FiRepeat size={20} />
-                                    {compareCount > 0 && <span className="cart-badge">{compareCount}</span>}
-                                </div>
-                            </Link>
-                        </>
-                    )}
-
-                    {isAuthenticated ? (
-                        <>
-                            <Link to="/profile" className="user-action">
-                                <FiUser />
-                                <span>{user?.fullName || user?.email}</span>
-                            </Link>
-                            {user?.role === 'admin' && (
-                                <Link to="/admin" className="admin-btn">
-                                    ⚙️ {t('admin')}
+                            <div className="header-actions-group">
+                                <NotificationBell />
+                                <Link to="/wishlist" className="icon-btn" title={t('wishlist')}>
+                                    <div style={{ position: 'relative', display: 'flex' }}>
+                                        <FiHeart size={20} />
+                                        {wishlistCount > 0 && <span className="cart-badge">{wishlistCount}</span>}
+                                    </div>
                                 </Link>
-                            )}
-                            <button className="user-action logout-btn" onClick={handleLogout}>
-                                <FiLogOut />
-                                <span>{t('logout')}</span>
-                            </button>
-                        </>
-                    ) : (
-                        <>
-                            <Link to="/login" state={{ mode: 'register' }} className="header-link">
-                                📝 {t('register')}
-                            </Link>
-                            <Link to="/login" state={{ mode: 'login' }} className="header-link">
-                                🔑 {t('login')}
-                            </Link>
+                                <Link to="/compare" className="icon-btn" title={t('compare')}>
+                                    <div style={{ position: 'relative', display: 'flex' }}>
+                                        <FiRepeat size={20} />
+                                        {compareCount > 0 && <span className="cart-badge">{compareCount}</span>}
+                                    </div>
+                                </Link>
+                            </div>
+                            <div className="header-actions-divider"></div>
                         </>
                     )}
 
-                    <div className="cart-icon-wrapper" onClick={handleCartClick}>
-                        <FiShoppingCart size={24} />
-                        {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+                    {/* Group 3: User & Cart */}
+                    <div className="header-actions-group">
+                        {isAuthenticated ? (
+                            <div className="user-menu-wrapper" ref={userMenuRef}>
+                                <button
+                                    className="user-menu-trigger"
+                                    onClick={() => setShowUserMenu(!showUserMenu)}
+                                    title={user?.fullName || user?.email}
+                                >
+                                    <FiUser size={20} />
+                                    <span>{user?.firstName || user?.fullName?.split(' ')[0] || 'User'}</span>
+                                    <FiChevronDown size={16} style={{ marginLeft: '4px', transition: 'transform 0.3s' }} />
+                                </button>
+                                {showUserMenu && (
+                                    <div className="user-menu-dropdown">
+                                        <Link to="/profile" className="user-menu-item">
+                                            <FiUser size={16} />
+                                            <span>{t('profile') || 'Profile'}</span>
+                                        </Link>
+                                        <Link to="/orders" className="user-menu-item" onClick={() => setShowUserMenu(false)}>
+                                            <FiPackage size={16} />
+                                            <span>{t('orders') || 'My Orders'}</span>
+                                        </Link>
+                                        {user?.role === 'admin' && (
+                                            <Link to="/admin" className="user-menu-item">
+                                                <FiSettings size={16} />
+                                                <span>{t('admin') || 'Admin'}</span>
+                                            </Link>
+                                        )}
+                                        <div className="user-menu-divider"></div>
+                                        <button className="user-menu-item logout" onClick={handleLogout}>
+                                            <FiLogOut size={16} />
+                                            <span>{t('logout') || 'Logout'}</span>
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <>
+                                <Link to="/login" state={{ mode: 'login' }} className="header-link">
+                                    {t('login') || 'Login'}
+                                </Link>
+                                <Link to="/login" state={{ mode: 'register' }} className="header-link">
+                                    {t('register') || 'Register'}
+                                </Link>
+                            </>
+                        )}
+
+                        <div className="cart-icon-wrapper" onClick={handleCartClick}>
+                            <FiShoppingCart size={24} />
+                            {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+                        </div>
                     </div>
                 </div>
             </div>

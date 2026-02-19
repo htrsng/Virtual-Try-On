@@ -486,7 +486,7 @@ function App() {
             <Route path="/profile" element={<UserProfilePage showToast={showToast} />} />
 
             {/* TRANG ĐƠN HÀNG (CŨ - GIỮ LẠI ĐỂ TƯƠNG THÍCH) */}
-            <Route path="/orders" element={<OrderPage orders={orders} />} />
+            <Route path="/orders" element={<OrderPage showToast={showToast} />} />
 
             {/* TRANG 3D VIRTUAL TRY-ON */}
             <Route path="/try-on" element={

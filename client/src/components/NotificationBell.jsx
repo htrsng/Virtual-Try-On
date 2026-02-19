@@ -81,13 +81,9 @@ function NotificationBell() {
                     setIsOpen(!isOpen);
                     if (!isOpen && unreadCount > 0) markAllRead();
                 }}
+                className="icon-btn"
                 style={{
-                    background: 'none',
-                    border: 'none',
-                    fontSize: '22px',
-                    cursor: 'pointer',
                     position: 'relative',
-                    padding: '6px',
                 }}
                 title="Thông báo"
             >
@@ -95,19 +91,20 @@ function NotificationBell() {
                 {unreadCount > 0 && (
                     <span style={{
                         position: 'absolute',
-                        top: '0',
-                        right: '0',
-                        background: '#ee4d2d',
+                        top: '-4px',
+                        right: '-4px',
+                        background: '#d32f2f',
                         color: 'white',
                         borderRadius: '50%',
-                        width: '18px',
-                        height: '18px',
-                        fontSize: '11px',
+                        width: '24px',
+                        height: '24px',
+                        fontSize: '13px',
                         fontWeight: 700,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        animation: 'notifPulse 2s infinite',
+                        animation: 'bounce 0.5s ease',
+                        boxShadow: '0 2px 8px rgba(211, 47, 47, 0.4)',
                     }}>
                         {unreadCount > 9 ? '9+' : unreadCount}
                     </span>

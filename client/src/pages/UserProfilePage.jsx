@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import MapPicker from '../components/MapPicker';
-import OrderTracking from '../components/OrderTracking';
 import { getCities, getDistricts, getWards } from '../data/vietnamAddress';
 import axios from 'axios';
 
@@ -12,9 +11,7 @@ function UserProfilePage({ showToast }) {
     const { user, isAuthenticated, updateProfile } = useAuth();
     const { t } = useLanguage();
 
-    const [activeTab, setActiveTab] = useState('profile'); // profile, orders
-    const [orders, setOrders] = useState([]);
-    const [loadingOrders, setLoadingOrders] = useState(false);
+    const [activeTab, setActiveTab] = useState('profile'); // apenas 'profile'
 
     // Thông tin người dùng để chỉnh sửa
     const [fullName, setFullName] = useState('');
@@ -78,99 +75,7 @@ function UserProfilePage({ showToast }) {
             setDistrict(user.district || '');
             setWard(user.ward || '');
         }
-
-        // Load đơn hàng
-        fetchOrders();
     }, [user, isAuthenticated]);
-
-    const fetchOrders = async () => {
-        setLoadingOrders(true);
-        try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:3000/api/orders/my-orders', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            setOrders(response.data);
-        } catch (error) {
-            console.error('Lỗi lấy đơn hàng:', error);
-            showToast(t('cannot_load_orders'), 'error');
-        } finally {
-            setLoadingOrders(false);
-        }
-    };
-
-    const handleCancelOrder = async (orderId) => {
-        if (!window.confirm(t('confirm_cancel'))) {
-            return;
-        }
-
-        try {
-            const token = localStorage.getItem('token');
-            const response = await axios.put(
-                `http://localhost:3000/api/orders/${orderId}/cancel`,
-                { reason: 'Khách hàng hủy đơn' },
-                {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                }
-            );
-
-            showToast(t('cancel_success'), 'success');
-            fetchOrders(); // Reload danh sách đơn hàng
-        } catch (error) {
-            console.error('Lỗi hủy đơn hàng:', error);
-            const errorMessage = error.response?.data?.message || 'Không thể hủy đơn hàng';
-            showToast(errorMessage, 'error');
-        }
-    };
-
-    const handleDeleteOrder = async (orderId) => {
-        if (!window.confirm(t('confirm_delete'))) {
-            return;
-        }
-
-        try {
-            const token = localStorage.getItem('token');
-            await axios.delete(`http://localhost:3000/api/orders/${orderId}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            showToast(t('delete_success'), 'success');
-            fetchOrders(); // Reload danh sách đơn hàng
-        } catch (error) {
-            console.error('Lỗi xóa đơn hàng:', error);
-            const errorMessage = error.response?.data?.message || 'Không thể xóa đơn hàng';
-            showToast(errorMessage, 'error');
-        }
-    };
-
-    const handleReorder = (order) => {
-        // Chuyển đổi các products từ đơn hàng sang format của selectedProducts
-        const selectedProducts = order.products.map(product => ({
-            productId: product.productId || product._id,
-            name: product.name,
-            image: product.img,
-            price: product.price,
-            size: product.size,
-            color: product.color,
-            quantity: product.quantity
-        }));
-
-        // Lưu vào localStorage để CheckoutPage có thể đọc
-        localStorage.setItem('selectedProductsForCheckout', JSON.stringify(selectedProducts));
-
-        // Navigate đến trang checkout với state
-        navigate('/checkout/cart', {
-            state: { selectedProducts }
-        });
-
-        showToast(t('added_to_cart_msg'), 'success');
-    };
 
     const handleUpdateProfile = async (e) => {
         e.preventDefault();
@@ -237,12 +142,6 @@ function UserProfilePage({ showToast }) {
                         className={`user-profile-tab ${activeTab === 'profile' ? 'active' : ''}`}
                     >
                         📝 {t('personal_info')}
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('orders')}
-                        className={`user-profile-tab ${activeTab === 'orders' ? 'active' : ''}`}
-                    >
-                        📦 {t('my_orders_tab')} ({orders.length})
                     </button>
                 </div>
 
@@ -380,137 +279,6 @@ function UserProfilePage({ showToast }) {
                                     </button>
                                 )}
                             </form>
-                        </div>
-                    )}
-
-                    {activeTab === 'orders' && (
-                        <div>
-                            <h3 className="profile-section-title">{t('my_orders_tab')}</h3>
-
-                            {loadingOrders ? (
-                                <div className="profile-orders-loading">
-                                    {t('loading_orders')}
-                                </div>
-                            ) : orders.length === 0 ? (
-                                <div className="profile-orders-empty">
-                                    <div className="profile-orders-empty-icon">📦</div>
-                                    <p>{t('no_orders_yet')}</p>
-                                    <button
-                                        onClick={() => navigate('/')}
-                                        className="profile-orders-cta"
-                                    >
-                                        🛍️ {t('shop_now')}
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="profile-order-list">
-                                    {orders.map((order) => (
-                                        <div
-                                            key={order._id}
-                                            className="profile-order-card"
-                                        >
-                                            {/* Order Header */}
-                                            <div className="profile-order-header">
-                                                <div className="profile-order-meta">
-                                                    <span className="profile-order-id">
-                                                        {t('order_label')} #{order._id.slice(-8)}
-                                                    </span>
-                                                    <span className="profile-order-date">
-                                                        {formatDate(order.createdAt)}
-                                                    </span>
-                                                </div>
-                                                <div
-                                                    className="profile-order-status"
-                                                    style={{ background: getStatusColor(order.status) }}
-                                                >
-                                                    {order.status}
-                                                </div>
-                                            </div>
-
-                                            {/* Theo dõi đơn hàng */}
-                                            <OrderTracking status={order.status} />
-
-                                            {/* Order Products */}
-                                            <div className="profile-order-body">
-                                                {order.products.map((product, index) => (
-                                                    <div
-                                                        key={index}
-                                                        className={`profile-order-item ${index < order.products.length - 1 ? 'with-divider' : ''}`}
-                                                    >
-                                                        <img
-                                                            src={product.img}
-                                                            alt={product.name}
-                                                            className="profile-order-image"
-                                                        />
-                                                        <div className="profile-order-info">
-                                                            <div className="profile-order-name">
-                                                                {product.name}
-                                                            </div>
-                                                            <div className="profile-order-qty">
-                                                                {t('quantity_label')} {product.quantity}
-                                                            </div>
-                                                        </div>
-                                                        <div className="profile-order-price">
-                                                            {formatPrice(product.price)}
-                                                        </div>
-                                                    </div>
-                                                ))}
-
-                                                {/* Order Total */}
-                                                <div className="profile-order-total">
-                                                    <span className="profile-order-total-label">
-                                                        {t('total_amount_label')}
-                                                    </span>
-                                                    <span className="profile-order-total-value">
-                                                        {formatPrice(order.totalAmount)}
-                                                    </span>
-                                                </div>
-
-                                                {/* Shipping Info */}
-                                                <div className="profile-shipping">
-                                                    <div className="profile-shipping-title">
-                                                        📍 {t('shipping_info_title')}
-                                                    </div>
-                                                    <div>👤 {order.shippingInfo.fullName}</div>
-                                                    <div>📞 {order.shippingInfo.phone}</div>
-                                                    <div>🏠 {order.shippingInfo.address}, {order.shippingInfo.ward}, {order.shippingInfo.district}, {order.shippingInfo.city}</div>
-                                                    <div>💳 {order.paymentMethod}</div>
-                                                </div>
-
-                                                {/* Nút hủy đơn hàng */}
-                                                {order.status === 'Đang xử lý' && (
-                                                    <div className="profile-order-actions">
-                                                        <button
-                                                            onClick={() => handleCancelOrder(order._id)}
-                                                            className="btn-danger"
-                                                        >
-                                                            ❌ {t('cancel_order')}
-                                                        </button>
-                                                    </div>
-                                                )}
-
-                                                {/* Nút xóa đơn hàng đã hủy */}
-                                                {order.status === 'Đã hủy' && (
-                                                    <div className="profile-order-actions">
-                                                        <button
-                                                            onClick={() => handleReorder(order)}
-                                                            className="btn-success"
-                                                        >
-                                                            🔄 {t('reorder_btn')}
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleDeleteOrder(order._id)}
-                                                            className="btn-muted"
-                                                        >
-                                                            🗑️ {t('delete_order_btn')}
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
                         </div>
                     )}
                 </div>

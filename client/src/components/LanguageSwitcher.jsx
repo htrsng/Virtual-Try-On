@@ -27,17 +27,12 @@ function LanguageSwitcher() {
         <div ref={dropdownRef} style={{ position: 'relative', display: 'inline-block' }}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                style={{
-                    display: 'flex', alignItems: 'center', gap: '6px',
-                    background: 'none', border: '1px solid rgba(255,255,255,0.3)',
-                    borderRadius: '8px', padding: '6px 10px',
-                    cursor: 'pointer', color: 'inherit', fontSize: '13px',
-                    transition: 'all 0.2s',
-                }}
+                className="icon-btn"
                 title="Chọn ngôn ngữ"
+                style={{ gap: '6px' }}
             >
-                <span style={{ fontSize: '16px' }}>{currentLang.flag}</span>
-                <span style={{ fontWeight: 600 }}>{currentLang.code.toUpperCase()}</span>
+                <span>{currentLang.flag}</span>
+                <span style={{ fontSize: '12px', fontWeight: 600 }}>{currentLang.code.toUpperCase()}</span>
             </button>
 
             {isOpen && (
