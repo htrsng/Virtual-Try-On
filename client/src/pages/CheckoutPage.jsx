@@ -5,6 +5,9 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { FiX, FiZoomIn, FiPackage, FiTruck, FiShield, FiCheckCircle } from 'react-icons/fi';
 import axios from 'axios';
 import OnlinePaymentModal from '../components/OnlinePaymentModal';
+import AddressPicker from '../components/AddressPicker';
+import VoucherSelector from '../components/VoucherSelector';
+import { calculateDiscount } from '../data/voucherData';
 import './CheckoutPage.css';
 
 function CheckoutPage({ onCheckoutSuccess, showToast }) {
@@ -14,6 +17,8 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
     const { t } = useLanguage();
     const hasRedirected = useRef(false);
     const hasLoadedProducts = useRef(false);
+    const hasLoadedCouponsRef = useRef(false);
+    const hasLoggedUsedCouponsErrorRef = useRef(false);
 
     // Load sản phẩm đã chọn từ localStorage hoặc state
     const [selectedProducts, setSelectedProducts] = useState([]);
@@ -55,17 +60,21 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
     useEffect(() => {
         // Tránh load nhiều lần
         if (hasLoadedProducts.current) {
-            console.log('⏭️ Already loaded products, skipping...');
             return;
         }
 
-        console.log('🔍 CheckoutPage: Checking for products...');
-        console.log('📍 Location state:', location.state);
+        const redirectToChooseProduct = (messageKey, type) => {
+            if (hasRedirected.current) return;
+            if (location.pathname !== '/checkout/cart') return;
+
+            hasRedirected.current = true;
+            showToast(messageKey, type);
+            navigate('/checkout/choseproduct', { replace: true });
+        };
 
         // Ưu tiên lấy từ location.state trước
         const stateProducts = location.state?.selectedProducts;
         if (stateProducts && stateProducts.length > 0) {
-            console.log('✅ Loaded from location.state:', stateProducts);
             setSelectedProducts(stateProducts);
             hasLoadedProducts.current = true;
             // Lưu vào localStorage để backup
@@ -75,38 +84,21 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
 
         // Fallback: Lấy từ localStorage
         const saved = localStorage.getItem('selectedProductsForCheckout');
-        console.log('📦 Checking localStorage:', saved);
 
         if (saved) {
             try {
                 const products = JSON.parse(saved);
-                console.log('✅ Loaded products from localStorage:', products);
                 if (products && products.length > 0) {
                     setSelectedProducts(products);
                     hasLoadedProducts.current = true;
                 } else {
-                    console.warn('⚠️ Products array is empty');
-                    if (!hasRedirected.current) {
-                        hasRedirected.current = true;
-                        showToast(t('no_product_found'), "error");
-                        setTimeout(() => navigate('/checkout/choseproduct', { replace: true }), 100);
-                    }
+                    redirectToChooseProduct(t('no_product_found'), 'error');
                 }
             } catch (e) {
-                console.error('❌ Error parsing selectedProducts:', e);
-                if (!hasRedirected.current) {
-                    hasRedirected.current = true;
-                    showToast(t('no_product_found'), "error");
-                    setTimeout(() => navigate('/checkout/choseproduct', { replace: true }), 100);
-                }
+                redirectToChooseProduct(t('no_product_found'), 'error');
             }
         } else {
-            console.warn('⚠️ No data in localStorage');
-            if (!hasRedirected.current) {
-                hasRedirected.current = true;
-                showToast(t('please_select_products'), "warning");
-                setTimeout(() => navigate('/checkout/choseproduct', { replace: true }), 100);
-            }
+            redirectToChooseProduct(t('please_select_products'), 'warning');
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // Chỉ chạy 1 lần khi mount
@@ -121,6 +113,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
     const [paymentMethod, setPaymentMethod] = useState('COD');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showOnlinePayment, setShowOnlinePayment] = useState(false);
+    const [selectedVoucher, setSelectedVoucher] = useState(null);
 
     // State cho mã giảm giá
     const [discountCode, setDiscountCode] = useState('');
@@ -172,7 +165,11 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
 
     // Load mã giảm giá và coupons đã dùng
     useEffect(() => {
-        if (!isAuthenticated) return;
+        if (!isAuthenticated || hasLoadedCouponsRef.current) return;
+        hasLoadedCouponsRef.current = true;
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
 
         // Load danh sách mã đã sử dụng từ server
         const fetchUsedCoupons = async () => {
@@ -181,6 +178,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                 if (!token) return;
 
                 const response = await fetch('http://localhost:3000/api/used-coupons', {
+                    signal: controller.signal,
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -189,9 +187,14 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                 if (response.ok) {
                     const data = await response.json();
                     setUsedCoupons(data.coupons || []);
+                    hasLoggedUsedCouponsErrorRef.current = false;
                 }
             } catch (err) {
-                console.error('Lỗi load mã đã dùng:', err);
+                if (err?.name === 'AbortError') return;
+                if (!hasLoggedUsedCouponsErrorRef.current) {
+                    console.warn('Không thể tải danh sách mã đã dùng lúc này.');
+                    hasLoggedUsedCouponsErrorRef.current = true;
+                }
             }
         };
 
@@ -199,9 +202,19 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
 
         // Load mã giảm giá từ localStorage (chỉ mã từ vòng quay và newsletter)
         const loadCoupons = () => {
-            const savedCoupons = JSON.parse(localStorage.getItem('myCoupons') || '[]');
-            console.log('📦 Load mã giảm giá từ localStorage:', savedCoupons);
-            setMyCoupons(savedCoupons);
+            try {
+                const rawCoupons = JSON.parse(localStorage.getItem('myCoupons') || '[]');
+                const savedCoupons = [...new Set((Array.isArray(rawCoupons) ? rawCoupons : [])
+                    .map(code => String(code || '').trim().toUpperCase())
+                    .filter(Boolean))];
+                setMyCoupons(prev => {
+                    const prevSerialized = JSON.stringify(prev || []);
+                    const nextSerialized = JSON.stringify(savedCoupons || []);
+                    return prevSerialized === nextSerialized ? prev : savedCoupons;
+                });
+            } catch {
+                setMyCoupons(prev => (Array.isArray(prev) && prev.length === 0 ? prev : []));
+            }
         };
 
         loadCoupons();
@@ -215,7 +228,6 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
 
         // Lắng nghe custom event từ vòng quay (trong cùng tab)
         const handleCouponUpdate = () => {
-            console.log('🎯 Nhận event couponUpdated - đang reload mã...');
             loadCoupons();
         };
 
@@ -223,6 +235,8 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
         window.addEventListener('couponUpdated', handleCouponUpdate);
 
         return () => {
+            clearTimeout(timeoutId);
+            controller.abort();
             window.removeEventListener('storage', handleStorageChange);
             window.removeEventListener('couponUpdated', handleCouponUpdate);
         };
@@ -246,7 +260,12 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
     const selectedShipping = shippingOptions.find(opt => opt.id === shippingMethod);
     const shippingFee = selectedShipping?.price || 0;
     const discountAmount = appliedDiscount ? (totalAmount * appliedDiscount.discount) / 100 : 0;
-    const finalAmount = totalAmount + shippingFee - discountAmount;
+
+    // Tính voucher discount
+    const voucherDiscount = selectedVoucher ? calculateDiscount(selectedVoucher, totalAmount) : 0;
+
+    // Tính tổng final = subtotal + shipping - coupon discount - voucher discount
+    const finalAmount = totalAmount + shippingFee - discountAmount - voucherDiscount;
 
     const formatPrice = (price) => {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
@@ -422,6 +441,32 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
         }, 100);
     };
 
+    const consumeCouponAfterSuccess = (couponCode) => {
+        const normalized = String(couponCode || '').trim().toUpperCase();
+        if (!normalized) return;
+
+        setUsedCoupons(prev => {
+            if (prev.includes(normalized)) return prev;
+            return [...prev, normalized];
+        });
+
+        setMyCoupons(prev => {
+            const nextCoupons = (Array.isArray(prev) ? prev : []).filter(
+                code => String(code || '').trim().toUpperCase() !== normalized
+            );
+            localStorage.setItem('myCoupons', JSON.stringify(nextCoupons));
+            return nextCoupons;
+        });
+    };
+
+    // Hàm xử lý khi user chọn address từ AddressPicker
+    const handleAddressChange = (addressData) => {
+        setCity(addressData.city);
+        setDistrict(addressData.district);
+        setWard(addressData.ward);
+        setAddress(addressData.address);
+    };
+
     const handlePayment = async (e) => {
         e.preventDefault();
 
@@ -430,20 +475,9 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
             return;
         }
 
-        // Kiểm tra xem user đã có địa chỉ đầy đủ chưa
-        if (!user?.address || !user?.city || !user?.district || !user?.ward) {
-            showToast(t('update_address_warning'), "warning");
-            setTimeout(() => {
-                navigate('/profile');
-            }, 1500);
-            return;
-        }
-
+        // Kiểm tra form fields có được điền đủ không
         if (!fullName || !phone || !address || !city || !district || !ward) {
             showToast(t('update_full_info'), "warning");
-            setTimeout(() => {
-                navigate('/profile');
-            }, 1500);
             return;
         }
 
@@ -499,6 +533,8 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                 shippingMethod: t(selectedShipping.nameKey),
                 discountCode: appliedDiscount?.code || null,
                 discountAmount: discountAmount,
+                voucherCode: selectedVoucher?.code || null,
+                voucherDiscount: voucherDiscount,
                 shippingInfo: {
                     fullName,
                     phone,
@@ -533,6 +569,10 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                 } catch (err) {
                     console.error('Lỗi đánh dấu mã:', err);
                 }
+            }
+
+            if (appliedDiscount?.code) {
+                consumeCouponAfterSuccess(appliedDiscount.code);
             }
 
             showToast(`${t('order_success')} 🎉`, "success");
@@ -906,10 +946,24 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                                 )}
                             </div>
 
+                            {/* Voucher Selector */}
+                            <VoucherSelector
+                                totalAmount={totalAmount}
+                                onVoucherSelect={setSelectedVoucher}
+                                selectedVoucher={selectedVoucher}
+                            />
+
                             {appliedDiscount && (
                                 <div className="summary-row">
                                     <span className="summary-label summary-discount">{t('discount_code')} ({appliedDiscount.discount}%):</span>
                                     <span className="summary-value summary-discount">-{formatPrice(discountAmount)}</span>
+                                </div>
+                            )}
+
+                            {selectedVoucher && (
+                                <div className="summary-row">
+                                    <span className="summary-label summary-discount">{selectedVoucher.badge} {selectedVoucher.code}:</span>
+                                    <span className="summary-value summary-discount">-{formatPrice(voucherDiscount)}</span>
                                 </div>
                             )}
 
@@ -935,7 +989,8 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                                             type="text"
                                             className="form-input"
                                             value={fullName}
-                                            readOnly
+                                            onChange={(e) => setFullName(e.target.value)}
+                                            placeholder={t('enter_full_name') || "Nhập họ và tên"}
                                         />
                                     </div>
 
@@ -945,37 +1000,21 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                                             type="tel"
                                             className="form-input"
                                             value={phone}
-                                            readOnly
+                                            onChange={(e) => setPhone(e.target.value)}
+                                            placeholder={t('enter_phone') || "Nhập số điện thoại"}
                                         />
                                     </div>
 
-                                    <div className="form-group">
-                                        <label className="form-label">{t('address_star')}</label>
-                                        <input
-                                            type="text"
-                                            className="form-input"
-                                            value={address}
-                                            readOnly
+                                    {/* Address Picker Component */}
+                                    <div className="form-group" style={{ marginTop: '20px' }}>
+                                        <AddressPicker
+                                            onAddressChange={handleAddressChange}
+                                            initialCity={city}
+                                            initialDistrict={district}
+                                            initialWard={ward}
+                                            initialAddress={address}
+                                            showMap={true}
                                         />
-                                        <p className="form-hint">
-                                            💡 {t('address_hint')} <a href="/profile">{t('your_profile_link')}</a>
-                                        </p>
-                                    </div>
-
-                                    <div className="form-row">
-                                        <div className="form-group">
-                                            <label className="form-label">{t('ward_star')}</label>
-                                            <input type="text" className="form-input" value={ward} readOnly />
-                                        </div>
-                                        <div className="form-group">
-                                            <label className="form-label">{t('district_star')}</label>
-                                            <input type="text" className="form-input" value={district} readOnly />
-                                        </div>
-                                    </div>
-
-                                    <div className="form-group">
-                                        <label className="form-label">{t('city_star')}</label>
-                                        <input type="text" className="form-input" value={city} readOnly />
                                     </div>
 
                                     {/* Payment Methods */}

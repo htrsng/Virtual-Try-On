@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useGLTF, useAnimations } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -13,37 +13,48 @@ export const Avatar: React.FC<AvatarProps & { skinColor?: string }> = ({
     pose = 'Idle',
 }) => {
     const group = useRef<THREE.Group>(null);
-    const { scene, animations } = useGLTF(MODEL_PATH) as any;
+    const { scene, animations } = useGLTF(MODEL_PATH) as { scene: THREE.Group; animations: THREE.AnimationClip[] };
     const { actions, names } = useAnimations(animations, group);
+    const avatarDataRef = useRef<{ legs: THREE.Bone[]; spine: THREE.Bone[]; hips: THREE.Bone | null; morphMeshes: THREE.SkinnedMesh[] }>({
+        legs: [],
+        spine: [],
+        hips: null,
+        morphMeshes: []
+    });
 
     // 1. CHỈ QUÉT MODEL 1 LẦN: Lưu 2 mesh 'Plane003' và 'Plane003_1' vào bộ nhớ
-    const avatarData = useMemo(() => {
+    useEffect(() => {
         const map: { legs: THREE.Bone[], spine: THREE.Bone[], hips: THREE.Bone | null, morphMeshes: THREE.SkinnedMesh[] } = {
             legs: [], spine: [], hips: null, morphMeshes: []
         };
-        scene.traverse((child: any) => {
-            if (child.isBone) {
+        scene.traverse((child: THREE.Object3D) => {
+            if (child instanceof THREE.Bone) {
                 const name = child.name.toLowerCase();
                 if (name.includes('upper-leg') || (name.includes('leg') && !name.includes('ctrl'))) map.legs.push(child);
                 if (name.includes('spine')) map.spine.push(child);
                 if (name === 'hips' || name.includes('pelvis')) map.hips = child;
             }
             // Thu thập TẤT CẢ các Mesh có chứa Shape Keys đã tìm thấy
-            if (child.isSkinnedMesh && child.morphTargetDictionary) {
+            if (child instanceof THREE.SkinnedMesh && child.morphTargetDictionary) {
                 map.morphMeshes.push(child);
             }
         });
-        return map;
+        avatarDataRef.current = map;
     }, [scene]);
 
     // 2. GHI ĐÈ ANIMATION MỖI KHUNG HÌNH (useFrame)
     useFrame(() => {
+        const avatarData = avatarDataRef.current;
         if (!body || avatarData.morphMeshes.length === 0) return;
+
+        const safeHeight = Number.isFinite(body.height) && body.height > 0 ? body.height : 165;
+        const rawLegLength = Number.isFinite(body.legLength) && body.legLength > 0 ? body.legLength : Math.round(safeHeight * 0.58);
+        const safeLegLength = THREE.MathUtils.clamp(rawLegLength, Math.round(safeHeight * 0.35), Math.round(safeHeight * 0.75));
 
         // A. Cập nhật Xương (Chân)
         const stdLeg = 95;
-        const legScale = body.legLength / stdLeg;
-        const torsoScale = (body.height - body.legLength) / (165 - 95);
+        const legScale = THREE.MathUtils.clamp(safeLegLength / stdLeg, 0.45, 1.75);
+        const torsoScale = THREE.MathUtils.clamp((safeHeight - safeLegLength) / (165 - 95), 0.45, 1.75);
 
         avatarData.legs.forEach(b => b.scale.set(1, legScale, 1));
         avatarData.spine.forEach(b => {
@@ -68,7 +79,8 @@ export const Avatar: React.FC<AvatarProps & { skinColor?: string }> = ({
         return () => { actions[actionName]?.fadeOut(0.5); };
     }, [actions, names, pose]);
 
-    const globalScale = (body?.height || 165) / 165;
+    const safeGlobalHeight = Number.isFinite(body?.height) && (body?.height || 0) > 0 ? (body?.height || 165) : 165;
+    const globalScale = THREE.MathUtils.clamp(safeGlobalHeight / 165, 0.75, 1.45);
 
     return (
         <group ref={group} scale={[globalScale, globalScale, globalScale]}>

@@ -1,25 +1,74 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 function NotificationBell() {
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
+    const isFetchingRef = useRef(false);
+    const hasLoggedNetworkErrorRef = useRef(false);
     const { isAuthenticated } = useAuth();
+
+    const getAuthHeaders = () => {
+        const token = localStorage.getItem('token');
+        return token ? { Authorization: `Bearer ${token}` } : {};
+    };
+
+    const fetchNotifications = useCallback(async (signal) => {
+        if (!isAuthenticated || isFetchingRef.current) return;
+
+        isFetchingRef.current = true;
+        try {
+            const res = await axios.get(`${API_URL}/api/notifications`, {
+                headers: getAuthHeaders(),
+                timeout: 8000,
+                signal,
+            });
+            setNotifications(res.data.notifications || []);
+            setUnreadCount(res.data.unreadCount || 0);
+            hasLoggedNetworkErrorRef.current = false;
+        } catch (err) {
+            if (axios.isCancel(err) || err?.name === 'CanceledError') return;
+
+            if (err?.response?.status === 401) {
+                setNotifications([]);
+                setUnreadCount(0);
+                return;
+            }
+
+            if (!hasLoggedNetworkErrorRef.current) {
+                console.warn('Không thể tải thông báo. Server có thể đang tạm thời không phản hồi.');
+                hasLoggedNetworkErrorRef.current = true;
+            }
+        } finally {
+            isFetchingRef.current = false;
+        }
+    }, [isAuthenticated]);
 
     // Fetch notifications
     useEffect(() => {
-        if (isAuthenticated) {
-            fetchNotifications();
-            // Poll mỗi 30 giây
-            const interval = setInterval(fetchNotifications, 30000);
-            return () => clearInterval(interval);
+        if (!isAuthenticated) {
+            setNotifications([]);
+            setUnreadCount(0);
+            return;
         }
-    }, [isAuthenticated]);
+
+        const controller = new AbortController();
+        fetchNotifications(controller.signal);
+
+        const interval = setInterval(() => {
+            fetchNotifications();
+        }, 60000);
+
+        return () => {
+            controller.abort();
+            clearInterval(interval);
+        };
+    }, [isAuthenticated, fetchNotifications]);
 
     // Click outside to close
     useEffect(() => {
@@ -32,23 +81,18 @@ function NotificationBell() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const fetchNotifications = async () => {
-        try {
-            const res = await axios.get(`${API_URL}/api/notifications`);
-            setNotifications(res.data.notifications || []);
-            setUnreadCount(res.data.unreadCount || 0);
-        } catch (err) {
-            console.error('Lỗi fetch notifications:', err);
-        }
-    };
-
     const markAllRead = async () => {
         try {
-            await axios.put(`${API_URL}/api/notifications/read`);
+            await axios.put(`${API_URL}/api/notifications/read`, {}, {
+                headers: getAuthHeaders(),
+                timeout: 8000,
+            });
             setUnreadCount(0);
             setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
         } catch (err) {
-            console.error('Lỗi đánh dấu đã đọc:', err);
+            if (err?.response?.status !== 401) {
+                console.warn('Không thể cập nhật trạng thái thông báo lúc này.');
+            }
         }
     };
 

@@ -66,6 +66,16 @@ async function sendOrderConfirmationEmail(userEmail, order, shippingInfo) {
   `
       : "";
 
+  const voucherRow =
+    order.voucherDiscount > 0
+      ? `
+    <tr>
+      <td colspan="3" style="padding: 8px 12px; text-align: right; color: #e74c3c;">Voucher (${order.voucherCode}):</td>
+      <td style="padding: 8px 12px; text-align: right; color: #e74c3c; font-weight: 600;">-${Number(order.voucherDiscount).toLocaleString("vi-VN")}đ</td>
+    </tr>
+  `
+      : "";
+
   const htmlContent = `
   <!DOCTYPE html>
   <html>
@@ -104,6 +114,7 @@ async function sendOrderConfirmationEmail(userEmail, order, shippingInfo) {
           </tbody>
           <tfoot>
             ${discountRow}
+            ${voucherRow}
             <tr>
               <td colspan="3" style="padding:12px;text-align:right;font-size:16px;font-weight:700;color:#c8956c;">Tổng cộng:</td>
               <td style="padding:12px;text-align:right;font-size:18px;font-weight:700;color:#c8956c;">${Number(order.totalAmount).toLocaleString("vi-VN")}đ</td>
@@ -163,6 +174,9 @@ mongoose.connection.on("connected", () => {
   seedBannerContents().catch((err) =>
     console.error("❌ Seed banner contents error:", err),
   );
+  normalizeProductNumericIds()
+    .then((result) => console.log(`✅ ${result.message}`))
+    .catch((err) => console.error("❌ Normalize product IDs error:", err));
 });
 
 mongoose.connection.on("error", (err) => {
@@ -183,6 +197,60 @@ const ProductSchema = new mongoose.Schema({
   sold: Number,
 });
 const ProductModel = mongoose.model("products", ProductSchema);
+
+const normalizeProductNumericIds = async () => {
+  const products = await ProductModel.find().sort({ _id: 1 });
+  if (!products.length) {
+    return { total: 0, updated: 0, message: "Không có sản phẩm để chuẩn hóa ID" };
+  }
+
+  const usedIds = new Set();
+  let maxId = 0;
+
+  products.forEach((product) => {
+    const numericId = Number(product.id);
+    if (Number.isInteger(numericId) && numericId > 0 && !usedIds.has(numericId)) {
+      usedIds.add(numericId);
+      maxId = Math.max(maxId, numericId);
+    }
+  });
+
+  const updates = [];
+  const getNextId = () => {
+    let candidate = Math.max(1, maxId + 1);
+    while (usedIds.has(candidate)) {
+      candidate += 1;
+    }
+    usedIds.add(candidate);
+    maxId = Math.max(maxId, candidate);
+    return candidate;
+  };
+
+  products.forEach((product) => {
+    const numericId = Number(product.id);
+    const isValid = Number.isInteger(numericId) && numericId > 0;
+    if (!isValid || usedIds.has(`dup:${numericId}`)) {
+      updates.push({
+        updateOne: {
+          filter: { _id: product._id },
+          update: { $set: { id: getNextId() } },
+        },
+      });
+    } else {
+      usedIds.add(`dup:${numericId}`);
+    }
+  });
+
+  if (updates.length > 0) {
+    await ProductModel.bulkWrite(updates);
+  }
+
+  return {
+    total: products.length,
+    updated: updates.length,
+    message: `Đã chuẩn hóa ID sản phẩm (${updates.length}/${products.length})`,
+  };
+};
 
 // --- SCHEMA NGƯỜI DÙNG ---
 const UserSchema = new mongoose.Schema({
@@ -219,6 +287,10 @@ const OrderSchema = new mongoose.Schema({
   totalAmount: { type: Number, required: true },
   discountCode: { type: String, default: "" },
   discountAmount: { type: Number, default: 0 },
+  voucherCode: { type: String, default: "" },
+  voucherDiscount: { type: Number, default: 0 },
+  shippingFee: { type: Number, default: 0 },
+  shippingMethod: { type: String, default: "Tiêu chuẩn" },
   shippingInfo: {
     fullName: String,
     phone: String,
@@ -414,7 +486,8 @@ const authenticateToken = (req, res, next) => {
 // --- API SẢN PHẨM ---
 app.get("/api/products", async (req, res) => {
   try {
-    const products = await ProductModel.find();
+    await normalizeProductNumericIds();
+    const products = await ProductModel.find().sort({ id: 1 });
     res.json(products);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -462,6 +535,15 @@ app.delete("/api/products/:id", async (req, res) => {
     res.json({ message: "Deleted" });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/admin/products/normalize-ids", async (req, res) => {
+  try {
+    const result = await normalizeProductNumericIds();
+    res.json({ status: "success", ...result });
+  } catch (err) {
+    res.status(500).json({ status: "error", error: err.message });
   }
 });
 
@@ -573,11 +655,17 @@ app.post("/api/newsletter/use-coupon", async (req, res) => {
 // 4. Kiểm tra mã giảm giá đã sử dụng chưa (cho user)
 app.post("/api/check-coupon-used", authenticateToken, async (req, res) => {
   try {
-    const { couponCode } = req.body;
+    const normalizedCouponCode = String(req.body?.couponCode || "")
+      .trim()
+      .toUpperCase();
+
+    if (!normalizedCouponCode) {
+      return res.status(400).json({ message: "Thiếu mã giảm giá", used: false });
+    }
 
     const usedCoupon = await UsedCouponModel.findOne({
       userId: req.user.id,
-      couponCode: couponCode,
+      couponCode: normalizedCouponCode,
     });
 
     res.json({
@@ -701,6 +789,9 @@ app.post("/api/auth/register", async (req, res) => {
         fullName: newUser.fullName,
         phone: newUser.phone,
         address: newUser.address,
+        city: newUser.city || "",
+        district: newUser.district || "",
+        ward: newUser.ward || "",
       },
     });
   } catch (err) {
@@ -903,7 +994,15 @@ app.post("/api/orders", authenticateToken, async (req, res) => {
       paymentMethod,
       discountCode,
       discountAmount,
+      voucherCode,
+      voucherDiscount,
+      shippingFee,
+      shippingMethod,
     } = req.body;
+
+    const normalizedDiscountCode = String(discountCode || "")
+      .trim()
+      .toUpperCase();
 
     // Validate dữ liệu
     if (!products || products.length === 0) {
@@ -932,10 +1031,10 @@ app.post("/api/orders", authenticateToken, async (req, res) => {
     }
 
     // Kiểm tra mã giảm giá đã sử dụng
-    if (discountCode) {
+    if (normalizedDiscountCode) {
       const existingUsage = await UsedCouponModel.findOne({
         userId: req.user.id,
-        couponCode: discountCode,
+        couponCode: normalizedDiscountCode,
       });
 
       if (existingUsage) {
@@ -952,8 +1051,12 @@ app.post("/api/orders", authenticateToken, async (req, res) => {
       userId: req.user.id,
       products,
       totalAmount,
-      discountCode: discountCode || "",
+      discountCode: normalizedDiscountCode,
       discountAmount: discountAmount || 0,
+      voucherCode: voucherCode || "",
+      voucherDiscount: voucherDiscount || 0,
+      shippingFee: shippingFee || 0,
+      shippingMethod: shippingMethod || "Tiêu chuẩn",
       shippingInfo,
       paymentMethod: paymentMethod || "COD",
     });
@@ -962,16 +1065,27 @@ app.post("/api/orders", authenticateToken, async (req, res) => {
     console.log("✅ Đơn hàng đã lưu thành công:", newOrder._id);
 
     // Lưu mã giảm giá đã sử dụng
-    if (discountCode) {
+    if (normalizedDiscountCode) {
       try {
         await UsedCouponModel.create({
           userId: req.user.id,
-          couponCode: discountCode,
+          couponCode: normalizedDiscountCode,
           orderId: newOrder._id,
         });
         console.log("✅ Đã lưu mã giảm giá đã sử dụng");
       } catch (couponErr) {
         console.log("⚠️ Lỗi lưu mã giảm giá:", couponErr.message);
+      }
+    }
+
+    if (normalizedDiscountCode.startsWith("NEWS10")) {
+      try {
+        await NewsletterModel.updateOne(
+          { couponCode: normalizedDiscountCode, isUsed: false },
+          { $set: { isUsed: true } },
+        );
+      } catch (newsletterErr) {
+        console.log("⚠️ Lỗi đánh dấu newsletter coupon:", newsletterErr.message);
       }
     }
 
@@ -1100,25 +1214,7 @@ app.put("/api/orders/:id/cancel", authenticateToken, async (req, res) => {
     order.cancelReason = reason || "Khách hàng hủy đơn";
     await order.save();
 
-    // Nếu đơn hàng có sử dụng mã giảm giá newsletter, hoàn lại mã
-    if (order.discountCode && order.discountCode.startsWith("NEWS10")) {
-      const subscriber = await NewsletterModel.findOne({
-        couponCode: order.discountCode,
-      });
-      if (subscriber && subscriber.isUsed) {
-        subscriber.isUsed = false;
-        await subscriber.save();
-      }
-    }
-
-    // Xóa record mã giảm giá đã sử dụng
-    if (order.discountCode) {
-      await UsedCouponModel.findOneAndDelete({
-        userId: req.user.id,
-        couponCode: order.discountCode,
-        orderId: order._id,
-      });
-    }
+    // KHÔNG hoàn lại coupon khi hủy đơn: mã đã dùng sẽ mất luôn
 
     res.json({
       message: "Đã hủy đơn hàng thành công",
@@ -1329,8 +1425,8 @@ app.get("/api/reviews/:productId", async (req, res) => {
     const avgRating =
       reviews.length > 0
         ? (
-            reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-          ).toFixed(1)
+          reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+        ).toFixed(1)
         : 0;
     res.json({
       reviews,
@@ -1663,8 +1759,232 @@ app.get("/api/payment/status/:paymentId", async (req, res) => {
 });
 
 // =============================================
-// THÊM THÔNG BÁO KHI ĐƠN HÀNG THAY ĐỔI TRẠNG THÁI
+// ADMIN DATA SYNC & MANAGEMENT APIs
 // =============================================
+
+// 1. Kiểm tra trạng thái đồng bộ dữ liệu
+app.get("/api/admin/sync-status", async (req, res) => {
+  try {
+    const orders = await OrderModel.find();
+    const users = await UserModel.find();
+    const products = new Map();
+
+    // Collect products from orders
+    orders.forEach(order => {
+      if (order.products) {
+        order.products.forEach(p => {
+          const key = p.productId || p.name;
+          if (!products.has(key)) {
+            products.set(key, p);
+          }
+        });
+      }
+    });
+
+    res.json({
+      status: "success",
+      data: {
+        totalOrders: orders.length,
+        totalUsers: users.length,
+        totalProducts: products.size,
+        lastChecked: new Date(),
+        isSynced: orders.length > 0 && users.length > 0
+      }
+    });
+  } catch (error) {
+    console.error("❌ Lỗi check sync status:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 2. Lấy tất cả dữ liệu để đồng bộ
+app.get("/api/admin/get-all-data", async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+
+    // Verify token (optional - có thể bỏ để test)
+    // if (!token) return res.status(401).json({ message: "No token" });
+
+    const orders = await OrderModel.find().lean();
+    const users = await UserModel.find().lean();
+    const products = new Map();
+
+    // Aggregate products từ orders
+    orders.forEach(order => {
+      if (order.products) {
+        order.products.forEach(p => {
+          const key = p.productId || p.name;
+          if (!products.has(key)) {
+            products.set(key, {
+              _id: p.productId,
+              id: p.productId,
+              name: p.name,
+              sku: p.sku || `AUTO-${key}`,
+              price: p.price,
+              img: p.img,
+              category: p.category || 'Khác',
+              quantity: 0,
+              totalRevenue: 0
+            });
+          }
+        });
+      }
+    });
+
+    // Calculate sales & revenue
+    orders.forEach(order => {
+      if (order.products) {
+        order.products.forEach(p => {
+          const key = p.productId || p.name;
+          const product = products.get(key);
+          if (product) {
+            product.quantity += (p.quantity || 1);
+            product.totalRevenue += (p.price * (p.quantity || 1));
+          }
+        });
+      }
+    });
+
+    res.json({
+      status: "success",
+      data: {
+        orders: orders.length,
+        users: users.length,
+        products: Array.from(products.values()),
+        timestamp: new Date(),
+        message: `Đồng bộ ${orders.length} đơn, ${users.length} user, ${products.size} sản phẩm`
+      }
+    });
+  } catch (error) {
+    console.error("❌ Lỗi lấy dữ liệu:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 3. Xóa TẤT CẢ dữ liệu (DANGER - chỉ dùng khi muốn reset hoàn toàn)
+app.post("/api/admin/clear-all-data", async (req, res) => {
+  try {
+    const { confirm } = req.body;
+
+    if (confirm !== "CLEAR_ALL_DATA") {
+      return res.status(400).json({
+        error: "Xác nhận không đúng. Gửi { confirm: 'CLEAR_ALL_DATA' }"
+      });
+    }
+
+    // Delete all data
+    const deletedOrders = await OrderModel.deleteMany({});
+    const deletedUsers = await UserModel.deleteMany({});
+    const deletedCoupons = await UsedCouponModel.deleteMany({});
+
+    console.log(`
+    ⚠️  XÓA DỮ LIỆU HOÀN TOÀN:
+    - Orders: ${deletedOrders.deletedCount}
+    - Users: ${deletedUsers.deletedCount}
+    - Coupons: ${deletedCoupons.deletedCount}
+    `);
+
+    res.json({
+      status: "success",
+      message: "✅ Đã xóa tất cả dữ liệu",
+      deleted: {
+        orders: deletedOrders.deletedCount,
+        users: deletedUsers.deletedCount,
+        coupons: deletedCoupons.deletedCount
+      }
+    });
+  } catch (error) {
+    console.error("❌ Lỗi xóa dữ liệu:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 4. Reset dữ liệu về trạng thái ban đầu (tạo test data)
+app.post("/api/admin/reset-data", async (req, res) => {
+  try {
+    // Xóa all data trước
+    await OrderModel.deleteMany({});
+    await UserModel.deleteMany({});
+    await UsedCouponModel.deleteMany({});
+
+    // Tạo user test
+    const hashPassword = await bcrypt.hash("123456", 10);
+    const testUser = new UserModel({
+      email: "test@example.com",
+      password: hashPassword,
+      fullName: "Test User",
+      phone: "0123456789",
+      address: "123 Main St",
+      city: "Hà Nội",
+      district: "Ba Đình",
+      ward: "Phường Cống Vị",
+      role: "user"
+    });
+    await testUser.save();
+
+    // Tạo admin
+    const adminPassword = await bcrypt.hash("admin123", 10);
+    const admin = new UserModel({
+      email: "admin@example.com",
+      password: adminPassword,
+      fullName: "Admin",
+      phone: "0999999999",
+      address: "Admin Address",
+      city: "Hà Nội",
+      district: "Hoàn Kiếm",
+      ward: "Phường Hàng Bạc",
+      role: "admin"
+    });
+    await admin.save();
+
+    res.json({
+      status: "success",
+      message: "✅ Đã reset dữ liệu về ban đầu",
+      data: {
+        testUser: testUser.email,
+        admin: admin.email,
+        password: "123456 / admin123"
+      }
+    });
+  } catch (error) {
+    console.error("❌ Lỗi reset dữ liệu:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 5. API endpoint kiểm tra dữ liệu đồng bộ có vấn đề không
+app.post("/api/admin/check-sync", async (req, res) => {
+  try {
+    const orders = await OrderModel.find();
+    const users = await UserModel.find();
+
+    // Check if data is synced
+    const isSynced = orders.length > 0 && users.length > 0;
+
+    if (!isSynced) {
+      return res.json({
+        status: "warning",
+        isSynced: false,
+        message: "❌ Dữ liệu chưa được đồng bộ. Vui lòng clear và reset",
+        suggestion: "Gọi POST /api/admin/clear-all-data rồi POST /api/admin/reset-data"
+      });
+    }
+
+    res.json({
+      status: "success",
+      isSynced: true,
+      message: "✅ Dữ liệu đã đồng bộ",
+      stats: {
+        orders: orders.length,
+        users: users.length
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// THÊM THÔNG BÁO KHI ĐƠN HÀNG THAY ĐỔI TRẠNG THÁI
 // Override API cập nhật trạng thái đơn hàng để gửi notification
 const originalOrderUpdate = app.put;
 

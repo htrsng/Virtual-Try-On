@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useMemo } from 'react';
 
 // 1. Định nghĩa cấu trúc dữ liệu Profile

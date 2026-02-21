@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense, useCallback, useRef } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 
 // --- 1. IMPORT CÁC COMPONENT CỦA WEB BÁN HÀNG ---
@@ -7,7 +7,6 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import Toast from './components/Toast';
-import ChatWidget from './components/ChatWidget';
 import { FittingRoomProvider } from './contexts/FittingRoomContext';
 
 // --- LAZY LOAD CÁC TRANG (Performance Optimization) ---
@@ -21,6 +20,14 @@ const CheckoutSelectPage = lazy(() => import('./pages/CheckoutSelectPage'));
 const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'));
 const OrderPage = lazy(() => import('./pages/OrderPage'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
+const AdminLayout = lazy(() => import('./pages/AdminLayout'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const AdminOrders = lazy(() => import('./pages/AdminOrders'));
+const AdminProducts = lazy(() => import('./pages/AdminProducts'));
+const AdminCategories = lazy(() => import('./pages/AdminCategories'));
+const AdminFlashSale = lazy(() => import('./pages/AdminFlashSale'));
+const AdminCoupons = lazy(() => import('./pages/AdminCoupons'));
+const AdminDataSync = lazy(() => import('./components/AdminDataSync'));
 const UserProfilePage = lazy(() => import('./pages/UserProfilePage'));
 const HelpPage = lazy(() => import('./pages/HelpPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
@@ -29,9 +36,10 @@ const PolicyPage = lazy(() => import('./pages/PolicyPage'));
 const BannerContentPage = lazy(() => import('./pages/BannerContentPage'));
 const WishlistPage = lazy(() => import('./pages/WishlistPage'));
 const ComparePage = lazy(() => import('./pages/ComparePage'));
+const ChatWidget = lazy(() => import('./components/ChatWidget'));
 
 // --- 2. IMPORT TÍNH NĂNG 3D (MỚI) ---
-import VirtualTryOn from "./features/virtual-tryon/VirtualTryOn";
+const VirtualTryOn = lazy(() => import('./features/virtual-tryon/VirtualTryOn'));
 
 // --- 3. IMPORT CONTEXTS ---
 import { AuthProvider } from './contexts/AuthContext';
@@ -43,6 +51,8 @@ import { LanguageProvider } from './contexts/LanguageContext';
 // --- 4. IMPORT DỮ LIỆU MẪU (INITIAL DATA) ---
 import { initTopSearch, fallbackSuggestions, initCategories, initBanners } from './data/initialData';
 import { initFlashSaleProducts } from './data/flashSaleData';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 // --- LOADING FALLBACK COMPONENT ---
 const PageLoader = () => (
@@ -60,7 +70,44 @@ const PageLoader = () => (
   </div>
 );
 
-const formatPrice = (price: any) => {
+type PriceValue = number | string;
+
+type ProductRecord = {
+  id: number | string;
+  name: string;
+  price: PriceValue;
+  quantity?: number;
+  size?: string;
+  cartId?: number;
+  img?: string;
+  image?: string;
+  [key: string]: unknown;
+};
+
+type CartItem = ProductRecord & {
+  quantity: number;
+  size: string;
+  cartId: number;
+};
+
+type UserRecord = {
+  _id?: string;
+  id: number | null;
+  email: string;
+  role?: string;
+  fullName: string;
+  phone: string;
+  address: string;
+  [key: string]: unknown;
+};
+
+type OrderRecord = {
+  items: CartItem[];
+  total: number;
+  date: string;
+};
+
+const formatPrice = (price: PriceValue) => {
   if (typeof price === 'string') return price;
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 };
@@ -71,18 +118,18 @@ function App() {
   const [topSearch, setTopSearch] = useState(initTopSearch);
   const [topProducts, setTopProducts] = useState(initTopSearch);
   const [categories, setCategories] = useState(initCategories);
-  const [users, setUsers] = useState<any[]>([]); // Bắt đầu với mảng rỗng
+  const [users, setUsers] = useState<UserRecord[]>([]); // Bắt đầu với mảng rỗng
   const [bannerData, setBannerData] = useState(initBanners);
   const [flashSaleProducts, setFlashSaleProducts] = useState(initFlashSaleProducts);
 
   // Load cart từ localStorage ngay khi khởi tạo state
-  const [cartItems, setCartItems] = useState<any[]>(() => {
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
     const savedCart = localStorage.getItem('cartItems');
     if (savedCart) {
       try {
-        const parsed = JSON.parse(savedCart);
+        const parsed = JSON.parse(savedCart) as CartItem[];
         console.log('🛒 Khởi tạo giỏ hàng từ localStorage:', parsed);
-        return parsed;
+        return Array.isArray(parsed) ? parsed : [];
       } catch (e) {
         console.error("Lỗi parse cart:", e);
         return [];
@@ -91,10 +138,11 @@ function App() {
     return [];
   });
 
-  const [orders, setOrders] = useState<any[]>([]);
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [orders, setOrders] = useState<OrderRecord[]>([]);
+  const [currentUser, setCurrentUser] = useState<Record<string, unknown> | null>(null);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [toast, setToast] = useState<{ message: string, type: string } | null>(null);
+  const toastGuardRef = useRef<{ message: string; type: string; at: number } | null>(null);
 
 
   // Lưu cart vào localStorage mỗi khi thay đổi
@@ -151,26 +199,8 @@ function App() {
       }
     }
 
-    // Load products từ localStorage - GIỮ NGUYÊN SẢN PHẨM ĐÃ XÓA
-    const savedProducts = localStorage.getItem('products');
-    if (savedProducts) {
-      try {
-        const parsed = JSON.parse(savedProducts);
-        if (parsed && parsed.length > 0) {
-          setSuggestionProducts(parsed);
-        } else {
-          setSuggestionProducts(fallbackSuggestions);
-          localStorage.setItem('products', JSON.stringify(fallbackSuggestions));
-        }
-      } catch (e) {
-        console.error("Lỗi parse products:", e);
-        setSuggestionProducts(fallbackSuggestions);
-        localStorage.setItem('products', JSON.stringify(fallbackSuggestions));
-      }
-    } else {
-      setSuggestionProducts(fallbackSuggestions);
-      localStorage.setItem('products', JSON.stringify(fallbackSuggestions));
-    }
+    // Products chỉ lấy từ API để tránh lệch dữ liệu cũ/mới
+    setSuggestionProducts(fallbackSuggestions);
 
     // Load banner từ localStorage
     const savedBanner = localStorage.getItem('bannerData');
@@ -230,28 +260,31 @@ function App() {
   // --- FETCH API TỪ SERVER ---
   useEffect(() => {
     // --- 1. LẤY SẢN PHẨM TỪ SERVER VÀ GHÉP 3D ---
-    fetch('http://localhost:3000/api/products')
+    fetch(`${API_URL}/api/products`)
       .then(res => res.json())
-      .then(data => {
-        if (data && data.length > 0) {
-          console.log("🔥 DANH SÁCH ID SẢN PHẨM TỪ CLOUD (Copy ID ở đây):");
+      .then((data: unknown) => {
+        if (Array.isArray(data) && data.length > 0) {
+          console.log("🔥 DANH SÁCH ID SẢN PHẨM NUMERIC:");
 
-          // MAP DỮ LIỆU: Ghép thông tin từ Server + Config 3D ở Frontend
-          // QUAN TRỌNG: Ưu tiên dùng id numeric từ database, fallback về _id nếu không có
-          const formattedData = data.map((item: any) => {
-            // In ra tên và ID để bạn dễ tìm
-            console.log(`- ${item.name}: ID=${item.id || item._id}`);
+          // MAP DỮ LIỆU: bắt buộc dùng id numeric duy nhất từ server
+          const formattedData = data.map((item) => {
+            const productItem = item as Record<string, unknown>;
+            const numericId = Number(item.id);
+            if (!Number.isInteger(numericId) || numericId <= 0) {
+              throw new Error(`Sản phẩm ${String(productItem.name || productItem._id || 'N/A')} không có id numeric hợp lệ`);
+            }
 
-            // Chuẩn bị object cơ bản - Ưu tiên id numeric từ database
-            const product = {
-              ...item,
-              id: item.id || item._id, // Dùng id numeric nếu có, không thì dùng _id
-              price: item.price
+            console.log(`- ${String(productItem.name || 'Sản phẩm')}: ID=${numericId}`);
+
+            const product: ProductRecord = {
+              ...(productItem as ProductRecord),
+              id: numericId,
+              price: productItem.price as PriceValue
             };
 
             // KIỂM TRA VÀ TIÊM DỮ LIỆU 3D
             // Nếu ID của sản phẩm này có trong file cấu hình ThreeDConfig
-            const productId = item.id || item._id;
+            const productId = numericId;
             if (MODEL_INJECTION[productId]) {
               console.log(`=> Đã kích hoạt 3D cho sản phẩm: ${item.name}`);
               product.model3D = MODEL_INJECTION[productId];
@@ -260,9 +293,8 @@ function App() {
             return product;
           });
 
-          // Cập nhật State và Cache
-          setSuggestionProducts(formattedData);
-          localStorage.setItem('products', JSON.stringify(formattedData));
+          // Cập nhật State (không cache products vào localStorage)
+          setSuggestionProducts(formattedData as typeof suggestionProducts);
         }
       })
       .catch(err => {
@@ -272,13 +304,15 @@ function App() {
       });
 
     // --- 2. Lấy Người Dùng (THAY THẾ HOÀN TOÀN từ database) ---
-    fetch('http://localhost:3000/api/users')
+    fetch(`${API_URL}/api/users`)
       .then(res => res.json())
-      .then(data => {
-        if (data && Array.isArray(data) && data.length > 0) {
+      .then((data: unknown) => {
+        if (Array.isArray(data) && data.length > 0) {
           // Lọc bỏ dữ liệu rỗng/undefined và loại duplicate
-          const validUsers = data.filter((u: any) => u && u._id && u.email);
-          const uniqueUsers = validUsers.reduce((acc: any[], current: any) => {
+          const validUsers = data.filter((u): u is Record<string, unknown> => Boolean(
+            u && typeof u === 'object' && '_id' in u && 'email' in u
+          ));
+          const uniqueUsers = validUsers.reduce<Record<string, unknown>[]>((acc, current) => {
             const exists = acc.find(item => item._id === current._id);
             if (!exists) {
               acc.push(current);
@@ -286,16 +320,16 @@ function App() {
             return acc;
           }, []);
 
-          // QUAN TRỌNG: Ưu tiên dùng id numeric từ database, fallback về _id nếu không có
-          const formattedUsers = uniqueUsers.map((u: any) => ({
+          // Dùng id numeric rõ ràng cho user
+          const formattedUsers = uniqueUsers.map((u): UserRecord => ({
             ...u,
-            id: u.id || u._id, // Ưu tiên id numeric từ database, không thì dùng _id
-            email: u.email,
-            role: u.role,
-            fullName: u.fullName || '',
-            phone: u.phone || '',
-            address: u.address || ''
-          }));
+            id: Number.isInteger(Number(u.id)) ? Number(u.id) : null,
+            email: String(u.email || ''),
+            role: String(u.role || ''),
+            fullName: String(u.fullName || ''),
+            phone: String(u.phone || ''),
+            address: String(u.address || '')
+          })).filter(u => u.id !== null);
 
           setUsers(formattedUsers);
           console.log('✅ Đã load', formattedUsers.length, 'users từ database');
@@ -312,7 +346,27 @@ function App() {
       });
   }, []);
 
-  const showToast = (message: string, type = 'success') => { setToast({ message, type }); };
+  const showToast = useCallback((message: string, type = 'success') => {
+    const now = Date.now();
+    const lastToast = toastGuardRef.current;
+
+    if (
+      lastToast &&
+      lastToast.message === message &&
+      lastToast.type === type &&
+      now - lastToast.at < 1500
+    ) {
+      return;
+    }
+
+    toastGuardRef.current = { message, type, at: now };
+    setToast((prev) => {
+      if (prev && prev.message === message && prev.type === type) {
+        return prev;
+      }
+      return { message, type };
+    });
+  }, []);
 
   // Chuẩn bị dữ liệu hiển thị (Format giá)
   const displayProducts = suggestionProducts.map(p => ({
@@ -328,7 +382,7 @@ function App() {
   ];
 
   // --- CÁC HÀM XỬ LÝ LOGIC ---
-  const handleAddToCart = (product: any, size?: string) => {
+  const handleAddToCart = (product: ProductRecord, size?: string) => {
     const actualSize = size || 'M'; // Sử dụng size mặc định nếu không được cung cấp
     setCartItems(prev => {
       // So sánh id bằng String() để tránh lỗi giữa MongoDB _id và id số
@@ -361,7 +415,7 @@ function App() {
   };
 
   // Mua ngay 1 sản phẩm (Buy Now): chỉ chuyển sang checkout với đúng sản phẩm đó
-  const handleBuyNow = (product: any, size?: string) => {
+  const handleBuyNow = (product: ProductRecord, size?: string) => {
     // Kiểm tra đăng nhập trước - DÙNG LOCALSTORAGE ĐỂ CHECK CHÍNH XÁC
     const isLoggedIn = localStorage.getItem('currentUser') || localStorage.getItem('token');
     if (!isLoggedIn) {
@@ -392,21 +446,14 @@ function App() {
     return productName.includes(keyword);
   });
 
-  // Debug log
-  console.log('Search keyword:', searchKeyword);
-  console.log('Display products count:', displayProducts.length);
-  console.log('Filtered products count:', filteredProducts.length);
-  if (searchKeyword) {
-    console.log('Sample filtered products:', filteredProducts.slice(0, 3).map(p => p.name));
-  }
-
   const AppShell = () => {
     const location = useLocation();
     const isTryOnPage = location.pathname === '/try-on';
+    const isAdminRoute = location.pathname.startsWith('/admin');
 
     return (
       <div>
-        {!isTryOnPage && (
+        {!isTryOnPage && !isAdminRoute && (
           <Header
             cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
             onSearch={setSearchKeyword}
@@ -439,17 +486,100 @@ function App() {
             } />
 
             {/* 2. TRANG ADMIN */}
-            <Route path="/admin" element={
-              <AdminPage
-                products={suggestionProducts} setProducts={setSuggestionProducts}
-                topSearch={topSearch} setTopSearch={setTopSearch}
-                topProducts={topProducts} setTopProducts={setTopProducts}
-                categories={categories} setCategories={setCategories}
-                users={users} setUsers={setUsers}
-                bannerData={bannerData} setBannerData={setBannerData}
-                flashSaleProducts={flashSaleProducts} setFlashSaleProducts={setFlashSaleProducts}
-                currentUser={currentUser} showToast={showToast}
-              />
+            <Route path="/admin/*" element={
+              <AdminLayout>
+                <Routes>
+                  <Route
+                    index
+                    element={<AdminDashboard />}
+                  />
+                  <Route
+                    path="orders"
+                    element={<AdminOrders showToast={showToast} />}
+                  />
+                  <Route
+                    path="users"
+                    element={
+                      <AdminPage
+                        products={suggestionProducts} setProducts={setSuggestionProducts}
+                        topSearch={topSearch} setTopSearch={setTopSearch}
+                        topProducts={topProducts} setTopProducts={setTopProducts}
+                        categories={categories} setCategories={setCategories}
+                        users={users} setUsers={setUsers}
+                        bannerData={bannerData} setBannerData={setBannerData}
+                        flashSaleProducts={flashSaleProducts} setFlashSaleProducts={setFlashSaleProducts}
+                        currentUser={currentUser} showToast={showToast}
+                        initialTab="users"
+                      />
+                    }
+                  />
+                  <Route
+                    path="banners"
+                    element={
+                      <AdminPage
+                        products={suggestionProducts} setProducts={setSuggestionProducts}
+                        topSearch={topSearch} setTopSearch={setTopSearch}
+                        topProducts={topProducts} setTopProducts={setTopProducts}
+                        categories={categories} setCategories={setCategories}
+                        users={users} setUsers={setUsers}
+                        bannerData={bannerData} setBannerData={setBannerData}
+                        flashSaleProducts={flashSaleProducts} setFlashSaleProducts={setFlashSaleProducts}
+                        currentUser={currentUser} showToast={showToast}
+                        initialTab="banner"
+                      />
+                    }
+                  />
+                  <Route
+                    path="categories"
+                    element={
+                      <AdminCategories
+                        categories={categories}
+                        setCategories={setCategories}
+                        showToast={showToast}
+                      />
+                    }
+                  />
+                  <Route
+                    path="flash-sale"
+                    element={
+                      <AdminFlashSale
+                        flashSaleProducts={flashSaleProducts}
+                        setFlashSaleProducts={setFlashSaleProducts}
+                        categories={categories}
+                        showToast={showToast}
+                      />
+                    }
+                  />
+                  <Route
+                    path="banner-content"
+                    element={
+                      <AdminPage
+                        products={suggestionProducts} setProducts={setSuggestionProducts}
+                        topSearch={topSearch} setTopSearch={setTopSearch}
+                        topProducts={topProducts} setTopProducts={setTopProducts}
+                        categories={categories} setCategories={setCategories}
+                        users={users} setUsers={setUsers}
+                        bannerData={bannerData} setBannerData={setBannerData}
+                        flashSaleProducts={flashSaleProducts} setFlashSaleProducts={setFlashSaleProducts}
+                        currentUser={currentUser} showToast={showToast}
+                        initialTab="banner_content"
+                      />
+                    }
+                  />
+                  <Route
+                    path="products-list"
+                    element={<AdminProducts showToast={showToast} categories={categories} />}
+                  />
+                  <Route
+                    path="vouchers"
+                    element={<AdminCoupons showToast={showToast} />}
+                  />
+                  <Route
+                    path="sync"
+                    element={<AdminDataSync />}
+                  />
+                </Routes>
+              </AdminLayout>
             } />
 
             {/* 3. CÁC TRANG CHỨC NĂNG KHÁC */}
@@ -525,10 +655,14 @@ function App() {
         {/* Thông báo (Toast) hiển thị đè lên trên cùng */}
         {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
-        {/* Chat Widget - Hiển thị trên mọi trang */}
-        <ChatWidget />
+        {/* Chat Widget - Hiển thị trên các trang khách */}
+        {!isAdminRoute && (
+          <Suspense fallback={null}>
+            <ChatWidget />
+          </Suspense>
+        )}
 
-        {!isTryOnPage && <Footer />}
+        {!isTryOnPage && !isAdminRoute && <Footer />}
       </div>
     );
   };

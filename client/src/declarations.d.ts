@@ -2,19 +2,19 @@
 
 // 1. Cho phép import tất cả file .jsx
 declare module '*.jsx' {
-    const content: any;
+    const content: unknown;
     export default content;
-    export const AuthProvider: any;
-    export const ThemeProvider: any;
-    export const useAuth: any;
-    export const useTheme: any;
+    export const AuthProvider: unknown;
+    export const ThemeProvider: unknown;
+    export const useAuth: unknown;
+    export const useTheme: unknown;
 }
 
 // 2. Cho phép import tất cả file .js
 declare module '*.js' {
-    const content: any;
+    const content: unknown;
     export default content;
-    export const MODEL_INJECTION: any;
+    export const MODEL_INJECTION: Record<number, unknown>;
 }
 
 // 3. Cho phép import các thư mục con

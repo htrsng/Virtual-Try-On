@@ -24,26 +24,41 @@ export const updateAvatarMorph = (targetMesh: THREE.SkinnedMesh, measurements: B
     // 1. Reset về 0 trước khi tính toán mới
     influences.fill(0);
 
+    const normalize = (value: number, fallback: number) => {
+        return Number.isFinite(value) ? value : fallback;
+    };
+
     const apply = (key: string, value: number) => {
         if (dict[key] !== undefined) {
             influences[dict[key]] = Math.max(0, Math.min(1, value));
         }
     };
 
+    const safeMeasurements = {
+        weight: normalize(measurements.weight, STANDARD.weight),
+        chest: normalize(measurements.chest, STANDARD.chest),
+        waist: normalize(measurements.waist, STANDARD.waist),
+        hips: normalize(measurements.hips, STANDARD.hips),
+        shoulder: normalize(measurements.shoulder, STANDARD.shoulder),
+        arm: normalize(measurements.arm, STANDARD.arm),
+        thigh: normalize(measurements.thigh, STANDARD.thigh),
+        belly: normalize(measurements.belly, STANDARD.belly),
+    };
+
     // 2. Xử lý Cân nặng (Fat_Full / Thin_Full)
-    const weightDiff = (measurements.weight - STANDARD.weight) / RANGE.weight;
+    const weightDiff = (safeMeasurements.weight - STANDARD.weight) / RANGE.weight;
     if (weightDiff > 0) apply('Fat_Full', weightDiff);
     else apply('Thin_Full', Math.abs(weightDiff));
 
     // 3. Áp dụng từng bộ phận (Khớp chính xác tên Shape Key trong Blender)
     const parts = [
-        { name: 'Chest', val: measurements.chest, std: STANDARD.chest, rng: RANGE.chest },
-        { name: 'Waist', val: measurements.waist, std: STANDARD.waist, rng: RANGE.waist },
-        { name: 'Hip', val: measurements.hips, std: STANDARD.hips, rng: RANGE.hips },
-        { name: 'Shoulder', val: measurements.shoulder, std: STANDARD.shoulder, rng: RANGE.shoulder },
-        { name: 'Thigh', val: measurements.thigh, std: STANDARD.thigh, rng: RANGE.thigh },
-        { name: 'Belly', val: measurements.belly, std: STANDARD.belly, rng: RANGE.belly },
-        { name: 'Arm', val: measurements.arm, std: STANDARD.arm, rng: RANGE.arm },
+        { name: 'Chest', val: safeMeasurements.chest, std: STANDARD.chest, rng: RANGE.chest },
+        { name: 'Waist', val: safeMeasurements.waist, std: STANDARD.waist, rng: RANGE.waist },
+        { name: 'Hip', val: safeMeasurements.hips, std: STANDARD.hips, rng: RANGE.hips },
+        { name: 'Shoulder', val: safeMeasurements.shoulder, std: STANDARD.shoulder, rng: RANGE.shoulder },
+        { name: 'Thigh', val: safeMeasurements.thigh, std: STANDARD.thigh, rng: RANGE.thigh },
+        { name: 'Belly', val: safeMeasurements.belly, std: STANDARD.belly, rng: RANGE.belly },
+        { name: 'Arm', val: safeMeasurements.arm, std: STANDARD.arm, rng: RANGE.arm },
     ];
 
     parts.forEach(p => {
