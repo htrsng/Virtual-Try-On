@@ -1,0 +1,159 @@
+.cmodal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .5);
+    backdrop-filter: blur(4px);
+    display: grid;
+    place-items: center;
+    z-index: 9999;
+    padding: var(--sp-5);
+    animation: cmFadeIn var(--t-fast);
+}
+
+@keyframes cmFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.cmodal {
+    background: var(--a-surface);
+    border-radius: var(--r-xl);
+    box-shadow: var(--shadow-xl);
+    padding: var(--sp-9);
+    max-width: 440px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    animation: cmSlideUp .25s ease;
+}
+
+@keyframes cmSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.cmodal__close {
+    position: absolute;
+    top: var(--sp-4);
+    right: var(--sp-4);
+    background: none;
+    border: none;
+    color: var(--a-text-tertiary);
+    cursor: pointer;
+    padding: var(--sp-1);
+    border-radius: var(--r-sm);
+    transition: all var(--t-fast);
+}
+
+.cmodal__close:hover {
+    background: var(--a-surface-alt);
+    color: var(--a-text);
+}
+
+.cmodal__icon {
+    width: 58px;
+    height: 58px;
+    border-radius: var(--r-full);
+    display: grid;
+    place-items: center;
+    margin: 0 auto var(--sp-5);
+    font-size: 24px;
+}
+
+.cmodal__icon--danger {
+    background: var(--a-danger-light);
+    color: var(--a-danger);
+}
+
+.cmodal__icon--warning {
+    background: var(--a-warning-light);
+    color: var(--a-warning);
+}
+
+.cmodal__icon--primary {
+    background: var(--a-primary-light);
+    color: var(--a-primary);
+}
+
+.cmodal__title {
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--a-text-heading, var(--a-text));
+    margin: 0 0 var(--sp-2);
+    letter-spacing: -.02em;
+}
+
+.cmodal__message {
+    font-size: 15px;
+    color: var(--a-text-secondary);
+    margin: 0 0 var(--sp-7);
+    line-height: 1.6;
+}
+
+.cmodal__actions {
+    display: flex;
+    gap: var(--sp-3);
+}
+
+.cmodal__btn {
+    flex: 1;
+    padding: var(--sp-3) var(--sp-5);
+    border: none;
+    border-radius: var(--r-md);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--t-fast);
+    font-family: var(--admin-font);
+    letter-spacing: .01em;
+}
+
+.cmodal__btn:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+.cmodal__btn--secondary {
+    background: var(--a-surface-alt);
+    color: var(--a-text);
+    border: 1px solid var(--a-border);
+}
+
+.cmodal__btn--secondary:hover:not(:disabled) {
+    background: var(--a-border-light);
+}
+
+.cmodal__btn--danger {
+    background: var(--a-danger);
+    color: #fff;
+}
+
+.cmodal__btn--danger:hover:not(:disabled) {
+    background: #dc2626;
+}
+
+.cmodal__btn--warning {
+    background: var(--a-warning);
+    color: #fff;
+}
+
+.cmodal__btn--primary {
+    background: var(--a-primary);
+    color: #fff;
+}
+
+.cmodal__btn--primary:hover:not(:disabled) {
+    background: var(--a-primary-hover);
+}

@@ -2,7 +2,6 @@
 
 .voucher-selector-container {
     width: 100%;
-    margin-bottom: 1.5rem;
     position: relative;
 }
 
@@ -29,9 +28,9 @@
 }
 
 .voucher-label {
-    font-weight: 600;
+    font-weight: 700;
     color: #333;
-    font-size: 0.95rem;
+    font-size: 15px;
 }
 
 .voucher-toggle-btn {
@@ -109,7 +108,7 @@
 /* Placeholder */
 .voucher-placeholder {
     color: #999;
-    font-size: 0.95rem;
+    font-size: 14px;
     text-align: center;
     padding: 0.5rem;
     font-style: italic;

@@ -1,0 +1,227 @@
+/* ======================================================
+   Admin Dashboard — Premium Page Styles
+   ====================================================== */
+
+.adash {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-7);
+}
+
+/* ---- Stats row ---- */
+.adash__stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--sp-5);
+}
+
+@media (max-width: 1200px) {
+    .adash__stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .adash__stats {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ---- Chart toggle ---- */
+.adash__chart-toggle {
+    display: flex;
+    gap: var(--sp-1);
+    background: var(--a-surface-alt);
+    border-radius: var(--r-sm);
+    padding: 3px;
+    border: 1px solid var(--a-border-light);
+}
+
+.adash__chart-toggle-btn {
+    padding: var(--sp-2) var(--sp-4);
+    border: none;
+    border-radius: var(--r-xs);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    background: transparent;
+    color: var(--a-text-tertiary);
+    font-family: var(--admin-font);
+    transition: all var(--t-fast);
+}
+
+.adash__chart-toggle-btn:hover {
+    color: var(--a-text-secondary);
+}
+
+.adash__chart-toggle-btn--active {
+    background: var(--a-surface);
+    color: var(--a-text);
+    box-shadow: var(--a-shadow-sm);
+}
+
+/* ---- Bottom row ---- */
+.adash__bottom-row {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: var(--sp-5);
+}
+
+@media (max-width: 900px) {
+    .adash__bottom-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ---- Recent orders list ---- */
+.adash__order-item {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    padding: var(--sp-4) 0;
+    border-bottom: 1px solid var(--a-border-light);
+    transition: all var(--t-fast);
+}
+
+.adash__order-item:last-child {
+    border-bottom: none;
+}
+
+.adash__order-item:hover {
+    background: var(--a-surface-alt);
+    margin: 0 calc(var(--sp-4) * -1);
+    padding-left: var(--sp-4);
+    padding-right: var(--sp-4);
+    border-radius: var(--r-sm);
+}
+
+.adash__order-id {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--a-primary);
+    min-width: 90px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    letter-spacing: -.01em;
+}
+
+.adash__order-customer {
+    flex: 1;
+    min-width: 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--a-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.adash__order-amount {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--a-text);
+    white-space: nowrap;
+}
+
+/* ---- Top products ---- */
+.adash__product-item {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    padding: var(--sp-4) 0;
+    border-bottom: 1px solid var(--a-border-light);
+    transition: all var(--t-fast);
+}
+
+.adash__product-item:last-child {
+    border-bottom: none;
+}
+
+.adash__product-item:hover {
+    background: var(--a-surface-alt);
+    margin: 0 calc(var(--sp-4) * -1);
+    padding-left: var(--sp-4);
+    padding-right: var(--sp-4);
+    border-radius: var(--r-sm);
+}
+
+.adash__product-rank {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--r-full);
+    font-size: 12px;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+.adash__product-rank--1 {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    color: #92400e;
+    box-shadow: 0 2px 6px rgba(234, 179, 8, .2);
+}
+
+.adash__product-rank--2 {
+    background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+    color: #4b5563;
+    box-shadow: 0 2px 6px rgba(107, 114, 128, .15);
+}
+
+.adash__product-rank--3 {
+    background: linear-gradient(135deg, #fde68a, #fcd34d);
+    color: #78350f;
+    box-shadow: 0 2px 6px rgba(245, 158, 11, .15);
+}
+
+.adash__product-rank--4,
+.adash__product-rank--5 {
+    background: var(--a-surface-alt);
+    color: var(--a-text-tertiary);
+}
+
+.adash__product-name {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--a-text);
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.adash__product-revenue {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--a-primary);
+    white-space: nowrap;
+}
+
+/* ---- Recharts overrides ---- */
+.adash .recharts-cartesian-axis-tick-value {
+    font-size: 12px;
+    fill: var(--a-text-tertiary);
+}
+
+.adash .recharts-tooltip-wrapper {
+    outline: none;
+}
+
+/* ---- Skeleton pulse ---- */
+.adash__skeleton {
+    animation: adashPulse 1.2s infinite ease-in-out;
+    background: var(--a-border-light);
+    border-radius: var(--r-xl);
+}
+
+@keyframes adashPulse {
+
+    0%,
+    100% {
+        opacity: .4;
+    }
+
+    50% {
+        opacity: .8;
+    }
+}

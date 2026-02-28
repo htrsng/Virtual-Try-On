@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { FiUsers, FiPackage, FiZap, FiGrid, FiImage, FiSearch, FiPlus, FiEdit2, FiTrash2, FiShield, FiShieldOff, FiChevronLeft, FiChevronRight, FiUser, FiSave, FiX } from 'react-icons/fi';
 import axios from 'axios';
+import './AdminPage.css';
 
 function AdminPage({
     products, setProducts,
@@ -281,70 +283,94 @@ function AdminPage({
         showToast("Đã thay đổi quyền thành viên!", "success");
     }
 
+    const getTabIcon = () => {
+        const iconMap = {
+            products: { icon: FiPackage, cls: 'products' },
+            top_search: { icon: FiSearch, cls: 'products' },
+            top_products_manage: { icon: FiPackage, cls: 'products' },
+            flash_sale: { icon: FiZap, cls: 'flash' },
+            categories: { icon: FiGrid, cls: 'categories' },
+            banner: { icon: FiImage, cls: 'banner' },
+            users: { icon: FiUsers, cls: 'users' },
+        };
+        return iconMap[activeTab] || { icon: FiPackage, cls: 'products' };
+    };
+
+    const tabInfo = getTabIcon();
+    const TabIcon = tabInfo.icon;
+
     return (
-        <div className="admin-page-content">
-            <div className="admin-header">
-                <h2>
+        <div className="adm-page">
+            <div className="adm-page__header">
+                <h2 className="adm-page__title">
+                    <span className={`adm-page__title-icon adm-page__title-icon--${tabInfo.cls}`}>
+                        <TabIcon size={20} />
+                    </span>
                     {activeTab === 'products' && 'Quản lý Sản Phẩm Gợi Ý'}
                     {activeTab === 'top_search' && 'Quản lý Tìm Kiếm Hàng Đầu'}
-                    {activeTab === 'top_products_manage' && 'Quản lý Sản Phẩm Hàng Đầu'}                        {activeTab === 'flash_sale' && '⚡ Quản lý Flash Sale'}                        {activeTab === 'categories' && 'Quản lý Danh Mục'}
+                    {activeTab === 'top_products_manage' && 'Quản lý Sản Phẩm Hàng Đầu'}
+                    {activeTab === 'flash_sale' && 'Quản lý Flash Sale'}
+                    {activeTab === 'categories' && 'Quản lý Danh Mục'}
                     {activeTab === 'banner' && 'Thay đổi Hình ảnh Banner'}
                     {activeTab === 'users' && 'Quản lý Người Dùng'}
                 </h2>
                 {activeTab !== 'users' && activeTab !== 'banner' && (
-                    <button className="admin-btn btn-add" onClick={() => setEditingItem({})}>+ Thêm Mới</button>
+                    <button className="adm-page__btn-add" onClick={() => setEditingItem({})}>
+                        <FiPlus size={16} /> Thêm Mới
+                    </button>
                 )}
             </div>
 
             {activeTab === 'banner' && (
-                <form onSubmit={handleSave} style={{ background: '#fff', padding: '20px' }}>
-                    <h3 style={{ marginTop: 0 }}>Banner Lớn (Chạy Slide)</h3>
-                    <div className="form-group">
-                        <label className="form-label">Link Ảnh 1:</label>
-                        <input name="big1" className="form-input" defaultValue={bannerData.big[0]} required />
+                <form onSubmit={handleSave} className="adm-page__banner-form">
+                    <h3>Banner Lớn (Chạy Slide)</h3>
+                    <div className="adm-page__form-group">
+                        <label className="adm-page__form-label">Link Ảnh 1:</label>
+                        <input name="big1" className="adm-page__form-input" defaultValue={bannerData.big[0]} required />
                     </div>
-                    <div className="form-group">
-                        <label className="form-label">Link Ảnh 2:</label>
-                        <input name="big2" className="form-input" defaultValue={bannerData.big[1]} required />
+                    <div className="adm-page__form-group">
+                        <label className="adm-page__form-label">Link Ảnh 2:</label>
+                        <input name="big2" className="adm-page__form-input" defaultValue={bannerData.big[1]} required />
                     </div>
-                    <div className="form-group">
-                        <label className="form-label">Link Ảnh 3:</label>
-                        <input name="big3" className="form-input" defaultValue={bannerData.big[2]} required />
-                    </div>
-
-                    <h3 style={{ marginTop: '30px' }}>Banner Nhỏ (Bên phải)</h3>
-                    <div className="form-group">
-                        <label className="form-label">Link Ảnh Trên:</label>
-                        <input name="smallTop" className="form-input" defaultValue={bannerData.smallTop} required />
-                    </div>
-                    <div className="form-group">
-                        <label className="form-label">Link Ảnh Dưới:</label>
-                        <input name="smallBottom" className="form-input" defaultValue={bannerData.smallBottom} required />
+                    <div className="adm-page__form-group">
+                        <label className="adm-page__form-label">Link Ảnh 3:</label>
+                        <input name="big3" className="adm-page__form-input" defaultValue={bannerData.big[2]} required />
                     </div>
 
-                    <div className="form-actions">
-                        <button type="submit" className="admin-btn btn-add" style={{ fontSize: '16px', padding: '10px 30px' }}>Lưu Thay Đổi</button>
+                    <h3 style={{ marginTop: 'var(--sp-7)' }}>Banner Nhỏ (Bên phải)</h3>
+                    <div className="adm-page__form-group">
+                        <label className="adm-page__form-label">Link Ảnh Trên:</label>
+                        <input name="smallTop" className="adm-page__form-input" defaultValue={bannerData.smallTop} required />
+                    </div>
+                    <div className="adm-page__form-group">
+                        <label className="adm-page__form-label">Link Ảnh Dưới:</label>
+                        <input name="smallBottom" className="adm-page__form-input" defaultValue={bannerData.smallBottom} required />
+                    </div>
+
+                    <div className="adm-page__form-actions">
+                        <button type="submit" className="adm-page__form-btn adm-page__form-btn--save">
+                            <FiSave size={16} /> Lưu Thay Đổi
+                        </button>
                     </div>
                 </form>
             )}
 
             {editingItem && activeTab !== 'users' && activeTab !== 'banner' && (
-                <form onSubmit={handleSave} style={{ background: '#f9f9f9', padding: '20px', marginBottom: '20px', border: '1px solid #eee' }}>
-                    <h3>{editingItem.id ? 'Sửa thông tin' : 'Thêm mới'}</h3>
+                <form onSubmit={handleSave} className="adm-page__form">
+                    <h3>{editingItem.id ? '✏️ Sửa thông tin' : '➕ Thêm mới'}</h3>
 
-                    {/* Dropdown chọn từ sản phẩm có sẵn (chỉ khi thêm mới vào topSearch, topProducts, flashSale) */}
+                    {/* Dropdown chọn từ sản phẩm có sẵn */}
                     {!editingItem.id && (activeTab === 'top_search' || activeTab === 'top_products_manage' || activeTab === 'flash_sale') && (
-                        <div className="form-group" style={{ background: '#fff3cd', padding: '15px', borderRadius: '8px', marginBottom: '15px' }}>
-                            <label className="form-label" style={{ fontWeight: 'bold', color: '#856404' }}>
+                        <div className="adm-page__hint-box">
+                            <label className="adm-page__hint-label">
                                 📌 Chọn nhanh từ sản phẩm có sẵn (ID sẽ đồng bộ với database):
                             </label>
                             <select
-                                className="form-input"
+                                className="adm-page__form-input"
                                 onChange={(e) => {
                                     if (e.target.value) {
                                         const selectedProduct = products.find(p => String(p.id) === e.target.value);
                                         if (selectedProduct) {
-                                            // Auto-fill form
                                             document.querySelector('input[name="name"]').value = selectedProduct.name;
                                             document.querySelector('input[name="img"]').value = selectedProduct.img;
                                             if (document.querySelector('input[name="price"]')) {
@@ -356,12 +382,10 @@ function AdminPage({
                                             if (document.querySelector('textarea[name="description"]')) {
                                                 document.querySelector('textarea[name="description"]').value = selectedProduct.description || '';
                                             }
-                                            // Lưu id gốc để dùng sau
                                             setEditingItem({ ...editingItem, id: selectedProduct.id, _fromExisting: true });
                                         }
                                     }
                                 }}
-                                style={{ background: 'white' }}
                             >
                                 <option value="">-- Chọn sản phẩm từ database --</option>
                                 {products.map(p => (
@@ -370,215 +394,230 @@ function AdminPage({
                                     </option>
                                 ))}
                             </select>
-                            <small style={{ color: '#856404', display: 'block', marginTop: '5px' }}>
+                            <small className="adm-page__hint-small">
                                 💡 Khuyến nghị: Chọn từ danh sách này để ID đồng bộ với "Gợi ý hôm nay"
                             </small>
                         </div>
                     )}
 
-                    <div className="form-group">
-                        <label className="form-label">Tên:</label>
-                        <input name="name" className="form-input" defaultValue={editingItem.name} required />
+                    <div className="adm-page__form-group">
+                        <label className="adm-page__form-label">Tên:</label>
+                        <input name="name" className="adm-page__form-input" defaultValue={editingItem.name} required />
                     </div>
-                    <div className="form-group">
-                        <label className="form-label">Link Ảnh:</label>
-                        <input name="img" className="form-input" defaultValue={editingItem.img} placeholder="https://..." />
+                    <div className="adm-page__form-group">
+                        <label className="adm-page__form-label">Link Ảnh:</label>
+                        <input name="img" className="adm-page__form-input" defaultValue={editingItem.img} placeholder="https://..." />
                     </div>
 
                     {(activeTab === 'products' || activeTab === 'flash_sale') && (
                         <>
-                            <div className="form-group">
-                                <label className="form-label">Giá tiền (Nhập số):</label>
-                                <input name="price" type="number" className="form-input" defaultValue={editingItem.price} required />
+                            <div className="adm-page__form-group">
+                                <label className="adm-page__form-label">Giá tiền (Nhập số):</label>
+                                <input name="price" type="number" className="adm-page__form-input" defaultValue={editingItem.price} required />
                             </div>
-                            <div className="form-group">
-                                <label className="form-label">Danh mục:</label>
-                                <select name="category" className="form-input" defaultValue={editingItem.category}>
+                            <div className="adm-page__form-group">
+                                <label className="adm-page__form-label">Danh mục:</label>
+                                <select name="category" className="adm-page__form-input" defaultValue={editingItem.category}>
                                     {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                                 </select>
                             </div>
-                            <div className="form-group">
-                                <label className="form-label">Mô tả chi tiết:</label>
-                                <textarea name="description" className="form-input" rows="3" defaultValue={editingItem.description || "Chất liệu cao cấp, bền đẹp..."}></textarea>
+                            <div className="adm-page__form-group">
+                                <label className="adm-page__form-label">Mô tả chi tiết:</label>
+                                <textarea name="description" className="adm-page__form-input" rows="3" defaultValue={editingItem.description || "Chất liệu cao cấp, bền đẹp..."}></textarea>
                             </div>
                         </>
                     )}
 
                     {activeTab === 'flash_sale' && (
                         <>
-                            <div className="form-group">
-                                <label className="form-label">Giảm giá (%):</label>
-                                <input name="discount" type="number" className="form-input" defaultValue={editingItem.discount || 50} min="1" max="99" required />
+                            <div className="adm-page__form-group">
+                                <label className="adm-page__form-label">Giảm giá (%):</label>
+                                <input name="discount" type="number" className="adm-page__form-input" defaultValue={editingItem.discount || 50} min="1" max="99" required />
                             </div>
-                            <div className="form-group">
-                                <label className="form-label">Số lượng trong kho:</label>
-                                <input name="stock" type="number" className="form-input" defaultValue={editingItem.stock || 20} required />
+                            <div className="adm-page__form-group">
+                                <label className="adm-page__form-label">Số lượng trong kho:</label>
+                                <input name="stock" type="number" className="adm-page__form-input" defaultValue={editingItem.stock || 20} required />
                             </div>
-                            <div className="form-group">
-                                <label className="form-label">Đã bán:</label>
-                                <input name="sold" type="number" className="form-input" defaultValue={editingItem.sold || 0} required />
+                            <div className="adm-page__form-group">
+                                <label className="adm-page__form-label">Đã bán:</label>
+                                <input name="sold" type="number" className="adm-page__form-input" defaultValue={editingItem.sold || 0} required />
                             </div>
                         </>
                     )}
 
                     {activeTab === 'top_search' && (
                         <>
-                            <div className="form-group">
-                                <label className="form-label">Giá tiền (Nhập số):</label>
-                                <input name="price" type="number" className="form-input" defaultValue={editingItem.price || ""} required />
+                            <div className="adm-page__form-group">
+                                <label className="adm-page__form-label">Giá tiền (Nhập số):</label>
+                                <input name="price" type="number" className="adm-page__form-input" defaultValue={editingItem.price || ""} required />
                             </div>
-                            <div className="form-group">
-                                <label className="form-label">Danh mục:</label>
-                                <select name="category" className="form-input" defaultValue={editingItem.category || ""}>
+                            <div className="adm-page__form-group">
+                                <label className="adm-page__form-label">Danh mục:</label>
+                                <select name="category" className="adm-page__form-input" defaultValue={editingItem.category || ""}>
                                     <option value="">-- Chọn danh mục --</option>
                                     {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                                 </select>
                             </div>
-                            <div className="form-group">
-                                <label className="form-label">Số lượng bán (VD: Bán 50k+):</label>
-                                <input name="sold" className="form-input" defaultValue={editingItem.sold || ""} required />
+                            <div className="adm-page__form-group">
+                                <label className="adm-page__form-label">Số lượng bán (VD: Bán 50k+):</label>
+                                <input name="sold" className="adm-page__form-input" defaultValue={editingItem.sold || ""} required />
                             </div>
                         </>
                     )}
 
                     {activeTab === 'top_products_manage' && (
                         <>
-                            <div className="form-group">
-                                <label className="form-label">Giá tiền (Nhập số):</label>
-                                <input name="price" type="number" className="form-input" defaultValue={editingItem.price || ""} required />
+                            <div className="adm-page__form-group">
+                                <label className="adm-page__form-label">Giá tiền (Nhập số):</label>
+                                <input name="price" type="number" className="adm-page__form-input" defaultValue={editingItem.price || ""} required />
                             </div>
-                            <div className="form-group">
-                                <label className="form-label">Danh mục:</label>
-                                <select name="category" className="form-input" defaultValue={editingItem.category || ""}>
+                            <div className="adm-page__form-group">
+                                <label className="adm-page__form-label">Danh mục:</label>
+                                <select name="category" className="adm-page__form-input" defaultValue={editingItem.category || ""}>
                                     <option value="">-- Chọn danh mục --</option>
                                     {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                                 </select>
                             </div>
-                            <div className="form-group">
-                                <label className="form-label">Mô tả chi tiết:</label>
-                                <textarea name="description" className="form-input" rows="3" defaultValue={editingItem.description || "Chất liệu cao cấp, bền đẹp..."}></textarea>
+                            <div className="adm-page__form-group">
+                                <label className="adm-page__form-label">Mô tả chi tiết:</label>
+                                <textarea name="description" className="adm-page__form-input" rows="3" defaultValue={editingItem.description || "Chất liệu cao cấp, bền đẹp..."}></textarea>
                             </div>
                         </>
                     )}
 
-                    <div className="form-actions">
-                        <button type="button" className="admin-btn" onClick={() => setEditingItem(null)}>Hủy</button>
-                        <button type="submit" className="admin-btn btn-add">Lưu Lại</button>
+                    <div className="adm-page__form-actions">
+                        <button type="button" className="adm-page__form-btn adm-page__form-btn--cancel" onClick={() => setEditingItem(null)}>
+                            <FiX size={15} /> Hủy
+                        </button>
+                        <button type="submit" className="adm-page__form-btn adm-page__form-btn--save">
+                            <FiSave size={15} /> Lưu Lại
+                        </button>
                     </div>
                 </form>
             )}
 
             {activeTab !== 'banner' && (
                 <>
-                    <table className="admin-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Hình ảnh</th>
-                                <th>Tên</th>
-                                {(activeTab === 'products' || activeTab === 'flash_sale') && <th>Giá</th>}
-                                {activeTab === 'flash_sale' && <><th>Giảm</th><th>Kho</th><th>Bán</th></>}
-                                {(activeTab === 'top_search') && <th>Đã bán</th>}
-                                {activeTab === 'users' && <><th>Email</th><th>Vai trò</th></>}
-                                <th>Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {currentItems.map((item, index) => (
-                                <tr key={`${item.id}-${activeTab}-${index}`}>
-                                    <td>{item.id}</td>
-                                    {activeTab === 'users' ? (
-                                        <>
-                                            <td>-</td>
-                                            <td>{item.email}</td>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <td>
-                                                <img
-                                                    src={item.img} width="50" height="50" style={{ objectFit: 'cover' }} alt=""
-                                                    onError={(e) => { e.target.src = "https://placehold.co/50x50?text=Error" }}
-                                                />
-                                            </td>
-                                            <td>{item.name}</td>
-                                        </>
-                                    )}
-
-                                    {(activeTab === 'products' || activeTab === 'flash_sale') && <td>{item.price ? item.price.toLocaleString('vi-VN') : 0} đ</td>}
-                                    {activeTab === 'flash_sale' && (
-                                        <>
-                                            <td>{item.discount || 0}%</td>
-                                            <td>{item.stock || 0}</td>
-                                            <td>{item.sold || 0}</td>
-                                        </>
-                                    )}
-                                    {activeTab === 'top_search' && <td>{item.sold}</td>}
-
-                                    {activeTab === 'users' && (
-                                        <td>
-                                            <span style={{
-                                                padding: '4px 8px', borderRadius: '4px', fontSize: '12px',
-                                                background: item.role === 'admin' ? '#ee4d2d' : '#eee',
-                                                color: item.role === 'admin' ? 'white' : 'black'
-                                            }}>
-                                                {item.role}
-                                            </span>
-                                        </td>
-                                    )}
-
-                                    <td>
-                                        {activeTab !== 'users' ? (
+                    <div className="adm-page__table-wrap">
+                        <table className="adm-page__table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Hình ảnh</th>
+                                    <th>Tên</th>
+                                    {(activeTab === 'products' || activeTab === 'flash_sale') && <th>Giá</th>}
+                                    {activeTab === 'flash_sale' && <><th>Giảm</th><th>Kho</th><th>Bán</th></>}
+                                    {(activeTab === 'top_search') && <th>Đã bán</th>}
+                                    {activeTab === 'users' && <><th>Email</th><th>Vai trò</th></>}
+                                    <th>Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {currentItems.map((item, index) => (
+                                    <tr key={`${item.id}-${activeTab}-${index}`}>
+                                        <td className="adm-page__cell-id">{item.id}</td>
+                                        {activeTab === 'users' ? (
                                             <>
-                                                <button className="admin-btn btn-edit" onClick={() => setEditingItem(item)}>Sửa</button>
-                                                <button className="admin-btn btn-delete" onClick={() => handleDelete(activeTab === 'products' ? products : activeTab === 'top_search' ? topSearch : activeTab === 'top_products_manage' ? topProducts : categories, activeTab === 'products' ? setProducts : activeTab === 'top_search' ? setTopSearch : activeTab === 'top_products_manage' ? setTopProducts : setCategories, item.id)}>Xóa</button>
+                                                <td>
+                                                    <div className="adm-page__no-img">
+                                                        <FiUser size={20} />
+                                                    </div>
+                                                </td>
+                                                <td className="adm-page__cell-email">{item.email}</td>
                                             </>
                                         ) : (
-                                            item.email !== 'admin' && (
-                                                <button className="admin-btn btn-delete" onClick={() => handleDelete(users, setUsers, item.id)}>Xóa</button>
-                                            )
+                                            <>
+                                                <td>
+                                                    <img
+                                                        className="adm-page__cell-img"
+                                                        src={item.img} alt=""
+                                                        onError={(e) => { e.target.src = "https://placehold.co/50x50?text=Error" }}
+                                                    />
+                                                </td>
+                                                <td className="adm-page__cell-name">{item.name}</td>
+                                            </>
                                         )}
 
-                                        {activeTab === 'users' && item.email !== 'admin' && (
-                                            <button className="admin-btn btn-edit" onClick={() => toggleAdminRole(item.id)} style={{ marginLeft: '5px' }}>
-                                                {item.role === 'admin' ? 'Hủy Admin' : 'Cấp quyền'}
-                                            </button>
+                                        {(activeTab === 'products' || activeTab === 'flash_sale') && (
+                                            <td className="adm-page__cell-price">{item.price ? item.price.toLocaleString('vi-VN') : 0} đ</td>
                                         )}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                                        {activeTab === 'flash_sale' && (
+                                            <>
+                                                <td className="adm-page__cell-discount">-{item.discount || 0}%</td>
+                                                <td className="adm-page__cell-stock">{item.stock || 0}</td>
+                                                <td>{item.sold || 0}</td>
+                                            </>
+                                        )}
+                                        {activeTab === 'top_search' && <td>{item.sold}</td>}
+
+                                        {activeTab === 'users' && (
+                                            <td>
+                                                <span className={`adm-page__role adm-page__role--${item.role}`}>
+                                                    {item.role === 'admin' ? <FiShield size={12} /> : <FiUser size={12} />}
+                                                    {item.role}
+                                                </span>
+                                            </td>
+                                        )}
+
+                                        <td>
+                                            <div className="adm-page__actions">
+                                                {activeTab !== 'users' ? (
+                                                    <>
+                                                        <button className="adm-page__act-btn adm-page__act-btn--edit" onClick={() => setEditingItem(item)}>
+                                                            <FiEdit2 size={14} /> Sửa
+                                                        </button>
+                                                        <button className="adm-page__act-btn adm-page__act-btn--delete" onClick={() => handleDelete(activeTab === 'products' ? products : activeTab === 'top_search' ? topSearch : activeTab === 'top_products_manage' ? topProducts : categories, activeTab === 'products' ? setProducts : activeTab === 'top_search' ? setTopSearch : activeTab === 'top_products_manage' ? setTopProducts : setCategories, item.id)}>
+                                                            <FiTrash2 size={14} /> Xóa
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    item.email !== 'admin' && (
+                                                        <button className="adm-page__act-btn adm-page__act-btn--delete" onClick={() => handleDelete(users, setUsers, item.id)}>
+                                                            <FiTrash2 size={14} /> Xóa
+                                                        </button>
+                                                    )
+                                                )}
+
+                                                {activeTab === 'users' && item.email !== 'admin' && (
+                                                    <button
+                                                        className={`adm-page__act-btn ${item.role === 'admin' ? 'adm-page__act-btn--demote' : 'adm-page__act-btn--promote'}`}
+                                                        onClick={() => toggleAdminRole(item.id)}
+                                                    >
+                                                        {item.role === 'admin' ? <><FiShieldOff size={14} /> Hủy Admin</> : <><FiShield size={14} /> Cấp quyền</>}
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
 
                     {totalPages > 1 && (
-                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px', gap: '5px' }}>
+                        <div className="adm-page__pagination">
                             <button
+                                className="adm-page__pg-btn"
                                 onClick={() => handlePageChange(currentPage - 1)}
                                 disabled={currentPage === 1}
-                                style={{ padding: '5px 10px', cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
                             >
-                                Trước
+                                <FiChevronLeft size={16} />
                             </button>
                             {[...Array(totalPages)].map((_, index) => (
                                 <button
                                     key={`page-${index}`}
+                                    className={`adm-page__pg-btn ${currentPage === index + 1 ? 'adm-page__pg-btn--active' : ''}`}
                                     onClick={() => handlePageChange(index + 1)}
-                                    style={{
-                                        padding: '5px 10px',
-                                        background: currentPage === index + 1 ? '#ee4d2d' : '#eee',
-                                        color: currentPage === index + 1 ? 'white' : 'black',
-                                        border: '1px solid #ddd',
-                                        cursor: 'pointer'
-                                    }}
                                 >
                                     {index + 1}
                                 </button>
                             ))}
                             <button
+                                className="adm-page__pg-btn"
                                 onClick={() => handlePageChange(currentPage + 1)}
                                 disabled={currentPage === totalPages}
-                                style={{ padding: '5px 10px', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer' }}
                             >
-                                Sau
+                                <FiChevronRight size={16} />
                             </button>
                         </div>
                     )}
@@ -588,9 +627,16 @@ function AdminPage({
             {/* TAB NỘI DUNG BANNER */}
             {activeTab === 'banner_content' && (
                 <>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                        <h2>📝 Quản Lý Nội Dung Banner</h2>
-                        <button className="admin-btn btn-add" onClick={() => setEditingBannerContent({ bannerId: '', title: '', content: '', imageUrl: '' })}>+ Thêm Banner Content</button>
+                    <div className="adm-page__header" style={{ marginTop: 0 }}>
+                        <h2 className="adm-page__title">
+                            <span className="adm-page__title-icon adm-page__title-icon--banner">
+                                <FiImage size={20} />
+                            </span>
+                            Quản Lý Nội Dung Banner
+                        </h2>
+                        <button className="adm-page__btn-add" onClick={() => setEditingBannerContent({ bannerId: '', title: '', content: '', imageUrl: '' })}>
+                            <FiPlus size={16} /> Thêm Banner Content
+                        </button>
                     </div>
 
                     {editingBannerContent && (
@@ -606,11 +652,9 @@ function AdminPage({
 
                             try {
                                 if (editingBannerContent._id) {
-                                    // Update
                                     await axios.put(`http://localhost:3000/api/banner-contents/${editingBannerContent.bannerId}`, formData);
                                     showToast('Đã cập nhật nội dung banner!', 'success');
                                 } else {
-                                    // Create
                                     await axios.post('http://localhost:3000/api/banner-contents', formData);
                                     showToast('Đã thêm nội dung banner mới!', 'success');
                                 }
@@ -620,32 +664,32 @@ function AdminPage({
                                 console.error('Error saving banner content:', error);
                                 showToast(error.response?.data?.message || 'Có lỗi xảy ra!', 'error');
                             }
-                        }} style={{ background: '#f9f9f9', padding: '20px', marginBottom: '20px', border: '1px solid #eee', borderRadius: '8px' }}>
-                            <h3>{editingBannerContent._id ? 'Sửa Nội Dung Banner' : 'Thêm Nội Dung Banner Mới'}</h3>
+                        }} className="adm-page__form">
+                            <h3>{editingBannerContent._id ? '✏️ Sửa Nội Dung Banner' : '➕ Thêm Nội Dung Banner Mới'}</h3>
 
-                            <div className="form-group">
-                                <label className="form-label">Banner ID (VD: banner1, banner2, banner3):</label>
+                            <div className="adm-page__form-group">
+                                <label className="adm-page__form-label">Banner ID (VD: banner1, banner2, banner3):</label>
                                 <input
                                     name="bannerId"
-                                    className="form-input"
+                                    className="adm-page__form-input"
                                     defaultValue={editingBannerContent.bannerId}
                                     required
                                     disabled={!!editingBannerContent._id}
                                     placeholder="banner1"
                                 />
-                                <small style={{ color: '#666', fontSize: '12px' }}>Banner chính: banner1, banner2, banner3. Banner phụ: banner4, banner5</small>
+                                <small className="adm-page__hint-small">Banner chính: banner1, banner2, banner3. Banner phụ: banner4, banner5</small>
                             </div>
 
-                            <div className="form-group">
-                                <label className="form-label">Tiêu đề:</label>
-                                <input name="title" className="form-input" defaultValue={editingBannerContent.title} required />
+                            <div className="adm-page__form-group">
+                                <label className="adm-page__form-label">Tiêu đề:</label>
+                                <input name="title" className="adm-page__form-input" defaultValue={editingBannerContent.title} required />
                             </div>
 
-                            <div className="form-group">
-                                <label className="form-label">Nội dung (HTML được hỗ trợ):</label>
+                            <div className="adm-page__form-group">
+                                <label className="adm-page__form-label">Nội dung (HTML được hỗ trợ):</label>
                                 <textarea
                                     name="content"
-                                    className="form-input"
+                                    className="adm-page__form-input"
                                     rows="8"
                                     defaultValue={editingBannerContent.content}
                                     required
@@ -653,89 +697,95 @@ function AdminPage({
                                 ></textarea>
                             </div>
 
-                            <div className="form-group">
-                                <label className="form-label">Link Ảnh (tùy chọn):</label>
-                                <input name="imageUrl" className="form-input" defaultValue={editingBannerContent.imageUrl} placeholder="https://..." />
+                            <div className="adm-page__form-group">
+                                <label className="adm-page__form-label">Link Ảnh (tùy chọn):</label>
+                                <input name="imageUrl" className="adm-page__form-input" defaultValue={editingBannerContent.imageUrl} placeholder="https://..." />
                             </div>
 
-                            <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div className="adm-page__form-group" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexDirection: 'row' }}>
                                 <input
                                     type="checkbox"
                                     name="isActive"
                                     defaultChecked={editingBannerContent.isActive !== false}
                                     style={{ width: 'auto', cursor: 'pointer' }}
                                 />
-                                <label style={{ margin: 0, cursor: 'pointer' }}>Hiển thị banner này</label>
+                                <label style={{ margin: 0, cursor: 'pointer', fontSize: '14px' }}>Hiển thị banner này</label>
                             </div>
 
-                            <div className="form-actions" style={{ display: 'flex', gap: '10px' }}>
-                                <button type="submit" className="admin-btn btn-add">💾 Lưu</button>
-                                <button type="button" className="admin-btn btn-delete" onClick={() => setEditingBannerContent(null)}>❌ Hủy</button>
+                            <div className="adm-page__form-actions">
+                                <button type="button" className="adm-page__form-btn adm-page__form-btn--cancel" onClick={() => setEditingBannerContent(null)}>
+                                    <FiX size={15} /> Hủy
+                                </button>
+                                <button type="submit" className="adm-page__form-btn adm-page__form-btn--save">
+                                    <FiSave size={15} /> Lưu
+                                </button>
                             </div>
                         </form>
                     )}
 
-                    <table className="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Banner ID</th>
-                                <th>Tiêu đề</th>
-                                <th>Nội dung (preview)</th>
-                                <th>Ảnh</th>
-                                <th>Trạng thái</th>
-                                <th>Cập nhật</th>
-                                <th>Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {bannerContents.map((banner) => (
-                                <tr key={banner._id}>
-                                    <td><strong>{banner.bannerId}</strong></td>
-                                    <td>{banner.title}</td>
-                                    <td style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                        {banner.content.substring(0, 50)}...
-                                    </td>
-                                    <td>
-                                        {banner.imageUrl ? (
-                                            <img src={banner.imageUrl} alt="" style={{ width: '60px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
-                                        ) : (
-                                            <span style={{ color: '#999' }}>Không có</span>
-                                        )}
-                                    </td>
-                                    <td>
-                                        <span style={{
-                                            padding: '4px 8px',
-                                            borderRadius: '4px',
-                                            fontSize: '12px',
-                                            background: banner.isActive ? '#52c41a' : '#999',
-                                            color: 'white'
-                                        }}>
-                                            {banner.isActive ? 'Hoạt động' : 'Ẩn'}
-                                        </span>
-                                    </td>
-                                    <td>{new Date(banner.updatedAt).toLocaleDateString('vi-VN')}</td>
-                                    <td>
-                                        <button className="admin-btn btn-edit" onClick={() => setEditingBannerContent(banner)}>Sửa</button>
-                                        <button className="admin-btn btn-delete" onClick={async () => {
-                                            if (window.confirm('Xóa nội dung banner này?')) {
-                                                try {
-                                                    await axios.delete(`http://localhost:3000/api/banner-contents/${banner.bannerId}`);
-                                                    showToast('Đã xóa!', 'success');
-                                                    fetchBannerContents();
-                                                } catch (error) {
-                                                    console.error('Error deleting:', error);
-                                                    showToast('Có lỗi xảy ra!', 'error');
-                                                }
-                                            }
-                                        }}>Xóa</button>
-                                    </td>
+                    <div className="adm-page__table-wrap">
+                        <table className="adm-page__table">
+                            <thead>
+                                <tr>
+                                    <th>Banner ID</th>
+                                    <th>Tiêu đề</th>
+                                    <th>Nội dung (preview)</th>
+                                    <th>Ảnh</th>
+                                    <th>Trạng thái</th>
+                                    <th>Cập nhật</th>
+                                    <th>Thao tác</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {bannerContents.map((banner) => (
+                                    <tr key={banner._id}>
+                                        <td className="adm-page__cell-id"><strong>{banner.bannerId}</strong></td>
+                                        <td className="adm-page__cell-name">{banner.title}</td>
+                                        <td style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                            {banner.content.substring(0, 50)}...
+                                        </td>
+                                        <td>
+                                            {banner.imageUrl ? (
+                                                <img className="adm-page__cell-img" src={banner.imageUrl} alt="" style={{ width: '60px', height: '40px' }} />
+                                            ) : (
+                                                <span style={{ color: 'var(--a-text-tertiary)' }}>Không có</span>
+                                            )}
+                                        </td>
+                                        <td>
+                                            <span className={`adm-page__banner-status ${banner.isActive ? 'adm-page__banner-status--active' : 'adm-page__banner-status--inactive'}`}>
+                                                {banner.isActive ? 'Hoạt động' : 'Ẩn'}
+                                            </span>
+                                        </td>
+                                        <td>{new Date(banner.updatedAt).toLocaleDateString('vi-VN')}</td>
+                                        <td>
+                                            <div className="adm-page__actions">
+                                                <button className="adm-page__act-btn adm-page__act-btn--edit" onClick={() => setEditingBannerContent(banner)}>
+                                                    <FiEdit2 size={14} /> Sửa
+                                                </button>
+                                                <button className="adm-page__act-btn adm-page__act-btn--delete" onClick={async () => {
+                                                    if (window.confirm('Xóa nội dung banner này?')) {
+                                                        try {
+                                                            await axios.delete(`http://localhost:3000/api/banner-contents/${banner.bannerId}`);
+                                                            showToast('Đã xóa!', 'success');
+                                                            fetchBannerContents();
+                                                        } catch (error) {
+                                                            console.error('Error deleting:', error);
+                                                            showToast('Có lỗi xảy ra!', 'error');
+                                                        }
+                                                    }
+                                                }}>
+                                                    <FiTrash2 size={14} /> Xóa
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
 
                     {bannerContents.length === 0 && (
-                        <p style={{ textAlign: 'center', color: '#999', marginTop: '30px' }}>
+                        <p className="adm-page__empty">
                             Chưa có nội dung banner nào. Nhấn "Thêm Banner Content" để bắt đầu!
                         </p>
                     )}

@@ -8,9 +8,10 @@ import { updateAvatarMorph } from './useAvatarMorph';
 
 const MODEL_PATH = '/assets/models/avatar_morph.glb';
 
-export const Avatar: React.FC<AvatarProps & { skinColor?: string }> = ({
+export const Avatar: React.FC<AvatarProps & { skinColor?: string; onSceneReady?: (scene: THREE.Group) => void }> = ({
     body,
     pose = 'Idle',
+    onSceneReady,
 }) => {
     const group = useRef<THREE.Group>(null);
     const { scene, animations } = useGLTF(MODEL_PATH) as { scene: THREE.Group; animations: THREE.AnimationClip[] };
@@ -41,6 +42,12 @@ export const Avatar: React.FC<AvatarProps & { skinColor?: string }> = ({
         });
         avatarDataRef.current = map;
     }, [scene]);
+
+    useEffect(() => {
+        if (onSceneReady) {
+            onSceneReady(scene);
+        }
+    }, [onSceneReady, scene]);
 
     // 2. GHI ĐÈ ANIMATION MỖI KHUNG HÌNH (useFrame)
     useFrame(() => {

@@ -8,9 +8,14 @@ import OnlinePaymentModal from '../components/OnlinePaymentModal';
 import AddressPicker from '../components/AddressPicker';
 import VoucherSelector from '../components/VoucherSelector';
 import { calculateDiscount } from '../data/voucherData';
+import OrderSummary from './checkout/OrderSummary';
+import PaymentMethod from './checkout/PaymentMethod';
+import TrustSignals from './checkout/TrustSignals';
+import OutfitPreview from './checkout/OutfitPreview';
+import ShippingForm from './checkout/ShippingForm';
 import './CheckoutPage.css';
 
-function CheckoutPage({ onCheckoutSuccess, showToast }) {
+function CheckoutPage({ onCheckoutSuccess, showToast, suggestionProducts, onAddToCart }) {
     const navigate = useNavigate();
     const location = useLocation();
     const { user, isAuthenticated, loading } = useAuth();
@@ -119,6 +124,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
     const [discountCode, setDiscountCode] = useState('');
     const [appliedDiscount, setAppliedDiscount] = useState(null);
     const [discountError, setDiscountError] = useState('');
+    const [isApplyingDiscount, setIsApplyingDiscount] = useState(false);
     const [showCouponList, setShowCouponList] = useState(false);
     const [myCoupons, setMyCoupons] = useState([]);
     const [usedCoupons, setUsedCoupons] = useState([]); // Mã đã sử dụng
@@ -301,126 +307,135 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
     };
 
     // Hàm áp dụng mã giảm giá
-    const applyDiscountCode = async () => {
-        const normalizedCode = discountCode.trim().toUpperCase();
+    const applyDiscountCode = async (inputCode = null) => {
+        if (isApplyingDiscount) return;
+
+        const normalizedCode = String(inputCode ?? discountCode).trim().toUpperCase();
         if (!normalizedCode) {
             setDiscountError(t('enter_discount_error'));
             return;
         }
 
-        // Kiểm tra mã cố định trước
-        const coupon = validCoupons.find(c => c.code.toUpperCase() === normalizedCode);
+        setIsApplyingDiscount(true);
 
-        if (coupon) {
-            // Mã cố định
-            if (totalAmount < coupon.minOrder) {
-                setDiscountError(`${t('subtotal')} ${formatPrice(coupon.minOrder)}`);
-                setAppliedDiscount(null);
-                return;
-            }
+        try {
 
-            // Kiểm tra mã đã sử dụng chưa (gọi API - BẮT BUỘC)
-            try {
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    setDiscountError(t('please_login_coupon'));
+            // Kiểm tra mã cố định trước
+            const coupon = validCoupons.find(c => c.code.toUpperCase() === normalizedCode);
+
+            if (coupon) {
+                // Mã cố định
+                if (totalAmount < coupon.minOrder) {
+                    setDiscountError(`${t('subtotal')} ${formatPrice(coupon.minOrder)}`);
                     setAppliedDiscount(null);
                     return;
                 }
 
-                const checkResponse = await fetch('http://localhost:3000/api/check-coupon-used', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ couponCode: normalizedCode })
-                });
+                // Kiểm tra mã đã sử dụng chưa (gọi API - BẮT BUỘC)
+                try {
+                    const token = localStorage.getItem('token');
+                    if (!token) {
+                        setDiscountError(t('please_login_coupon'));
+                        setAppliedDiscount(null);
+                        return;
+                    }
 
-                if (!checkResponse.ok) {
-                    setDiscountError(t('cannot_check_coupon'));
-                    setAppliedDiscount(null);
-                    return;
-                }
+                    const checkResponse = await fetch('http://localhost:3000/api/check-coupon-used', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ couponCode: normalizedCode })
+                    });
 
-                const checkData = await checkResponse.json();
-                if (checkData.used) {
-                    setDiscountError(t('coupon_already_used'));
-                    setAppliedDiscount(null);
-                    return;
-                }
-            } catch (err) {
-                console.error('Lỗi kiểm tra mã:', err);
-                setDiscountError(t('coupon_check_error'));
-                setAppliedDiscount(null);
-                return; // Chặn không cho áp dụng nếu API lỗi
-            }
+                    if (!checkResponse.ok) {
+                        setDiscountError(t('cannot_check_coupon'));
+                        setAppliedDiscount(null);
+                        return;
+                    }
 
-            setAppliedDiscount(coupon);
-            setDiscountError('');
-            showToast(`${t('apply')} -${coupon.discount}% ${t('success')} 🎉`, 'success');
-            return;
-        }
-
-        // Kiểm tra mã từ newsletter
-        if (normalizedCode.startsWith('NEWS10')) {
-            try {
-                // Kiểm tra mã đã dùng chưa trong UsedCouponModel
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    setDiscountError(t('please_login_coupon'));
-                    setAppliedDiscount(null);
-                    return;
-                }
-
-                const checkUsedResponse = await fetch('http://localhost:3000/api/check-coupon-used', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ couponCode: normalizedCode })
-                });
-
-                if (checkUsedResponse.ok) {
-                    const checkData = await checkUsedResponse.json();
+                    const checkData = await checkResponse.json();
                     if (checkData.used) {
                         setDiscountError(t('coupon_already_used'));
                         setAppliedDiscount(null);
                         return;
                     }
+                } catch (err) {
+                    console.error('Lỗi kiểm tra mã:', err);
+                    setDiscountError(t('coupon_check_error'));
+                    setAppliedDiscount(null);
+                    return; // Chặn không cho áp dụng nếu API lỗi
                 }
 
-                // Kiểm tra mã newsletter có hợp lệ không
-                const response = await fetch('http://localhost:3000/api/newsletter/validate-coupon', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ couponCode: normalizedCode })
-                });
+                setAppliedDiscount(coupon);
+                setDiscountError('');
+                showToast(`${t('apply')} -${coupon.discount}% ${t('success')} 🎉`, 'success');
+                return;
+            }
 
-                const data = await response.json();
+            // Kiểm tra mã từ newsletter
+            if (normalizedCode.startsWith('NEWS10')) {
+                try {
+                    // Kiểm tra mã đã dùng chưa trong UsedCouponModel
+                    const token = localStorage.getItem('token');
+                    if (!token) {
+                        setDiscountError(t('please_login_coupon'));
+                        setAppliedDiscount(null);
+                        return;
+                    }
 
-                if (response.ok && data.valid) {
-                    setAppliedDiscount({
-                        code: normalizedCode,
-                        discount: data.discount,
-                        minOrder: 0,
-                        isNewsletter: true
+                    const checkUsedResponse = await fetch('http://localhost:3000/api/check-coupon-used', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ couponCode: normalizedCode })
                     });
-                    setDiscountError('');
-                    showToast(`${t('apply')} -${data.discount}% ${t('success')} 🎉`, 'success');
-                } else {
-                    setDiscountError(data.message || t('coupon_invalid'));
+
+                    if (checkUsedResponse.ok) {
+                        const checkData = await checkUsedResponse.json();
+                        if (checkData.used) {
+                            setDiscountError(t('coupon_already_used'));
+                            setAppliedDiscount(null);
+                            return;
+                        }
+                    }
+
+                    // Kiểm tra mã newsletter có hợp lệ không
+                    const response = await fetch('http://localhost:3000/api/newsletter/validate-coupon', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ couponCode: normalizedCode })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok && data.valid) {
+                        setAppliedDiscount({
+                            code: normalizedCode,
+                            discount: data.discount,
+                            minOrder: 0,
+                            isNewsletter: true
+                        });
+                        setDiscountError('');
+                        showToast(`${t('apply')} -${data.discount}% ${t('success')} 🎉`, 'success');
+                    } else {
+                        setDiscountError(data.message || t('coupon_invalid'));
+                        setAppliedDiscount(null);
+                    }
+                } catch (err) {
+                    console.error('Lỗi kiểm tra mã newsletter:', err);
+                    setDiscountError(t('cannot_check_coupon'));
                     setAppliedDiscount(null);
                 }
-            } catch (err) {
-                console.error('Lỗi kiểm tra mã newsletter:', err);
-                setDiscountError(t('cannot_check_coupon'));
+            } else {
+                setDiscountError(t('coupon_invalid'));
                 setAppliedDiscount(null);
             }
-        } else {
-            setDiscountError(t('coupon_invalid'));
-            setAppliedDiscount(null);
+        } finally {
+            setIsApplyingDiscount(false);
         }
     };
 
@@ -432,13 +447,11 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
     };
 
     // Hàm chọn mã từ danh sách
-    const selectCoupon = (code) => {
+    const selectCoupon = async (code) => {
         setDiscountCode(code);
         setShowCouponList(false);
-        // Tự động áp dụng
-        setTimeout(() => {
-            document.getElementById('apply-coupon-btn')?.click();
-        }, 100);
+        setDiscountError('');
+        await applyDiscountCode(code);
     };
 
     const consumeCouponAfterSuccess = (couponCode) => {
@@ -575,8 +588,6 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                 consumeCouponAfterSuccess(appliedDiscount.code);
             }
 
-            showToast(`${t('order_success')} 🎉`, "success");
-
             // CẬP NHẬT SỐ "ĐÃ BÁN" CHO SẢN PHẨM FLASH SALE
             const flashSaleProducts = JSON.parse(localStorage.getItem('flashSaleProducts') || '[]');
             let hasFlashSaleUpdate = false;
@@ -638,7 +649,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                 marginTop: '20px',
                 borderRadius: '8px'
             }}>
-                <div style={{ fontSize: '40px', marginBottom: '20px' }}>⏳</div>
+                <div style={{ fontSize: '32px', marginBottom: '16px' }}>⏳</div>
                 <p style={{ color: '#666' }}>{t('loading')}</p>
             </div>
         );
@@ -680,7 +691,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                             {t('confirm_order_title')}
                         </h2>
                         <div className="confirm-body">
-                            <p style={{ marginBottom: '16px' }}>{t('confirm_check_info')}</p>
+                            <p style={{ marginBottom: '12px' }}>{t('confirm_check_info')}</p>
                             <div className="confirm-summary-item">
                                 <span>{t('product_col')}:</span>
                                 <strong>{selectedProducts.length} {t('products_unit')}</strong>
@@ -699,9 +710,9 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                                     <strong>-{formatPrice(discountAmount)}</strong>
                                 </div>
                             )}
-                            <div className="confirm-summary-item" style={{ borderTop: '2px solid var(--accent-primary)', paddingTop: '16px' }}>
-                                <span style={{ fontSize: '18px', fontWeight: '700' }}>{t('total_payment')}:</span>
-                                <strong style={{ fontSize: '24px', color: 'var(--accent-primary)' }}>{formatPrice(finalAmount)}</strong>
+                            <div className="confirm-summary-item" style={{ borderTop: '2px solid var(--accent-primary)', paddingTop: '12px' }}>
+                                <span style={{ fontSize: '16px', fontWeight: '700' }}>{t('total_payment')}:</span>
+                                <strong style={{ fontSize: '20px', color: 'var(--accent-primary)' }}>{formatPrice(finalAmount)}</strong>
                             </div>
                             <div className="confirm-summary-item" style={{ border: 'none' }}>
                                 <span>{t('payment_method')}:</span>
@@ -800,7 +811,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
                                 {t('shipping_method_label')}
                             </h3>
                             <div className="shipping-info-box">
-                                <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)' }}>
+                                <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)' }}>
                                     💡 {t('shipping_hint')}
                                 </p>
                             </div>
@@ -830,259 +841,174 @@ function CheckoutPage({ onCheckoutSuccess, showToast }) {
 
                     {/* Right Side - Summary & Payment */}
                     <div className="checkout-right">
-                        <div className="checkout-card">
-                            <h3 className="section-header">
-                                <span className="section-icon">💰</span>
-                                {t('payment_title')}
-                            </h3>
-
-                            <div className="summary-row">
-                                <span className="summary-label">{t('subtotal')}</span>
-                                <span className="summary-value">{formatPrice(totalAmount)}</span>
+                        <form onSubmit={handlePayment}>
+                            {/* Card 1: Order Summary */}
+                            <div className="checkout-card right-card">
+                                <OrderSummary
+                                    selectedProducts={selectedProducts}
+                                    totalAmount={totalAmount}
+                                    shippingFee={shippingFee}
+                                    discountAmount={discountAmount}
+                                    voucherDiscount={voucherDiscount}
+                                    finalAmount={finalAmount}
+                                    appliedDiscount={appliedDiscount}
+                                    selectedVoucher={selectedVoucher}
+                                    formatPrice={formatPrice}
+                                    parsePrice={parsePrice}
+                                    t={t}
+                                />
                             </div>
 
-                            <div className="summary-row">
-                                <span className="summary-label">{t('shipping_fee_label')}</span>
-                                <span className="summary-value">{formatPrice(shippingFee)}</span>
-                            </div>
+                            {/* Card 2: Discount & Voucher */}
+                            <div className="checkout-card right-card">
+                                <div className="discount-section">
+                                    <div className="discount-header">
+                                        <h4 className="discount-title">
+                                            🎟️ {t('discount_code_label')}
+                                        </h4>
+                                        {myCoupons.length > 0 && !appliedDiscount && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowCouponList(!showCouponList)}
+                                                className="view-coupons-btn"
+                                            >
+                                                {showCouponList ? t('hide_btn') : `${myCoupons.filter(c => !usedCoupons.includes(c)).length} ${t('codes_count')}`}
+                                            </button>
+                                        )}
+                                    </div>
 
-                            <div className="summary-row">
-                                <span className="summary-label">{t('expected_delivery')}</span>
-                                <span className="summary-value">{getDeliveryRangeText(selectedShipping.id)}</span>
-                            </div>
-
-                            {/* Discount Section */}
-                            <div className="discount-section">
-                                <div className="discount-header">
-                                    <h4 className="discount-title">
-                                        🎟️ {t('discount_code_label')}
-                                    </h4>
-                                    {myCoupons.length > 0 && !appliedDiscount && (
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowCouponList(!showCouponList)}
-                                            className="view-coupons-btn"
-                                        >
-                                            {showCouponList ? t('hide_btn') : `${myCoupons.filter(c => !usedCoupons.includes(c)).length} ${t('codes_count')}`}
-                                        </button>
-                                    )}
-                                </div>
-
-                                {/* Coupon List */}
-                                {showCouponList && myCoupons.length > 0 && (
-                                    (() => {
-                                        const availableCoupons = myCoupons.filter(coupon => !usedCoupons.includes(coupon));
-
-                                        if (availableCoupons.length === 0) {
+                                    {showCouponList && myCoupons.length > 0 && (
+                                        (() => {
+                                            const availableCoupons = myCoupons.filter(coupon => !usedCoupons.includes(coupon));
+                                            if (availableCoupons.length === 0) {
+                                                return (
+                                                    <div className="coupon-list" style={{ textAlign: 'center', color: 'var(--text-tertiary)' }}>
+                                                        😔 {t('used_all_coupons')}
+                                                    </div>
+                                                );
+                                            }
                                             return (
-                                                <div className="coupon-list" style={{ textAlign: 'center', color: 'var(--text-tertiary)' }}>
-                                                    😔 {t('used_all_coupons')}
+                                                <div className="coupon-list">
+                                                    {availableCoupons.map((coupon, index) => (
+                                                        <div key={index} onClick={() => selectCoupon(coupon)} className="coupon-item">
+                                                            <div className="coupon-info">
+                                                                <div className="coupon-code">{coupon}</div>
+                                                                <div className="coupon-desc">
+                                                                    {coupon.startsWith('NEWS10') ? t('coupon_from_newsletter') : t('discount_code_text')}
+                                                                </div>
+                                                            </div>
+                                                            <button className="coupon-select-btn">{t('select_btn')}</button>
+                                                        </div>
+                                                    ))}
                                                 </div>
                                             );
-                                        }
+                                        })()
+                                    )}
 
-                                        return (
-                                            <div className="coupon-list">
-                                                {availableCoupons.map((coupon, index) => (
-                                                    <div
-                                                        key={index}
-                                                        onClick={() => selectCoupon(coupon)}
-                                                        className="coupon-item"
-                                                    >
-                                                        <div className="coupon-info">
-                                                            <div className="coupon-code">{coupon}</div>
-                                                            <div className="coupon-desc">
-                                                                {coupon.startsWith('NEWS10') ? t('coupon_from_newsletter') : t('discount_code_text')}
-                                                            </div>
-                                                        </div>
-                                                        <button className="coupon-select-btn">{t('select_btn')}</button>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        );
-                                    })()
-                                )}
+                                    <div className="discount-input-wrapper">
+                                        <input
+                                            type="text"
+                                            placeholder={t('enter_discount')}
+                                            value={discountCode}
+                                            onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                                            disabled={appliedDiscount !== null}
+                                            className="discount-input"
+                                        />
+                                        {appliedDiscount ? (
+                                            <button type="button" onClick={removeDiscount} className="remove-btn">
+                                                {t('delete')}
+                                            </button>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                onClick={() => applyDiscountCode()}
+                                                className="apply-btn"
+                                                disabled={isApplyingDiscount}
+                                            >
+                                                {isApplyingDiscount ? `${t('loading')}...` : t('apply')}
+                                            </button>
+                                        )}
+                                    </div>
 
-                                <div className="discount-input-wrapper">
-                                    <input
-                                        type="text"
-                                        placeholder={t('enter_discount')}
-                                        value={discountCode}
-                                        onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
-                                        disabled={appliedDiscount !== null}
-                                        className="discount-input"
-                                    />
-                                    {appliedDiscount ? (
-                                        <button
-                                            type="button"
-                                            onClick={removeDiscount}
-                                            className="remove-btn"
-                                        >
-                                            {t('delete')}
-                                        </button>
-                                    ) : (
-                                        <button
-                                            id="apply-coupon-btn"
-                                            type="button"
-                                            onClick={applyDiscountCode}
-                                            className="apply-btn"
-                                        >
-                                            {t('apply')}
-                                        </button>
+                                    {discountError && <p className="discount-error">{discountError}</p>}
+
+                                    {appliedDiscount && (
+                                        <div className="discount-success">
+                                            <p className="discount-success-text">
+                                                <FiCheckCircle size={16} />
+                                                Đã áp dụng mã <strong>{appliedDiscount.code}</strong> - Giảm {appliedDiscount.discount}%
+                                            </p>
+                                        </div>
                                     )}
                                 </div>
 
-                                {discountError && (
-                                    <p className="discount-error">{discountError}</p>
-                                )}
+                                <div className="right-card__divider" />
 
-                                {appliedDiscount && (
-                                    <div className="discount-success">
-                                        <p className="discount-success-text">
-                                            <FiCheckCircle size={16} />
-                                            Đã áp dụng mã <strong>{appliedDiscount.code}</strong> - Giảm {appliedDiscount.discount}%
-                                        </p>
-                                    </div>
-                                )}
+                                <VoucherSelector
+                                    totalAmount={totalAmount}
+                                    onVoucherSelect={setSelectedVoucher}
+                                    selectedVoucher={selectedVoucher}
+                                />
                             </div>
 
-                            {/* Voucher Selector */}
-                            <VoucherSelector
-                                totalAmount={totalAmount}
-                                onVoucherSelect={setSelectedVoucher}
-                                selectedVoucher={selectedVoucher}
+                            {/* Card 3: Shipping & Payment */}
+                            <div className="checkout-card right-card">
+                                <ShippingForm
+                                    fullName={fullName} setFullName={setFullName}
+                                    phone={phone} setPhone={setPhone}
+                                    address={address} setAddress={setAddress}
+                                    city={city} setCity={setCity}
+                                    district={district} setDistrict={setDistrict}
+                                    ward={ward} setWard={setWard}
+                                    onAddressChange={handleAddressChange}
+                                    hasSavedAddress={!!(user?.fullName && user?.phone && (user?.address || user?.city))}
+                                    t={t}
+                                />
+
+                                <div className="right-card__divider" />
+
+                                <PaymentMethod
+                                    paymentMethod={paymentMethod}
+                                    setPaymentMethod={setPaymentMethod}
+                                    t={t}
+                                />
+                            </div>
+
+                            {/* Security + Outfit Preview */}
+                            <div className="security-notice">
+                                <div className="security-icon"><FiShield /></div>
+                                <p className="security-text">
+                                    <strong>{t('security_title')}</strong> {t('security_desc')}
+                                </p>
+                            </div>
+
+                            <OutfitPreview
+                                outfitSnapshot={location.state?.outfitSnapshot || null}
+                                outfitItems={location.state?.outfitItems || []}
                             />
 
-                            {appliedDiscount && (
-                                <div className="summary-row">
-                                    <span className="summary-label summary-discount">{t('discount_code')} ({appliedDiscount.discount}%):</span>
-                                    <span className="summary-value summary-discount">-{formatPrice(discountAmount)}</span>
-                                </div>
-                            )}
+                            {/* Order Button */}
+                            <button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="checkout-btn"
+                            >
+                                <span className="checkout-btn-content">
+                                    {isSubmitting ? (
+                                        <>
+                                            <span className="loading-spinner"></span>
+                                            {t('processing_order')}
+                                        </>
+                                    ) : (
+                                        <>
+                                            🎉 {t('place_order_now')} • {formatPrice(finalAmount)}
+                                        </>
+                                    )}
+                                </span>
+                            </button>
 
-                            {selectedVoucher && (
-                                <div className="summary-row">
-                                    <span className="summary-label summary-discount">{selectedVoucher.badge} {selectedVoucher.code}:</span>
-                                    <span className="summary-value summary-discount">-{formatPrice(voucherDiscount)}</span>
-                                </div>
-                            )}
-
-                            <div className="summary-row summary-total">
-                                <div className="summary-label">
-                                    {t('total_payment')}
-                                    <span className="item-count">({selectedProducts.length} {t('products_unit')})</span>
-                                </div>
-                                <span className="summary-value">{formatPrice(finalAmount)}</span>
-                            </div>
-
-                            {/* Shipping Info */}
-                            <div className="shipping-section">
-                                <h3 className="section-header" style={{ fontSize: '16px', marginBottom: '16px' }}>
-                                    <span className="section-icon">📦</span>
-                                    {t('receiver_info')}
-                                </h3>
-
-                                <form onSubmit={handlePayment}>
-                                    <div className="form-group">
-                                        <label className="form-label">{t('full_name_star')}</label>
-                                        <input
-                                            type="text"
-                                            className="form-input"
-                                            value={fullName}
-                                            onChange={(e) => setFullName(e.target.value)}
-                                            placeholder={t('enter_full_name') || "Nhập họ và tên"}
-                                        />
-                                    </div>
-
-                                    <div className="form-group">
-                                        <label className="form-label">{t('phone_star')}</label>
-                                        <input
-                                            type="tel"
-                                            className="form-input"
-                                            value={phone}
-                                            onChange={(e) => setPhone(e.target.value)}
-                                            placeholder={t('enter_phone') || "Nhập số điện thoại"}
-                                        />
-                                    </div>
-
-                                    {/* Address Picker Component */}
-                                    <div className="form-group" style={{ marginTop: '20px' }}>
-                                        <AddressPicker
-                                            onAddressChange={handleAddressChange}
-                                            initialCity={city}
-                                            initialDistrict={district}
-                                            initialWard={ward}
-                                            initialAddress={address}
-                                            showMap={true}
-                                        />
-                                    </div>
-
-                                    {/* Payment Methods */}
-                                    <div className="form-group">
-                                        <label className="form-label">{t('payment_method')}</label>
-                                        <div className="payment-methods">
-                                            <label className={`payment-option ${paymentMethod === 'COD' ? 'selected' : ''}`}>
-                                                <input
-                                                    type="radio"
-                                                    name="payment"
-                                                    value="COD"
-                                                    checked={paymentMethod === 'COD'}
-                                                    onChange={(e) => setPaymentMethod(e.target.value)}
-                                                />
-                                                <span className="payment-label">💵 {t('cod_full')}</span>
-                                            </label>
-                                            <label className={`payment-option ${paymentMethod === 'Banking' ? 'selected' : ''}`}>
-                                                <input
-                                                    type="radio"
-                                                    name="payment"
-                                                    value="Banking"
-                                                    checked={paymentMethod === 'Banking'}
-                                                    onChange={(e) => setPaymentMethod(e.target.value)}
-                                                />
-                                                <span className="payment-label">🏦 {t('banking_full')}</span>
-                                            </label>
-                                            <label className={`payment-option ${paymentMethod === 'Online' ? 'selected' : ''}`}>
-                                                <input
-                                                    type="radio"
-                                                    name="payment"
-                                                    value="Online"
-                                                    checked={paymentMethod === 'Online'}
-                                                    onChange={(e) => setPaymentMethod(e.target.value)}
-                                                />
-                                                <span className="payment-label">💳 {t('online_full')}</span>
-                                            </label>
-                                        </div>
-                                    </div>
-
-                                    {/* Security Notice */}
-                                    <div className="security-notice">
-                                        <div className="security-icon"><FiShield /></div>
-                                        <p className="security-text">
-                                            <strong>{t('security_title')}</strong> {t('security_desc')}
-                                        </p>
-                                    </div>
-
-                                    <button
-                                        type="submit"
-                                        disabled={isSubmitting}
-                                        className="checkout-btn"
-                                    >
-                                        <span className="checkout-btn-content">
-                                            {isSubmitting ? (
-                                                <>
-                                                    <span className="loading-spinner"></span>
-                                                    {t('processing_order')}
-                                                </>
-                                            ) : (
-                                                <>
-                                                    🎉 {t('place_order_now')} ({selectedProducts.length} {t('products_unit')})
-                                                </>
-                                            )}
-                                        </span>
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
+                            <TrustSignals />
+                        </form>
                     </div>
                 </div>
             </div>

@@ -1,0 +1,105 @@
+.sbadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 4px 14px;
+    border-radius: var(--r-full);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.5;
+    white-space: nowrap;
+    letter-spacing: .01em;
+}
+
+.sbadge__dot {
+    width: 7px;
+    height: 7px;
+    border-radius: var(--r-full);
+    flex-shrink: 0;
+}
+
+/* Color variants */
+.sbadge--yellow {
+    background: var(--a-warning-light);
+    color: #b45309;
+}
+
+.sbadge--yellow .sbadge__dot {
+    background: var(--a-warning);
+}
+
+.sbadge--blue {
+    background: var(--a-info-light);
+    color: #1d4ed8;
+}
+
+.sbadge--blue .sbadge__dot {
+    background: var(--a-info);
+}
+
+.sbadge--green {
+    background: var(--a-success-light);
+    color: #15803d;
+}
+
+.sbadge--green .sbadge__dot {
+    background: var(--a-success);
+}
+
+.sbadge--red {
+    background: var(--a-danger-light);
+    color: #b91c1c;
+}
+
+.sbadge--red .sbadge__dot {
+    background: var(--a-danger);
+}
+
+.sbadge--gray {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.sbadge--gray .sbadge__dot {
+    background: #9ca3af;
+}
+
+.sbadge--purple {
+    background: var(--a-purple-light);
+    color: #6d28d9;
+}
+
+.sbadge--purple .sbadge__dot {
+    background: var(--a-purple);
+}
+
+/* Dark theme adjustments */
+[data-admin-theme="dark"] .sbadge--yellow {
+    background: rgba(245, 158, 11, .15);
+    color: #fbbf24;
+}
+
+[data-admin-theme="dark"] .sbadge--blue {
+    background: rgba(59, 130, 246, .15);
+    color: #60a5fa;
+}
+
+[data-admin-theme="dark"] .sbadge--green {
+    background: rgba(34, 197, 94, .15);
+    color: #4ade80;
+}
+
+[data-admin-theme="dark"] .sbadge--red {
+    background: rgba(239, 68, 68, .15);
+    color: #f87171;
+}
+
+[data-admin-theme="dark"] .sbadge--gray {
+    background: rgba(255, 255, 255, .06);
+    color: #94a3b8;
+}
+
+[data-admin-theme="dark"] .sbadge--purple {
+    background: rgba(139, 92, 246, .15);
+    color: #a78bfa;
+}

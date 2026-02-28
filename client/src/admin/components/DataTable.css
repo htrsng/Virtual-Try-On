@@ -1,0 +1,297 @@
+/* ======================================================
+   DataTable — compact professional table
+   ====================================================== */
+
+.dtable {
+    width: 100%;
+}
+
+/* Toolbar */
+.dtable__toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    padding: var(--sp-5) var(--sp-6);
+    border-bottom: 1px solid var(--a-border-light);
+    flex-wrap: wrap;
+}
+
+/* Search */
+.dtable__search {
+    position: relative;
+    flex: 1;
+    max-width: 380px;
+}
+
+.dtable__search-icon {
+    position: absolute;
+    left: var(--sp-3);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--a-text-tertiary);
+    pointer-events: none;
+}
+
+.dtable__search-input {
+    width: 100%;
+    padding: var(--sp-2-5) var(--sp-4) var(--sp-2-5) 38px;
+    border: 1px solid var(--a-border);
+    border-radius: var(--r-sm);
+    font-size: 14px;
+    color: var(--a-text);
+    background: var(--a-surface);
+    font-family: var(--admin-font);
+    transition: all var(--t-fast);
+}
+
+.dtable__search-input:focus {
+    outline: none;
+    border-color: var(--a-primary);
+    box-shadow: 0 0 0 3px var(--a-primary-ring);
+}
+
+.dtable__search-input::placeholder {
+    color: var(--a-text-tertiary);
+}
+
+/* Bulk actions */
+.dtable__bulk {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-left: auto;
+}
+
+.dtable__bulk-count {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--a-primary);
+    background: var(--a-primary-light);
+    padding: var(--sp-1) var(--sp-3);
+    border-radius: var(--r-full);
+}
+
+.dtable__bulk-dropdown {
+    position: relative;
+}
+
+.dtable__bulk-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: var(--sp-2) var(--sp-3);
+    border: 1px solid var(--a-border);
+    border-radius: var(--r-sm);
+    background: var(--a-surface);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--a-text);
+    cursor: pointer;
+    transition: all var(--t-fast);
+    font-family: var(--admin-font);
+}
+
+.dtable__bulk-btn:hover {
+    border-color: var(--a-primary);
+}
+
+.dtable__bulk-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    min-width: 160px;
+    background: var(--a-surface);
+    border: 1px solid var(--a-border);
+    border-radius: var(--r-sm);
+    box-shadow: var(--a-shadow-md);
+    z-index: 20;
+    padding: var(--sp-1) 0;
+    animation: dtMenuIn var(--t-fast);
+}
+
+@keyframes dtMenuIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dtable__bulk-action {
+    display: block;
+    width: 100%;
+    padding: var(--sp-2) var(--sp-4);
+    background: none;
+    border: none;
+    text-align: left;
+    font-size: 13px;
+    color: var(--a-text);
+    cursor: pointer;
+    transition: background var(--t-fast);
+    font-family: var(--admin-font);
+}
+
+.dtable__bulk-action:hover {
+    background: var(--a-surface-alt);
+}
+
+.dtable__bulk-action--danger {
+    color: var(--a-danger);
+}
+
+.dtable__bulk-action--danger:hover {
+    background: var(--a-danger-light);
+}
+
+/* Table */
+.dtable__wrap {
+    overflow-x: auto;
+}
+
+.dtable__table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.dtable__th {
+    padding: var(--sp-3-5) var(--sp-5);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--a-text-tertiary);
+    background: var(--a-surface-alt);
+    border-bottom: 1px solid var(--a-border);
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+}
+
+.dtable__th--check {
+    width: 40px;
+    text-align: center;
+}
+
+.dtable__tr {
+    transition: background var(--t-fast);
+}
+
+.dtable__tr:hover {
+    background: var(--a-surface-alt);
+}
+
+.dtable__tr--selected {
+    background: var(--a-primary-light) !important;
+}
+
+.dtable__td {
+    padding: var(--sp-3-5) var(--sp-5);
+    font-size: 14px;
+    color: var(--a-text);
+    border-bottom: 1px solid var(--a-border-light);
+    vertical-align: middle;
+}
+
+.dtable__td--check {
+    width: 40px;
+    text-align: center;
+}
+
+.dtable__checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--a-primary);
+    cursor: pointer;
+}
+
+/* Empty state */
+.dtable__empty {
+    padding: var(--sp-14) var(--sp-5);
+    text-align: center;
+    color: var(--a-text-tertiary);
+    font-size: 15px;
+}
+
+/* Skeleton */
+.dtable__skeleton {
+    height: 14px;
+    background: var(--a-border-light);
+    border-radius: var(--r-sm);
+    animation: dtSkelPulse 1.2s infinite ease-in-out;
+}
+
+.dtable__skeleton--check {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    margin: 0 auto;
+}
+
+@keyframes dtSkelPulse {
+
+    0%,
+    100% {
+        opacity: .5;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+/* Pagination */
+.dtable__pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--sp-4) var(--sp-6);
+    border-top: 1px solid var(--a-border-light);
+}
+
+.dtable__page-info {
+    font-size: 14px;
+    color: var(--a-text-secondary);
+    font-weight: 500;
+}
+
+.dtable__page-btns {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-1-5);
+}
+
+.dtable__page-btn {
+    min-width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--a-border);
+    border-radius: var(--r-sm);
+    background: var(--a-surface);
+    color: var(--a-text-secondary);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--t-fast);
+    font-family: var(--admin-font);
+}
+
+.dtable__page-btn:hover:not(:disabled) {
+    border-color: var(--a-primary);
+    color: var(--a-primary);
+}
+
+.dtable__page-btn--active {
+    background: var(--a-primary);
+    color: #fff !important;
+    border-color: var(--a-primary) !important;
+}
+
+.dtable__page-btn:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+}

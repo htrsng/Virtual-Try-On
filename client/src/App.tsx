@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense, useCallback, useRef } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 
 // --- 1. IMPORT CÁC COMPONENT CỦA WEB BÁN HÀNG ---
 import { MODEL_INJECTION } from './data/ThreeDConfig';
@@ -16,12 +16,14 @@ const TopProductsPage = lazy(() => import('./pages/TopProductsPage'));
 const FlashSalePage = lazy(() => import('./pages/FlashSalePage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
-const CheckoutSelectPage = lazy(() => import('./pages/CheckoutSelectPage'));
+const CartPage = lazy(() => import('./pages/CartPage'));
 const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'));
 const OrderPage = lazy(() => import('./pages/OrderPage'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
-const AdminLayout = lazy(() => import('./pages/AdminLayout'));
-const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+// @ts-ignore
+const AdminLayout = lazy(() => import('./admin/layout/AdminLayout'));
+// @ts-ignore
+const AdminDashboard = lazy(() => import('./admin/pages/AdminDashboard'));
 const AdminOrders = lazy(() => import('./pages/AdminOrders'));
 const AdminProducts = lazy(() => import('./pages/AdminProducts'));
 const AdminCategories = lazy(() => import('./pages/AdminCategories'));
@@ -39,7 +41,7 @@ const ComparePage = lazy(() => import('./pages/ComparePage'));
 const ChatWidget = lazy(() => import('./components/ChatWidget'));
 
 // --- 2. IMPORT TÍNH NĂNG 3D (MỚI) ---
-const VirtualTryOn = lazy(() => import('./features/virtual-tryon/VirtualTryOn'));
+const VirtualTryOn = lazy(() => import('./features/virtual-tryon/VirtualTryOn.tsx'));
 
 // --- 3. IMPORT CONTEXTS ---
 import { AuthProvider } from './contexts/AuthContext';
@@ -368,6 +370,10 @@ function App() {
     });
   }, []);
 
+  const handleToastClose = useCallback(() => {
+    setToast(null);
+  }, []);
+
   // Chuẩn bị dữ liệu hiển thị (Format giá)
   const displayProducts = suggestionProducts.map(p => ({
     ...p,
@@ -411,7 +417,7 @@ function App() {
     const newOrder = { items: cartItems, total: totalAmount, date: new Date().toISOString() };
     setOrders([...orders, newOrder]);
     setCartItems([]);
-    showToast("Đặt hàng thành công!", 'success');
+    showToast("🎉 Đặt hàng thành công! Cảm ơn bạn đã mua sắm cùng tụi mình.", 'success');
   };
 
   // Mua ngay 1 sản phẩm (Buy Now): chỉ chuyển sang checkout với đúng sản phẩm đó
@@ -445,6 +451,56 @@ function App() {
     const keyword = searchKeyword.toLowerCase();
     return productName.includes(keyword);
   });
+
+  // Wrapper component để lấy product từ location.state
+  const VirtualTryOnWrapper = ({ defaultProduct, onAddToCart, onBuyNow, showToast }: {
+    defaultProduct: ProductRecord;
+    onAddToCart: (product: ProductRecord, size?: string) => void;
+    onBuyNow: (product: ProductRecord, size?: string) => void;
+    showToast: (message: string, type?: string) => void;
+  }) => {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const locState = location.state as {
+      product?: ProductRecord;
+      selectedItems?: ProductRecord[];
+    } | null;
+
+    // Resolve outfit items: selectedItems array → outfitItems
+    const selectedItems = locState?.selectedItems;
+    const singleProduct = locState?.product;
+
+    // Redirect to cart if selectedItems is explicitly empty
+    useEffect(() => {
+      if (selectedItems && selectedItems.length === 0) {
+        showToast('Chưa chọn sản phẩm nào — quay lại giỏ hàng', 'warning');
+        navigate('/cart', { replace: true });
+      }
+    }, [selectedItems, navigate, showToast]);
+
+    // Determine the primary product for the component
+    const product = (selectedItems && selectedItems.length > 0)
+      ? selectedItems[0]
+      : singleProduct || defaultProduct;
+
+    // Build outfitItems array
+    const outfitItems = (selectedItems && selectedItems.length > 0)
+      ? selectedItems
+      : singleProduct
+        ? [singleProduct]
+        : undefined;
+
+    return (
+      <VirtualTryOn
+        product={product}
+        outfitItems={outfitItems}
+        onAddToCart={onAddToCart}
+        onBuyNow={onBuyNow}
+        handleBack={() => window.history.back()}
+        showToast={showToast}
+      />
+    );
+  };
 
   const AppShell = () => {
     const location = useLocation();
@@ -603,14 +659,17 @@ function App() {
             {/* TRANG SO SÁNH */}
             <Route path="/compare" element={<ComparePage onAddToCart={handleAddToCart} showToast={showToast} />} />
 
+            {/* TRANG GIỎ HÀNG MỚI (LUXURY CART) */}
+            <Route path="/cart" element={<CartPage cartItems={cartItems} onRemove={handleRemoveFromCart} onUpdateQuantity={handleUpdateQuantity} onAddToCart={handleAddToCart} showToast={showToast} suggestionProducts={suggestionProducts} />} />
+
             {/* TRANG CHỌN SẢN PHẨM THANH TOÁN */}
-            <Route path="/checkout/choseproduct" element={<CheckoutSelectPage cartItems={cartItems} onRemove={handleRemoveFromCart} onUpdateQuantity={handleUpdateQuantity} showToast={showToast} />} />
+            <Route path="/checkout/choseproduct" element={<CartPage cartItems={cartItems} onRemove={handleRemoveFromCart} onUpdateQuantity={handleUpdateQuantity} onAddToCart={handleAddToCart} showToast={showToast} suggestionProducts={suggestionProducts} />} />
 
             {/* TRANG THANH TOÁN */}
-            <Route path="/checkout/cart" element={<CheckoutPage cartItems={cartItems} onCheckoutSuccess={handleCheckoutSuccess} showToast={showToast} />} />
+            <Route path="/checkout/cart" element={<CheckoutPage cartItems={cartItems} onCheckoutSuccess={handleCheckoutSuccess} showToast={showToast} suggestionProducts={suggestionProducts} onAddToCart={handleAddToCart} />} />
 
             {/* TRANG GIỎ HÀNG & THANH TOÁN (Redirect cũ) */}
-            <Route path="/checkout" element={<CheckoutSelectPage cartItems={cartItems} onRemove={handleRemoveFromCart} onUpdateQuantity={handleUpdateQuantity} showToast={showToast} />} />
+            <Route path="/checkout" element={<CartPage cartItems={cartItems} onRemove={handleRemoveFromCart} onUpdateQuantity={handleUpdateQuantity} onAddToCart={handleAddToCart} showToast={showToast} suggestionProducts={suggestionProducts} />} />
 
             {/* TRANG CÁ NHÂN NGƯỜI DÙNG */}
             <Route path="/profile" element={<UserProfilePage showToast={showToast} />} />
@@ -620,12 +679,10 @@ function App() {
 
             {/* TRANG 3D VIRTUAL TRY-ON */}
             <Route path="/try-on" element={
-              <VirtualTryOn
-                // Lấy sản phẩm đầu tiên làm mặc định hoặc truyền object sản phẩm cụ thể
-                product={suggestionProducts[0]}
+              <VirtualTryOnWrapper
+                defaultProduct={suggestionProducts[0]}
                 onAddToCart={handleAddToCart}
                 onBuyNow={handleBuyNow}
-                handleBack={() => window.history.back()} // Hàm quay lại shop
                 showToast={showToast}
               />
             } />
@@ -653,7 +710,7 @@ function App() {
         </Suspense>
 
         {/* Thông báo (Toast) hiển thị đè lên trên cùng */}
-        {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+        {toast && <Toast message={toast.message} type={toast.type} onClose={handleToastClose} />}
 
         {/* Chat Widget - Hiển thị trên các trang khách */}
         {!isAdminRoute && (

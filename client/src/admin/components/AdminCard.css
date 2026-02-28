@@ -1,0 +1,50 @@
+.acard {
+    background: var(--a-surface);
+    border: 1px solid var(--a-border);
+    border-radius: var(--r-xl);
+    box-shadow: var(--a-shadow-card);
+    transition: all var(--t-base);
+}
+
+.acard:hover {
+    box-shadow: var(--a-shadow-card-hover);
+}
+
+.acard--no-pad .acard__body {
+    padding: 0;
+}
+
+.acard__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-5);
+    padding: var(--sp-6) var(--sp-7);
+    border-bottom: 1px solid var(--a-border-light);
+}
+
+.acard__title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--a-text-heading);
+    margin: 0;
+    letter-spacing: -.01em;
+}
+
+.acard__subtitle {
+    font-size: 13px;
+    color: var(--a-text-tertiary);
+    margin: 3px 0 0;
+}
+
+.acard__action {
+    flex-shrink: 0;
+}
+
+.acard__body {
+    padding: var(--sp-6) var(--sp-7);
+}
+
+.acard__body--flush {
+    padding: 0;
+}
