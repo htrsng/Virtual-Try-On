@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import type { Profile } from '../../../contexts/FittingRoomContext';
 import { detectBodyShape } from './BodyPresets';
 
@@ -146,6 +146,8 @@ interface SizeRecommendationProps {
 export default function SizeRecommendation({
     profile, availableSizes, selectedSize, onSelectSize
 }: SizeRecommendationProps) {
+    const [isDetailOpen, setIsDetailOpen] = useState(false);
+
     const results = useMemo(
         () => recommendSizes(profile, availableSizes),
         [profile, availableSizes]
@@ -156,6 +158,10 @@ export default function SizeRecommendation({
     const bestResult = results.find(r => r.isRecommended);
     const selectedResult = results.find(r => r.size === selectedSize);
     const displayResult = selectedResult || bestResult;
+
+    useEffect(() => {
+        setIsDetailOpen(false);
+    }, [selectedSize, profile]);
 
     return (
         <div className="vto-size-rec">
@@ -187,31 +193,48 @@ export default function SizeRecommendation({
                 ))}
             </div>
 
-            {/* Fit detail for selected/recommended size */}
+            {/* Detail toggle */}
             {displayResult && (
-                <div className="vto-size-rec__detail">
-                    <p className="vto-size-rec__detail-title">
-                        Chi tiết size {displayResult.size}
-                    </p>
-                    <div className="vto-size-rec__zones">
-                        {displayResult.zones.map(z => {
-                            const fitInfo = FIT_LABELS[z.fit];
-                            return (
-                                <div key={z.label} className="vto-size-rec__zone">
-                                    <span className="vto-size-rec__zone-label">{z.label}</span>
-                                    <span
-                                        className="vto-size-rec__zone-fit"
-                                        style={{ color: fitInfo.color }}
-                                    >
-                                        {fitInfo.text}
-                                    </span>
-                                    <span className="vto-size-rec__zone-delta">
-                                        {z.delta > 0 ? `+${z.delta}` : z.delta} cm
-                                    </span>
-                                </div>
-                            );
-                        })}
-                    </div>
+                <div className="vto-size-rec__detail-wrap">
+                    <button
+                        type="button"
+                        className={`vto-size-rec__toggle ${isDetailOpen ? 'open' : ''}`}
+                        onClick={() => setIsDetailOpen(open => !open)}
+                    >
+                        <span className="vto-size-rec__toggle-text">
+                            {isDetailOpen ? 'Ẩn chi tiết' : `Xem chi tiết size ${displayResult.size}`}
+                        </span>
+                        <svg className="vto-size-rec__toggle-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                            <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                    </button>
+
+                    {isDetailOpen && (
+                        <div className="vto-size-rec__detail">
+                            <p className="vto-size-rec__detail-title">
+                                Chi tiết size {displayResult.size}
+                            </p>
+                            <div className="vto-size-rec__zones">
+                                {displayResult.zones.map(z => {
+                                    const fitInfo = FIT_LABELS[z.fit];
+                                    return (
+                                        <div key={z.label} className="vto-size-rec__zone">
+                                            <span className="vto-size-rec__zone-label">{z.label}</span>
+                                            <span
+                                                className="vto-size-rec__zone-fit"
+                                                style={{ color: fitInfo.color }}
+                                            >
+                                                {fitInfo.text}
+                                            </span>
+                                            <span className="vto-size-rec__zone-delta">
+                                                {z.delta > 0 ? `+${z.delta}` : z.delta} cm
+                                            </span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
         </div>

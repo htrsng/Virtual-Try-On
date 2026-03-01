@@ -223,9 +223,9 @@
 
 /* ─── Sidebar (30%) ─── */
 .vto-sidebar {
-    width: 360px;
-    min-width: 320px;
-    max-width: 400px;
+    width: 430px;
+    min-width: 380px;
+    max-width: 460px;
     height: 100%;
     background: var(--bg-secondary);
     border-left: 1px solid rgba(31, 26, 23, 0.06);
@@ -448,26 +448,83 @@
 }
 
 /* ─── Action Buttons (Sidebar) ─── */
-.vto-actions {
+.vto-customize-panel {
     display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid rgba(var(--accent-rgb), 0.28);
+    border-radius: var(--radius-xl);
+    background: var(--accent-gradient-5);
+}
+
+.vto-customize-panel__head {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.vto-customize-panel .vto-section-label {
+    margin-bottom: 0;
+}
+
+.vto-customize-panel__hint {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--text-secondary);
+}
+
+.vto-customize-btn {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 14px;
+    border: none;
+    border-radius: var(--radius-lg);
+    background: var(--accent-gradient);
+    color: var(--button-text);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.25);
+    transition: all var(--transition-fast);
+}
+
+.vto-customize-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(var(--accent-rgb), 0.35);
+}
+
+.vto-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
 }
 
 .vto-action-btn {
-    flex: 1;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 4px;
     padding: 12px;
     border: 1px solid rgba(31, 26, 23, 0.1);
     border-radius: var(--radius-lg);
     background: transparent;
     color: var(--text-secondary);
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     cursor: pointer;
     transition: all var(--transition-fast);
+    min-height: 70px;
+}
+
+.vto-action-btn span {
+    white-space: nowrap;
 }
 
 .vto-action-btn:hover {
@@ -574,7 +631,52 @@
     color: #22c55e;
 }
 
+.vto-size-rec__detail-wrap {
+    margin-top: 2px;
+}
+
+.vto-size-rec__toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--bg-card);
+    border: 1px solid rgba(31, 26, 23, 0.08);
+    border-radius: var(--radius-lg);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.vto-size-rec__toggle:hover {
+    border-color: rgba(var(--accent-rgb), 0.35);
+    background: var(--accent-gradient-5);
+}
+
+.vto-size-rec__toggle.open {
+    border-color: rgba(var(--accent-rgb), 0.45);
+    color: var(--text-primary);
+}
+
+.vto-size-rec__toggle-text {
+    text-align: left;
+}
+
+.vto-size-rec__toggle-icon {
+    flex-shrink: 0;
+    transition: transform var(--transition-fast);
+}
+
+.vto-size-rec__toggle.open .vto-size-rec__toggle-icon {
+    transform: rotate(180deg);
+}
+
 .vto-size-rec__detail {
+    margin-top: 8px;
     padding: 12px;
     background: var(--bg-card);
     border: 1px solid rgba(31, 26, 23, 0.06);
@@ -1199,8 +1301,8 @@
 /* ─── Responsive ─── */
 @media (max-width: 900px) {
     .vto-sidebar {
-        width: 300px;
-        min-width: 280px;
+        width: 340px;
+        min-width: 320px;
     }
 
     .vto-drawer {
@@ -1234,6 +1336,10 @@
 
     .vto-profile-pill__name {
         display: none;
+    }
+
+    .vto-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
