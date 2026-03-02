@@ -10,6 +10,7 @@ function ChatWidget() {
     const [messages, setMessages] = useState([]);
     const [inputMessage, setInputMessage] = useState('');
     const [isTyping, setIsTyping] = useState(false);
+    const [historyLoaded, setHistoryLoaded] = useState(false);
     const messagesEndRef = useRef(null);
     const { user, isAuthenticated } = useAuth();
     const { t } = useLanguage();
@@ -17,66 +18,97 @@ function ChatWidget() {
     // Lấy userId từ cả 2 format (login trả về .id, /auth/me trả về ._id)
     const getUserId = () => user?.id || user?._id || null;
 
+    const GREETING = {
+        id: 'greeting',
+        sender: 'bot',
+        message: 'Xin chào! 👋 Tôi là trợ lý VFitAI. Bạn cần hỗ trợ gì?',
+        createdAt: new Date().toISOString()
+    };
+
     // Quick replies
     const quickReplies = [
         '🚚 Giao hàng', '🔄 Đổi trả', '💳 Thanh toán',
         '📐 Hướng dẫn size', '🎁 Khuyến mãi', '👕 Thử đồ 3D'
     ];
 
-    // Load chat history khi mở
-    useEffect(() => {
-        if (isOpen && isAuthenticated) {
-            loadChatHistory();
+    // Load lịch sử chat từ server
+    const loadChatHistory = async (isInitial = false) => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                // Không đăng nhập — chỉ hiển greeting
+                if (isInitial) setMessages([GREETING]);
+                setHistoryLoaded(true);
+                return;
+            }
+            const res = await axios.get(`${API_URL}/api/chat/history`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const history = res.data || [];
+            if (isInitial) {
+                // Lần đầu: nếu có lịch sử thì show lịch sử, không tó greeting ở trước
+                setMessages(history.length > 0 ? history : [GREETING]);
+            } else {
+                // Poll: merge tin nhắn mới (không override tin tạm thời chưa save)
+                setMessages(prev => {
+                    if (history.length === 0) return prev;
+                    // Giữ các tin nhắn tạm thời (id bắt đầu bằng 'user_' hoặc 'error_')
+                    const tempMsgs = prev.filter(m =>
+                        typeof m.id === 'string' && (m.id.startsWith('user_') || m.id.startsWith('error_'))
+                    );
+                    const savedIds = new Set(history.map(m => String(m._id)));
+                    const filtered = tempMsgs.filter(m => !savedIds.has(m.id));
+                    return [...history, ...filtered];
+                });
+            }
+            setHistoryLoaded(true);
+        } catch (err) {
+            console.error('Lỗi load chat:', err);
+            if (isInitial) setMessages([GREETING]);
+            setHistoryLoaded(true);
         }
-    }, [isOpen, isAuthenticated]);
+    };
+
+    // Mở chat — load history ngay
+    useEffect(() => {
+        if (isOpen && !historyLoaded) {
+            loadChatHistory(true);
+        }
+    }, [isOpen]);
+
+    // Reset khi đóng chat
+    useEffect(() => {
+        if (!isOpen) {
+            setHistoryLoaded(false);
+            setMessages([]);
+        }
+    }, [isOpen]);
 
     // Auto scroll
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
-    // Initial greeting
+    // Poll tin nhắn mới (admin có thể đã reply) mỗi 10s khi chat đang mở
     useEffect(() => {
-        if (isOpen && messages.length === 0) {
-            setMessages([{
-                id: 'greeting',
-                sender: 'bot',
-                message: 'Xin chào! 👋 Tôi là trợ lý VFitAI. Bạn cần hỗ trợ gì?',
-                createdAt: new Date().toISOString()
-            }]);
-        }
-    }, [isOpen]);
-
-    const loadChatHistory = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            if (!token) return;
-            const res = await axios.get(`${API_URL}/api/chat/history`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            if (res.data && res.data.length > 0) {
-                setMessages(prev => {
-                    const greeting = prev.find(m => m.id === 'greeting');
-                    return greeting ? [greeting, ...res.data] : res.data;
-                });
-            }
-        } catch (err) {
-            console.error('Lỗi load chat:', err);
-        }
-    };
+        if (!isOpen || !isAuthenticated) return;
+        const id = setInterval(() => loadChatHistory(false), 10000);
+        return () => clearInterval(id);
+    }, [isOpen, isAuthenticated]);
 
     const sendMessage = async (text) => {
         const msg = text || inputMessage.trim();
         if (!msg) return;
 
-        // Thêm tin nhắn user vào UI ngay
-        const userMsg = {
-            id: 'user_' + Date.now(),
+        // Thêm tin nhắn user tạm vào UI ngay
+        const tempId = 'user_' + Date.now();
+        const userMsgTemp = {
+            id: tempId,
             sender: 'user',
             message: msg,
             createdAt: new Date().toISOString()
         };
-        setMessages(prev => [...prev, userMsg]);
+        setMessages(prev => [...prev, userMsgTemp]);
         setInputMessage('');
         setIsTyping(true);
 
@@ -87,11 +119,16 @@ function ChatWidget() {
                 message: msg,
                 userId: getUserId()
             }, { headers });
-            // Thêm reply bot
+
+            // Thay tin nhắn tạm bằng bản đã được lưu (có _id thật)
+            const savedUserMsg = res.data.userMessage;
+            setMessages(prev => prev.map(m => m.id === tempId ? savedUserMsg : m));
+
+            // Thêm reply bot sau delay gõ phím
             setTimeout(() => {
                 setMessages(prev => [...prev, res.data.botReply]);
                 setIsTyping(false);
-            }, 800); // Delay giả lập typing
+            }, 800);
         } catch (err) {
             setIsTyping(false);
             setMessages(prev => [...prev, {
@@ -215,12 +252,21 @@ function ChatWidget() {
                                         : '16px 16px 16px 4px',
                                     background: msg.sender === 'user'
                                         ? 'linear-gradient(135deg, #ee4d2d, #ff6b35)'
-                                        : 'white',
-                                    color: msg.sender === 'user' ? 'white' : '#333',
-                                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                                        : msg.sender === 'admin'
+                                            ? 'linear-gradient(135deg, #6366f1, #818cf8)'
+                                            : 'white',
+                                    color: msg.sender === 'user' || msg.sender === 'admin' ? 'white' : '#333',
+                                    boxShadow: msg.sender === 'admin'
+                                        ? '0 2px 8px rgba(99,102,241,.25)'
+                                        : '0 2px 8px rgba(0,0,0,0.08)',
                                     fontSize: '14px',
                                     lineHeight: '1.5',
                                 }}>
+                                    {msg.sender === 'admin' && (
+                                        <div style={{ fontSize: '11px', opacity: 0.85, marginBottom: '4px', fontWeight: 600 }}>
+                                            👩‍💻 Nhân viên hỗ trợ
+                                        </div>
+                                    )}
                                     <div>{msg.message}</div>
                                     <div style={{
                                         fontSize: '11px',

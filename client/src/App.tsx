@@ -30,6 +30,7 @@ const AdminCategories = lazy(() => import('./pages/AdminCategories'));
 const AdminFlashSale = lazy(() => import('./pages/AdminFlashSale'));
 const AdminCoupons = lazy(() => import('./pages/AdminCoupons'));
 const AdminDataSync = lazy(() => import('./components/AdminDataSync'));
+const AdminChat = lazy(() => import('./pages/AdminChat'));
 const UserProfilePage = lazy(() => import('./pages/UserProfilePage'));
 const HelpPage = lazy(() => import('./pages/HelpPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
@@ -633,6 +634,10 @@ function App() {
                   <Route
                     path="sync"
                     element={<AdminDataSync />}
+                  />
+                  <Route
+                    path="chat"
+                    element={<AdminChat showToast={showToast} />}
                   />
                 </Routes>
               </AdminLayout>

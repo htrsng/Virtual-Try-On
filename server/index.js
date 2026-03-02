@@ -201,7 +201,11 @@ const ProductModel = mongoose.model("products", ProductSchema);
 const normalizeProductNumericIds = async () => {
   const products = await ProductModel.find().sort({ _id: 1 });
   if (!products.length) {
-    return { total: 0, updated: 0, message: "Không có sản phẩm để chuẩn hóa ID" };
+    return {
+      total: 0,
+      updated: 0,
+      message: "Không có sản phẩm để chuẩn hóa ID",
+    };
   }
 
   const usedIds = new Set();
@@ -209,7 +213,11 @@ const normalizeProductNumericIds = async () => {
 
   products.forEach((product) => {
     const numericId = Number(product.id);
-    if (Number.isInteger(numericId) && numericId > 0 && !usedIds.has(numericId)) {
+    if (
+      Number.isInteger(numericId) &&
+      numericId > 0 &&
+      !usedIds.has(numericId)
+    ) {
       usedIds.add(numericId);
       maxId = Math.max(maxId, numericId);
     }
@@ -660,7 +668,9 @@ app.post("/api/check-coupon-used", authenticateToken, async (req, res) => {
       .toUpperCase();
 
     if (!normalizedCouponCode) {
-      return res.status(400).json({ message: "Thiếu mã giảm giá", used: false });
+      return res
+        .status(400)
+        .json({ message: "Thiếu mã giảm giá", used: false });
     }
 
     const usedCoupon = await UsedCouponModel.findOne({
@@ -1085,7 +1095,10 @@ app.post("/api/orders", authenticateToken, async (req, res) => {
           { $set: { isUsed: true } },
         );
       } catch (newsletterErr) {
-        console.log("⚠️ Lỗi đánh dấu newsletter coupon:", newsletterErr.message);
+        console.log(
+          "⚠️ Lỗi đánh dấu newsletter coupon:",
+          newsletterErr.message,
+        );
       }
     }
 
@@ -1425,8 +1438,8 @@ app.get("/api/reviews/:productId", async (req, res) => {
     const avgRating =
       reviews.length > 0
         ? (
-          reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-        ).toFixed(1)
+            reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+          ).toFixed(1)
         : 0;
     res.json({
       reviews,
@@ -1521,15 +1534,35 @@ function getBotReply(message) {
 // 1. Gửi tin nhắn chat
 app.post("/api/chat/send", async (req, res) => {
   try {
-    const { message, userId } = req.body;
+    const { message, userId: clientUserId } = req.body;
     if (!message || !message.trim()) {
       return res.status(400).json({ error: "Message is required" });
     }
 
-    // Validate userId - chỉ dùng nếu là ObjectId hợp lệ (24 hex chars)
+    // Ủu tiên userId từ token (nếu có), sau đó mới dùng client-sent
     let validUserId = null;
-    if (userId && /^[0-9a-fA-F]{24}$/.test(String(userId))) {
-      validUserId = userId;
+    const authHeader = req.headers["authorization"];
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      try {
+        const decoded = jwt.verify(authHeader.split(" ")[1], JWT_SECRET);
+        if (decoded?.id) {
+          validUserId = decoded.id;
+          console.log(`💬 Chat from user: ${decoded.email} (${validUserId})`);
+        }
+      } catch (e) {
+        console.log("💬 Chat token invalid:", e.message);
+      }
+    }
+    if (
+      !validUserId &&
+      clientUserId &&
+      /^[0-9a-fA-F]{24}$/.test(String(clientUserId))
+    ) {
+      validUserId = clientUserId;
+      console.log(`💬 Chat from clientUserId: ${validUserId}`);
+    }
+    if (!validUserId) {
+      console.log("💬 Chat from anonymous (no userId)");
     }
 
     // Lưu tin nhắn user
@@ -1559,6 +1592,92 @@ app.get("/api/chat/history", authenticateToken, async (req, res) => {
       .sort({ createdAt: 1 })
       .limit(100);
     res.json(messages);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// =============================================
+// ADMIN CHAT APIs
+// =============================================
+// 1. Lấy danh sách tất cả cuộc hội thoại (group theo userId)
+app.get("/api/admin/chat/conversations", async (req, res) => {
+  try {
+    // Lấy tất cả userId đã chat (bỏ null)
+    const userIds = await ChatMessageModel.distinct("userId", {
+      userId: { $ne: null },
+    });
+
+    const conversations = await Promise.all(
+      userIds.map(async (userId) => {
+        const user = await mongoose
+          .model("users")
+          .findById(userId)
+          .select("fullName email")
+          .lean();
+        const lastMsg = await ChatMessageModel.findOne({ userId })
+          .sort({ createdAt: -1 })
+          .lean();
+        const unread = await ChatMessageModel.countDocuments({
+          userId,
+          sender: "user",
+          isRead: false,
+        });
+        return {
+          userId,
+          user: user || { fullName: "Khách ẩn danh", email: "" },
+          lastMessage: lastMsg,
+          unreadCount: unread,
+        };
+      }),
+    );
+
+    // Sort by last message time descending
+    conversations.sort(
+      (a, b) =>
+        new Date(b.lastMessage?.createdAt || 0) -
+        new Date(a.lastMessage?.createdAt || 0),
+    );
+
+    res.json(conversations);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 2. Lấy toàn bộ tin nhắn của một user (cho admin xem)
+app.get("/api/admin/chat/messages/:userId", async (req, res) => {
+  try {
+    const messages = await ChatMessageModel.find({ userId: req.params.userId })
+      .sort({ createdAt: 1 })
+      .limit(200);
+    // Đánh dấu đã đọc tất cả tin nhắn của user này
+    await ChatMessageModel.updateMany(
+      { userId: req.params.userId, sender: "user", isRead: false },
+      { isRead: true },
+    );
+    res.json(messages);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 3. Admin gửi phản hồi cho user
+app.post("/api/admin/chat/reply", async (req, res) => {
+  try {
+    const { userId, message } = req.body;
+    if (!message || !message.trim())
+      return res.status(400).json({ error: "Message required" });
+    if (!userId || !/^[0-9a-fA-F]{24}$/.test(String(userId))) {
+      return res.status(400).json({ error: "Invalid userId" });
+    }
+    const msg = new ChatMessageModel({
+      userId,
+      sender: "admin",
+      message: message.trim(),
+    });
+    await msg.save();
+    res.json(msg);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -1770,9 +1889,9 @@ app.get("/api/admin/sync-status", async (req, res) => {
     const products = new Map();
 
     // Collect products from orders
-    orders.forEach(order => {
+    orders.forEach((order) => {
       if (order.products) {
-        order.products.forEach(p => {
+        order.products.forEach((p) => {
           const key = p.productId || p.name;
           if (!products.has(key)) {
             products.set(key, p);
@@ -1788,8 +1907,8 @@ app.get("/api/admin/sync-status", async (req, res) => {
         totalUsers: users.length,
         totalProducts: products.size,
         lastChecked: new Date(),
-        isSynced: orders.length > 0 && users.length > 0
-      }
+        isSynced: orders.length > 0 && users.length > 0,
+      },
     });
   } catch (error) {
     console.error("❌ Lỗi check sync status:", error);
@@ -1810,9 +1929,9 @@ app.get("/api/admin/get-all-data", async (req, res) => {
     const products = new Map();
 
     // Aggregate products từ orders
-    orders.forEach(order => {
+    orders.forEach((order) => {
       if (order.products) {
-        order.products.forEach(p => {
+        order.products.forEach((p) => {
           const key = p.productId || p.name;
           if (!products.has(key)) {
             products.set(key, {
@@ -1822,9 +1941,9 @@ app.get("/api/admin/get-all-data", async (req, res) => {
               sku: p.sku || `AUTO-${key}`,
               price: p.price,
               img: p.img,
-              category: p.category || 'Khác',
+              category: p.category || "Khác",
               quantity: 0,
-              totalRevenue: 0
+              totalRevenue: 0,
             });
           }
         });
@@ -1832,14 +1951,14 @@ app.get("/api/admin/get-all-data", async (req, res) => {
     });
 
     // Calculate sales & revenue
-    orders.forEach(order => {
+    orders.forEach((order) => {
       if (order.products) {
-        order.products.forEach(p => {
+        order.products.forEach((p) => {
           const key = p.productId || p.name;
           const product = products.get(key);
           if (product) {
-            product.quantity += (p.quantity || 1);
-            product.totalRevenue += (p.price * (p.quantity || 1));
+            product.quantity += p.quantity || 1;
+            product.totalRevenue += p.price * (p.quantity || 1);
           }
         });
       }
@@ -1852,8 +1971,8 @@ app.get("/api/admin/get-all-data", async (req, res) => {
         users: users.length,
         products: Array.from(products.values()),
         timestamp: new Date(),
-        message: `Đồng bộ ${orders.length} đơn, ${users.length} user, ${products.size} sản phẩm`
-      }
+        message: `Đồng bộ ${orders.length} đơn, ${users.length} user, ${products.size} sản phẩm`,
+      },
     });
   } catch (error) {
     console.error("❌ Lỗi lấy dữ liệu:", error);
@@ -1868,7 +1987,7 @@ app.post("/api/admin/clear-all-data", async (req, res) => {
 
     if (confirm !== "CLEAR_ALL_DATA") {
       return res.status(400).json({
-        error: "Xác nhận không đúng. Gửi { confirm: 'CLEAR_ALL_DATA' }"
+        error: "Xác nhận không đúng. Gửi { confirm: 'CLEAR_ALL_DATA' }",
       });
     }
 
@@ -1890,8 +2009,8 @@ app.post("/api/admin/clear-all-data", async (req, res) => {
       deleted: {
         orders: deletedOrders.deletedCount,
         users: deletedUsers.deletedCount,
-        coupons: deletedCoupons.deletedCount
-      }
+        coupons: deletedCoupons.deletedCount,
+      },
     });
   } catch (error) {
     console.error("❌ Lỗi xóa dữ liệu:", error);
@@ -1918,7 +2037,7 @@ app.post("/api/admin/reset-data", async (req, res) => {
       city: "Hà Nội",
       district: "Ba Đình",
       ward: "Phường Cống Vị",
-      role: "user"
+      role: "user",
     });
     await testUser.save();
 
@@ -1933,7 +2052,7 @@ app.post("/api/admin/reset-data", async (req, res) => {
       city: "Hà Nội",
       district: "Hoàn Kiếm",
       ward: "Phường Hàng Bạc",
-      role: "admin"
+      role: "admin",
     });
     await admin.save();
 
@@ -1943,8 +2062,8 @@ app.post("/api/admin/reset-data", async (req, res) => {
       data: {
         testUser: testUser.email,
         admin: admin.email,
-        password: "123456 / admin123"
-      }
+        password: "123456 / admin123",
+      },
     });
   } catch (error) {
     console.error("❌ Lỗi reset dữ liệu:", error);
@@ -1966,7 +2085,8 @@ app.post("/api/admin/check-sync", async (req, res) => {
         status: "warning",
         isSynced: false,
         message: "❌ Dữ liệu chưa được đồng bộ. Vui lòng clear và reset",
-        suggestion: "Gọi POST /api/admin/clear-all-data rồi POST /api/admin/reset-data"
+        suggestion:
+          "Gọi POST /api/admin/clear-all-data rồi POST /api/admin/reset-data",
       });
     }
 
@@ -1976,8 +2096,8 @@ app.post("/api/admin/check-sync", async (req, res) => {
       message: "✅ Dữ liệu đã đồng bộ",
       stats: {
         orders: orders.length,
-        users: users.length
-      }
+        users: users.length,
+      },
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

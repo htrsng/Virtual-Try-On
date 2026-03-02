@@ -6,7 +6,7 @@ import {
     FiActivity, FiPackage, FiShoppingCart, FiTag,
     FiUsers, FiImage, FiFileText, FiBox, FiList,
     FiGift, FiTrendingUp, FiSearch, FiBell,
-    FiUser, FiSun, FiMoon, FiDatabase, FiX, FiCheckCircle
+    FiUser, FiSun, FiMoon, FiDatabase, FiX, FiCheckCircle, FiMessageSquare
 } from 'react-icons/fi';
 import axios from 'axios';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -60,6 +60,13 @@ const MENU_GROUPS = [
             { path: '/admin/banners', label: 'Banner', icon: <FiImage size={18} /> },
             { path: '/admin/banner-content', label: 'Nội dung Banner', icon: <FiFileText size={18} /> },
             { path: '/admin/sync', label: 'Đồng bộ dữ liệu', icon: <FiDatabase size={18} /> },
+        ],
+    },
+    {
+        id: 'support',
+        label: 'Hỗ trợ',
+        items: [
+            { path: '/admin/chat', label: 'Phản hồi khách hàng', icon: <FiMessageSquare size={18} /> },
         ],
     },
 ];
