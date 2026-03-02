@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -6,8 +6,10 @@ import {
     FiActivity, FiPackage, FiShoppingCart, FiTag,
     FiUsers, FiImage, FiFileText, FiBox, FiList,
     FiGift, FiTrendingUp, FiSearch, FiBell,
-    FiUser, FiSun, FiMoon, FiDatabase, FiX
+    FiUser, FiSun, FiMoon, FiDatabase, FiX, FiCheckCircle
 } from 'react-icons/fi';
+import axios from 'axios';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 import '../styles/admin-layout.css';
 
 /* ── Menu definition ── */
@@ -72,6 +74,57 @@ export default function AdminLayout({ children }) {
     const [darkMode, setDarkMode] = useState(() =>
         localStorage.getItem('admin-theme') === 'dark'
     );
+
+    // Notification state
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [notifications, setNotifications] = useState([]);
+    const [readIds, setReadIds] = useState(() => {
+        try { return JSON.parse(localStorage.getItem('admin-read-notifs') || '[]'); }
+        catch { return []; }
+    });
+    const notifRef = useRef(null);
+
+    const fetchNotifications = useCallback(async () => {
+        try {
+            const res = await axios.get(`${API_URL}/api/orders`);
+            const orders = res.data.slice(0, 10);
+            setNotifications(orders.map(o => ({
+                id: o._id,
+                orderId: o._id?.slice(-6)?.toUpperCase() || '------',
+                customer: o.userId?.fullName || o.shippingInfo?.fullName || 'Khách',
+                status: o.status || 'Đang xử lý',
+                total: o.totalPrice || o.total || 0,
+                time: o.createdAt,
+            })));
+        } catch (_) { }
+    }, []);
+
+    useEffect(() => { fetchNotifications(); }, [fetchNotifications]);
+
+    // Poll every 30s for new orders
+    useEffect(() => {
+        const id = setInterval(fetchNotifications, 30000);
+        return () => clearInterval(id);
+    }, [fetchNotifications]);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handler = (e) => {
+            if (notifRef.current && !notifRef.current.contains(e.target)) {
+                setShowNotifications(false);
+            }
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    const markAllRead = () => {
+        const all = notifications.map(n => n.id);
+        setReadIds(all);
+        localStorage.setItem('admin-read-notifs', JSON.stringify(all));
+    };
+
+    const unreadCount = notifications.filter(n => !readIds.includes(n.id)).length;
 
     // Expand groups containing the active route on mount
     const [expanded, setExpanded] = useState(() => {
@@ -212,9 +265,80 @@ export default function AdminLayout({ children }) {
                         <button className="adm-topbar__btn" onClick={() => navigate('/')} title="Về trang chủ">
                             <FiHome size={20} />
                         </button>
-                        <button className="adm-topbar__btn adm-topbar__btn--badge" title="Thông báo">
-                            <FiBell size={20} />
-                        </button>
+                        {/* Notification Bell */}
+                        <div className="adm-notif-wrap" ref={notifRef}>
+                            <button
+                                className="adm-topbar__btn adm-topbar__btn--badge"
+                                title="Thông báo"
+                                onClick={() => setShowNotifications(v => !v)}
+                            >
+                                <FiBell size={20} />
+                                {unreadCount > 0 && (
+                                    <span className="adm-notif-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
+                                )}
+                            </button>
+
+                            {showNotifications && (
+                                <div className="adm-notif-dropdown">
+                                    <div className="adm-notif-header">
+                                        <span className="adm-notif-title">
+                                            Thông báo {unreadCount > 0 && <span className="adm-notif-count">{unreadCount} mới</span>}
+                                        </span>
+                                        <button className="adm-notif-markall" onClick={markAllRead}>
+                                            <FiCheckCircle size={14} /> Đánh dấu đã đọc
+                                        </button>
+                                    </div>
+
+                                    <div className="adm-notif-list">
+                                        {notifications.length === 0 ? (
+                                            <div className="adm-notif-empty">Không có thông báo nào</div>
+                                        ) : notifications.map(n => {
+                                            const isRead = readIds.includes(n.id);
+                                            const statusColor =
+                                                n.status === 'Đã giao' ? '#22c55e' :
+                                                    n.status === 'Đang giao' ? '#3b82f6' :
+                                                        n.status === 'Đã hủy' ? '#ef4444' : '#f59e0b';
+                                            return (
+                                                <div
+                                                    key={n.id}
+                                                    className={`adm-notif-item ${isRead ? 'adm-notif-item--read' : ''}`}
+                                                    onClick={() => {
+                                                        const updated = [...new Set([...readIds, n.id])];
+                                                        setReadIds(updated);
+                                                        localStorage.setItem('admin-read-notifs', JSON.stringify(updated));
+                                                        setShowNotifications(false);
+                                                        navigate('/admin/orders');
+                                                    }}
+                                                >
+                                                    <div className="adm-notif-item__dot" style={{ background: statusColor }} />
+                                                    <div className="adm-notif-item__body">
+                                                        <div className="adm-notif-item__text">
+                                                            Đơn hàng <strong>#{n.orderId}</strong> — {n.customer}
+                                                        </div>
+                                                        <div className="adm-notif-item__meta">
+                                                            <span style={{ color: statusColor }}>{n.status}</span>
+                                                            <span>•</span>
+                                                            <span>{Number(n.total).toLocaleString('vi-VN')}đ</span>
+                                                            {n.time && <span>• {new Date(n.time).toLocaleDateString('vi-VN')}</span>}
+                                                        </div>
+                                                    </div>
+                                                    {!isRead && <div className="adm-notif-item__unread-dot" />}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+
+                                    <div className="adm-notif-footer">
+                                        <button
+                                            className="adm-notif-viewall"
+                                            onClick={() => { setShowNotifications(false); navigate('/admin/orders'); }}
+                                        >
+                                            Xem tất cả đơn hàng →
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
 
                         <button
                             className="adm-topbar__theme"

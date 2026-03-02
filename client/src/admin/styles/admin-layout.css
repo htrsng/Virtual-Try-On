@@ -607,3 +607,188 @@
     background: var(--a-primary-medium);
     color: var(--a-text);
 }
+
+/* ========== NOTIFICATION DROPDOWN ========== */
+.adm-notif-wrap {
+    position: relative;
+}
+
+/* Override pseudo-element badge — use real badge span instead */
+.adm-topbar__btn--badge::after {
+    display: none;
+}
+
+.adm-notif-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    background: var(--a-danger, #dc2626);
+    border-radius: 999px;
+    border: 2px solid var(--a-surface, #fff);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 14px;
+    text-align: center;
+    pointer-events: none;
+    animation: admBadgePulse 2s infinite;
+}
+
+.adm-notif-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 360px;
+    background: var(--a-surface, #fff);
+    border: 1px solid var(--a-border, #e5e7eb);
+    border-radius: var(--r-lg, 12px);
+    box-shadow: 0 12px 40px rgba(0,0,0,.15);
+    z-index: 9999;
+    overflow: hidden;
+    animation: admNotifIn .18s ease;
+}
+
+@keyframes admNotifIn {
+    from { opacity: 0; transform: translateY(-8px) scale(.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.adm-notif-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid var(--a-border, #e5e7eb);
+}
+
+.adm-notif-title {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--a-text, #111);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.adm-notif-count {
+    background: var(--a-danger, #dc2626);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 999px;
+}
+
+.adm-notif-markall {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    color: var(--a-primary, #6366f1);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: var(--r-sm, 6px);
+    transition: background .15s;
+}
+.adm-notif-markall:hover { background: var(--a-surface-alt, #f3f4f6); }
+
+.adm-notif-list {
+    max-height: 340px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.adm-notif-list::-webkit-scrollbar { width: 4px; }
+.adm-notif-list::-webkit-scrollbar-track { background: transparent; }
+.adm-notif-list::-webkit-scrollbar-thumb { background: var(--a-border, #e5e7eb); border-radius: 4px; }
+
+.adm-notif-empty {
+    padding: 32px 16px;
+    text-align: center;
+    color: var(--a-text-secondary, #6b7280);
+    font-size: 13px;
+}
+
+.adm-notif-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--a-border, #f3f4f6);
+    cursor: pointer;
+    transition: background .15s;
+    background: var(--a-surface, #fff);
+    position: relative;
+}
+
+.adm-notif-item:last-child { border-bottom: none; }
+
+.adm-notif-item:hover { background: var(--a-surface-alt, #f9fafb); }
+
+.adm-notif-item--read { opacity: .65; }
+
+.adm-notif-item__dot {
+    flex-shrink: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-top: 4px;
+}
+
+.adm-notif-item__body {
+    flex: 1;
+    min-width: 0;
+}
+
+.adm-notif-item__text {
+    font-size: 13px;
+    color: var(--a-text, #111);
+    line-height: 1.4;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.adm-notif-item__meta {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--a-text-secondary, #6b7280);
+    flex-wrap: wrap;
+}
+
+.adm-notif-item__unread-dot {
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    background: var(--a-primary, #6366f1);
+    border-radius: 50%;
+    align-self: center;
+}
+
+.adm-notif-footer {
+    padding: 10px 16px;
+    border-top: 1px solid var(--a-border, #e5e7eb);
+    text-align: center;
+}
+
+.adm-notif-viewall {
+    background: none;
+    border: none;
+    color: var(--a-primary, #6366f1);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 12px;
+    border-radius: var(--r-sm, 6px);
+    transition: background .15s;
+    width: 100%;
+}
+.adm-notif-viewall:hover { background: var(--a-surface-alt, #f3f4f6); }

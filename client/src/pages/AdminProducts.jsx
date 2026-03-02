@@ -175,7 +175,7 @@ function AdminProducts({ showToast, categories = [] }) {
         setEditingProduct(null);
     };
 
-    const handleSaveProduct = (e) => {
+    const handleSaveProduct = async (e) => {
         e.preventDefault();
 
         // Validation
@@ -185,33 +185,79 @@ function AdminProducts({ showToast, categories = [] }) {
             return;
         }
 
-        if (editingProduct) {
-            // Update product
-            const updatedProducts = products.map(p =>
-                p.id === editingProduct.id ? { ...p, ...formData } : p
-            );
-            setProducts(updatedProducts);
-            showToast?.('Cập nhật sản phẩm thành công', 'success');
-        } else {
-            // Add new product
-            const newId = getNumericProductId(formData.id) || Date.now();
-            const newProduct = {
-                ...formData,
-                id: newId,
-                soldQuantity: 0,
-                totalRevenue: 0
-            };
-            setProducts([...products, newProduct]);
-            showToast?.('Thêm sản phẩm thành công', 'success');
+        const token = localStorage.getItem('token');
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+        try {
+            if (editingProduct) {
+                const payload = {
+                    name: formData.name,
+                    price: Number(formData.basePrice),
+                    category: formData.category,
+                    stock: Number(formData.stock),
+                    description: formData.description,
+                    shortDescription: formData.shortDescription,
+                    img: formData.mainImage,
+                    secondaryImages: formData.secondaryImages,
+                    status: formData.status,
+                };
+                await axios.put(`${API_URL}/api/products/${editingProduct._id}`, payload, { headers });
+                const updatedProducts = products.map(p =>
+                    p.id === editingProduct.id ? { ...p, ...formData, basePrice: Number(formData.basePrice) } : p
+                );
+                setProducts(updatedProducts);
+                showToast?.('Cập nhật sản phẩm thành công', 'success');
+            } else {
+                const payload = {
+                    name: formData.name,
+                    price: Number(formData.basePrice),
+                    category: formData.category,
+                    stock: Number(formData.stock),
+                    description: formData.description,
+                    shortDescription: formData.shortDescription,
+                    img: formData.mainImage,
+                    secondaryImages: formData.secondaryImages,
+                    status: formData.status,
+                };
+                const res = await axios.post(`${API_URL}/api/products`, payload, { headers });
+                const saved = res.data;
+                const newProduct = {
+                    ...formData,
+                    _id: saved._id,
+                    id: getNumericProductId(saved.id) || Date.now(),
+                    basePrice: Number(formData.basePrice),
+                    soldQuantity: 0,
+                    totalRevenue: 0,
+                };
+                setProducts(prev => [...prev, newProduct]);
+                showToast?.('Thêm sản phẩm thành công', 'success');
+            }
+        } catch (err) {
+            console.error('Lỗi lưu sản phẩm:', err);
+            showToast?.('Lỗi lưu sản phẩm: ' + (err.response?.data?.error || err.message), 'error');
+            return;
         }
 
         handleCloseModal();
     };
 
-    const handleDeleteProduct = (productId) => {
-        if (window.confirm('Bạn chắc chắn muốn xóa sản phẩm này?')) {
+    const handleDeleteProduct = async (productId) => {
+        if (!window.confirm('Bạn chắc chắn muốn xóa sản phẩm này?')) return;
+        const target = products.find(p => p.id === productId);
+        if (!target?._id) {
             setProducts(products.filter(p => p.id !== productId));
             showToast?.('Xóa sản phẩm thành công', 'success');
+            return;
+        }
+        try {
+            const token = localStorage.getItem('token');
+            await axios.delete(`${API_URL}/api/products/${target._id}`, {
+                headers: token ? { Authorization: `Bearer ${token}` } : {}
+            });
+            setProducts(products.filter(p => p.id !== productId));
+            showToast?.('Xóa sản phẩm thành công', 'success');
+        } catch (err) {
+            showToast?.('Lỗi xóa sản phẩm: ' + (err.response?.data?.error || err.message), 'error');
         }
     };
 
@@ -364,14 +410,16 @@ function AdminProducts({ showToast, categories = [] }) {
                                                     onClick={() => handleOpenModal(product)}
                                                     title="Chỉnh sửa"
                                                 >
-                                                    <FiEdit2 size={16} />
+                                                    <FiEdit2 size={14} />
+                                                    <span>Sửa</span>
                                                 </button>
                                                 <button
                                                     className="action-btn delete-btn"
                                                     onClick={() => handleDeleteProduct(product.id)}
                                                     title="Xóa"
                                                 >
-                                                    <FiTrash2 size={16} />
+                                                    <FiTrash2 size={14} />
+                                                    <span>Xóa</span>
                                                 </button>
                                             </div>
                                         </td>
