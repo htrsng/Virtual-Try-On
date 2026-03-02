@@ -713,7 +713,7 @@ function App() {
         {toast && <Toast message={toast.message} type={toast.type} onClose={handleToastClose} />}
 
         {/* Chat Widget - Hiển thị trên các trang khách */}
-        {!isAdminRoute && (
+        {!isAdminRoute && !isTryOnPage && (
           <Suspense fallback={null}>
             <ChatWidget />
           </Suspense>
