@@ -1,7 +1,16 @@
 import { useEffect, useMemo } from 'react';
-import { useGLTF } from '@react-three/drei';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
+import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
+
+import {
+    applyGarmentColor,
+    bindGarmentToAvatarSkeleton,
+    createGarmentMorphBindings,
+    prepareGarmentMaterials,
+    syncGarmentMorphTargets,
+} from './garmentBinding';
 
 type Vector3Tuple = [number, number, number];
 
@@ -44,26 +53,35 @@ const toScaleVector = (scale?: number | Vector3Tuple): Vector3Tuple => {
     return [1, 1, 1];
 };
 
-const normalizeBoneName = (name: string) =>
-    name
-        .toLowerCase()
-        .replace(/mixamorig|armature|skeleton|bone/gi, '')
-        .replace(/[^a-z0-9]/g, '');
-
 const resolveGarmentConfig = (
     config?: GarmentConfig,
     selectedSize?: string | null
-): GarmentSizeConfig | null => {
+): (GarmentSizeConfig & { autoNormalize: boolean; followAvatarBones: boolean }) | null => {
     if (!config || config.enable === false) {
         return null;
     }
 
     if (config.sizes && Object.keys(config.sizes).length > 0) {
         const normalizedSize = String(selectedSize || '').trim().toUpperCase();
-        if (!normalizedSize) {
-            return config.sizes.S || null;
+        const sizeConfig = normalizedSize ? config.sizes[normalizedSize] : config.sizes.S;
+
+        if (!sizeConfig) {
+            return null;
         }
-        return config.sizes[normalizedSize] || null;
+
+        if (!normalizedSize) {
+            return {
+                ...sizeConfig,
+                autoNormalize: sizeConfig.autoNormalize ?? config.autoNormalize ?? true,
+                followAvatarBones: sizeConfig.followAvatarBones ?? config.followAvatarBones ?? false,
+            };
+        }
+
+        return {
+            ...sizeConfig,
+            autoNormalize: sizeConfig.autoNormalize ?? config.autoNormalize ?? true,
+            followAvatarBones: sizeConfig.followAvatarBones ?? config.followAvatarBones ?? false,
+        };
     }
 
     if (!config.url) {
@@ -74,51 +92,25 @@ const resolveGarmentConfig = (
         url: config.url,
         scale: config.scale,
         position: config.position,
-        rotation: config.rotation
+        rotation: config.rotation,
+        autoNormalize: config.autoNormalize ?? true,
+        followAvatarBones: config.followAvatarBones ?? false,
     };
 };
 
-export default function GarmentModel({ config, selectedSize, selectedColor = '#f5f5f5', avatarScene = null }: GarmentModelProps) {
-    const garment = resolveGarmentConfig(config, selectedSize);
-    const shouldAutoNormalize = garment?.autoNormalize ?? config?.autoNormalize ?? true;
-    const shouldFollowAvatarBones = garment?.followAvatarBones ?? config?.followAvatarBones ?? false;
+type GarmentInstanceProps = {
+    garment: GarmentSizeConfig & { autoNormalize: boolean; followAvatarBones: boolean };
+    selectedColor: string;
+    avatarScene: THREE.Group | null;
+};
 
-    useEffect(() => {
-        if (!config) {
-            console.log('🧥 [GarmentModel] Không có config model3D cho sản phẩm này');
-            return;
-        }
-
-        if (!garment?.url) {
-            console.log('🧥 [GarmentModel] Có config nhưng chưa resolve được file GLB', {
-                selectedSize,
-                config,
-            });
-            return;
-        }
-
-        console.log('🧥 [GarmentModel] Đang load áo', {
-            selectedSize,
-            url: garment.url,
-            selectedColor,
-            scale: garment.scale,
-            position: garment.position,
-            rotation: garment.rotation,
-            autoNormalize: shouldAutoNormalize,
-            followAvatarBones: shouldFollowAvatarBones,
-        });
-    }, [config, garment, selectedSize, selectedColor, shouldAutoNormalize, shouldFollowAvatarBones]);
-
-    if (!garment?.url) {
-        return null;
-    }
-
-    const { scene } = useGLTF(garment.url);
+function GarmentInstance({ garment, selectedColor, avatarScene }: GarmentInstanceProps) {
+    const gltf = useLoader(GLTFLoader, garment.url) as GLTF;
 
     const garmentScene = useMemo(() => {
-        const cloned = scene.clone(true);
+        const cloned = clone(gltf.scene) as THREE.Group;
 
-        if (shouldAutoNormalize) {
+        if (garment.autoNormalize) {
             const box = new THREE.Box3().setFromObject(cloned);
             if (!box.isEmpty()) {
                 const center = box.getCenter(new THREE.Vector3());
@@ -126,110 +118,52 @@ export default function GarmentModel({ config, selectedSize, selectedColor = '#f
             }
         }
 
-        cloned.traverse((child: THREE.Object3D) => {
-            if (child instanceof THREE.Mesh) {
-                child.castShadow = false;
-                child.receiveShadow = false;
-                child.frustumCulled = false;
-
-                if (Array.isArray(child.material)) {
-                    child.material = child.material.map((mat) => {
-                        const clonedMat = mat.clone();
-                        if ('color' in clonedMat && clonedMat.color instanceof THREE.Color) {
-                            clonedMat.color = new THREE.Color(selectedColor);
-                        }
-                        if ('transparent' in clonedMat) {
-                            clonedMat.transparent = false;
-                        }
-                        if ('opacity' in clonedMat) {
-                            clonedMat.opacity = 1;
-                        }
-                        if ('side' in clonedMat) {
-                            clonedMat.side = THREE.DoubleSide;
-                        }
-                        return clonedMat;
-                    });
-                } else if (child.material) {
-                    const clonedMat = child.material.clone();
-                    if ('color' in clonedMat && clonedMat.color instanceof THREE.Color) {
-                        clonedMat.color = new THREE.Color(selectedColor);
-                    }
-                    if ('transparent' in clonedMat) {
-                        clonedMat.transparent = false;
-                    }
-                    if ('opacity' in clonedMat) {
-                        clonedMat.opacity = 1;
-                    }
-                    if ('side' in clonedMat) {
-                        clonedMat.side = THREE.DoubleSide;
-                    }
-                    child.material = clonedMat;
-                }
-            }
-        });
+        prepareGarmentMaterials(cloned);
         return cloned;
-    }, [scene, selectedColor, shouldAutoNormalize]);
+    }, [gltf.scene, garment.autoNormalize]);
 
-    const bonePairs = useMemo(() => {
-        if (!shouldFollowAvatarBones || !avatarScene) {
-            return [] as Array<{ garmentBone: THREE.Bone; avatarBone: THREE.Bone }>;
-        }
+    useEffect(() => {
+        applyGarmentColor(garmentScene, selectedColor);
+    }, [garmentScene, selectedColor]);
 
-        const avatarBoneMap = new Map<string, THREE.Bone>();
-        const avatarBones: THREE.Bone[] = [];
-        avatarScene.traverse((child) => {
-            if (child instanceof THREE.Bone) {
-                avatarBones.push(child);
-                avatarBoneMap.set(child.name.toLowerCase(), child);
-                avatarBoneMap.set(normalizeBoneName(child.name), child);
-            }
-        });
-
-        const pairs: Array<{ garmentBone: THREE.Bone; avatarBone: THREE.Bone }> = [];
-        garmentScene.traverse((child) => {
-            if (child instanceof THREE.Bone) {
-                const exactKey = child.name.toLowerCase();
-                const normalizedKey = normalizeBoneName(child.name);
-
-                let matched = avatarBoneMap.get(exactKey) || avatarBoneMap.get(normalizedKey);
-
-                if (!matched) {
-                    matched = avatarBones.find((ab) => {
-                        const abNorm = normalizeBoneName(ab.name);
-                        return abNorm.endsWith(normalizedKey) || normalizedKey.endsWith(abNorm);
-                    });
-                }
-
-                if (matched) {
-                    pairs.push({ garmentBone: child, avatarBone: matched });
-                }
-            }
-        });
-
-        console.log('🧵 [GarmentModel] Bone mapping', {
-            followAvatarBones: shouldFollowAvatarBones,
-            matchedBones: pairs.length,
-        });
-
-        return pairs;
-    }, [avatarScene, garmentScene, shouldFollowAvatarBones]);
-
-    useFrame(() => {
-        if (!shouldFollowAvatarBones || bonePairs.length === 0) {
+    useEffect(() => {
+        if (!garment.followAvatarBones || !avatarScene) {
             return;
         }
 
-        for (const pair of bonePairs) {
-            pair.garmentBone.position.copy(pair.avatarBone.position);
-            pair.garmentBone.quaternion.copy(pair.avatarBone.quaternion);
-            pair.garmentBone.scale.copy(pair.avatarBone.scale);
+        const bindResult = bindGarmentToAvatarSkeleton(garmentScene, avatarScene);
+
+        if (bindResult.boundMeshCount === 0) {
+            console.warn(`[GarmentModel] No skinned mesh found to bind for ${garment.url}`);
+            return;
         }
 
-        garmentScene.traverse((child) => {
-            if (child instanceof THREE.SkinnedMesh && child.skeleton) {
-                child.skeleton.update();
-            }
-        });
+        if (bindResult.missingBoneNames.length > 0) {
+            console.warn(
+                `[GarmentModel] Missing avatar bones while binding ${garment.url}: ${bindResult.missingBoneNames.join(', ')}`,
+            );
+        }
+    }, [avatarScene, garment.followAvatarBones, garment.url, garmentScene]);
+
+    const morphBindings = useMemo(() => {
+        if (!avatarScene) {
+            return [];
+        }
+
+        const { bindings, mappedChannelCount } = createGarmentMorphBindings(garmentScene, avatarScene);
+        if (mappedChannelCount === 0) {
+            return [];
+        }
+
+        return bindings;
+    }, [avatarScene, garmentScene]);
+
+    useFrame(() => {
+        if (morphBindings.length === 0) {
+            return;
+        }
+
+        syncGarmentMorphTargets(morphBindings);
     });
 
     return (
@@ -240,4 +174,14 @@ export default function GarmentModel({ config, selectedSize, selectedColor = '#f
             scale={toScaleVector(garment.scale)}
         />
     );
+}
+
+export default function GarmentModel({ config, selectedSize, selectedColor = '#f5f5f5', avatarScene = null }: GarmentModelProps) {
+    const garment = useMemo(() => resolveGarmentConfig(config, selectedSize), [config, selectedSize]);
+
+    if (!garment?.url) {
+        return null;
+    }
+
+    return <GarmentInstance garment={garment} selectedColor={selectedColor} avatarScene={avatarScene} />;
 }

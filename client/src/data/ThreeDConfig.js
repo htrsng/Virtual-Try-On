@@ -25,6 +25,13 @@ export const MODEL_INJECTION = {
                 autoNormalize: false,
                 followAvatarBones: true
             },
+            M: {
+                url: "/models/Ao_Thun_sizeM.glb",
+                scale: 1,
+                position: [0, 0, 0],
+                autoNormalize: false,
+                followAvatarBones: true
+            }
         }
     }
 };
