@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { Suspense, useEffect, useMemo } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -8,30 +8,41 @@ import {
     applyGarmentColor,
     bindGarmentToAvatarSkeleton,
     createGarmentMorphBindings,
-    prepareGarmentMaterials,
+    prepareGarmentMaterialsWithTuning,
     syncGarmentMorphTargets,
 } from './garmentBinding';
 
-type Vector3Tuple = [number, number, number];
+type GarmentSoftnessConfig = {
+    morphInfluence?: number;
+    morphSmoothing?: number;
+    maxMorphInfluence?: number;
+    roughness?: number;
+    metalness?: number;
+    envMapIntensity?: number;
+    /** Small outward offset (in model units) to prevent body-through-cloth clipping. */
+    skinOffset?: number;
+};
 
 type GarmentSizeConfig = {
     url: string;
-    scale?: number | Vector3Tuple;
-    position?: Vector3Tuple;
-    rotation?: Vector3Tuple;
     autoNormalize?: boolean;
     followAvatarBones?: boolean;
+    softness?: GarmentSoftnessConfig;
 };
 
 type GarmentConfig = {
     enable?: boolean;
-    url?: string;
-    scale?: number | Vector3Tuple;
-    position?: Vector3Tuple;
-    rotation?: Vector3Tuple;
     sizes?: Record<string, GarmentSizeConfig>;
     autoNormalize?: boolean;
     followAvatarBones?: boolean;
+    softness?: GarmentSoftnessConfig;
+};
+
+type ResolvedGarmentConfig = {
+    url: string;
+    autoNormalize: boolean;
+    followAvatarBones: boolean;
+    softness: GarmentSoftnessConfig;
 };
 
 interface GarmentModelProps {
@@ -41,65 +52,39 @@ interface GarmentModelProps {
     avatarScene?: THREE.Group | null;
 }
 
-const toScaleVector = (scale?: number | Vector3Tuple): Vector3Tuple => {
-    if (Array.isArray(scale) && scale.length === 3) {
-        return [scale[0], scale[1], scale[2]];
-    }
-
-    if (typeof scale === 'number') {
-        return [scale, scale, scale];
-    }
-
-    return [1, 1, 1];
-};
+const mergeSoftnessConfig = (
+    base?: GarmentSoftnessConfig,
+    override?: GarmentSoftnessConfig,
+): GarmentSoftnessConfig => ({
+    ...(base || {}),
+    ...(override || {}),
+});
 
 const resolveGarmentConfig = (
     config?: GarmentConfig,
     selectedSize?: string | null
-): (GarmentSizeConfig & { autoNormalize: boolean; followAvatarBones: boolean }) | null => {
+): ResolvedGarmentConfig | null => {
     if (!config || config.enable === false) {
         return null;
     }
 
-    if (config.sizes && Object.keys(config.sizes).length > 0) {
-        const normalizedSize = String(selectedSize || '').trim().toUpperCase();
-        const sizeConfig = normalizedSize ? config.sizes[normalizedSize] : config.sizes.S;
+    const normalizedSize = String(selectedSize || 'M').trim().toUpperCase();
+    const sizeConfig = config.sizes?.[normalizedSize];
 
-        if (!sizeConfig) {
-            return null;
-        }
-
-        if (!normalizedSize) {
-            return {
-                ...sizeConfig,
-                autoNormalize: sizeConfig.autoNormalize ?? config.autoNormalize ?? true,
-                followAvatarBones: sizeConfig.followAvatarBones ?? config.followAvatarBones ?? false,
-            };
-        }
-
-        return {
-            ...sizeConfig,
-            autoNormalize: sizeConfig.autoNormalize ?? config.autoNormalize ?? true,
-            followAvatarBones: sizeConfig.followAvatarBones ?? config.followAvatarBones ?? false,
-        };
-    }
-
-    if (!config.url) {
+    if (!sizeConfig?.url) {
         return null;
     }
 
     return {
-        url: config.url,
-        scale: config.scale,
-        position: config.position,
-        rotation: config.rotation,
-        autoNormalize: config.autoNormalize ?? true,
-        followAvatarBones: config.followAvatarBones ?? false,
+        url: sizeConfig.url,
+        autoNormalize: sizeConfig.autoNormalize ?? config.autoNormalize ?? true,
+        followAvatarBones: sizeConfig.followAvatarBones ?? config.followAvatarBones ?? false,
+        softness: mergeSoftnessConfig(config.softness, sizeConfig.softness),
     };
 };
 
 type GarmentInstanceProps = {
-    garment: GarmentSizeConfig & { autoNormalize: boolean; followAvatarBones: boolean };
+    garment: ResolvedGarmentConfig;
     selectedColor: string;
     avatarScene: THREE.Group | null;
 };
@@ -118,9 +103,19 @@ function GarmentInstance({ garment, selectedColor, avatarScene }: GarmentInstanc
             }
         }
 
-        prepareGarmentMaterials(cloned);
+        prepareGarmentMaterialsWithTuning(cloned, {
+            roughness: garment.softness.roughness,
+            metalness: garment.softness.metalness,
+            envMapIntensity: garment.softness.envMapIntensity,
+        });
         return cloned;
-    }, [gltf.scene, garment.autoNormalize]);
+    }, [
+        gltf.scene,
+        garment.autoNormalize,
+        garment.softness.envMapIntensity,
+        garment.softness.metalness,
+        garment.softness.roughness,
+    ]);
 
     useEffect(() => {
         applyGarmentColor(garmentScene, selectedColor);
@@ -131,11 +126,24 @@ function GarmentInstance({ garment, selectedColor, avatarScene }: GarmentInstanc
             return;
         }
 
-        const bindResult = bindGarmentToAvatarSkeleton(garmentScene, avatarScene);
+        // Capture all meshes and their original parents before binding.
+        // bindGarmentToAvatarSkeleton() may reparent meshes via attach().
+        const trackedMeshes: Array<{ mesh: THREE.Mesh; originalParent: THREE.Object3D | null }> = [];
+        garmentScene.traverse((child) => {
+            if ((child as THREE.Mesh).isMesh) {
+                const mesh = child as THREE.Mesh;
+                trackedMeshes.push({ mesh, originalParent: mesh.parent });
+            }
+        });
 
-        if (bindResult.boundMeshCount === 0) {
-            console.warn(`[GarmentModel] No skinned mesh found to bind for ${garment.url}`);
-            return;
+        const bindResult = bindGarmentToAvatarSkeleton(
+            garmentScene,
+            avatarScene,
+            garment.softness.skinOffset ?? 0,
+        );
+
+        if (bindResult.boundMeshCount === 0 && bindResult.attachedMeshCount === 0) {
+            console.warn(`[GarmentModel] No mesh found to bind/attach for ${garment.url}`);
         }
 
         if (bindResult.missingBoneNames.length > 0) {
@@ -143,6 +151,21 @@ function GarmentInstance({ garment, selectedColor, avatarScene }: GarmentInstanc
                 `[GarmentModel] Missing avatar bones while binding ${garment.url}: ${bindResult.missingBoneNames.join(', ')}`,
             );
         }
+
+        // Cleanup: restore meshes to their original parent.
+        // This keeps development StrictMode effect re-runs safe.
+        return () => {
+            for (const { mesh, originalParent } of trackedMeshes) {
+                if (!originalParent) {
+                    mesh.parent?.remove(mesh);
+                    continue;
+                }
+
+                if (mesh.parent !== originalParent) {
+                    originalParent.attach(mesh);
+                }
+            }
+        };
     }, [avatarScene, garment.followAvatarBones, garment.url, garmentScene]);
 
     const morphBindings = useMemo(() => {
@@ -163,15 +186,16 @@ function GarmentInstance({ garment, selectedColor, avatarScene }: GarmentInstanc
             return;
         }
 
-        syncGarmentMorphTargets(morphBindings);
+        syncGarmentMorphTargets(morphBindings, {
+            influenceScale: garment.softness.morphInfluence,
+            smoothing: garment.softness.morphSmoothing,
+            maxInfluence: garment.softness.maxMorphInfluence,
+        });
     });
 
     return (
         <primitive
             object={garmentScene}
-            position={garment.position || [0, 0, 0]}
-            rotation={garment.rotation || [0, 0, 0]}
-            scale={toScaleVector(garment.scale)}
         />
     );
 }
@@ -183,5 +207,9 @@ export default function GarmentModel({ config, selectedSize, selectedColor = '#f
         return null;
     }
 
-    return <GarmentInstance garment={garment} selectedColor={selectedColor} avatarScene={avatarScene} />;
+    return (
+        <Suspense fallback={null}>
+            <GarmentInstance key={garment.url} garment={garment} selectedColor={selectedColor} avatarScene={avatarScene} />
+        </Suspense>
+    );
 }

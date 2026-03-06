@@ -39,6 +39,11 @@ export const Avatar: React.FC<AvatarProps & { skinColor?: string; onSceneReady?:
             if (child instanceof THREE.SkinnedMesh && child.morphTargetDictionary) {
                 map.morphMeshes.push(child);
             }
+            // Enable shadows on every avatar mesh
+            if ((child as THREE.Mesh).isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }
         });
         avatarDataRef.current = map;
     }, [scene]);

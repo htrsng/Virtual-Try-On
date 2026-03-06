@@ -1,7 +1,13 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import type { Profile } from '../../../contexts/FittingRoomContext';
 import CustomSlider from './CustomSlider';
 import BodyShapeIndicator, { estimateBodyFromHW } from './BodyPresets';
+import {
+    getBodyMeasurementRanges,
+    sanitizeBodyMeasurements,
+    updateMeasurementField,
+    type BodyMeasurementKey,
+} from '../../../utils/bodyProfileConstraints';
 
 interface BodyEditorDrawerProps {
     profile: Profile;
@@ -15,11 +21,10 @@ interface BodyEditorDrawerProps {
 /* ─── Slider field definition ─── */
 interface SliderField {
     label: string;
-    field: keyof Profile;
+    field: BodyMeasurementKey;
     min: number;
     max: number;
     unit?: string;
-    dynamicRange?: (profile: Profile) => { min: number; max: number };
 }
 
 /* Main body measurements — always visible */
@@ -35,13 +40,7 @@ const ADVANCED_FIELDS: SliderField[] = [
     { label: 'Vòng bụng', field: 'belly', min: 60, max: 120 },
     { label: 'Bắp tay', field: 'arm', min: 20, max: 40 },
     { label: 'Bắp đùi', field: 'thigh', min: 40, max: 80 },
-    {
-        label: 'Chiều dài chân', field: 'legLength', min: 70, max: 115,
-        dynamicRange: (p) => ({
-            min: Math.round(p.height * 0.45),
-            max: Math.round(p.height * 0.65)
-        })
-    },
+    { label: 'Chiều dài chân', field: 'legLength', min: 70, max: 115 },
 ];
 
 /* ─── Inline number input (clean, large, minimal) ─── */
@@ -80,6 +79,10 @@ export default function BodyEditorDrawer({ profile, isOpen, onClose, onSave, onC
     const [showAdvanced, setShowAdvanced] = useState(false);
     const advancedRef = useRef<HTMLDivElement>(null);
     const [advancedHeight, setAdvancedHeight] = useState(0);
+    const dynamicRanges = useMemo(
+        () => getBodyMeasurementRanges(profile.height, profile.weight, profile),
+        [profile],
+    );
 
     // Measure advanced section height for smooth animation
     useEffect(() => {
@@ -91,27 +94,22 @@ export default function BodyEditorDrawer({ profile, isOpen, onClose, onSave, onC
     /** Auto-fill all measurements from current height + weight */
     const handleAutoFill = useCallback(() => {
         const estimated = estimateBodyFromHW(profile.height, profile.weight);
-        onChange({ ...profile, ...estimated });
+        onChange(sanitizeBodyMeasurements({ ...profile, ...estimated }));
         showToast('Đã tự động ước lượng số đo');
     }, [profile, onChange, showToast]);
 
-    const handleFieldChange = useCallback((field: keyof Profile, value: number) => {
-        const updated = { ...profile, [field]: value };
-        if (field === 'height') {
-            const ratio = profile.legLength / profile.height;
-            updated.legLength = Math.round(value * ratio);
-        }
-        onChange(updated);
+    const handleFieldChange = useCallback((field: BodyMeasurementKey, value: number) => {
+        onChange(updateMeasurementField(profile, field, value));
     }, [profile, onChange]);
 
     const handleReset = useCallback(() => {
         setShowAdvanced(false);
         const estimated = estimateBodyFromHW(165, 55);
-        onChange({
+        onChange(sanitizeBodyMeasurements({
             ...profile,
             height: 165, weight: 55,
             ...estimated,
-        });
+        }));
         showToast('Đã khôi phục về dáng tiêu chuẩn');
     }, [profile, onChange, showToast]);
 
@@ -168,17 +166,20 @@ export default function BodyEditorDrawer({ profile, isOpen, onClose, onSave, onC
 
                     {/* Primary sliders — chest / shoulder / hips */}
                     <div className="bed-sliders">
-                        {PRIMARY_SLIDERS.map(f => (
-                            <CustomSlider
-                                key={f.field}
-                                label={f.label}
-                                value={profile[f.field] as number}
-                                min={f.min}
-                                max={f.max}
-                                unit={f.unit || 'cm'}
-                                onChange={(v) => handleFieldChange(f.field, v)}
-                            />
-                        ))}
+                        {PRIMARY_SLIDERS.map(f => {
+                            const range = dynamicRanges[f.field] || { min: f.min, max: f.max };
+                            return (
+                                <CustomSlider
+                                    key={f.field}
+                                    label={f.label}
+                                    value={profile[f.field] as number}
+                                    min={range.min}
+                                    max={range.max}
+                                    unit={f.unit || 'cm'}
+                                    onChange={(v) => handleFieldChange(f.field, v)}
+                                />
+                            );
+                        })}
                     </div>
 
                     {/* Advanced disclosure */}
@@ -199,7 +200,7 @@ export default function BodyEditorDrawer({ profile, isOpen, onClose, onSave, onC
                     >
                         <div ref={advancedRef} className="bed-advanced__inner">
                             {ADVANCED_FIELDS.map(f => {
-                                const range = f.dynamicRange ? f.dynamicRange(profile) : { min: f.min, max: f.max };
+                                const range = dynamicRanges[f.field] || { min: f.min, max: f.max };
                                 return (
                                     <CustomSlider
                                         key={f.field}

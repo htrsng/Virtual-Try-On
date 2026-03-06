@@ -1,5 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useMemo } from 'react';
+import { sanitizeBodyMeasurements } from '../utils/bodyProfileConstraints';
 
 // 1. Định nghĩa cấu trúc dữ liệu Profile
 export interface Profile {
@@ -54,7 +55,7 @@ const INITIAL_PROFILES: Profile[] = [
 export const FittingRoomProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     // Chỉ sử dụng state trong bộ nhớ (In-memory storage)
     // Dữ liệu sẽ tự động mất đi và reset về INITIAL_PROFILES khi người dùng nhấn F5 hoặc reload trang
-    const [profiles, setProfiles] = useState<Profile[]>(INITIAL_PROFILES);
+    const [profiles, setProfiles] = useState<Profile[]>(() => INITIAL_PROFILES.map((profile) => sanitizeBodyMeasurements(profile)));
     const [activeProfileId, setActiveProfileId] = useState<string>('p1');
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
     const [isHeatmapOpen, setIsHeatmapOpen] = useState(false);
@@ -67,13 +68,13 @@ export const FittingRoomProvider: React.FC<{ children: React.ReactNode }> = ({ c
     // Hàm cập nhật hồ sơ (Chỉ lưu trong phiên làm việc hiện tại)
     const updateProfile = (id: string, updates: Partial<Profile>) => {
         setProfiles(prev => prev.map(p =>
-            p.id === id ? { ...p, ...updates } : p
+            p.id === id ? sanitizeBodyMeasurements({ ...p, ...updates }) : p
         ));
     };
 
     // Hàm thêm hồ sơ mới
     const addProfile = (profile: Profile) => {
-        setProfiles(prev => [...prev, profile]);
+        setProfiles(prev => [...prev, sanitizeBodyMeasurements(profile)]);
     };
 
     const value = {

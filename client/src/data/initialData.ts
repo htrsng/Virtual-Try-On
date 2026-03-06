@@ -24,13 +24,6 @@ export const fallbackSuggestions = [
         img: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=600&fit=crop',
         discount: 30,
         sold: 1234,
-        model3D: {
-            enable: true,                    // Bật tính năng 3D
-            url: "/models/tshirt_base.glb",  // Đảm bảo bạn đã copy file vào public/models/
-            scale: 0.085,                    // Tỉ lệ file Blender của bạn
-            nodeName: "Ao_Phong",            // Tên Mesh trong file Blender của bạn
-            position: [0, -0.7, 0]           // Vị trí đặt áo
-        },
         variants: [
             {
                 color: 'grey',

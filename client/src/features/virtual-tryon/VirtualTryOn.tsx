@@ -11,6 +11,12 @@ import CameraPresets from './components/CameraPresets';
 import type { CameraView } from './components/CameraPresets';
 import SizeRecommendation from './components/SizeRecommendation';
 import { ColorSelector } from './components/ProductOptions';
+import {
+    getBodyMeasurementRanges,
+    sanitizeBodyMeasurements,
+    updateMeasurementField,
+    type BodyMeasurementKey,
+} from '../../utils/bodyProfileConstraints';
 import './VirtualTryOn.css';
 import * as THREE from 'three';
 
@@ -49,21 +55,21 @@ interface BodyQuickEditModalProps {
 }
 
 const QUICK_SLIDERS = [
-    { label: 'Chiều cao', field: 'height' as keyof Profile, min: 140, max: 200, unit: 'cm', icon: '📏' },
-    { label: 'Cân nặng', field: 'weight' as keyof Profile, min: 35, max: 120, unit: 'kg', icon: '⚖️' },
-    { label: 'Vòng eo', field: 'waist' as keyof Profile, min: 55, max: 100, unit: 'cm', icon: '🔵' },
-    { label: 'Vòng hông', field: 'hips' as keyof Profile, min: 80, max: 120, unit: 'cm', icon: '🔵' },
-    { label: 'Vòng ngực', field: 'chest' as keyof Profile, min: 70, max: 120, unit: 'cm', icon: '🔵' },
+    { label: 'Chiều cao', field: 'height' as BodyMeasurementKey, unit: 'cm', icon: '📏' },
+    { label: 'Cân nặng', field: 'weight' as BodyMeasurementKey, unit: 'kg', icon: '⚖️' },
+    { label: 'Vòng eo', field: 'waist' as BodyMeasurementKey, unit: 'cm', icon: '🔵' },
+    { label: 'Vòng hông', field: 'hips' as BodyMeasurementKey, unit: 'cm', icon: '🔵' },
+    { label: 'Vòng ngực', field: 'chest' as BodyMeasurementKey, unit: 'cm', icon: '🔵' },
 ] as const;
 
 function BodyQuickEditModal({ isOpen, profile, onClose, onChange, onSave, onReset }: BodyQuickEditModalProps) {
-    const handleSliderChange = useCallback((field: keyof Profile, value: number) => {
-        const updated = { ...profile, [field]: value };
-        if (field === 'height') {
-            const ratio = profile.legLength / profile.height;
-            updated.legLength = Math.round(value * ratio);
-        }
-        onChange(updated);
+    const dynamicRanges = useMemo(
+        () => getBodyMeasurementRanges(profile.height, profile.weight, profile),
+        [profile],
+    );
+
+    const handleSliderChange = useCallback((field: BodyMeasurementKey, value: number) => {
+        onChange(updateMeasurementField(profile, field, value));
     }, [profile, onChange]);
 
     const bmi = (profile.weight / ((profile.height / 100) ** 2)).toFixed(1);
@@ -88,8 +94,10 @@ function BodyQuickEditModal({ isOpen, profile, onClose, onChange, onSave, onRese
                 {/* Sliders */}
                 <div className="bqe-body">
                     {QUICK_SLIDERS.map(s => {
+                        const range = dynamicRanges[s.field];
                         const val = profile[s.field] as number;
-                        const pct = ((val - s.min) / (s.max - s.min)) * 100;
+                        const span = Math.max(1, range.max - range.min);
+                        const pct = ((val - range.min) / span) * 100;
                         return (
                             <div key={s.field} className="bqe-slider">
                                 <div className="bqe-slider__head">
@@ -103,15 +111,15 @@ function BodyQuickEditModal({ isOpen, profile, onClose, onChange, onSave, onRese
                                     <input
                                         type="range"
                                         className="bqe-range"
-                                        min={s.min}
-                                        max={s.max}
+                                        min={range.min}
+                                        max={range.max}
                                         value={val}
                                         onChange={(e) => handleSliderChange(s.field, Number(e.target.value))}
                                         style={{ '--range-pct': `${pct}%` } as React.CSSProperties}
                                     />
                                     <div className="bqe-slider__minmax">
-                                        <span>{s.min}</span>
-                                        <span>{s.max}</span>
+                                        <span>{range.min}</span>
+                                        <span>{range.max}</span>
                                     </div>
                                 </div>
                             </div>
@@ -125,7 +133,7 @@ function BodyQuickEditModal({ isOpen, profile, onClose, onChange, onSave, onRese
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" /></svg>
                         Đặt lại
                     </button>
-                    <button className="vto-btn vto-btn--primary" onClick={() => { onSave(profile); onClose(); }} type="button">
+                    <button className="vto-btn vto-btn--primary" onClick={() => { onSave(sanitizeBodyMeasurements(profile)); onClose(); }} type="button">
                         Xác nhận
                     </button>
                 </div>
@@ -189,15 +197,18 @@ type TryOnProduct = {
 type ProductWithModel = TryOnProduct & {
     model3D?: {
         enable?: boolean;
-        url?: string;
-        scale?: number | [number, number, number];
-        position?: [number, number, number];
-        rotation?: [number, number, number];
         sizes?: Record<string, {
             url: string;
-            scale?: number | [number, number, number];
-            position?: [number, number, number];
-            rotation?: [number, number, number];
+            autoNormalize?: boolean;
+            followAvatarBones?: boolean;
+            softness?: {
+                morphInfluence?: number;
+                morphSmoothing?: number;
+                maxMorphInfluence?: number;
+                roughness?: number;
+                metalness?: number;
+                envMapIntensity?: number;
+            };
         }>;
         colors?: Array<{
             name?: string;
@@ -224,6 +235,23 @@ const CATEGORY_LAYER_ORDER: Record<string, number> = {
     accessory: 4,
 };
 
+const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
+
+const normalizeSizeKey = (value: string) => value.trim().toUpperCase();
+
+const sortSizeKeys = (sizes: string[]) =>
+    [...sizes]
+        .map(normalizeSizeKey)
+        .filter(Boolean)
+        .sort((a, b) => {
+            const ai = SIZE_ORDER.indexOf(a);
+            const bi = SIZE_ORDER.indexOf(b);
+            if (ai === -1 && bi === -1) return a.localeCompare(b);
+            if (ai === -1) return 1;
+            if (bi === -1) return -1;
+            return ai - bi;
+        });
+
 const getCategoryOrder = (cat?: string): number => {
     if (!cat) return 2; // default to "top" layer
     const key = cat.toLowerCase().trim();
@@ -248,8 +276,10 @@ const resolveModel3D = (item: TryOnProduct) => {
 };
 
 const toEditableProfile = (profile: Profile): Profile => ({
-    ...profile,
-    legLength: profile.legLength || Math.round(profile.height * 0.58)
+    ...sanitizeBodyMeasurements({
+        ...profile,
+        legLength: profile.legLength || Math.round(profile.height * 0.58),
+    }),
 });
 
 /* ─── Main Component ─── */
@@ -281,8 +311,9 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
         const colors: Record<string, string> = {};
         items.forEach(it => {
             const key = String(it.id);
-            if (!sizes[key]) sizes[key] = 'S';
             const m3d = resolveModel3D(it);
+            const configuredSizes = m3d?.sizes ? sortSizeKeys(Object.keys(m3d.sizes)) : [];
+            if (!sizes[key]) sizes[key] = configuredSizes.includes('M') ? 'M' : (configuredSizes[0] || 'M');
             const firstColor = m3d?.colors?.[0]?.hex || '#f5f5f5';
             if (!colors[key]) colors[key] = firstColor;
         });
@@ -342,9 +373,21 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
         return colors;
     }, [activeModel3D]);
 
+    const availableSizes = useMemo(() => {
+        const fromConfig = activeModel3D?.sizes ? sortSizeKeys(Object.keys(activeModel3D.sizes)) : [];
+        if (fromConfig.length > 0) {
+            return fromConfig;
+        }
+        return ['S', 'M', 'L'];
+    }, [activeModel3D]);
+
     useEffect(() => {
-        if (selectedSize !== 'S') setSelectedSize('S');
-    }, [selectedSize, setSelectedSize]);
+        const key = String(activeItem.id);
+        const next = itemSizes[key] || (availableSizes.includes('M') ? 'M' : availableSizes[0]) || 'M';
+        if (selectedSize !== next) {
+            setSelectedSize(next);
+        }
+    }, [activeItem, availableSizes, itemSizes, selectedSize, setSelectedSize]);
 
     // Handlers
     const handleCameraView = useCallback((view: CameraView) => {
@@ -367,17 +410,17 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
     const handleBodyModalReset = useCallback(() => {
         if (activeProfile) {
             const reset = toEditableProfile({ ...activeProfile, height: 165, weight: 55, chest: 86, waist: 68, hips: 92, shoulder: 38, arm: 28, thigh: 52, belly: 72, legLength: 96 });
-            setTempProfile(reset);
+            setTempProfile(sanitizeBodyMeasurements(reset));
         }
     }, [activeProfile]);
 
     const handleSaveBody = useCallback((profile: Profile) => {
-        updateProfile(activeProfileId, profile);
+        updateProfile(activeProfileId, sanitizeBodyMeasurements(profile));
         setIsBodyEditorOpen(false);
     }, [activeProfileId, updateProfile]);
 
     const handleBodyChange = useCallback((profile: Profile) => {
-        setTempProfile(profile);
+        setTempProfile(sanitizeBodyMeasurements(profile));
     }, []);
 
     const handleItemSizeChange = useCallback((size: string) => {
@@ -411,7 +454,7 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
     const handleSaveOutfit = useCallback(() => {
         const outfit = {
             id: Date.now(),
-            size: selectedSize || 'S',
+            size: selectedSize || 'M',
             color: itemColors[String(activeItem.id)] || '#f5f5f5',
             date: new Date().toLocaleDateString('vi-VN'),
         };
@@ -477,11 +520,33 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                         ref={canvasRef}
                         dpr={[1, 1.5]}
                         camera={{ position: [0, 0.7, 4.5], fov: 32 }}
-                        shadows={false}
+                        shadows
                         gl={{ antialias: true, preserveDrawingBuffer: true, powerPreference: 'high-performance' }}
                     >
-                        <ambientLight intensity={0.6} />
-                        <directionalLight position={[2, 5, 2]} intensity={1.2} />
+
+
+                        {/* Base fill light */}
+                        <ambientLight intensity={0.4} />
+
+                        {/* Key light with shadow map */}
+                        <directionalLight
+                            position={[3, 6, 4]}
+                            intensity={1.4}
+                            castShadow
+                            shadow-mapSize-width={1024}
+                            shadow-mapSize-height={1024}
+                            shadow-camera-near={0.5}
+                            shadow-camera-far={20}
+                            shadow-camera-left={-3}
+                            shadow-camera-right={3}
+                            shadow-camera-top={4}
+                            shadow-camera-bottom={-2}
+                            shadow-bias={-0.0005}
+                        />
+
+                        {/* Subtle fill light from the opposite side */}
+                        <directionalLight position={[-2, 3, -2]} intensity={0.3} />
+
                         <Environment preset="city" />
 
                         <CameraAnimator targetPosition={cameraPos} targetLookAt={cameraTarget} />
@@ -496,7 +561,7 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                                     <GarmentModel
                                         key={key}
                                         config={model3D}
-                                        selectedSize={itemSizes[key] || 'S'}
+                                        selectedSize={itemSizes[key] || 'M'}
                                         selectedColor={itemColors[key] || '#f5f5f5'}
                                         avatarScene={avatarScene}
                                     />
@@ -643,7 +708,7 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                         >
                             <SizeRecommendation
                                 profile={currentBodyData}
-                                availableSizes={['XS', 'S', 'M', 'L', 'XL', 'XXL']}
+                                availableSizes={availableSizes}
                                 selectedSize={itemSizes[String(activeItem.id)] || selectedSize}
                                 onSelectSize={handleItemSizeChange}
                             />

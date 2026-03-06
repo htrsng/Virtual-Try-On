@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import type { Profile } from '../../../contexts/FittingRoomContext';
+import { estimateBodyFromHW as estimateBodyFromHWWithLimits } from '../../../utils/bodyProfileConstraints';
 
 /* ══════════════════════════════════════════════════════════════
    Body Shape Detection Algorithm
@@ -72,22 +73,7 @@ export function detectBodyShape(profile: Profile): BodyShape {
 
 /** Estimate full body measurements from height + weight using anthropometric formulas */
 export function estimateBodyFromHW(height: number, weight: number): Partial<Profile> {
-    const bmi = weight / ((height / 100) ** 2);
-
-    // Base proportions from anthropometric averages (Vietnamese/Asian body)
-    // Adjusted by BMI deviation from 22 (average)
-    const bmiDelta = bmi - 22;
-
-    const chest = Math.round(78 + height * 0.04 + bmiDelta * 1.6);
-    const waist = Math.round(58 + height * 0.02 + bmiDelta * 2.0);
-    const hips = Math.round(82 + height * 0.04 + bmiDelta * 1.4);
-    const shoulder = Math.round(30 + height * 0.05 + bmiDelta * 0.4);
-    const arm = Math.round(18 + height * 0.02 + bmiDelta * 0.8);
-    const thigh = Math.round(38 + height * 0.03 + bmiDelta * 1.0);
-    const belly = Math.round(waist + bmiDelta * 0.8);
-    const legLength = Math.round(height * 0.58);
-
-    return { chest, waist, hips, shoulder, arm, thigh, belly, legLength };
+    return estimateBodyFromHWWithLimits(height, weight);
 }
 
 /* ─── Shape icon SVG (simple body silhouette) ─── */
