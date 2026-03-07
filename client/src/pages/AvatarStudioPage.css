@@ -1,0 +1,388 @@
+.avatar-studio {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: var(--font-sans);
+    color: var(--text-primary);
+    background:
+        radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.94) 0%, transparent 45%),
+        radial-gradient(circle at 85% 12%, rgba(200, 168, 103, 0.14) 0%, transparent 42%),
+        var(--bg-primary);
+}
+
+.avatar-studio__header {
+    height: 60px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid rgba(31, 26, 23, 0.08);
+    background: rgba(255, 255, 255, 0.84);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    flex-shrink: 0;
+}
+
+.avatar-studio__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(31, 26, 23, 0.14);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.avatar-studio__back:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.avatar-studio__title-wrap {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.avatar-studio__title {
+    margin: 0;
+    font-size: 18px;
+    font-family: var(--font-display);
+}
+
+.avatar-studio__subtitle {
+    margin: 2px 0 0;
+    font-size: 11px;
+    color: var(--text-tertiary);
+}
+
+.avatar-studio__workspace {
+    flex: 1;
+    min-height: 0;
+    padding: 10px;
+    display: grid;
+    grid-template-columns: 210px minmax(0, 1fr) 430px;
+    gap: 10px;
+}
+
+.avatar-studio__list-panel,
+.avatar-studio__preview-panel,
+.avatar-studio__editor-panel {
+    background: var(--bg-card);
+    border: 1px solid rgba(31, 26, 23, 0.08);
+    border-radius: var(--radius-xl);
+}
+
+.avatar-studio__list-panel {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.avatar-studio__list-title {
+    margin: 0 0 8px;
+    font-size: 12px;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.avatar-studio__list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 2px;
+}
+
+.avatar-studio__avatar-card {
+    width: 100%;
+    border: 1px solid rgba(31, 26, 23, 0.1);
+    border-radius: 12px;
+    background: transparent;
+    padding: 10px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.avatar-studio__avatar-card:hover {
+    background: var(--bg-tertiary);
+    border-color: rgba(var(--accent-rgb), 0.35);
+}
+
+.avatar-studio__avatar-card.active {
+    background: var(--accent-gradient-5);
+    border-color: rgba(var(--accent-rgb), 0.55);
+}
+
+.avatar-studio__avatar-card--create {
+    border-style: dashed;
+}
+
+.avatar-studio__avatar-thumb {
+    width: 58px;
+    height: 58px;
+    border-radius: 14px;
+    background: linear-gradient(160deg, #f3ead8, #dbc79e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 700;
+    color: #5c4f3d;
+}
+
+.avatar-studio__avatar-thumb--create {
+    background: var(--accent-gradient-5);
+    color: var(--accent-primary);
+}
+
+.avatar-studio__avatar-card-name {
+    font-size: 12px;
+    color: var(--text-primary);
+    text-align: center;
+}
+
+.avatar-studio__avatar-card-default {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(var(--accent-rgb), 0.25);
+    background: rgba(var(--accent-rgb), 0.12);
+    color: var(--accent-primary);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+
+.avatar-studio__preview-panel {
+    position: relative;
+    overflow: hidden;
+}
+
+.avatar-studio__preview-head {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 5;
+}
+
+.avatar-studio__preview-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(31, 26, 23, 0.08);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.avatar-studio__canvas {
+    width: 100%;
+    height: 100%;
+}
+
+.avatar-studio__loader {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(31, 26, 23, 0.08);
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.avatar-studio__loader-ring {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid rgba(var(--accent-rgb), 0.2);
+    border-top-color: var(--accent-primary);
+    animation: avatar-studio-spin 0.8s linear infinite;
+}
+
+@keyframes avatar-studio-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.avatar-studio__editor-panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding: 10px;
+}
+
+.avatar-studio__editor-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.avatar-studio__editor-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 22px;
+}
+
+.avatar-studio__editor-bmi {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    font-weight: 600;
+}
+
+.avatar-studio__editor-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+.avatar-studio__name-group {
+    margin-bottom: 12px;
+}
+
+.avatar-studio__name-label {
+    display: block;
+    font-size: 11px;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.avatar-studio__name-input {
+    width: 100%;
+    border: 1px solid rgba(31, 26, 23, 0.14);
+    border-radius: 10px;
+    padding: 9px 10px;
+    font-size: 13px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    outline: none;
+}
+
+.avatar-studio__name-input:focus {
+    border-color: rgba(var(--accent-rgb), 0.45);
+    box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.1);
+}
+
+.avatar-studio__editor-footer {
+    display: flex;
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(31, 26, 23, 0.08);
+}
+
+.avatar-studio__default-btn.active {
+    border-color: rgba(var(--accent-rgb), 0.44);
+    color: var(--accent-primary);
+    background: rgba(var(--accent-rgb), 0.1);
+}
+
+.avatar-studio .bed-advanced.open {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    scrollbar-gutter: stable;
+    padding-right: 4px;
+}
+
+.avatar-studio .bed-advanced.open::-webkit-scrollbar {
+    width: 6px;
+}
+
+.avatar-studio .bed-advanced.open::-webkit-scrollbar-thumb {
+    background: rgba(var(--accent-rgb), 0.24);
+    border-radius: 999px;
+}
+
+.avatar-studio .bed-advanced__inner {
+    padding-right: 8px;
+}
+
+.avatar-studio__editor-footer .vto-btn {
+    flex: 1;
+}
+
+.avatar-studio__delete-btn {
+    margin-top: 8px;
+    border: none;
+    background: transparent;
+    color: #b91c1c;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: left;
+}
+
+.avatar-studio__delete-btn:hover {
+    text-decoration: underline;
+}
+
+.avatar-studio__notice {
+    margin: 8px 0 0;
+    font-size: 12px;
+    color: #166534;
+    background: rgba(34, 197, 94, 0.08);
+    border: 1px solid rgba(34, 197, 94, 0.24);
+    border-radius: 10px;
+    padding: 8px 10px;
+}
+
+@media (max-width: 1260px) {
+    .avatar-studio__workspace {
+        grid-template-columns: 190px minmax(0, 1fr) 390px;
+    }
+}
+
+@media (max-width: 1120px) {
+    .avatar-studio__workspace {
+        grid-template-columns: 180px minmax(0, 1fr) 350px;
+    }
+}
+
+@media (max-width: 980px) {
+    .avatar-studio {
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .avatar-studio__workspace {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 52vh auto;
+    }
+
+    .avatar-studio__list {
+        flex-direction: row;
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+
+    .avatar-studio__avatar-card {
+        min-width: 108px;
+    }
+
+    .avatar-studio__editor-panel {
+        min-height: 560px;
+    }
+}

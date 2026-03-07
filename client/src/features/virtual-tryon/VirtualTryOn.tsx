@@ -1,22 +1,15 @@
 import { Suspense, useState, useRef, useMemo, useEffect, useCallback, type ReactNode } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows, Html, useProgress, Grid } from '@react-three/drei';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Avatar } from '../../three/controls/avatar/Avatar';
 import { useFittingRoom } from '../../contexts/FittingRoomContext';
-import type { Profile } from '../../contexts/FittingRoomContext';
 import { MODEL_INJECTION } from '../../data/ThreeDConfig.js';
 import GarmentModel from './GarmentModel';
-import BodyEditorDrawer from './components/BodyEditorDrawer';
 import CameraPresets from './components/CameraPresets';
 import type { CameraView } from './components/CameraPresets';
 import SizeRecommendation from './components/SizeRecommendation';
 import { ColorSelector } from './components/ProductOptions';
-import {
-    getBodyMeasurementRanges,
-    sanitizeBodyMeasurements,
-    updateMeasurementField,
-    type BodyMeasurementKey,
-} from '../../utils/bodyProfileConstraints';
 import './VirtualTryOn.css';
 import * as THREE from 'three';
 
@@ -44,101 +37,34 @@ function Accordion({ title, icon, defaultOpen = false, children }: {
     );
 }
 
-/* ─── Body Quick Edit Modal ─── */
-interface BodyQuickEditModalProps {
+interface EmptyAvatarModalProps {
     isOpen: boolean;
-    profile: Profile;
-    onClose: () => void;
-    onChange: (profile: Profile) => void;
-    onSave: (profile: Profile) => void;
-    onReset: () => void;
+    onCreateAvatar: () => void;
+    onSkip: () => void;
 }
 
-const QUICK_SLIDERS = [
-    { label: 'Chiều cao', field: 'height' as BodyMeasurementKey, unit: 'cm', icon: '📏' },
-    { label: 'Cân nặng', field: 'weight' as BodyMeasurementKey, unit: 'kg', icon: '⚖️' },
-    { label: 'Vòng eo', field: 'waist' as BodyMeasurementKey, unit: 'cm', icon: '🔵' },
-    { label: 'Vòng hông', field: 'hips' as BodyMeasurementKey, unit: 'cm', icon: '🔵' },
-    { label: 'Vòng ngực', field: 'chest' as BodyMeasurementKey, unit: 'cm', icon: '🔵' },
-] as const;
-
-function BodyQuickEditModal({ isOpen, profile, onClose, onChange, onSave, onReset }: BodyQuickEditModalProps) {
-    const dynamicRanges = useMemo(
-        () => getBodyMeasurementRanges(profile.height, profile.weight, profile),
-        [profile],
-    );
-
-    const handleSliderChange = useCallback((field: BodyMeasurementKey, value: number) => {
-        onChange(updateMeasurementField(profile, field, value));
-    }, [profile, onChange]);
-
-    const bmi = (profile.weight / ((profile.height / 100) ** 2)).toFixed(1);
+function EmptyAvatarModal({ isOpen, onCreateAvatar, onSkip }: EmptyAvatarModalProps) {
+    if (!isOpen) {
+        return null;
+    }
 
     return (
-        <>
-            <div className={`bqe-backdrop ${isOpen ? 'open' : ''}`} onClick={onClose} />
-            <div className={`bqe-modal ${isOpen ? 'open' : ''}`}>
-                {/* Header */}
-                <div className="bqe-header">
-                    <div className="bqe-header__left">
-                        <h3 className="bqe-header__title">Tùy chỉnh cơ thể</h3>
-                        <span className="bqe-header__bmi">BMI {bmi}</span>
-                    </div>
-                    <button className="bqe-close" onClick={onClose} type="button" aria-label="Đóng">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-                        </svg>
+        <div className="vto-empty-avatar-modal__backdrop" role="presentation">
+            <div className="vto-empty-avatar-modal" role="dialog" aria-modal="true" aria-labelledby="vto-empty-avatar-title">
+                <h3 id="vto-empty-avatar-title">Bạn chưa tạo avatar nào</h3>
+                <p>
+                    Tạo avatar để thử đồ với số đo thật của bạn. Nếu bỏ qua, hệ thống sẽ sử dụng body mặc định tạm thời.
+                </p>
+                <div className="vto-empty-avatar-modal__actions">
+                    <button type="button" className="vto-btn vto-btn--primary" onClick={onCreateAvatar}>
+                        Tạo Avatar
                     </button>
-                </div>
-
-                {/* Sliders */}
-                <div className="bqe-body">
-                    {QUICK_SLIDERS.map(s => {
-                        const range = dynamicRanges[s.field];
-                        const val = profile[s.field] as number;
-                        const span = Math.max(1, range.max - range.min);
-                        const pct = ((val - range.min) / span) * 100;
-                        return (
-                            <div key={s.field} className="bqe-slider">
-                                <div className="bqe-slider__head">
-                                    <span className="bqe-slider__label">
-                                        <span className="bqe-slider__icon">{s.icon}</span>
-                                        {s.label}
-                                    </span>
-                                    <span className="bqe-slider__value">{val}<small> {s.unit}</small></span>
-                                </div>
-                                <div className="bqe-slider__track-wrap">
-                                    <input
-                                        type="range"
-                                        className="bqe-range"
-                                        min={range.min}
-                                        max={range.max}
-                                        value={val}
-                                        onChange={(e) => handleSliderChange(s.field, Number(e.target.value))}
-                                        style={{ '--range-pct': `${pct}%` } as React.CSSProperties}
-                                    />
-                                    <div className="bqe-slider__minmax">
-                                        <span>{range.min}</span>
-                                        <span>{range.max}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-
-                {/* Footer */}
-                <div className="bqe-footer">
-                    <button className="vto-btn vto-btn--ghost" onClick={onReset} type="button">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" /></svg>
-                        Đặt lại
-                    </button>
-                    <button className="vto-btn vto-btn--primary" onClick={() => { onSave(sanitizeBodyMeasurements(profile)); onClose(); }} type="button">
-                        Xác nhận
+                    <button type="button" className="vto-btn vto-btn--ghost" onClick={onSkip}>
+                        Bỏ qua
                     </button>
                 </div>
             </div>
-        </>
+        </div>
     );
 }
 
@@ -275,18 +201,20 @@ const resolveModel3D = (item: TryOnProduct) => {
     return undefined;
 };
 
-const toEditableProfile = (profile: Profile): Profile => ({
-    ...sanitizeBodyMeasurements({
-        ...profile,
-        legLength: profile.legLength || Math.round(profile.height * 0.58),
-    }),
-});
-
 /* ─── Main Component ─── */
 export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyNow, handleBack, showToast }: VirtualTryOnProps) {
+    const location = useLocation();
+    const navigate = useNavigate();
+
     const {
-        profiles, activeProfile, activeProfileId, setActiveProfileId,
-        selectedSize, setSelectedSize, isHeatmapOpen, toggleHeatmap, updateProfile
+        avatars,
+        currentAvatar,
+        currentAvatarId,
+        setCurrentAvatarId,
+        selectedSize,
+        setSelectedSize,
+        isHeatmapOpen,
+        toggleHeatmap,
     } = useFittingRoom();
 
     /* ---- Normalise items array ---------------------------------- */
@@ -339,9 +267,8 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
 
     // UI state
     const [isRotating, setIsRotating] = useState(false);
-    const [isBodyEditorOpen, setIsBodyEditorOpen] = useState(false);
-    const [isBodyModalOpen, setIsBodyModalOpen] = useState(false);
-    const [tempProfile, setTempProfile] = useState<Profile | null>(() => (activeProfile ? toEditableProfile(activeProfile) : null));
+    const [hasSkippedAvatarSetup, setHasSkippedAvatarSetup] = useState(false);
+    const [showEmptyAvatarModal, setShowEmptyAvatarModal] = useState(false);
     const [avatarScene, setAvatarScene] = useState<THREE.Group | null>(null);
     const [cameraView, setCameraView] = useState('front');
     const [cameraPos, setCameraPos] = useState<[number, number, number]>([0, 0.7, 4.5]);
@@ -350,15 +277,10 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
     const [isWishlisted, setIsWishlisted] = useState(false);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
-    const editableProfile = tempProfile || (activeProfile ? toEditableProfile(activeProfile) : null);
-
     // Resolve active item's model for sidebar controls
     const activeModel3D = useMemo(() => resolveModel3D(activeItem), [activeItem]);
 
-    // Body data: use tempProfile when editing, otherwise activeProfile
-    const currentBodyData = useMemo(() => {
-        return (isBodyEditorOpen || isBodyModalOpen) ? editableProfile : activeProfile;
-    }, [isBodyEditorOpen, isBodyModalOpen, editableProfile, activeProfile]);
+    const currentBodyData = currentAvatar;
 
     const colorOptions = useMemo(() => {
         const colors = activeModel3D?.colors;
@@ -389,6 +311,18 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
         }
     }, [activeItem, availableSizes, itemSizes, selectedSize, setSelectedSize]);
 
+    useEffect(() => {
+        if (avatars.length === 0) {
+            setShowEmptyAvatarModal(!hasSkippedAvatarSetup);
+            return;
+        }
+
+        setShowEmptyAvatarModal(false);
+        if (hasSkippedAvatarSetup) {
+            setHasSkippedAvatarSetup(false);
+        }
+    }, [avatars.length, hasSkippedAvatarSetup]);
+
     // Handlers
     const handleCameraView = useCallback((view: CameraView) => {
         setCameraView(view.id);
@@ -397,30 +331,18 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
         if (isRotating) setIsRotating(false);
     }, [isRotating]);
 
-    const handleOpenBodyEditor = useCallback(() => {
-        if (activeProfile) setTempProfile(toEditableProfile(activeProfile));
-        setIsBodyEditorOpen(true);
-    }, [activeProfile]);
+    const handleOpenAvatarStudio = useCallback(() => {
+        navigate('/avatar-studio', {
+            state: {
+                returnTo: '/try-on',
+                returnState: location.state || null,
+            },
+        });
+    }, [navigate, location.state]);
 
-    const handleOpenBodyModal = useCallback(() => {
-        if (activeProfile) setTempProfile(toEditableProfile(activeProfile));
-        setIsBodyModalOpen(true);
-    }, [activeProfile]);
-
-    const handleBodyModalReset = useCallback(() => {
-        if (activeProfile) {
-            const reset = toEditableProfile({ ...activeProfile, height: 165, weight: 55, chest: 86, waist: 68, hips: 92, shoulder: 38, arm: 28, thigh: 52, belly: 72, legLength: 96 });
-            setTempProfile(sanitizeBodyMeasurements(reset));
-        }
-    }, [activeProfile]);
-
-    const handleSaveBody = useCallback((profile: Profile) => {
-        updateProfile(activeProfileId, sanitizeBodyMeasurements(profile));
-        setIsBodyEditorOpen(false);
-    }, [activeProfileId, updateProfile]);
-
-    const handleBodyChange = useCallback((profile: Profile) => {
-        setTempProfile(sanitizeBodyMeasurements(profile));
+    const handleSkipAvatarSetup = useCallback(() => {
+        setHasSkippedAvatarSetup(true);
+        setShowEmptyAvatarModal(false);
     }, []);
 
     const handleItemSizeChange = useCallback((size: string) => {
@@ -465,8 +387,6 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
         showToast(`Đã lưu outfit: ${label}`);
     }, [activeItem, items, isMultiProduct, selectedSize, itemColors, showToast]);
 
-    if (!activeProfile || !editableProfile || !currentBodyData) return null;
-
     return (
         <div className="vto-container">
             {/* ─── Top Navigation ─── */}
@@ -475,21 +395,31 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="15 18 9 12 15 6" /></svg>
                     <span>Quay lại</span>
                 </button>
-                <div className="vto-nav__profiles">
-                    {profiles.map(p => (
-                        <button
-                            key={p.id}
-                            className={`vto-profile-pill ${activeProfileId === p.id ? 'active' : ''}`}
-                            onClick={() => {
-                                setActiveProfileId(p.id);
-                                setTempProfile(toEditableProfile(p));
-                                setIsBodyEditorOpen(false);
-                            }}
-                        >
-                            <span className="vto-profile-pill__avatar">{p.name.charAt(0).toUpperCase()}</span>
-                            <span className="vto-profile-pill__name">{p.name}</span>
-                        </button>
-                    ))}
+                <div className="vto-nav__avatar-picker">
+                    <span className="vto-nav__avatar-label">Avatar</span>
+                    <select
+                        className="vto-nav__avatar-select"
+                        value={currentAvatarId || ''}
+                        onChange={(event) => setCurrentAvatarId(event.target.value)}
+                        disabled={avatars.length === 0}
+                    >
+                        {avatars.length === 0 && (
+                            <option value="">Khách mặc định</option>
+                        )}
+                        {avatars.map((avatar) => (
+                            <option key={avatar.id} value={avatar.id}>
+                                {avatar.name}
+                            </option>
+                        ))}
+                    </select>
+                    <button
+                        type="button"
+                        className="vto-nav__avatar-add"
+                        onClick={handleOpenAvatarStudio}
+                        aria-label="Mở Avatar Studio"
+                    >
+                        +
+                    </button>
                 </div>
                 {isMultiProduct && (
                     <span className="vto-nav__outfit-badge">
@@ -714,40 +644,6 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                             />
                         </Accordion>
 
-                        {/* Body customization — Accordion */}
-                        <Accordion
-                            title="Tùy chỉnh cơ thể"
-                            icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="5" r="3" /><line x1="12" y1="8" x2="12" y2="21" /><line x1="8" y1="12" x2="16" y2="12" /><line x1="9" y1="18" x2="12" y2="21" /><line x1="15" y1="18" x2="12" y2="21" /></svg>}
-                        >
-                            <div className="vto-customize-panel">
-                                <div className="vto-body-summary">
-                                    <div className="vto-body-summary__row">
-                                        <span>Cao</span><strong>{currentBodyData.height} cm</strong>
-                                    </div>
-                                    <div className="vto-body-summary__row">
-                                        <span>Nặng</span><strong>{currentBodyData.weight} kg</strong>
-                                    </div>
-                                    <div className="vto-body-summary__row">
-                                        <span>Ngực</span><strong>{currentBodyData.chest} cm</strong>
-                                    </div>
-                                    <div className="vto-body-summary__row">
-                                        <span>Eo</span><strong>{currentBodyData.waist} cm</strong>
-                                    </div>
-                                    <div className="vto-body-summary__row">
-                                        <span>Hông</span><strong>{currentBodyData.hips} cm</strong>
-                                    </div>
-                                </div>
-                                <button className="vto-customize-btn" onClick={handleOpenBodyModal}>
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
-                                    <span>Chỉnh sửa số đo</span>
-                                </button>
-                                <button className="vto-customize-btn vto-customize-btn--secondary" onClick={handleOpenBodyEditor}>
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
-                                    <span>Chỉnh sửa nâng cao</span>
-                                </button>
-                            </div>
-                        </Accordion>
-
                         {/* Quick actions — Accordion */}
                         <Accordion
                             title="Công cụ nhanh"
@@ -813,26 +709,10 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                 </aside>
             </div>
 
-            {/* ─── Body Quick Edit Modal ─── */}
-            {editableProfile && (
-                <BodyQuickEditModal
-                    isOpen={isBodyModalOpen}
-                    profile={editableProfile}
-                    onClose={() => setIsBodyModalOpen(false)}
-                    onChange={handleBodyChange}
-                    onSave={handleSaveBody}
-                    onReset={handleBodyModalReset}
-                />
-            )}
-
-            {/* ─── Body Editor Drawer (Overlay) ─── */}
-            <BodyEditorDrawer
-                profile={editableProfile}
-                isOpen={isBodyEditorOpen}
-                onClose={() => setIsBodyEditorOpen(false)}
-                onSave={handleSaveBody}
-                onChange={handleBodyChange}
-                showToast={showToast}
+            <EmptyAvatarModal
+                isOpen={showEmptyAvatarModal}
+                onCreateAvatar={handleOpenAvatarStudio}
+                onSkip={handleSkipAvatarSetup}
             />
         </div>
     );

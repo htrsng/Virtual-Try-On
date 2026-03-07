@@ -58,6 +58,59 @@
     align-items: center;
 }
 
+.vto-nav__avatar-picker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(31, 26, 23, 0.1);
+    background: var(--bg-card);
+}
+
+.vto-nav__avatar-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    padding-left: 8px;
+}
+
+.vto-nav__avatar-select {
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 4px 6px;
+    outline: none;
+    min-width: 128px;
+}
+
+.vto-nav__avatar-add {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: var(--accent-gradient);
+    color: var(--button-text);
+    font-size: 18px;
+    line-height: 1;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.2);
+}
+
+.vto-nav__avatar-add:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(var(--accent-rgb), 0.3);
+}
+
 .vto-nav__spacer {
     flex: 1;
 }
@@ -1009,6 +1062,56 @@
     color: var(--text-primary);
     border-color: rgba(31, 26, 23, 0.2);
     box-shadow: none;
+}
+
+/* Empty avatar modal shown for first-time setup */
+.vto-empty-avatar-modal__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 3200;
+    background: rgba(0, 0, 0, 0.36);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+.vto-empty-avatar-modal {
+    width: min(440px, 94vw);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xl);
+    border: 1px solid rgba(31, 26, 23, 0.08);
+    box-shadow: 0 24px 70px rgba(31, 26, 23, 0.2);
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.vto-empty-avatar-modal h3 {
+    margin: 0;
+    font-size: 20px;
+    font-family: var(--font-display);
+    color: var(--text-primary);
+}
+
+.vto-empty-avatar-modal p {
+    margin: 0;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    font-size: 14px;
+}
+
+.vto-empty-avatar-modal__actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.vto-empty-avatar-modal__actions .vto-btn {
+    flex: 1;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -2256,12 +2359,32 @@
         height: 50vh;
     }
 
-    .vto-nav__profiles {
-        overflow-x: auto;
+    .vto-nav {
+        gap: 8px;
+        padding: 0 10px;
     }
 
-    .vto-profile-pill__name {
+    .vto-nav__avatar-picker {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .vto-nav__avatar-label {
         display: none;
+    }
+
+    .vto-nav__avatar-select {
+        min-width: 0;
+        width: 100%;
+        font-size: 12px;
+    }
+
+    .vto-empty-avatar-modal {
+        padding: 16px;
+    }
+
+    .vto-empty-avatar-modal__actions {
+        flex-direction: column;
     }
 
     .vto-actions {
