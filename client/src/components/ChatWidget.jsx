@@ -21,7 +21,7 @@ function ChatWidget() {
     const GREETING = {
         id: 'greeting',
         sender: 'bot',
-        message: 'Xin chào! 👋 Tôi là trợ lý VFitAI. Bạn cần hỗ trợ gì?',
+        message: 'Xin chào! 👋 Tôi là trợ lý VFit. Bạn cần hỗ trợ gì?',
         createdAt: new Date().toISOString()
     };
 
@@ -217,7 +217,7 @@ function ChatWidget() {
                             fontSize: '20px'
                         }}>🤖</div>
                         <div>
-                            <div style={{ fontWeight: 700, fontSize: '16px' }}>VFitAI Support</div>
+                            <div style={{ fontWeight: 700, fontSize: '16px' }}>VFit Support</div>
                             <div style={{ fontSize: '12px', opacity: 0.9 }}>
                                 <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#4caf50', marginRight: '6px' }}></span>
                                 {t('chat_support')}

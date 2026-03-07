@@ -22,8 +22,8 @@
         <circle cx="46" cy="44" r="3" fill="white" fill-opacity="0.2" />
     </g>
 
-    <text x="74" y="30" font-family="Poppins, Inter, Arial, sans-serif" font-size="22" font-weight="800"
-        fill="white">Beauty Shop</text>
-    <text x="74" y="48" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="white">Everyday
-        elegance</text>
+    <text x="74" y="30" font-family="Poppins, Inter, Arial, sans-serif" font-size="24" font-weight="800"
+        fill="white">VFit</text>
+    <text x="74" y="48" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" fill="white">Virtual
+        fit experience</text>
 </svg>

@@ -70,7 +70,7 @@ function Footer() {
                         >
                             <div className="footer-brand">
                                 <FiShoppingBag size={32} />
-                                <h3>Shopee Fashion</h3>
+                                <h3>VFit</h3>
                             </div>
                             <p className="footer-description">
                                 {t('footer_desc')}
@@ -86,7 +86,7 @@ function Footer() {
                                 </div>
                                 <div className="contact-item">
                                     <FiMail />
-                                    <span>support@shopeefashion.vn</span>
+                                    <span>support@vfit.vn</span>
                                 </div>
                             </div>
                         </motion.div>
@@ -170,7 +170,7 @@ function Footer() {
                     </div>
 
                     <div className="footer-copyright">
-                        <p>© {currentYear} Shopee Fashion. {t('copyright')}</p>
+                        <p>© {currentYear} VFit. {t('copyright')}</p>
                         <p className="footer-country">{t('country_region')}
                             <a href="#sg">Singapore</a> |
                             <a href="#id">Indonesia</a> |

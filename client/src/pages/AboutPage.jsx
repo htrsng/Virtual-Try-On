@@ -34,7 +34,7 @@ function AboutPage() {
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent'
             }}>
-                Về Shopee Fashion
+                Về VFit
             </h1>
 
             <p style={{
@@ -133,7 +133,7 @@ function AboutPage() {
                     color: 'var(--text-secondary)',
                     marginBottom: '20px'
                 }}>
-                    Ra đời năm 2020, <strong>Shopee Fashion</strong> được xây dựng với sứ mệnh mang đến trải nghiệm mua sắm thời trang hiện đại, tiện lợi và độc đáo cho người Việt Nam. Chúng tôi không chỉ bán sản phẩm, mà còn tạo ra những trải nghiệm mua sắm đáng nhớ.
+                    Ra đời năm 2020, <strong>VFit</strong> được xây dựng với sứ mệnh mang đến trải nghiệm mua sắm thời trang hiện đại, tiện lợi và độc đáo cho người Việt Nam. Chúng tôi không chỉ bán sản phẩm, mà còn tạo ra những trải nghiệm mua sắm đáng nhớ.
                 </p>
 
                 <p style={{
@@ -173,7 +173,7 @@ function AboutPage() {
                         marginTop: '10px',
                         opacity: 0.9
                     }}>
-                        - Shopee Fashion Team
+                        - VFit Team
                     </p>
                 </div>
             </motion.div>

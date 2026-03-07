@@ -90,7 +90,7 @@ function Header({ cartCount, onSearch, showToast }) {
         <div className={`shopee-header ${scrolled ? 'header-scrolled' : ''}`}>
             <div className="container header-content">
                 <Link to="/" className="logo">
-                    <img src={logo} alt="Beauty Clothes" className="brand-logo" />
+                    <img src={logo} alt="VFit logo" className="brand-logo" />
                 </Link>
 
                 <div className="search-box">

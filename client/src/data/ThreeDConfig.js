@@ -54,5 +54,42 @@ export const MODEL_INJECTION = {
                 }
             }
         }
+    },
+
+    // Sản phẩm ID 11
+    "11": {
+        enable: true,
+
+        colors: [
+            { name: 'Đen', hex: '#222222' },
+            { name: 'Hồng', hex: '#ec4899' },
+            { name: 'Xanh dương', hex: '#2563eb' },
+            { name: 'Be', hex: '#d4c3a3' }
+        ],
+
+        softness: {
+            roughness: 0.8,
+            metalness: 0.05,
+            envMapIntensity: 0.5,
+            skinOffset: 0.003
+        },
+
+        sizes: {
+            S: {
+                url: "/models/QuanS.glb",
+                autoNormalize: false,
+                followAvatarBones: true
+            },
+            M: {
+                url: "/models/QuanM.glb",
+                autoNormalize: false,
+                followAvatarBones: true
+            },
+            L: {
+                url: "/models/QuanL.glb",
+                autoNormalize: false,
+                followAvatarBones: true
+            }
+        }
     }
 };

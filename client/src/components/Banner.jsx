@@ -70,7 +70,7 @@ function Banner({ bannerData }) {
                                             className="banner-image"
                                             onError={(e) => {
                                                 e.target.onerror = null;
-                                                e.target.src = "https://placehold.co/800x300/ee4d2d/white?text=Shopee+Fashion";
+                                                e.target.src = "https://placehold.co/800x300/ee4d2d/white?text=VFit";
                                             }}
                                         />
                                     </div>

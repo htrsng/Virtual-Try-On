@@ -19,7 +19,7 @@ function HelpPage() {
         {
             icon: <FiMail size={24} />,
             title: "Email",
-            content: "support@shopeefashion.vn",
+            content: "support@vfit.vn",
             subtext: "Phản hồi trong 24h"
         },
         {
