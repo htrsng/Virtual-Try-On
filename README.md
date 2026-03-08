@@ -1,4 +1,4 @@
-
+<div align="center">
 
 # 👕 VFitAI — Virtual Try-On 3D Platform
 
@@ -11,6 +11,9 @@
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/atlas)
 [![Vite](https://img.shields.io/badge/Vite-7.2-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
 
+</div>
+
+---
 
 ## 📖 Giới thiệu
 
@@ -480,7 +483,9 @@ Lưu ý: hiện một số cấu hình server đang để trực tiếp trong `s
 
 ---
 
-
+<div align="center">
 
 **VFitAI** — Đồ án cơ sở ngành Công nghệ Thông tin
+
+</div>
 
