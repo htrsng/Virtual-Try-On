@@ -49,8 +49,7 @@ function Banner({ bannerData }) {
                     {/* Main Banner Slider - Bên trái */}
                     <div className="main-banner">
                         <Swiper
-                            modules={[Navigation, Pagination, Autoplay]}
-                            navigation
+                            modules={[Pagination, Autoplay]}
                             pagination={{ clickable: true }}
                             autoplay={{ delay: 3000, disableOnInteraction: false }}
                             loop={mainBanners.length >= 3}
@@ -70,7 +69,7 @@ function Banner({ bannerData }) {
                                             className="banner-image"
                                             onError={(e) => {
                                                 e.target.onerror = null;
-                                                e.target.src = "https://placehold.co/800x300/ee4d2d/white?text=VFit";
+                                                e.target.src = "https://placehold.co/800x300/6C63FF/white?text=VFitAI";
                                             }}
                                         />
                                     </div>
@@ -86,8 +85,6 @@ function Banner({ bannerData }) {
                                 key={banner.id}
                                 onClick={() => navigate(`/banner/banner${index + 4}`)}
                                 className="side-banner-item"
-                                whileHover={{ scale: 1.02 }}
-                                transition={{ duration: 0.2 }}
                                 style={{ cursor: 'pointer' }}
                             >
                                 <img

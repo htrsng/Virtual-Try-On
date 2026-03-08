@@ -18,7 +18,12 @@ function Category({ data }) {
 
     return (
         <div className="category-section">
-            <div className="category-header">{t('fashion_categories')}</div>
+            <div className="category-header">
+                <span>{t('fashion_categories')}</span>
+                <Link to="/categories" className="section-view-more">
+                    {t('view_all') || 'Xem thêm'} →
+                </Link>
+            </div>
             <div className="category-grid">
                 {categories.map((item) => (
                     <Link

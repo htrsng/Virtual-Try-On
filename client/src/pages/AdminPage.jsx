@@ -114,6 +114,12 @@ function AdminPage({
         setCurrentPage(pageNumber);
     };
 
+    const getFallbackSoldCount = (seed) => {
+        const numericSeed = Number(seed);
+        const safeSeed = Number.isFinite(numericSeed) && numericSeed > 0 ? numericSeed : Date.now();
+        return 120 + ((Math.abs(safeSeed) * 137) % 3800);
+    };
+
     const handleDelete = async (list, setList, id) => {
         if (window.confirm("Bạn chắc chắn muốn xóa?")) {
             // Xóa Sản Phẩm từ database (luôn gọi API vì tất cả sản phẩm đều lưu trong DB)
@@ -159,9 +165,33 @@ function AdminPage({
         e.preventDefault();
         const form = e.target;
 
+        if (activeTab === 'banner') {
+            const newBannerData = {
+                big: [
+                    form.big1.value,
+                    form.big2.value,
+                    form.big3.value
+                ],
+                smallTop: form.smallTop.value,
+                smallBottom: form.smallBottom.value
+            };
+            setBannerData(newBannerData);
+            localStorage.setItem('bannerData', JSON.stringify(newBannerData));
+            showToast("Đã cập nhật Banner!", "success");
+            return;
+        }
+
         if (activeTab === 'products') {
             const isNew = !editingItem || !editingItem.id;
             const defaultImg = "https://placehold.co/200x200?text=No+Image";
+            const existingProduct = !isNew
+                ? products.find(p => String(p.id) === String(editingItem.id))
+                : null;
+
+            const existingSold = Number(existingProduct?.sold);
+            const soldValue = Number.isFinite(existingSold) && existingSold > 0
+                ? Math.round(existingSold)
+                : getFallbackSoldCount(isNew ? Date.now() : editingItem.id);
 
             const newItemData = {
                 name: form.name.value,
@@ -169,7 +199,7 @@ function AdminPage({
                 category: form.category.value,
                 img: form.img.value || defaultImg,
                 description: form.description.value,
-                sold: 0
+                sold: soldValue
             };
 
             if (isNew) {
@@ -193,7 +223,6 @@ function AdminPage({
                     showToast("Lỗi kết nối Server!", "error");
                 }
             } else {
-                const existingProduct = products.find(p => String(p.id) === String(editingItem.id));
                 if (!existingProduct?._id) {
                     showToast("Không tìm thấy sản phẩm trong CSDL", "error");
                     return;

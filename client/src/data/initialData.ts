@@ -1033,7 +1033,7 @@ export const initCategories = [
     { id: 1002, name: "Áo Sơ Mi", img: "https://down-vn.img.susercontent.com/file/cn-11134207-7r98o-lm193z6e1086e3_tn" },
     { id: 1003, name: "Áo Khoác", img: "https://down-vn.img.susercontent.com/file/sg-11134201-22120-7469736467kvf4_tn" },
     { id: 1004, name: "Quần Jeans", img: "https://down-vn.img.susercontent.com/file/sg-11134201-22120-5643425557kv6d_tn" },
-    { id: 1005, name: "Váy & Đầm", img: "https://down-vn.img.susercontent.com/file/cn-11134207-7r98o-lmg020294192b6_tn" },
+    { id: 1005, name: "Váy và Đầm", img: "https://down-vn.img.susercontent.com/file/cn-11134207-7r98o-lmg020294192b6_tn" },
     { id: 1006, name: "Chân Váy", img: "https://down-vn.img.susercontent.com/file/cn-11134207-7r98o-ll943805391295_tn" },
     { id: 1007, name: "Phụ Kiện", img: "https://down-vn.img.susercontent.com/file/vn-11134207-7qukw-lf522039201942_tn" },
 ];

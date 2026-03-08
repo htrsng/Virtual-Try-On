@@ -274,7 +274,7 @@ function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, onBu
                 <div className="product-specs">
                     <div className="product-spec-row">
                         <div className="product-spec-label">{t('category_label')}</div>
-                        <div className="product-spec-value">VFit {'>'} {t('fashion_breadcrumb')} {'>'} {finalProduct.category}</div>
+                        <div className="product-spec-value">VFitAI {'>'} {t('fashion_breadcrumb')} {'>'} {finalProduct.category}</div>
                     </div>
                     <div className="product-spec-row">
                         <div className="product-spec-label">{t('material_label')}</div>

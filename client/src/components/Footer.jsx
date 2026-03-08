@@ -70,7 +70,7 @@ function Footer() {
                         >
                             <div className="footer-brand">
                                 <FiShoppingBag size={32} />
-                                <h3>VFit</h3>
+                                <h3>VFitAI</h3>
                             </div>
                             <p className="footer-description">
                                 {t('footer_desc')}
@@ -86,7 +86,7 @@ function Footer() {
                                 </div>
                                 <div className="contact-item">
                                     <FiMail />
-                                    <span>support@vfit.vn</span>
+                                    <span>support@vfitai.vn</span>
                                 </div>
                             </div>
                         </motion.div>
@@ -170,7 +170,7 @@ function Footer() {
                     </div>
 
                     <div className="footer-copyright">
-                        <p>© {currentYear} VFit. {t('copyright')}</p>
+                        <p>© {currentYear} VFitAI. {t('copyright')}</p>
                         <p className="footer-country">{t('country_region')}
                             <a href="#sg">Singapore</a> |
                             <a href="#id">Indonesia</a> |

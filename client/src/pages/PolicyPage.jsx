@@ -181,7 +181,7 @@ function PolicyPage() {
                     color: 'var(--text-secondary)'
                 }}>
                     <p style={{ marginBottom: '20px' }}>
-                        Khi truy cập và sử dụng website VFit, bạn đồng ý tuân thủ các điều khoản và điều kiện sau:
+                        Khi truy cập và sử dụng website VFitAI, bạn đồng ý tuân thủ các điều khoản và điều kiện sau:
                     </p>
 
                     <h3 style={{
@@ -194,7 +194,7 @@ function PolicyPage() {
                         1. Quyền Sở Hữu Trí Tuệ
                     </h3>
                     <p style={{ marginBottom: '20px' }}>
-                        Toàn bộ nội dung, hình ảnh, logo, và thương hiệu trên website thuộc quyền sở hữu của VFit. Nghiêm cấm sao chép, phân phối hoặc sử dụng cho mục đích thương mại mà không có sự cho phép.
+                        Toàn bộ nội dung, hình ảnh, logo, và thương hiệu trên website thuộc quyền sở hữu của VFitAI. Nghiêm cấm sao chép, phân phối hoặc sử dụng cho mục đích thương mại mà không có sự cho phép.
                     </p>
 
                     <h3 style={{
@@ -220,7 +220,7 @@ function PolicyPage() {
                         3. Giới Hạn Trách Nhiệm
                     </h3>
                     <p style={{ marginBottom: '20px' }}>
-                        VFit không chịu trách nhiệm về bất kỳ thiệt hại trực tiếp, gián tiếp, ngẫu nhiên hoặc hậu quả phát sinh từ việc sử dụng hoặc không thể sử dụng website.
+                        VFitAI không chịu trách nhiệm về bất kỳ thiệt hại trực tiếp, gián tiếp, ngẫu nhiên hoặc hậu quả phát sinh từ việc sử dụng hoặc không thể sử dụng website.
                     </p>
 
                     <div style={{
@@ -235,7 +235,7 @@ function PolicyPage() {
                             Có thắc mắc về chính sách?
                         </p>
                         <p style={{ marginTop: '10px' }}>
-                            Liên hệ: <strong>support@vfit.vn</strong> hoặc <strong>1900 9999</strong>
+                            Liên hệ: <strong>support@vfitai.vn</strong> hoặc <strong>1900 9999</strong>
                         </p>
                     </div>
                 </div>

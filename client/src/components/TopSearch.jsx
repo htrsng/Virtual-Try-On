@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 
 function TopSearch({ products }) {
@@ -14,6 +14,9 @@ function TopSearch({ products }) {
         <div className="top-search-section">
             <div className="top-header">
                 <div className="top-title">{t('top_search_title')}</div>
+                <Link to="/top-products" className="section-view-more">
+                    {t('view_all') || 'Xem thêm'} →
+                </Link>
             </div>
             <div className="top-grid">
                 {/* Kiểm tra mảng tồn tại và có dữ liệu */}

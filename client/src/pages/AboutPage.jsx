@@ -34,7 +34,7 @@ function AboutPage() {
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent'
             }}>
-                Về VFit
+                Về VFitAI
             </h1>
 
             <p style={{
@@ -45,7 +45,7 @@ function AboutPage() {
                 color: 'var(--text-secondary)',
                 lineHeight: '1.8'
             }}>
-                Nền tảng thời trang trực tuyến hàng đầu Việt Nam, mang đến trải nghiệm mua sắm hiện đại với công nghệ thử đồ 3D độc đáo
+                Nền tảng thời trang trực tuyến hàng đầu Việt Nam, mang đến trải nghiệm mua sắm hiện đại với công nghệ thử đồ 3D và AI thông minh
             </p>
 
             {/* Stats */}
@@ -133,7 +133,7 @@ function AboutPage() {
                     color: 'var(--text-secondary)',
                     marginBottom: '20px'
                 }}>
-                    Ra đời năm 2020, <strong>VFit</strong> được xây dựng với sứ mệnh mang đến trải nghiệm mua sắm thời trang hiện đại, tiện lợi và độc đáo cho người Việt Nam. Chúng tôi không chỉ bán sản phẩm, mà còn tạo ra những trải nghiệm mua sắm đáng nhớ.
+                    Ra đời năm 2020, <strong>VFitAI</strong> được xây dựng với sứ mệnh mang đến trải nghiệm mua sắm thời trang hiện đại, tiện lợi và độc đáo cho người Việt Nam. Chúng tôi không chỉ bán sản phẩm, mà còn tạo ra những trải nghiệm mua sắm đáng nhớ.
                 </p>
 
                 <p style={{
@@ -173,7 +173,7 @@ function AboutPage() {
                         marginTop: '10px',
                         opacity: 0.9
                     }}>
-                        - VFit Team
+                        - VFitAI Team
                     </p>
                 </div>
             </motion.div>

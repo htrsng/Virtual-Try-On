@@ -172,7 +172,7 @@ export default function AdminLayout({ children }) {
                 {/* Brand */}
                 <div className="adm-sidebar__brand">
                     <div className="adm-sidebar__brand-icon">V</div>
-                    <span className="adm-sidebar__brand-text">VFit Admin</span>
+                    <span className="adm-sidebar__brand-text">VFitAI Admin</span>
                 </div>
 
                 {/* User card */}

@@ -16,7 +16,7 @@ function ReviewCarousel() {
             name: "Nguyễn Thị Lan",
             avatar: "https://i.pravatar.cc/150?img=1",
             rating: 5,
-            comment: "Sản phẩm chất lượng tuyệt vời, giao hàng nhanh chóng. Tôi rất hài lòng với dịch vụ của VFit!",
+            comment: "Sản phẩm chất lượng tuyệt vời, giao hàng nhanh chóng. Tôi rất hài lòng với dịch vụ của VFitAI!",
             date: "15/01/2026",
             product: "Áo Sơ Mi Công Sở",
             images: ["https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=300&h=300&fit=crop", "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=300&h=300&fit=crop&brightness=0.9"]

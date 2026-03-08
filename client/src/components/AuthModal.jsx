@@ -54,7 +54,7 @@ function AuthModal({ isOpen, onClose, onLogin }) {
                         </button>
                     </form>
                     <div className="switch-mode">
-                        {isRegister ? 'Bạn đã có tài khoản?' : 'Bạn mới biết đến VFit?'}
+                        {isRegister ? 'Bạn đã có tài khoản?' : 'Bạn mới biết đến VFitAI?'}
                         <span className="switch-link" onClick={() => setIsRegister(!isRegister)}>
                             {isRegister ? 'Đăng nhập' : 'Đăng ký'}
                         </span>

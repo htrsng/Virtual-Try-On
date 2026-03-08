@@ -51,6 +51,19 @@ function ProductList({ products, title, onBuy, loading = false }) {
         return <div className="empty-state">{t('no_products')}</div>;
     }
 
+    const getDisplayedSold = (product) => {
+        const soldValue = Number(product?.sold);
+        if (Number.isFinite(soldValue) && soldValue > 0) {
+            return Math.round(soldValue);
+        }
+
+        const seed = Number(product?.id) || 1;
+        return 120 + ((Math.abs(seed) * 137) % 3800);
+    };
+
+    const isEightProductLayout = displayProducts.length === 8;
+    const productGridClassName = isEightProductLayout ? 'product-grid product-grid--eight' : 'product-grid';
+
     const handleQuickAction = (e, action, product) => {
         e.preventDefault();
         e.stopPropagation();
@@ -70,10 +83,15 @@ function ProductList({ products, title, onBuy, loading = false }) {
 
     return (
         <div className="product-section">
-            <div className="product-header">{displayTitle}</div>
+            <div className="product-header">
+                <span>{displayTitle}</span>
+                <Link to="/products" className="section-view-more">
+                    {t('view_all') || 'Xem thêm'} →
+                </Link>
+            </div>
 
             <motion.div
-                className="product-grid"
+                className={productGridClassName}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
@@ -171,7 +189,7 @@ function ProductList({ products, title, onBuy, loading = false }) {
                                 <div className="product-meta">
                                     <div className="product-rating">
                                         <span className="stars">⭐⭐⭐⭐⭐</span>
-                                        <span className="sold-count">{t('sold')} {product.sold || 0}</span>
+                                        <span className="sold-count">{t('sold')} {getDisplayedSold(product).toLocaleString('vi-VN')}</span>
                                     </div>
                                     <div className="product-price-wrapper">
                                         {product.oldPrice && (

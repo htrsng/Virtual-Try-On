@@ -154,7 +154,7 @@ function LoginPage({ showToast }) {
                 </form>
 
                 <div className="auth-switch">
-                    {isRegister ? 'Bạn đã có tài khoản?' : 'Bạn mới biết đến VFit?'}
+                    {isRegister ? 'Bạn đã có tài khoản?' : 'Bạn mới biết đến VFitAI?'}
                     <span
                         className="auth-switch-link"
                         onClick={() => {

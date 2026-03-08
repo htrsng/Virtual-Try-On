@@ -1,0 +1,41 @@
+<svg width="280" height="64" viewBox="0 0 280 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="neonGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00D4FF" />
+      <stop offset="100%" stop-color="#7B2FFF" />
+    </linearGradient>
+    <linearGradient id="iconBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7B2FFF" />
+      <stop offset="100%" stop-color="#00D4FF" />
+    </linearGradient>
+    <filter id="glow">
+      <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#00D4FF" flood-opacity="0.4" />
+    </filter>
+  </defs>
+
+  <!-- Icon background -->
+  <rect x="4" y="6" width="52" height="52" rx="14" fill="#1a1a2e" stroke="url(#neonGrad)" stroke-width="2" />
+
+  <!-- Game controller -->
+  <g filter="url(#glow)">
+    <!-- Controller body -->
+    <rect x="17" y="24" width="30" height="16" rx="8" fill="url(#neonGrad)" />
+    <!-- D-pad vertical -->
+    <rect x="24" y="27" width="4" height="10" rx="1" fill="#1a1a2e" />
+    <!-- D-pad horizontal -->
+    <rect x="21" y="30" width="10" height="4" rx="1" fill="#1a1a2e" />
+    <!-- Buttons -->
+    <circle cx="39" cy="29" r="2" fill="#1a1a2e" />
+    <circle cx="43" cy="33" r="2" fill="#1a1a2e" />
+    <!-- Trading arrows -->
+    <path d="M26 18 L30 14 L34 18" stroke="#00D4FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+    <path d="M38 46 L34 50 L30 46" stroke="#7B2FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  </g>
+
+  <!-- Brand text -->
+  <text x="68" y="34" font-family="'Inter','Segoe UI',Arial,sans-serif" font-size="28" font-weight="800" letter-spacing="-1" fill="#EAEAEA">Game</text>
+  <text x="148" y="34" font-family="'Inter','Segoe UI',Arial,sans-serif" font-size="28" font-weight="800" letter-spacing="-1" fill="url(#neonGrad)">Trade</text>
+
+  <!-- Tagline -->
+  <text x="68" y="50" font-family="'Inter','Segoe UI',Arial,sans-serif" font-size="10" font-weight="500" fill="#666" letter-spacing="2">GAMING MARKETPLACE</text>
+</svg>
