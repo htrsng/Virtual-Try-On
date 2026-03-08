@@ -9,6 +9,10 @@ import { updateAvatarMorph } from './useAvatarMorph';
 
 const MODEL_PATH = '/assets/models/avatar_morph.glb';
 
+// Preload the GLB immediately when this module is imported, so the model
+// starts downloading before the component mounts and Suspense triggers.
+useGLTF.preload(MODEL_PATH);
+
 export const Avatar: React.FC<AvatarProps & { skinColor?: string; onSceneReady?: (scene: THREE.Group) => void }> = ({
     body,
     pose = 'Idle',

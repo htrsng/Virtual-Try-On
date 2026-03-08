@@ -384,9 +384,9 @@ function SizeCompareViewport({
                         shadow-bias={-0.0005}
                     />
                     <directionalLight position={[-2, 3, -2]} intensity={0.3} />
-                    <Environment preset="city" />
 
                     <Suspense fallback={<Loader />}>
+                        <Environment preset="city" />
                         <group position={[0, -1.08, 0]}>
                             <Grid position={[0, 0, 0]} args={[10, 10]} cellColor="#d1d5db" sectionColor="#9ca3af" fadeDistance={20} />
                             <Avatar body={bodyData} pose={'Idle'} skinColor="#F2C9AC" onSceneReady={setAvatarScene} />
@@ -1142,11 +1142,10 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                         {/* Hemisphere light for soft ambient occlusion feel at garment intersection */}
                         <hemisphereLight args={['#f5f0e8', '#3a3228', 0.35]} />
 
-                        <Environment preset="city" />
-
                         <CameraAnimator targetPosition={cameraPos} targetLookAt={cameraTarget} />
 
                         <Suspense fallback={<Loader />}>
+                            <Environment preset="city" />
                             <group position={[0, -1.15, 0]}>
                                 <Grid position={[0, 0, 0]} args={[10, 10]} cellColor="#d1d5db" sectionColor="#9ca3af" fadeDistance={20} />
                                 <Avatar body={currentBodyData} pose={'Idle'} skinColor="#F2C9AC" onSceneReady={setAvatarScene} />

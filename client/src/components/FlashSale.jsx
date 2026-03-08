@@ -75,7 +75,8 @@ function FlashSale({ products = [] }) {
                                 animate={{ scale: [1, 1.05, 1] }}
                                 transition={{ duration: 1, repeat: Infinity }}
                             >
-                                {formatTime(timeLeft.hours)}
+                                <span className="timer-value">{formatTime(timeLeft.hours)}</span>
+                                <span className="timer-unit">h</span>
                             </motion.div>
                             <span className="timer-separator">:</span>
                             <motion.div
@@ -83,7 +84,8 @@ function FlashSale({ products = [] }) {
                                 animate={{ scale: [1, 1.05, 1] }}
                                 transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}
                             >
-                                {formatTime(timeLeft.minutes)}
+                                <span className="timer-value">{formatTime(timeLeft.minutes)}</span>
+                                <span className="timer-unit">m</span>
                             </motion.div>
                             <span className="timer-separator">:</span>
                             <motion.div
@@ -91,7 +93,8 @@ function FlashSale({ products = [] }) {
                                 animate={{ scale: [1, 1.05, 1] }}
                                 transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
                             >
-                                {formatTime(timeLeft.seconds)}
+                                <span className="timer-value">{formatTime(timeLeft.seconds)}</span>
+                                <span className="timer-unit">s</span>
                             </motion.div>
                         </div>
                     </div>
@@ -123,7 +126,7 @@ function FlashSale({ products = [] }) {
                                             loading="lazy"
                                         />
                                         <div className="flash-badge">
-                                            <span>-{product.discount}%</span>
+                                            <span className="flash-badge-value">-{product.discount}%</span>
                                         </div>
                                         <motion.button
                                             className="quick-buy-btn"
@@ -139,25 +142,22 @@ function FlashSale({ products = [] }) {
                                     </div>
 
                                     <div className="flash-product-info">
-                                        <h4 className="product-name">{product.name}</h4>
                                         <div className="price-section">
-                                            <span className="flash-price">{product.price}</span>
-                                            <span className="original-price">{product.originalPrice}đ</span>
+                                            <span className="flash-price">{typeof product.price === 'number' ? product.price.toLocaleString('vi-VN') : product.price} <u>đ</u></span>
+                                            <span className="original-price">{typeof product.originalPrice === 'number' ? product.originalPrice.toLocaleString('vi-VN') : product.originalPrice}đ</span>
                                         </div>
 
                                         <div className="stock-progress">
-                                            <div className="stock-info">
-                                                <span>{t('sold')} {product.sold}</span>
-                                                <span>{t('in_stock')} {product.stock}</span>
-                                            </div>
                                             <div className="progress-bar">
                                                 <motion.div
                                                     className="progress-fill"
                                                     initial={{ width: 0 }}
-                                                    whileInView={{ width: `${soldPercent}%` }}
+                                                    whileInView={{ width: `${Math.max(soldPercent, 30)}%` }}
                                                     viewport={{ once: true }}
                                                     transition={{ duration: 1, delay: 0.5 }}
-                                                />
+                                                >
+                                                    <span className="progress-text">{t('sold').toUpperCase()} {product.sold}</span>
+                                                </motion.div>
                                             </div>
                                         </div>
                                     </div>
