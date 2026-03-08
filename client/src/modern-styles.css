@@ -3605,3 +3605,264 @@ h6 {
     gap: 16px;
   }
 }
+
+/* ======================
+   UI REFRESH LAYER 2025
+   Non-breaking visual polish only
+   ====================== */
+:root {
+  --ui-focus-ring: rgba(var(--accent-rgb), 0.38);
+  --ui-border-soft: rgba(31, 26, 23, 0.12);
+  --ui-border-strong: rgba(31, 26, 23, 0.18);
+  --ui-surface-elevated: rgba(255, 255, 255, 0.86);
+  --ui-shadow-soft: 0 8px 24px rgba(23, 19, 15, 0.09);
+  --ui-shadow-hover: 0 16px 36px rgba(23, 19, 15, 0.14);
+}
+
+[data-theme="dark"] {
+  --ui-border-soft: rgba(255, 255, 255, 0.12);
+  --ui-border-strong: rgba(255, 255, 255, 0.2);
+  --ui-surface-elevated: rgba(27, 24, 22, 0.9);
+  --ui-shadow-soft: 0 10px 26px rgba(0, 0, 0, 0.38);
+  --ui-shadow-hover: 0 18px 40px rgba(0, 0, 0, 0.5);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  letter-spacing: 0.01em;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  line-height: 1.2;
+}
+
+p,
+li,
+label,
+input,
+select,
+textarea,
+button {
+  font-family: var(--font-sans);
+}
+
+.home-page {
+  gap: 18px;
+}
+
+.section-header {
+  margin-bottom: 18px;
+}
+
+.section-title {
+  font-size: clamp(28px, 3vw, 40px);
+  letter-spacing: 0.01em;
+}
+
+.section-subtitle {
+  max-width: 68ch;
+  color: var(--text-secondary);
+}
+
+/* Accessible focus ring for keyboard users */
+:where(a, button, input, select, textarea, [role="button"], [tabindex]):focus-visible {
+  outline: 3px solid var(--ui-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Core interactive components */
+.search-btn,
+.view-all-btn,
+.category-toggle-btn,
+.action-btn,
+.quick-buy-btn,
+.auth-btn,
+.profile-edit-btn,
+.profile-map-btn,
+.profile-save-btn,
+.dashboard-save-btn,
+.dashboard-card-btn,
+.dashboard-edit-btn,
+.dashboard-support-btn,
+.flash-sale-product-card .add-to-cart-btn,
+.btn-primary,
+.btn-secondary,
+.btn-danger,
+.btn-success,
+.btn-muted {
+  border-radius: 12px;
+  border: 1px solid transparent;
+  letter-spacing: 0.01em;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), filter var(--transition-fast), border-color var(--transition-fast);
+}
+
+.search-btn:hover,
+.view-all-btn:hover,
+.category-toggle-btn:hover,
+.action-btn:hover,
+.quick-buy-btn:hover,
+.auth-btn:hover,
+.profile-edit-btn:hover,
+.profile-map-btn:hover,
+.profile-save-btn:hover,
+.dashboard-save-btn:hover,
+.dashboard-card-btn:hover,
+.dashboard-edit-btn:hover,
+.dashboard-support-btn:hover,
+.flash-sale-product-card .add-to-cart-btn:hover,
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-danger:hover,
+.btn-success:hover,
+.btn-muted:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--ui-shadow-soft);
+}
+
+.search-input,
+.auth-input,
+.profile-input,
+.profile-select,
+.dashboard-input,
+.dashboard-select,
+.newsletter-input {
+  border-radius: 12px;
+  border: 1px solid var(--ui-border-soft);
+  min-height: 44px;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+}
+
+.search-input:focus,
+.auth-input:focus,
+.profile-input:focus,
+.profile-select:focus,
+.dashboard-input:focus,
+.dashboard-select:focus,
+.newsletter-input:focus {
+  border-color: rgba(var(--accent-rgb), 0.55);
+  box-shadow: 0 0 0 4px rgba(var(--accent-rgb), 0.16);
+}
+
+/* Card rhythm and separation */
+.modern-product-card,
+.category-card,
+.review-card,
+.flash-sale-card,
+.flash-sale-product-card,
+.product-detail-card,
+.profile-section,
+.profile-order-card,
+.dashboard-section,
+.flash-sale-page-header {
+  border: 1px solid var(--ui-border-soft);
+  box-shadow: var(--ui-shadow-soft);
+  transition: box-shadow var(--transition-base), transform var(--transition-base), border-color var(--transition-base);
+}
+
+.modern-product-card:hover,
+.category-card:hover,
+.review-card:hover,
+.flash-sale-card:hover,
+.flash-sale-product-card:hover,
+.dashboard-section:hover {
+  border-color: var(--ui-border-strong);
+  box-shadow: var(--ui-shadow-hover);
+}
+
+/* Header and nav clarity */
+.shopee-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.header-link,
+.icon-btn,
+.user-action,
+.theme-toggle {
+  backdrop-filter: blur(10px);
+}
+
+.header-link,
+.icon-btn,
+.user-action {
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.header-link:hover,
+.icon-btn:hover,
+.user-action:hover {
+  border-color: rgba(255, 255, 255, 0.34);
+}
+
+/* Table polish */
+.dtable__table,
+.admin-table,
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.dtable__th,
+thead th {
+  backdrop-filter: blur(8px);
+}
+
+.dtable__tr:nth-child(even),
+tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--bg-secondary) 92%, var(--accent-primary) 8%);
+}
+
+.dtable__tr:hover,
+tbody tr:hover {
+  background: color-mix(in srgb, var(--bg-secondary) 88%, var(--accent-primary) 12%);
+}
+
+/* Modal readability and depth */
+.modal-overlay,
+.cmodal-overlay {
+  background: rgba(17, 13, 10, 0.58);
+  backdrop-filter: blur(10px);
+}
+
+.modal-content,
+.cmodal {
+  background: var(--ui-surface-elevated);
+  border: 1px solid var(--ui-border-soft);
+  box-shadow: var(--ui-shadow-hover);
+}
+
+.modal-header,
+.cmodal__title {
+  letter-spacing: 0.01em;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 14px;
+  }
+
+  .section-title {
+    font-size: clamp(24px, 7vw, 30px);
+  }
+
+  .search-btn,
+  .view-all-btn,
+  .auth-btn,
+  .profile-save-btn,
+  .dashboard-save-btn,
+  .flash-sale-product-card .add-to-cart-btn {
+    min-height: 44px;
+  }
+
+  .modal-content,
+  .cmodal {
+    border-radius: 14px;
+  }
+}

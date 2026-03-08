@@ -1,140 +1,435 @@
-# 👕 VFitAI – Nền tảng Thử đồ 3D (Virtual Try-On)
+<div align="center">
+
+# 👕 VFitAI — Virtual Try-On 3D Platform
+
+**Nền tảng thương mại điện tử thời trang tích hợp công nghệ thử đồ 3D thời gian thực**
+
+[![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=white)](https://react.dev/)
+[![Three.js](https://img.shields.io/badge/Three.js-0.182-000000?logo=threedotjs&logoColor=white)](https://threejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-Express_5-339933?logo=nodedotjs&logoColor=white)](https://expressjs.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/atlas)
+[![Vite](https://img.shields.io/badge/Vite-7.2-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
+
+</div>
+
 
 ## 📖 Giới thiệu
 
-**VFitAI** là một dự án web thương mại điện tử thời trang được tích hợp công nghệ **Virtual Try-On 3D**, giúp người dùng có thể hình dung trực quan trang phục trước khi mua.
+### Bối cảnh đề tài
 
-Thay vì chỉ xem hình ảnh sản phẩm như các website thông thường, người dùng có thể nhập **chiều cao** và **cân nặng** để tạo ra một **nhân vật 3D (avatar)** tương ứng với vóc dáng của mình và thử quần áo trực tiếp trong môi trường 3D.
+Trong thương mại điện tử thời trang, tỷ lệ đổi trả sản phẩm do **không vừa size** hoặc **khác kỳ vọng** chiếm tới 30-40% tổng đơn hàng. Nguyên nhân chính là người dùng không thể hình dung chính xác sản phẩm sẽ trông như thế nào trên cơ thể mình khi chỉ xem ảnh 2D.
 
-Dự án được xây dựng với mục tiêu học tập, nghiên cứu và phát triển kỹ năng **Fullstack Web + 3D Graphics**.
+### Giải pháp
 
----
+**VFitAI** giải quyết vấn đề này bằng cách xây dựng một **phòng thử đồ ảo 3D (Virtual Fitting Room)** tích hợp trực tiếp vào nền tảng thương mại điện tử. Người dùng nhập thông số cơ thể (chiều cao, cân nặng, số đo) → hệ thống tạo **avatar 3D** tương ứng vóc dáng → thử trang phục trong không gian ba chiều với phản hồi **gợi ý size bằng AI** theo thời gian thực.
 
-## 🚀 Tính năng chính
+### Phạm vi đồ án
 
-### 🛍️ Chức năng Thương mại điện tử
-- Xem danh sách sản phẩm theo danh mục
-- Xem chi tiết sản phẩm
-- Thêm sản phẩm vào giỏ hàng
-- Cập nhật số lượng, xoá sản phẩm trong giỏ hàng
-- Mô phỏng quy trình thanh toán
-- Hệ thống người dùng (Đăng ký / Đăng nhập)
-
-### 🕴️ Virtual Try-On 3D (Trọng tâm dự án)
-- **Tạo Avatar 3D theo cơ thể người dùng** dựa trên:
-  - Chiều cao (cm)
-  - Cân nặng (kg)
-- **Body Morphing:** Tự động thay đổi hình dáng nhân vật 3D theo thông số cơ thể
-- **Thay đổi trang phục theo thời gian thực**
-- **Điều chỉnh size quần áo** (S, M, L, XL) để phù hợp với avatar
-- **Fit Score:** Đưa ra đánh giá mức độ phù hợp của trang phục dựa trên chỉ số BMI
-- **Animation:** Xem avatar ở các trạng thái như đứng yên hoặc di chuyển
-- **Xuất hình ảnh:** Cho phép người dùng chụp và tải ảnh avatar sau khi thử đồ
+| Hạng mục | Mô tả |
+|----------|-------|
+| **Loại đồ án** | Đồ án cơ sở ngành Công nghệ Thông tin |
+| **Mô hình phát triển** | Fullstack Monorepo (Client + Server) |
+| **Lĩnh vực ứng dụng** | Thương mại điện tử thời trang + Đồ họa 3D Web |
+| **Đối tượng người dùng** | Khách hàng mua sắm trực tuyến, Quản trị viên cửa hàng |
 
 ---
 
-## 🛠️ Công nghệ sử dụng
+## 🏗 Kiến trúc hệ thống
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                      CLIENT (SPA)                       │
+│  React 19 + TypeScript + Vite 7                         │
+│  ┌───────────┐  ┌──────────────┐  ┌──────────────────┐  │
+│  │ E-Commerce│  │ Virtual      │  │ Admin            │  │
+│  │ Module    │  │ Try-On 3D    │  │ Dashboard        │  │
+│  │           │  │ (Three.js)   │  │                  │  │
+│  └─────┬─────┘  └──────┬───────┘  └────────┬─────────┘  │
+│        └───────────────┼────────────────────┘            │
+│                        │ Axios HTTP                      │
+└────────────────────────┼─────────────────────────────────┘
+                         │ REST API
+┌────────────────────────┼─────────────────────────────────┐
+│                   SERVER (API)                           │
+│  Node.js + Express 5                                     │
+│  ┌──────────┐  ┌───────────┐  ┌─────────────┐           │
+│  │ Auth     │  │ Product   │  │ Order       │           │
+│  │ (JWT +   │  │ CRUD      │  │ Management  │           │
+│  │  bcrypt) │  │           │  │ + Email     │           │
+│  └────┬─────┘  └─────┬─────┘  └──────┬──────┘           │
+│       └───────────────┼───────────────┘                  │
+│                       │ Mongoose ODM                     │
+└───────────────────────┼──────────────────────────────────┘
+                        │
+              ┌─────────▼─────────┐
+              │   MongoDB Atlas   │
+              │   (Cloud NoSQL)   │
+              └───────────────────┘
+```
+
+---
+
+## 🛠 Công nghệ sử dụng
 
 ### Frontend
-- **ReactJS (Vite)**
-- **TypeScript**
-- **Three.js**
-- **React Three Fiber**
-- **@react-three/drei**
-- React Router DOM
-- React Hooks
-- CSS / CSS Modules
+
+| Công nghệ | Phiên bản | Vai trò |
+|-----------|-----------|---------|
+| **React** | 19.2.0 | Thư viện xây dựng giao diện SPA |
+| **TypeScript** | 5.9.3 | Hệ thống kiểu tĩnh, giảm lỗi runtime |
+| **Vite** | 7.2.4 | Build tool — HMR nhanh, tree-shaking |
+| **React Router DOM** | 7.12.0 | Định tuyến phía client (SPA routing) |
+| **Three.js** | 0.182.0 | Thư viện đồ họa 3D WebGL |
+| **React Three Fiber** | 9.5.0 | React renderer cho Three.js |
+| **@react-three/drei** | 10.7.7 | Bộ helper cho R3F (OrbitControls, Environment, ...) |
+| **Framer Motion** | 12.29.0 | Thư viện animation khai báo |
+| **Axios** | 1.13.2 | HTTP client gọi API |
+| **Recharts** | 3.7.0 | Biểu đồ thống kê cho Admin Dashboard |
+| **Swiper** | 12.0.3 | Carousel/slider responsive |
+| **Lucide React** | 0.575.0 | Bộ icon SVG |
 
 ### Backend
-- **Node.js**
-- **Express.js**
-- RESTful API
 
-### Database
-- **MongoDB**
-- **Mongoose**
+| Công nghệ | Phiên bản | Vai trò |
+|-----------|-----------|---------|
+| **Node.js** | 18+ | Runtime JavaScript phía server |
+| **Express** | 5.2.1 | Framework xây dựng REST API |
+| **Mongoose** | (MongoDB 9.1.3) | ODM cho MongoDB |
+| **JWT** | 9.0.3 | Xác thực token-based |
+| **bcryptjs** | 3.0.3 | Hash mật khẩu |
+| **Nodemailer** | 8.0.1 | Gửi email xác nhận đơn hàng |
+| **CORS** | 2.8.5 | Xử lý Cross-Origin requests |
+
+### Cơ sở dữ liệu
+
+| Công nghệ | Chi tiết |
+|-----------|----------|
+| **MongoDB Atlas** | Cloud NoSQL — lưu trữ sản phẩm, người dùng, đơn hàng |
+
+### Công cụ phát triển
+
+| Công cụ | Mục đích |
+|---------|----------|
+| **Git & GitHub** | Quản lý mã nguồn |
+| **VS Code** | IDE phát triển |
+| **ESLint** | Kiểm tra chất lượng code |
+| **Blender** | Tạo & chỉnh sửa mô hình 3D (.glb) |
+
+---
+
+## 🚀 Tính năng chi tiết
+
+### 1. Phòng thử đồ 3D — Virtual Try-On ⭐ *Trọng tâm đồ án*
+
+Đây là module cốt lõi, mô phỏng trải nghiệm thử quần áo trong không gian 3D.
+
+| Tính năng | Mô tả |
+|----------|-------|
+| **Avatar Studio** | Tạo nhân vật 3D từ thông số cơ thể (chiều cao, cân nặng, số đo ngực/eo/hông) |
+| **Body Morphing** | Tự động biến đổi mesh avatar theo thông số — sử dụng Morph Targets (Blend Shapes) |
+| **Body Presets** | Chọn nhanh kiểu dáng cơ thể (Đồng hồ cát, Chữ nhật, ...) |
+| **Garment Binding** | Gắn trang phục 3D lên khung xương avatar — xử lý skinning, skeleton binding |
+| **Multi-Layer Outfit** | Thử nhiều trang phục cùng lúc (áo + quần) với hệ thống layer |
+| **Fabric Simulation** | Mô phỏng chất liệu vải (cotton, silk, denim) thông qua PBR Material tuning |
+| **Size Recommendation (AI)** | Phân tích khoảng cách (ease) giữa số đo cơ thể và garment size specs → gợi ý size phù hợp nhất kèm điểm phần trăm |
+| **Heatmap Fit Analysis** | Hiển thị bản đồ nhiệt trên trang phục: vùng chật (đỏ), vừa (xanh lá), rộng (xanh dương) |
+| **Camera Controls** | 5 góc nhìn preset (Trước, Trái, Phải, Sau, 3/4) + xoay tự do + tự động xoay |
+| **Screenshot Export** | Chụp ảnh avatar đã thử đồ để lưu hoặc chia sẻ |
+| **Size Compare Room** | So sánh 2 size song song trên 2 màn hình 3D |
+
+#### Quy trình hoạt động
+
+```
+Người dùng nhập thông số cơ thể
+        │
+        ▼
+Avatar 3D được tạo (Morph Targets)
+        │
+        ▼
+Chọn sản phẩm → Load mô hình .glb
+        │
+        ▼
+Garment binding lên skeleton avatar
+        │
+        ▼
+Chọn size + màu sắc
+        │
+        ▼
+AI phân tích ease → Gợi ý size + Heatmap
+        │
+        ▼
+Xem 3D / Chụp ảnh / Thêm giỏ hàng
+```
+
+### 2. Thương mại điện tử
+
+| Tính năng | Mô tả |
+|----------|-------|
+| **Danh mục sản phẩm** | Phân loại theo category, tìm kiếm, lọc |
+| **Chi tiết sản phẩm** | Thông tin, ảnh, đánh giá, sản phẩm liên quan |
+| **Giỏ hàng** | Thêm/sửa/xoá sản phẩm, lưu localStorage + đồng bộ server |
+| **Thanh toán** | Quy trình multi-step: thông tin → vận chuyển → thanh toán → xác nhận |
+| **Phương thức thanh toán** | COD, Chuyển khoản, MoMo, ZaloPay, VNPAY, Visa/MasterCard |
+| **Đơn hàng** | Theo dõi trạng thái (Chờ xử lý → Đang giao → Đã giao), huỷ đơn |
+| **Email xác nhận** | Gửi email HTML khi đặt hàng thành công (Nodemailer) |
+| **Đánh giá sản phẩm** | Hệ thống 5 sao + bình luận + ảnh đính kèm |
+| **Wishlist** | Danh sách yêu thích, đồng bộ server |
+| **So sánh sản phẩm** | So sánh thông số song song |
+| **Gợi ý sản phẩm** | Dựa trên lịch sử xem, category, và sản phẩm bán chạy |
+
+### 3. Khuyến mãi & Tương tác
+
+| Tính năng | Mô tả |
+|----------|-------|
+| **Flash Sale** | Đếm ngược thời gian, giới hạn số lượng |
+| **Voucher & Mã giảm giá** | Áp dụng khi thanh toán, theo dõi sử dụng per-user |
+| **Vòng quay may mắn** | Gamification — quay trúng voucher giảm giá |
+| **Newsletter** | Đăng ký email nhận mã giảm 10% |
+| **Chat hỗ trợ** | Chatbot tự động trả lời FAQ + Admin trả lời trực tiếp |
+| **Thông báo realtime** | Cập nhật đơn hàng, khuyến mãi, hệ thống (tối đa 50 mục) |
+
+### 4. Quản trị (Admin Panel)
+
+| Trang | Chức năng |
+|-------|-----------|
+| **Dashboard** | Thống kê tổng quan: doanh thu, đơn hàng, sản phẩm, biểu đồ (Recharts) |
+| **Quản lý sản phẩm** | CRUD sản phẩm, chuẩn hoá ID |
+| **Quản lý danh mục** | CRUD danh mục sản phẩm |
+| **Quản lý đơn hàng** | Cập nhật trạng thái, xem chi tiết |
+| **Quản lý mã giảm giá** | Tạo/sửa/xoá coupon |
+| **Quản lý Flash Sale** | Thiết lập sự kiện giảm giá theo thời gian |
+| **Chat hỗ trợ** | Trả lời tin nhắn khách hàng, quản lý hội thoại |
+| **Đồng bộ dữ liệu** | Sync dữ liệu giữa client và server |
+
+### 5. Trải nghiệm người dùng (UX)
+
+| Tính năng | Chi tiết |
+|----------|---------|
+| **Đa ngôn ngữ** | LanguageContext — chuyển đổi ngôn ngữ |
+| **Dark Mode** | ThemeContext — giao diện sáng/tối |
+| **Responsive** | Hỗ trợ Desktop, Tablet, Mobile (breakpoints: 900px, 640px) |
+| **Loading Skeleton** | Hiệu ứng loading mượt mà khi tải dữ liệu |
+| **Toast Notification** | Phản hồi hành động người dùng |
 
 ---
 
 ## 📂 Cấu trúc thư mục
 
-```txt
+```
 Virtual-Try-On/
-├── client/                # Frontend (React + Vite)
+│
+├── client/                          # Frontend Application
 │   ├── public/
+│   │   └── models/                  # Mô hình 3D (.glb)
 │   ├── src/
-│   ├── index.html
+│   │   ├── App.tsx                  # Router chính
+│   │   ├── main.tsx                 # Entry point
+│   │   │
+│   │   ├── features/
+│   │   │   └── virtual-tryon/       # ⭐ Module Virtual Try-On
+│   │   │       ├── VirtualTryOn.tsx         # Component chính phòng thử đồ
+│   │   │       ├── VirtualTryOn.css         # Styles (3500+ dòng)
+│   │   │       ├── GarmentModel.tsx         # Render & bind trang phục 3D
+│   │   │       ├── garmentBinding.ts        # Skeleton binding, fabric, heatmap
+│   │   │       └── components/
+│   │   │           ├── SizeRecommendation.tsx   # AI gợi ý size
+│   │   │           ├── CameraPresets.tsx         # Điều khiển góc camera
+│   │   │           ├── BodyEditorDrawer.tsx      # Chỉnh sửa body
+│   │   │           ├── BodyPresets.tsx           # Preset dáng người
+│   │   │           └── ColorSelector.tsx         # Chọn màu sắc
+│   │   │
+│   │   ├── pages/                   # 17+ trang giao diện
+│   │   │   ├── HomePage.jsx
+│   │   │   ├── ProductDetailPage.jsx
+│   │   │   ├── CartPage.tsx
+│   │   │   ├── CheckoutPage.jsx
+│   │   │   ├── AvatarStudioPage.tsx
+│   │   │   └── ...
+│   │   │
+│   │   ├── components/              # 30+ component tái sử dụng
+│   │   │   ├── Header.jsx
+│   │   │   ├── ChatWidget.jsx
+│   │   │   ├── AuthModal.jsx
+│   │   │   └── ...
+│   │   │
+│   │   ├── contexts/                # 6 Context Providers
+│   │   │   ├── AuthContext.jsx
+│   │   │   ├── FittingRoomContext.tsx
+│   │   │   ├── WishlistContext.jsx
+│   │   │   ├── CompareContext.jsx
+│   │   │   ├── LanguageContext.jsx
+│   │   │   └── ThemeContext.jsx
+│   │   │
+│   │   ├── admin/                   # Admin Panel
+│   │   │   ├── pages/               # Dashboard, Products, Orders, ...
+│   │   │   ├── components/          # DataTable, StatCard, ...
+│   │   │   └── layout/              # AdminLayout
+│   │   │
+│   │   ├── data/                    # Dữ liệu cấu hình
+│   │   │   ├── initialData.ts       # Sản phẩm mặc định
+│   │   │   ├── ThreeDConfig.js      # Cấu hình mô hình 3D
+│   │   │   └── vietnamAddress.js    # Dữ liệu địa chỉ VN
+│   │   │
+│   │   └── three/                   # Utilities Three.js
+│   │
 │   ├── package.json
-│   └── vite.config.ts
+│   ├── vite.config.ts
+│   └── tsconfig.json
 │
-├── server/                # Backend (Node + Express)
-│   ├── index.js
-│   ├── package.json
-│   └── node_modules/
+├── server/                          # Backend API
+│   ├── index.js                     # Express server + tất cả routes
+│   └── package.json
 │
-├── .gitignore
 └── README.md
 ```
-## ⚙️ Cài đặt & Chạy dự án
-Yêu cầu hệ thống
 
-Node.js (phiên bản 16 trở lên)
+---
 
-MongoDB (cài local hoặc sử dụng MongoDB Atlas)
+## ⚙️ Cài đặt & Triển khai
 
-1️⃣ Clone project
-```git clone https://github.com/your-username/vfitai.git
+### Yêu cầu hệ thống
+
+| Yêu cầu | Phiên bản tối thiểu |
+|----------|---------------------|
+| **Node.js** | 18.0 trở lên |
+| **npm** | 9.0 trở lên |
+| **Trình duyệt** | Chrome/Edge/Firefox (hỗ trợ WebGL 2.0) |
+| **MongoDB** | Atlas Cloud hoặc Local 6.0+ |
+
+### Cài đặt
+
+**1. Clone repository**
+
+```bash
+git clone https://github.com/htrsng/Virtual-Try-On.git
 cd Virtual-Try-On
-``````
-2️⃣ Chạy Frontend
-````
-cd client
-npm install
-npm run dev
-````
-````
-Mặc định frontend chạy tại:
+```
 
-http://localhost:5173
-````
+**2. Khởi chạy Backend**
 
-3️⃣ Chạy Backend
-
-Mở terminal mới:
-````
+```bash
 cd server
 npm install
 node index.js
-````
+```
 
-````
-Backend mặc định chạy tại:
+Server khởi động tại `http://localhost:5000`
 
-http://localhost:5000
-````
+**3. Khởi chạy Frontend**
 
-## 🎯 Mục tiêu của dự án
+```bash
+# Mở terminal mới
+cd client
+npm install
+npm run dev
+```
 
-Áp dụng kiến thức React + Node.js + MongoDB
+Ứng dụng mở tại `http://localhost:5173`
 
-Nghiên cứu và thực hành lập trình đồ họa 3D trên web
+### Scripts
 
-Mô phỏng quy trình xây dựng một nền tảng thương mại điện tử hiện đại
+| Lệnh | Mô tả |
+|-------|-------|
+| `npm run dev` | Chạy development server (HMR) |
+| `npm run build` | Build production (`tsc -b && vite build`) |
+| `npm run preview` | Preview bản build production |
+| `npm run lint` | Kiểm tra code với ESLint |
 
-Chuẩn bị nền tảng để phát triển các tính năng nâng cao trong tương lai
+---
 
-## 🔮 Hướng phát triển trong tương lai
+## 📡 API Endpoints
 
-Tích hợp xác thực JWT
+### Xác thực (`/api/auth`)
 
-Quản lý sản phẩm cho Admin
+| Method | Endpoint | Mô tả |
+|--------|----------|-------|
+| POST | `/api/auth/register` | Đăng ký tài khoản |
+| POST | `/api/auth/login` | Đăng nhập (trả JWT) |
+| GET | `/api/auth/me` | Lấy thông tin user hiện tại |
+| PUT | `/api/auth/profile` | Cập nhật profile |
+| POST | `/api/auth/create-admin` | Tạo tài khoản admin |
 
-Cải thiện độ chính xác của Body Morphing
+### Sản phẩm (`/api/products`)
 
-Thêm gợi ý size thông minh bằng AI
+| Method | Endpoint | Mô tả |
+|--------|----------|-------|
+| GET | `/api/products` | Lấy danh sách sản phẩm |
+| GET | `/api/products/:id` | Chi tiết sản phẩm |
+| POST | `/api/products` | Thêm sản phẩm (Admin) |
+| PUT | `/api/products/:id` | Sửa sản phẩm (Admin) |
+| DELETE | `/api/products/:id` | Xoá sản phẩm (Admin) |
 
-Triển khai dự án lên môi trường production
+### Đơn hàng (`/api/orders`)
 
-## 📌 Ghi chú
+| Method | Endpoint | Mô tả |
+|--------|----------|-------|
+| POST | `/api/orders` | Tạo đơn hàng mới |
+| GET | `/api/orders/my-orders` | Lấy đơn hàng của user |
+| GET | `/api/orders` | Tất cả đơn hàng (Admin) |
+| PUT | `/api/orders/:id` | Cập nhật trạng thái |
+| PUT | `/api/orders/:id/cancel` | Huỷ đơn hàng |
+| DELETE | `/api/orders/:id` | Xoá đơn hàng |
 
-Dự án hiện đang trong giai đoạn phát triển, một số tính năng có thể chưa hoàn thiện và sẽ được cập nhật thêm trong các phiên bản tiếp theo.
+### Người dùng (`/api/users`)
+
+| Method | Endpoint | Mô tả |
+|--------|----------|-------|
+| GET | `/api/users` | Danh sách users (Admin) |
+| PUT | `/api/users/:id` | Cập nhật user (Admin) |
+| DELETE | `/api/users/:id` | Xoá user (Admin) |
+
+### Khuyến mãi
+
+| Method | Endpoint | Mô tả |
+|--------|----------|-------|
+| POST | `/api/newsletter/subscribe` | Đăng ký newsletter |
+| POST | `/api/newsletter/validate-coupon` | Kiểm tra mã giảm giá |
+| POST | `/api/newsletter/use-coupon` | Sử dụng mã giảm giá |
+
+---
+
+## 📸 Ảnh chụp màn hình
+
+> *Bổ sung ảnh chụp các trang chính của ứng dụng tại đây.*
+
+<!-- Uncomment và thay link ảnh thực tế:
+### Trang chủ
+![Homepage](docs/screenshots/homepage.png)
+
+### Phòng thử đồ 3D
+![Virtual Try-On](docs/screenshots/virtual-tryon.png)
+
+### Avatar Studio
+![Avatar Studio](docs/screenshots/avatar-studio.png)
+
+### Admin Dashboard
+![Admin Dashboard](docs/screenshots/admin-dashboard.png)
+-->
+
+
+## 📚 Tài liệu tham khảo
+
+1. React Documentation — [https://react.dev](https://react.dev)
+2. Three.js Documentation — [https://threejs.org/docs](https://threejs.org/docs)
+3. React Three Fiber — [https://r3f.docs.pmnd.rs](https://r3f.docs.pmnd.rs)
+4. Express.js Guide — [https://expressjs.com](https://expressjs.com)
+5. MongoDB Manual — [https://www.mongodb.com/docs/manual](https://www.mongodb.com/docs/manual)
+6. Vite Documentation — [https://vite.dev/guide](https://vite.dev/guide)
+
+---
+
+## 📝 Ghi chú
+
+- Dự án phục vụ mục đích **học tập và nghiên cứu** trong khuôn khổ đồ án cơ sở ngành CNTT.
+- Các tính năng thanh toán (MoMo, ZaloPay, VNPAY) hiện ở chế độ **mô phỏng**, chưa tích hợp API gateway thật.
+- Mô hình 3D (.glb) được tạo bằng Blender và tối ưu cho hiển thị realtime trên trình duyệt.
+- Database sử dụng MongoDB Atlas (cloud) — không cần cài đặt MongoDB local.
+
+---
+
+<div align="center">
+
+**VFitAI** — Đồ án cơ sở ngành Công nghệ Thông tin
+
+</div>

@@ -2,11 +2,6 @@ import { useMemo } from 'react';
 import type { Profile } from '../../../contexts/FittingRoomContext';
 import { estimateBodyFromHW as estimateBodyFromHWWithLimits } from '../../../utils/bodyProfileConstraints';
 
-/* ══════════════════════════════════════════════════════════════
-   Body Shape Detection Algorithm
-   Classifies body shape based on shoulder / chest / waist / hips.
-   ══════════════════════════════════════════════════════════════ */
-
 export interface BodyShape {
     id: string;
     label: string;

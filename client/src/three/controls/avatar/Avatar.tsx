@@ -1,7 +1,8 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import { useGLTF, useAnimations } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { clone as cloneSkeleton } from 'three/examples/jsm/utils/SkeletonUtils.js';
 
 import type { AvatarProps } from './types';
 import { updateAvatarMorph } from './useAvatarMorph';
@@ -15,6 +16,8 @@ export const Avatar: React.FC<AvatarProps & { skinColor?: string; onSceneReady?:
 }) => {
     const group = useRef<THREE.Group>(null);
     const { scene, animations } = useGLTF(MODEL_PATH) as { scene: THREE.Group; animations: THREE.AnimationClip[] };
+    // Clone scene per instance because a Three.js Object3D cannot be attached to two parents.
+    const avatarScene = useMemo(() => cloneSkeleton(scene) as THREE.Group, [scene]);
     const { actions, names } = useAnimations(animations, group);
     const avatarDataRef = useRef<{ legs: THREE.Bone[]; spine: THREE.Bone[]; hips: THREE.Bone | null; morphMeshes: THREE.SkinnedMesh[] }>({
         legs: [],
@@ -28,7 +31,7 @@ export const Avatar: React.FC<AvatarProps & { skinColor?: string; onSceneReady?:
         const map: { legs: THREE.Bone[], spine: THREE.Bone[], hips: THREE.Bone | null, morphMeshes: THREE.SkinnedMesh[] } = {
             legs: [], spine: [], hips: null, morphMeshes: []
         };
-        scene.traverse((child: THREE.Object3D) => {
+        avatarScene.traverse((child: THREE.Object3D) => {
             if (child instanceof THREE.Bone) {
                 const name = child.name.toLowerCase();
                 if (name.includes('upper-leg') || (name.includes('leg') && !name.includes('ctrl'))) map.legs.push(child);
@@ -46,13 +49,13 @@ export const Avatar: React.FC<AvatarProps & { skinColor?: string; onSceneReady?:
             }
         });
         avatarDataRef.current = map;
-    }, [scene]);
+    }, [avatarScene]);
 
     useEffect(() => {
         if (onSceneReady) {
-            onSceneReady(scene);
+            onSceneReady(avatarScene);
         }
-    }, [onSceneReady, scene]);
+    }, [onSceneReady, avatarScene]);
 
     // 2. GHI ĐÈ ANIMATION MỖI KHUNG HÌNH (useFrame)
     useFrame(() => {
@@ -96,7 +99,7 @@ export const Avatar: React.FC<AvatarProps & { skinColor?: string; onSceneReady?:
 
     return (
         <group ref={group} scale={[globalScale, globalScale, globalScale]}>
-            <primitive object={scene} />
+            <primitive object={avatarScene} />
         </group>
     );
 };

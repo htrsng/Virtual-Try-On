@@ -498,7 +498,6 @@ function App() {
         outfitItems={outfitItems}
         onAddToCart={onAddToCart}
         onBuyNow={onBuyNow}
-        handleBack={() => window.history.back()}
         showToast={showToast}
       />
     );

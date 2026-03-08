@@ -1,8 +1,8 @@
 .cmodal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, .5);
-    backdrop-filter: blur(4px);
+    background: rgba(8, 10, 14, .56);
+    backdrop-filter: blur(8px);
     display: grid;
     place-items: center;
     z-index: 9999;
@@ -23,7 +23,8 @@
 .cmodal {
     background: var(--a-surface);
     border-radius: var(--r-xl);
-    box-shadow: var(--shadow-xl);
+    border: 1px solid var(--a-border);
+    box-shadow: var(--a-shadow-xl);
     padding: var(--sp-9);
     max-width: 440px;
     width: 100%;
@@ -54,12 +55,18 @@
     cursor: pointer;
     padding: var(--sp-1);
     border-radius: var(--r-sm);
-    transition: all var(--t-fast);
+    transition: transform var(--t-fast), background-color var(--t-fast), color var(--t-fast);
 }
 
 .cmodal__close:hover {
     background: var(--a-surface-alt);
     color: var(--a-text);
+    transform: rotate(90deg);
+}
+
+.cmodal__close:focus-visible {
+    outline: 3px solid var(--a-primary-ring);
+    outline-offset: 2px;
 }
 
 .cmodal__icon {
@@ -115,7 +122,7 @@
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    transition: all var(--t-fast);
+    transition: transform var(--t-fast), box-shadow var(--t-fast), background-color var(--t-fast), border-color var(--t-fast);
     font-family: var(--admin-font);
     letter-spacing: .01em;
 }
@@ -133,6 +140,7 @@
 
 .cmodal__btn--secondary:hover:not(:disabled) {
     background: var(--a-border-light);
+    box-shadow: var(--a-shadow-sm);
 }
 
 .cmodal__btn--danger {
@@ -142,6 +150,8 @@
 
 .cmodal__btn--danger:hover:not(:disabled) {
     background: #dc2626;
+    transform: translateY(-1px);
+    box-shadow: var(--a-shadow-md);
 }
 
 .cmodal__btn--warning {
@@ -156,4 +166,27 @@
 
 .cmodal__btn--primary:hover:not(:disabled) {
     background: var(--a-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--a-shadow-md);
+}
+
+.cmodal__btn--warning:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: var(--a-shadow-md);
+}
+
+:where(.cmodal__btn):focus-visible {
+    outline: 3px solid var(--a-primary-ring);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .cmodal-overlay,
+    .cmodal,
+    .cmodal__btn,
+    .cmodal__close {
+        animation: none;
+        transition: none;
+    }
 }

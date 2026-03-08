@@ -493,3 +493,102 @@
         transform: translateY(0);
     }
 }
+
+/* ============================================
+   DASHBOARD UI REFRESH LAYER
+   Keep layout structure, upgrade visuals only
+   ============================================ */
+.user-dashboard-page {
+    padding: clamp(14px, 2.2vw, 24px);
+    background-image:
+        radial-gradient(circle at 10% 5%, rgba(255, 255, 255, 0.9) 0%, transparent 42%),
+        radial-gradient(circle at 85% 0%, rgba(200, 168, 103, 0.15) 0%, transparent 38%);
+}
+
+.dashboard-header {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 16px 34px rgba(20, 17, 13, 0.18);
+}
+
+.dashboard-section {
+    border: 1px solid rgba(31, 26, 23, 0.1);
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(31, 26, 23, 0.1);
+}
+
+.dashboard-section:hover {
+    border-color: rgba(200, 168, 103, 0.3);
+    box-shadow: 0 14px 30px rgba(31, 26, 23, 0.14);
+}
+
+.dashboard-section-header {
+    margin-bottom: 22px;
+    padding-bottom: 14px;
+}
+
+.dashboard-section-header h3,
+.dashboard-card-header h3,
+.dashboard-support h3,
+.dashboard-security h3 {
+    letter-spacing: 0.01em;
+}
+
+.dashboard-input,
+.dashboard-select {
+    min-height: 44px;
+    border-radius: 10px;
+    border-color: rgba(31, 26, 23, 0.14);
+    background: #fbfaf7;
+}
+
+.dashboard-input:focus,
+.dashboard-select:focus {
+    box-shadow: 0 0 0 4px rgba(200, 168, 103, 0.14);
+}
+
+.dashboard-save-btn,
+.dashboard-card-btn,
+.dashboard-support-btn,
+.dashboard-edit-btn,
+.dashboard-link-btn,
+.dashboard-logout-btn {
+    border-radius: 10px;
+    transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease, border-color 160ms ease;
+}
+
+.dashboard-save-btn:hover,
+.dashboard-card-btn:hover,
+.dashboard-support-btn:hover,
+.dashboard-edit-btn:hover,
+.dashboard-link-btn:hover,
+.dashboard-logout-btn:hover {
+    box-shadow: 0 10px 20px rgba(31, 26, 23, 0.14);
+}
+
+.dashboard-support-btn {
+    border-color: rgba(31, 26, 23, 0.12);
+}
+
+.dashboard-security-item,
+.dashboard-support-btn {
+    min-height: 44px;
+}
+
+.dashboard-security-item:hover {
+    background: #f6f0e6;
+}
+
+:where(.dashboard-input, .dashboard-select, .dashboard-save-btn, .dashboard-card-btn, .dashboard-edit-btn, .dashboard-support-btn, .dashboard-link-btn, .dashboard-logout-btn):focus-visible {
+    outline: 3px solid rgba(200, 168, 103, 0.34);
+    outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+    .dashboard-section {
+        border-radius: 12px;
+    }
+
+    .dashboard-section-header {
+        margin-bottom: 16px;
+    }
+}

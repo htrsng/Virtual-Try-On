@@ -4,18 +4,54 @@ import { detectBodyShape } from './BodyPresets';
 
 /* ══════════════════════════════════════════════════════════════
    Size Recommendation Engine
-   Maps body measurements → best fitting garment size
-   with fit analysis (tight / fit / loose) per zone.
+   Uses ease (garment - body) as the primary fit signal.
    ══════════════════════════════════════════════════════════════ */
 
-/** Standard Vietnamese/Asian size chart (cm) */
+export type MeasurementZone = 'chest' | 'waist' | 'hips' | 'shoulder' | 'thigh' | 'legOpening';
+export type FitLevel = 'tight' | 'fitted' | 'comfortable' | 'loose';
+export type GarmentType = 'top' | 'bottom' | 'dress' | 'outerwear' | 'unknown';
+
 interface SizeSpec {
-    chest: [number, number];     // [min, max]
+    chest: [number, number];
     waist: [number, number];
     hips: [number, number];
     shoulder: [number, number];
     height: [number, number];
     weight: [number, number];
+}
+
+export interface GarmentSizeSpec {
+    chest?: number;
+    waist?: number;
+    hips?: number;
+    shoulder?: number;
+    thigh?: number;
+    legOpening?: number;
+    sleeveLength?: number;
+    garmentLength?: number;
+    stretchWarp?: number;
+    stretchWeft?: number;
+    fitIntent?: string;
+}
+
+export interface RecommendSizeOptions {
+    garmentType?: string;
+}
+
+export interface FitZone {
+    key: MeasurementZone;
+    label: string;
+    fit: FitLevel;
+    delta: number;      // rounded ease in cm (garment - body)
+    deltaRaw: number;   // precise ease in cm
+    severity: number;   // 0..1 (higher = worse mismatch)
+}
+
+export interface SizeResult {
+    size: string;
+    score: number;      // 0..100, higher = better
+    zones: FitZone[];
+    isRecommended: boolean;
 }
 
 const SIZE_CHART: Record<string, SizeSpec> = {
@@ -47,77 +83,298 @@ const SIZE_CHART: Record<string, SizeSpec> = {
 
 const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
-export type FitLevel = 'tight' | 'fit' | 'slightly-loose' | 'loose';
+const ZONE_LABELS: Record<MeasurementZone, string> = {
+    chest: 'Ngực',
+    waist: 'Eo',
+    hips: 'Hông',
+    shoulder: 'Vai',
+    thigh: 'Đùi',
+    legOpening: 'Ống quần',
+};
 
-export interface FitZone {
-    label: string;
-    fit: FitLevel;
-    delta: number;  // negative = tight, positive = loose (cm)
-}
+const ZONE_WEIGHTS: Record<MeasurementZone, number> = {
+    chest: 3,
+    waist: 2,
+    hips: 2.8,
+    shoulder: 1.8,
+    thigh: 2.4,
+    legOpening: 1.3,
+};
 
-export interface SizeResult {
-    size: string;
-    score: number;        // 0–100, higher = better fit
-    zones: FitZone[];
-    isRecommended: boolean;
-}
+const IDEAL_EASE_CM: Record<MeasurementZone, number> = {
+    chest: 8,
+    waist: 8,
+    hips: 8,
+    shoulder: 3,
+    thigh: 5,
+    legOpening: 4,
+};
 
-/** Evaluate how well a single measurement fits a size range */
-function evalFit(value: number, range: [number, number]): { fit: FitLevel; delta: number } {
-    const mid = (range[0] + range[1]) / 2;
-    const delta = value - mid;
+const EASE_TOLERANCE_CM: Record<MeasurementZone, number> = {
+    chest: 6,
+    waist: 7,
+    hips: 6,
+    shoulder: 2.5,
+    thigh: 5,
+    legOpening: 4,
+};
 
-    if (value < range[0] - 2) return { fit: 'tight', delta: value - range[0] };
-    if (value > range[1] + 4) return { fit: 'loose', delta: value - range[1] };
-    if (value > range[1]) return { fit: 'slightly-loose', delta };
-    if (value < range[0]) return { fit: 'tight', delta: value - range[0] };
-    return { fit: 'fit', delta };
-}
+const ALL_ZONES: MeasurementZone[] = ['chest', 'waist', 'hips', 'shoulder', 'thigh', 'legOpening'];
 
-/** Score a profile against a size (0–100) */
-function scoreSize(profile: Profile, spec: SizeSpec): { score: number; zones: FitZone[] } {
-    const checks: { label: string; value: number; range: [number, number]; weight: number }[] = [
-        { label: 'Ngực', value: profile.chest, range: spec.chest, weight: 3 },
-        { label: 'Eo', value: profile.waist, range: spec.waist, weight: 2.5 },
-        { label: 'Hông', value: profile.hips, range: spec.hips, weight: 2.5 },
-        { label: 'Vai', value: profile.shoulder, range: spec.shoulder, weight: 2 },
+const GARMENT_ZONE_PROFILES: Record<GarmentType, MeasurementZone[]> = {
+    top: ['chest', 'waist', 'hips', 'shoulder'],
+    bottom: ['waist', 'hips', 'thigh', 'legOpening'],
+    dress: ['chest', 'waist', 'hips', 'shoulder'],
+    outerwear: ['chest', 'waist', 'hips', 'shoulder'],
+    unknown: ['chest', 'waist', 'hips', 'shoulder'],
+};
+
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+const round2 = (value: number) => Math.round(value * 100) / 100;
+const normalizeSize = (value: string) => value.trim().toUpperCase();
+
+const normalizeGarmentType = (value?: string): GarmentType => {
+    if (!value) {
+        return 'unknown';
+    }
+
+    const normalized = value.trim().toLowerCase();
+    if (normalized === 'top' || normalized === 'bottom' || normalized === 'dress' || normalized === 'outerwear') {
+        return normalized;
+    }
+
+    return 'unknown';
+};
+
+const getBodyMeasurement = (profile: Profile, zone: MeasurementZone) => {
+    if (zone === 'chest') return profile.chest;
+    if (zone === 'waist') return profile.waist;
+    if (zone === 'hips') return profile.hips;
+    if (zone === 'shoulder') return profile.shoulder;
+
+    // Derived lower-body estimates used when avatar profile has no direct thigh/calf measures.
+    if (zone === 'thigh') {
+        return round2(profile.hips * 0.61);
+    }
+
+    return round2(profile.hips * 0.56);
+};
+
+const getGarmentMeasurement = (spec: GarmentSizeSpec, zone: MeasurementZone): number | null => {
+    const value = spec[zone];
+    return typeof value === 'number' && Number.isFinite(value) ? value : null;
+};
+
+const resolveActiveZones = (garmentType: GarmentType, garmentSpec?: GarmentSizeSpec): MeasurementZone[] => {
+    const preferred = GARMENT_ZONE_PROFILES[garmentType] || ALL_ZONES;
+    if (!garmentSpec) {
+        return preferred;
+    }
+
+    const availableInPreferred = preferred.filter((zone) => getGarmentMeasurement(garmentSpec, zone) !== null);
+    if (availableInPreferred.length > 0) {
+        return availableInPreferred;
+    }
+
+    const availableInAll = ALL_ZONES.filter((zone) => getGarmentMeasurement(garmentSpec, zone) !== null);
+    return availableInAll.length > 0 ? availableInAll : preferred;
+};
+
+const classifyEase = (easeCm: number): FitLevel => {
+    if (easeCm < 2) {
+        return 'tight';
+    }
+
+    if (easeCm <= 6) {
+        return 'fitted';
+    }
+
+    if (easeCm <= 12) {
+        return 'comfortable';
+    }
+
+    return 'loose';
+};
+
+const computeEaseSeverity = (zone: MeasurementZone, easeCm: number, fit: FitLevel) => {
+    const ideal = IDEAL_EASE_CM[zone];
+    const tolerance = EASE_TOLERANCE_CM[zone];
+
+    if (fit === 'tight') {
+        return round2(clamp(0.7 + (2 - easeCm) / 4, 0.7, 1));
+    }
+
+    if (fit === 'loose') {
+        return round2(clamp(0.45 + (easeCm - 12) / 18, 0.45, 1));
+    }
+
+    const normalized = Math.abs(easeCm - ideal) / tolerance;
+    if (fit === 'fitted') {
+        return round2(clamp(0.18 + normalized * 0.35, 0.14, 0.62));
+    }
+
+    return round2(clamp(0.08 + normalized * 0.3, 0.08, 0.55));
+};
+
+const buildFitZone = (zone: MeasurementZone, easeCm: number): FitZone => {
+    const fit = classifyEase(easeCm);
+    const severity = computeEaseSeverity(zone, easeCm, fit);
+
+    return {
+        key: zone,
+        label: ZONE_LABELS[zone],
+        fit,
+        delta: Math.round(easeCm),
+        deltaRaw: round2(easeCm),
+        severity,
+    };
+};
+
+const scoreFromZones = (zones: FitZone[]) => {
+    let weightedTotal = 0;
+    let weightSum = 0;
+
+    zones.forEach((zone) => {
+        const weight = ZONE_WEIGHTS[zone.key];
+        const zoneScore = Math.max(0, 100 - zone.severity * 88);
+        weightedTotal += zoneScore * weight;
+        weightSum += weight;
+    });
+
+    return weightSum > 0 ? Math.round(weightedTotal / weightSum) : 0;
+};
+
+const scoreGarmentSizeByEase = (
+    profile: Profile,
+    garmentSpec: GarmentSizeSpec,
+    activeZones: MeasurementZone[],
+): { score: number; zones: FitZone[] } => {
+    const zones: FitZone[] = activeZones.flatMap((zone) => {
+        const body = getBodyMeasurement(profile, zone);
+        const garment = getGarmentMeasurement(garmentSpec, zone);
+        if (garment === null) {
+            return [];
+        }
+        const easeCm = garment - body;
+        return [buildFitZone(zone, easeCm)];
+    });
+
+    return {
+        score: scoreFromZones(zones),
+        zones,
+    };
+};
+
+// Fallback when product-specific garment measurements are unavailable.
+const estimateEaseFromRange = (bodyValue: number, range: [number, number]) => {
+    const [min, max] = range;
+
+    if (bodyValue > max) {
+        return 2 - (bodyValue - max);
+    }
+
+    if (bodyValue < min) {
+        const gap = min - bodyValue;
+        if (gap <= 4) {
+            return 6 + gap * 1.2;
+        }
+        return 12 + (gap - 4) * 1.1;
+    }
+
+    const t = (bodyValue - min) / Math.max(max - min, 1);
+    return 8 - t * 4.5;
+};
+
+const scoreFallbackRangeSize = (
+    profile: Profile,
+    spec: SizeSpec,
+    activeZones: MeasurementZone[],
+): { score: number; zones: FitZone[] } => {
+    const deriveLowerRangeFromHips = (
+        hipsRange: [number, number],
+        kind: 'thigh' | 'legOpening',
+    ): [number, number] => {
+        if (kind === 'thigh') {
+            return [round2(hipsRange[0] * 0.58), round2(hipsRange[1] * 0.66)];
+        }
+
+        return [round2(hipsRange[0] * 0.5), round2(hipsRange[1] * 0.58)];
+    };
+
+    const rangeByZone: Record<MeasurementZone, [number, number]> = {
+        chest: spec.chest,
+        waist: spec.waist,
+        hips: spec.hips,
+        shoulder: spec.shoulder,
+        thigh: deriveLowerRangeFromHips(spec.hips, 'thigh'),
+        legOpening: deriveLowerRangeFromHips(spec.hips, 'legOpening'),
+    };
+
+    const zones: FitZone[] = activeZones.map((zone) => {
+        const body = getBodyMeasurement(profile, zone);
+        const estimatedEase = estimateEaseFromRange(body, rangeByZone[zone]);
+        const zoneFit = buildFitZone(zone, estimatedEase);
+
+        // Fallback path is less precise than true garment measurements.
+        return {
+            ...zoneFit,
+            severity: round2(clamp(zoneFit.severity + 0.08, 0, 1)),
+        };
+    });
+
+    return {
+        score: scoreFromZones(zones),
+        zones,
+    };
+};
+
+export function recommendSizes(
+    profile: Profile,
+    availableSizes: string[],
+    garmentSizeSpecs?: Record<string, GarmentSizeSpec>,
+    options: RecommendSizeOptions = {},
+): SizeResult[] {
+    const results: SizeResult[] = [];
+    const garmentType = normalizeGarmentType(options.garmentType);
+
+    const normalizedAvailableSizes = [...new Set(availableSizes.map(normalizeSize).filter(Boolean))];
+    const orderedAvailableSizes = [
+        ...SIZE_ORDER.filter((size) => normalizedAvailableSizes.includes(size)),
+        ...normalizedAvailableSizes.filter((size) => !SIZE_ORDER.includes(size)),
     ];
 
-    let totalScore = 0;
-    let totalWeight = 0;
-    const zones: FitZone[] = [];
+    const normalizedGarmentSpecs = garmentSizeSpecs
+        ? Object.entries(garmentSizeSpecs).reduce<Record<string, GarmentSizeSpec>>((acc, [size, spec]) => {
+            const key = normalizeSize(size);
+            if (!key || !spec) {
+                return acc;
+            }
+            acc[key] = spec;
+            return acc;
+        }, {})
+        : undefined;
 
-    for (const c of checks) {
-        const { fit, delta } = evalFit(c.value, c.range);
-        const mid = (c.range[0] + c.range[1]) / 2;
-        const span = (c.range[1] - c.range[0]) / 2 || 1;
-        // Score: 100 at center, drops with distance
-        const normalized = Math.abs(c.value - mid) / span;
-        const zoneScore = Math.max(0, 100 - normalized * 40);
-        totalScore += zoneScore * c.weight;
-        totalWeight += c.weight;
-        zones.push({ label: c.label, fit, delta: Math.round(delta) });
-    }
+    orderedAvailableSizes.forEach((size) => {
+        const garmentSpec = normalizedGarmentSpecs?.[size];
+        const activeZones = resolveActiveZones(garmentType, garmentSpec);
+        const result = garmentSpec
+            ? scoreGarmentSizeByEase(profile, garmentSpec, activeZones)
+            : (SIZE_CHART[size] ? scoreFallbackRangeSize(profile, SIZE_CHART[size], activeZones) : null);
 
-    return { score: Math.round(totalScore / totalWeight), zones };
-}
+        if (!result) {
+            return;
+        }
 
-/** Get all size recommendations sorted by score */
-export function recommendSizes(profile: Profile, availableSizes: string[]): SizeResult[] {
-    const results: SizeResult[] = [];
+        results.push({
+            size,
+            score: result.score,
+            zones: result.zones,
+            isRecommended: false,
+        });
+    });
 
-    for (const size of SIZE_ORDER) {
-        if (!availableSizes.includes(size)) continue;
-        const spec = SIZE_CHART[size];
-        if (!spec) continue;
-        const { score, zones } = scoreSize(profile, spec);
-        results.push({ size, score, zones, isRecommended: false });
-    }
-
-    // Sort by score descending
     results.sort((a, b) => b.score - a.score);
 
-    // Mark best as recommended
     if (results.length > 0) {
         results[0].isRecommended = true;
     }
@@ -131,9 +388,9 @@ export function recommendSizes(profile: Profile, availableSizes: string[]): Size
 
 const FIT_LABELS: Record<FitLevel, { text: string; color: string }> = {
     tight: { text: 'Chật', color: '#ef4444' },
-    fit: { text: 'Vừa', color: '#22c55e' },
-    'slightly-loose': { text: 'Hơi rộng', color: '#f59e0b' },
-    loose: { text: 'Rộng', color: '#ef4444' },
+    fitted: { text: 'Ôm vừa', color: '#eab308' },
+    comfortable: { text: 'Thoải mái', color: '#22c55e' },
+    loose: { text: 'Rộng', color: '#166534' },
 };
 
 interface SizeRecommendationProps {
@@ -141,22 +398,24 @@ interface SizeRecommendationProps {
     availableSizes: string[];
     selectedSize: string | null;
     onSelectSize: (size: string) => void;
+    garmentSizeSpecs?: Record<string, GarmentSizeSpec>;
+    garmentType?: string;
 }
 
 export default function SizeRecommendation({
-    profile, availableSizes, selectedSize, onSelectSize
+    profile, availableSizes, selectedSize, onSelectSize, garmentSizeSpecs, garmentType,
 }: SizeRecommendationProps) {
     const [isDetailOpen, setIsDetailOpen] = useState(false);
 
     const results = useMemo(
-        () => recommendSizes(profile, availableSizes),
-        [profile, availableSizes]
+        () => recommendSizes(profile, availableSizes, garmentSizeSpecs, { garmentType }),
+        [profile, availableSizes, garmentSizeSpecs, garmentType],
     );
 
     const shape = useMemo(() => detectBodyShape(profile), [profile]);
 
-    const bestResult = results.find(r => r.isRecommended);
-    const selectedResult = results.find(r => r.size === selectedSize);
+    const bestResult = results.find((result) => result.isRecommended);
+    const selectedResult = results.find((result) => result.size === selectedSize);
     const displayResult = selectedResult || bestResult;
 
     useEffect(() => {
@@ -165,7 +424,6 @@ export default function SizeRecommendation({
 
     return (
         <div className="vto-size-rec">
-            {/* Recommendation badge */}
             {bestResult && (
                 <div className="vto-size-rec__badge">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -173,33 +431,31 @@ export default function SizeRecommendation({
                         <polyline points="22 4 12 14.01 9 11.01" />
                     </svg>
                     <span>
-                        Gợi ý: <strong>{bestResult.size}</strong> — phù hợp {bestResult.score}% · Dáng {shape.label}
+                        Gợi ý: <strong>{bestResult.size}</strong> - phù hợp {bestResult.score}% · Dáng {shape.label}
                     </span>
                 </div>
             )}
 
-            {/* Size buttons with scores */}
             <div className="vto-size-rec__grid">
-                {results.map(r => (
+                {results.map((result) => (
                     <button
-                        key={r.size}
-                        className={`vto-size-rec__btn ${selectedSize === r.size ? 'active' : ''} ${r.isRecommended ? 'recommended' : ''}`}
-                        onClick={() => onSelectSize(r.size)}
+                        key={result.size}
+                        className={`vto-size-rec__btn ${selectedSize === result.size ? 'active' : ''} ${result.isRecommended ? 'recommended' : ''}`}
+                        onClick={() => onSelectSize(result.size)}
                     >
-                        <span className="vto-size-rec__btn-label">{r.size}</span>
-                        <span className="vto-size-rec__btn-score">{r.score}%</span>
-                        {r.isRecommended && <span className="vto-size-rec__star">★</span>}
+                        <span className="vto-size-rec__btn-label">{result.size}</span>
+                        <span className="vto-size-rec__btn-score">{result.score}%</span>
+                        {result.isRecommended && <span className="vto-size-rec__star">★</span>}
                     </button>
                 ))}
             </div>
 
-            {/* Detail toggle */}
             {displayResult && (
                 <div className="vto-size-rec__detail-wrap">
                     <button
                         type="button"
                         className={`vto-size-rec__toggle ${isDetailOpen ? 'open' : ''}`}
-                        onClick={() => setIsDetailOpen(open => !open)}
+                        onClick={() => setIsDetailOpen((open) => !open)}
                     >
                         <span className="vto-size-rec__toggle-text">
                             {isDetailOpen ? 'Ẩn chi tiết' : `Xem chi tiết size ${displayResult.size}`}
@@ -211,23 +467,18 @@ export default function SizeRecommendation({
 
                     {isDetailOpen && (
                         <div className="vto-size-rec__detail">
-                            <p className="vto-size-rec__detail-title">
-                                Chi tiết size {displayResult.size}
-                            </p>
+                            <p className="vto-size-rec__detail-title">Chi tiết size {displayResult.size}</p>
                             <div className="vto-size-rec__zones">
-                                {displayResult.zones.map(z => {
-                                    const fitInfo = FIT_LABELS[z.fit];
+                                {displayResult.zones.map((zone) => {
+                                    const fitInfo = FIT_LABELS[zone.fit];
                                     return (
-                                        <div key={z.label} className="vto-size-rec__zone">
-                                            <span className="vto-size-rec__zone-label">{z.label}</span>
-                                            <span
-                                                className="vto-size-rec__zone-fit"
-                                                style={{ color: fitInfo.color }}
-                                            >
+                                        <div key={zone.key} className="vto-size-rec__zone">
+                                            <span className="vto-size-rec__zone-label">{zone.label}</span>
+                                            <span className="vto-size-rec__zone-fit" style={{ color: fitInfo.color }}>
                                                 {fitInfo.text}
                                             </span>
                                             <span className="vto-size-rec__zone-delta">
-                                                {z.delta > 0 ? `+${z.delta}` : z.delta} cm
+                                                {zone.deltaRaw > 0 ? '+' : ''}{zone.deltaRaw} cm
                                             </span>
                                         </div>
                                     );
