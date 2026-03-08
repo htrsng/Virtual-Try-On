@@ -1904,11 +1904,22 @@
 
 .vto-size-rec__compare-scores {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
     gap: 6px;
     margin-bottom: 6px;
     font-size: 11px;
     color: var(--text-secondary);
+}
+
+.vto-size-rec__compare-scores>span:first-child {
+    justify-self: start;
+    text-align: left;
+}
+
+.vto-size-rec__compare-scores>span:nth-child(2) {
+    justify-self: end;
+    text-align: right;
 }
 
 .vto-size-rec__compare-scores strong {
@@ -1948,6 +1959,10 @@
     text-transform: uppercase;
     letter-spacing: 0.45px;
     color: var(--text-tertiary);
+}
+
+.vto-size-rec__compare-columns .vto-size-rec__compare-col:nth-child(3) {
+    text-align: right;
 }
 
 .vto-size-rec__compare-col--zone {
@@ -2341,6 +2356,7 @@
     min-height: 140px;
     max-height: 30%;
     overflow-y: auto;
+    scrollbar-gutter: stable both-edges;
     overscroll-behavior: contain;
     border-top: 1px solid rgba(31, 26, 23, 0.1);
     background: rgba(255, 255, 255, 0.84);
@@ -2363,6 +2379,28 @@
 
 .vto-size-room__summary .vto-size-rec__compare-panel {
     margin-top: 0;
+}
+
+.vto-size-room__summary .vto-size-rec__compare-scores {
+    gap: 8px;
+    margin-bottom: 10px;
+    font-size: 13px;
+    line-height: 1.2;
+}
+
+.vto-size-room__summary .vto-size-rec__compare-scores>span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font-weight: 700;
+}
+
+.vto-size-room__summary .vto-size-rec__compare-scores strong {
+    font-size: 14px;
+    font-weight: 800;
 }
 
 .vto-size-room__color-note {

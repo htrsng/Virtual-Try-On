@@ -1,4 +1,4 @@
-<div align="center">
+
 
 # 👕 VFitAI — Virtual Try-On 3D Platform
 
@@ -10,8 +10,6 @@
 [![Node.js](https://img.shields.io/badge/Node.js-Express_5-339933?logo=nodedotjs&logoColor=white)](https://expressjs.com/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/atlas)
 [![Vite](https://img.shields.io/badge/Vite-7.2-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
-
-</div>
 
 
 ## 📖 Giới thiệu
@@ -38,34 +36,34 @@ Trong thương mại điện tử thời trang, tỷ lệ đổi trả sản ph�
 ## 🏗 Kiến trúc hệ thống
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                      CLIENT (SPA)                       │
-│  React 19 + TypeScript + Vite 7                         │
-│  ┌───────────┐  ┌──────────────┐  ┌──────────────────┐  │
-│  │ E-Commerce│  │ Virtual      │  │ Admin            │  │
-│  │ Module    │  │ Try-On 3D    │  │ Dashboard        │  │
-│  │           │  │ (Three.js)   │  │                  │  │
-│  └─────┬─────┘  └──────┬───────┘  └────────┬─────────┘  │
-│        └───────────────┼────────────────────┘            │
-│                        │ Axios HTTP                      │
-└────────────────────────┼─────────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│                      CLIENT (SPA)                      │
+│  React 19 + TypeScript + Vite 7                        │
+│  ┌───────────┐  ┌──────────────┐  ┌──────────────────┐ │
+│  │ E-Commerce│  │ Virtual      │  │ Admin            │ │
+│  │ Module    │  │ Try-On 3D    │  │ Dashboard        │ │
+│  │           │  │ (Three.js)   │  │                  │ │
+│  └─────┬─────┘  └──────┬───────┘  └────────┬─────────┘ │
+│        └───────────────┼───────────────────┘           │
+│                        │ Axios HTTP                    │
+└────────────────────────┼───────────────────────────────┘
                          │ REST API
-┌────────────────────────┼─────────────────────────────────┐
-│                   SERVER (API)                           │
-│  Node.js + Express 5                                     │
+┌────────────────────────┼────────────────────────────────┐
+│                   SERVER (API)                          │
+│  Node.js + Express 5                                    │
 │  ┌──────────┐  ┌───────────┐  ┌─────────────┐           │
 │  │ Auth     │  │ Product   │  │ Order       │           │
 │  │ (JWT +   │  │ CRUD      │  │ Management  │           │
 │  │  bcrypt) │  │           │  │ + Email     │           │
 │  └────┬─────┘  └─────┬─────┘  └──────┬──────┘           │
-│       └───────────────┼───────────────┘                  │
-│                       │ Mongoose ODM                     │
-└───────────────────────┼──────────────────────────────────┘
-                        │
-              ┌─────────▼─────────┐
-              │   MongoDB Atlas   │
-              │   (Cloud NoSQL)   │
-              └───────────────────┘
+│       └──────────────│───────────────┘                  │
+│                      │ Mongoose ODM                     │
+└──────────────────────┼──────────────────────────────────┘
+                       │
+              ┌────────▼─────────┐
+              │   MongoDB Atlas  │
+              │   (Cloud NoSQL)  │
+              └──────────────────┘
 ```
 
 ---
@@ -95,7 +93,7 @@ Trong thương mại điện tử thời trang, tỷ lệ đổi trả sản ph�
 |-----------|-----------|---------|
 | **Node.js** | 18+ | Runtime JavaScript phía server |
 | **Express** | 5.2.1 | Framework xây dựng REST API |
-| **Mongoose** | (MongoDB 9.1.3) | ODM cho MongoDB |
+| **Mongoose** | 9.1.3 | ODM cho MongoDB |
 | **JWT** | 9.0.3 | Xác thực token-based |
 | **bcryptjs** | 3.0.3 | Hash mật khẩu |
 | **Nodemailer** | 8.0.1 | Gửi email xác nhận đơn hàng |
@@ -227,9 +225,9 @@ Virtual-Try-On/
 │   │   ├── main.tsx                 # Entry point
 │   │   │
 │   │   ├── features/
-│   │   │   └── virtual-tryon/       # ⭐ Module Virtual Try-On
+│   │   │   └── virtual-tryon/       # Module Virtual Try-On
 │   │   │       ├── VirtualTryOn.tsx         # Component chính phòng thử đồ
-│   │   │       ├── VirtualTryOn.css         # Styles (3500+ dòng)
+│   │   │       ├── VirtualTryOn.css         # Styles 
 │   │   │       ├── GarmentModel.tsx         # Render & bind trang phục 3D
 │   │   │       ├── garmentBinding.ts        # Skeleton binding, fabric, heatmap
 │   │   │       └── components/
@@ -237,9 +235,10 @@ Virtual-Try-On/
 │   │   │           ├── CameraPresets.tsx         # Điều khiển góc camera
 │   │   │           ├── BodyEditorDrawer.tsx      # Chỉnh sửa body
 │   │   │           ├── BodyPresets.tsx           # Preset dáng người
-│   │   │           └── ColorSelector.tsx         # Chọn màu sắc
+│   │   │           ├── ProductOptions.tsx        # Chọn size, màu, layer sản phẩm
+│   │   │           └── CustomSlider.tsx          # Thanh trượt tùy chỉnh
 │   │   │
-│   │   ├── pages/                   # 17+ trang giao diện
+│   │   ├── pages/                   # trang giao diện
 │   │   │   ├── HomePage.jsx
 │   │   │   ├── ProductDetailPage.jsx
 │   │   │   ├── CartPage.tsx
@@ -247,13 +246,13 @@ Virtual-Try-On/
 │   │   │   ├── AvatarStudioPage.tsx
 │   │   │   └── ...
 │   │   │
-│   │   ├── components/              # 30+ component tái sử dụng
+│   │   ├── components/              # component tái sử dụng
 │   │   │   ├── Header.jsx
 │   │   │   ├── ChatWidget.jsx
 │   │   │   ├── AuthModal.jsx
 │   │   │   └── ...
 │   │   │
-│   │   ├── contexts/                # 6 Context Providers
+│   │   ├── contexts/                # Context Providers
 │   │   │   ├── AuthContext.jsx
 │   │   │   ├── FittingRoomContext.tsx
 │   │   │   ├── WishlistContext.jsx
@@ -314,7 +313,7 @@ npm install
 node index.js
 ```
 
-Server khởi động tại `http://localhost:5000`
+Server khởi động tại `http://localhost:3000`
 
 **3. Khởi chạy Frontend**
 
@@ -326,6 +325,28 @@ npm run dev
 ```
 
 Ứng dụng mở tại `http://localhost:5173`
+
+Mặc định frontend gọi API tại `http://localhost:3000` (qua `VITE_API_URL` hoặc fallback hardcoded ở một số module).
+
+### Biến môi trường (khuyến nghị)
+
+**Client (`client/.env`)**
+
+```bash
+VITE_API_URL=http://localhost:3000
+```
+
+**Server (`server/.env`)**
+
+```bash
+PORT=3000
+MONGODB_URI=<your_mongodb_connection_string>
+JWT_SECRET=<your_jwt_secret>
+EMAIL_USER=<your_email>
+EMAIL_PASS=<your_app_password>
+```
+
+Lưu ý: hiện một số cấu hình server đang để trực tiếp trong `server/index.js`; nên chuyển sang `.env` trước khi deploy production.
 
 ### Scripts
 
@@ -391,21 +412,52 @@ npm run dev
 
 ## 📸 Ảnh chụp màn hình
 
-> *Bổ sung ảnh chụp các trang chính của ứng dụng tại đây.*
-
-<!-- Uncomment và thay link ảnh thực tế:
-### Trang chủ
-![Homepage](docs/screenshots/homepage.png)
-
-### Phòng thử đồ 3D
-![Virtual Try-On](docs/screenshots/virtual-tryon.png)
-
-### Avatar Studio
-![Avatar Studio](docs/screenshots/avatar-studio.png)
-
-### Admin Dashboard
-![Admin Dashboard](docs/screenshots/admin-dashboard.png)
--->
+<table>
+        <tr>
+                <td align="center">
+                        <strong>home-page</strong><br/>
+                        <img src="doc/Screenshots/Homepage.png" alt="home-page" width="210" />
+                </td>
+                <td align="center">
+                        <strong>product-list</strong><br/>
+                        <img src="doc/Screenshots/product-list.png" alt="product-list" width="210" />
+                </td>
+                <td align="center">
+                        <strong>product-detail</strong><br/>
+                        <img src="doc/Screenshots/product-detail.png" alt="product-detail" width="210" />
+                </td>
+                <td align="center">
+                        <strong>avatar-creation</strong><br/>
+                        <img src="doc/Screenshots/avatar-creation.png" alt="avatar-creation" width="210" />
+                </td>
+                <td align="center">
+                        <strong>virtual-try-on</strong><br/>
+                        <img src="doc/Screenshots/virtual-try-on.png" alt="virtual-try-on" width="210" />
+                </td>
+        </tr>
+        <tr>
+                <td align="center">
+                        <strong>size-ai-recommendation</strong><br/>
+                        <img src="doc/Screenshots/heatmap.png" alt="size-ai-recommendation" width="210" />
+                </td>
+                <td align="center">
+                        <strong>size-comparison</strong><br/>
+                        <img src="doc/Screenshots/size-comparison.png" alt="size-comparison" width="210" />
+                </td>
+                <td align="center">
+                        <strong>shopping-cart</strong><br/>
+                        <img src="doc/Screenshots/shopping-cart.png" alt="shopping-cart" width="210" />
+                </td>
+                <td align="center">
+                        <strong>outfit-builder</strong><br/>
+                        <img src="doc/Screenshots/outfit-builder.png" alt="outfit-builder" width="210" />
+                </td>
+                <td align="center">
+                        <strong>admin-dashboard</strong><br/>
+                        <img src="doc/Screenshots/admin-dashboard.png" alt="admin-dashboard" width="210" />
+                </td>
+        </tr>
+</table>
 
 
 ## 📚 Tài liệu tham khảo
@@ -428,8 +480,7 @@ npm run dev
 
 ---
 
-<div align="center">
+
 
 **VFitAI** — Đồ án cơ sở ngành Công nghệ Thông tin
 
-</div>

@@ -693,8 +693,9 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
     }, [activeModel3D, activeSelectedColorConfig, activeSelectedSize]);
 
     const hasConfigurable3DModel = Boolean(activeModel3D?.sizes && Object.keys(activeModel3D.sizes).length > 0);
-    const comparePreviewColor = '#f5f5f5';
-    const comparePreviewColorName = 'Trắng trung tính';
+    const comparePreviewColor = activeSelectedColor || '#f5f5f5';
+    const comparePreviewColorName = activeSelectedColorConfig?.name || 'Trắng trung tính';
+    const comparePreviewFabric = activeSelectedColorConfig?.fabric;
 
     const sizeCompareResults = useMemo<RecommendationResult[]>(
         () => recommendSizes(currentBodyData, availableSizes, activeGarmentSizeSpecs, { garmentType: activeGarmentType }),
@@ -1542,7 +1543,7 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                                 availableSizes={comparableSizes}
                                 onSelectSize={handleSizeCompareLeftChange}
                                 selectedColor={comparePreviewColor}
-                                selectedFabric={undefined}
+                                selectedFabric={comparePreviewFabric}
                                 fitScore={compareLeftResult.score}
                                 fitZones={compareLeftResult.zones}
                                 heatmapEnabled={false}
@@ -1561,7 +1562,7 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                                 availableSizes={comparableSizes}
                                 onSelectSize={handleSizeCompareRightChange}
                                 selectedColor={comparePreviewColor}
-                                selectedFabric={undefined}
+                                selectedFabric={comparePreviewFabric}
                                 fitScore={compareRightResult.score}
                                 fitZones={compareRightResult.zones}
                                 heatmapEnabled={false}
