@@ -1,10 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="VFit favicon">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="VFitAI favicon">
   <defs>
-    <linearGradient id="vfitGrad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#ff8a4c" />
-      <stop offset="100%" stop-color="#ff3d6a" />
+    <linearGradient id="iconGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6C63FF" />
+      <stop offset="100%" stop-color="#3B82F6" />
     </linearGradient>
   </defs>
-  <rect x="6" y="6" width="52" height="52" rx="14" fill="url(#vfitGrad)" />
-  <path d="M18 20h8l6 18l6-18h8L35 46h-6L18 20z" fill="#ffffff" />
+
+  <!-- Brand icon to match the header logo -->
+  <rect x="6" y="6" width="52" height="52" rx="16" fill="url(#iconGrad)" />
+  <rect x="20" y="26" width="24" height="22" rx="3" fill="none" stroke="#ffffff" stroke-width="2.2" />
+  <path d="M26 26V22C26 18.5 28.7 16 32 16C35.3 16 38 18.5 38 22V26" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" />
 </svg>
