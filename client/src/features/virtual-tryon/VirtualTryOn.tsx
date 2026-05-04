@@ -3,13 +3,15 @@ import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows, Html, useProgress, Grid } from '@react-three/drei';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Avatar } from '../../three/controls/avatar/Avatar';
-import { useFittingRoom, type Profile } from '../../contexts/FittingRoomContext';
+import { useFittingRoom, type GarmentSlot, type Profile, type SilentWearItem } from '../../contexts/FittingRoomContext';
 import { MODEL_INJECTION } from '../../data/ThreeDConfig.js';
 import GarmentModel from './GarmentModel';
 import CameraPresets from './components/CameraPresets';
 import type { CameraView } from './components/CameraPresets';
 import SizeRecommendation, { recommendSizes } from './components/SizeRecommendation';
 import { ColorSelector } from './components/ProductOptions';
+import VirtualPersonalClosetDrawer, { type ClosetItem } from './components/VirtualPersonalClosetDrawer';
+import OutfitPanel from './components/OutfitPanel';
 import './VirtualTryOn.css';
 import * as THREE from 'three';
 
@@ -62,6 +64,8 @@ type LocalColorOption = {
 type RecommendationResult = ReturnType<typeof recommendSizes>[number];
 type RecommendationZone = RecommendationResult['zones'][number];
 type RecommendationFitLevel = RecommendationZone['fit'];
+const RAW_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = RAW_API_URL.startsWith(':') ? `http://localhost${RAW_API_URL}` : RAW_API_URL;
 
 /* ─── Accordion ─── */
 function Accordion({ title, icon, defaultOpen = false, children, onLayoutChange }: {
@@ -239,6 +243,18 @@ type ProductWithModel = TryOnProduct & {
             sizeSpecs?: Record<string, LocalGarmentSizeSpec>;
         };
     };
+};
+
+type SavedOutfit = {
+    _id: string;
+    name?: string;
+    slots?: {
+        tops?: { itemId?: string; name?: string; thumbnailUrl?: string };
+        bottoms?: { itemId?: string; name?: string; thumbnailUrl?: string };
+        outerwear?: { itemId?: string; name?: string; thumbnailUrl?: string };
+        dresses?: { itemId?: string; name?: string; thumbnailUrl?: string };
+    };
+    createdAt?: string;
 };
 
 type SizeCompareViewportProps = {
@@ -568,6 +584,9 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
         setSelectedSize,
         isHeatmapOpen,
         toggleHeatmap,
+        layeredGarments,
+        lastSilentWear,
+        applySilentWear,
     } = useFittingRoom();
 
     /* ---- Normalise items array ---------------------------------- */
@@ -631,14 +650,160 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
     const [cameraView, setCameraView] = useState('front');
     const [cameraPos, setCameraPos] = useState<[number, number, number]>([0, 0.7, 4.5]);
     const [cameraTarget, setCameraTarget] = useState<[number, number, number]>([0, 0.4, 0]);
-    const [savedOutfits, setSavedOutfits] = useState<Array<{ id: number; size: string; color: string; date: string }>>([]);
+    const [savedOutfits, setSavedOutfits] = useState<SavedOutfit[]>([]);
     const [isWishlisted, setIsWishlisted] = useState(false);
+    const [selectedSidebarProduct, setSelectedSidebarProduct] = useState<TryOnProduct | null>(null);
+    const [productSpecCache, setProductSpecCache] = useState<Record<string, TryOnProduct>>({});
     const [isTryOnGuideOpen, setIsTryOnGuideOpen] = useState(false);
     const [isSizeCompareRoomOpen, setIsSizeCompareRoomOpen] = useState(false);
     const [sizeComparePair, setSizeComparePair] = useState({ left: '', right: '' });
     const [hasSidebarScrollFade, setHasSidebarScrollFade] = useState(false);
+    const [isClosetOpen, setIsClosetOpen] = useState(false);
+    const [isWebglContextLost, setIsWebglContextLost] = useState(false);
     const sidebarScrollRef = useRef<HTMLDivElement | null>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+    const [rendererReady, setRendererReady] = useState(false);
+    const savedOutfitsLoadedRef = useRef(false);
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const rightSidebarProduct = selectedSidebarProduct || activeItem;
+
+    useEffect(() => {
+        if (!token) {
+            savedOutfitsLoadedRef.current = false;
+            setSavedOutfits([]);
+        }
+    }, [token]);
+
+    useEffect(() => {
+        const renderer = rendererRef.current;
+        if (!renderer) {
+            return;
+        }
+
+        const handleContextLost = (event: Event) => {
+            event.preventDefault();
+            setIsWebglContextLost(true);
+            console.warn('[WebGL] Context lost - pausing render loop');
+        };
+
+        const handleContextRestored = () => {
+            setIsWebglContextLost(false);
+            console.info('[WebGL] Context restored - resuming');
+        };
+
+        renderer.domElement.addEventListener('webglcontextlost', handleContextLost, false);
+        renderer.domElement.addEventListener('webglcontextrestored', handleContextRestored, false);
+
+        return () => {
+            renderer.domElement.removeEventListener('webglcontextlost', handleContextLost);
+            renderer.domElement.removeEventListener('webglcontextrestored', handleContextRestored);
+        };
+    }, [rendererReady]);
+
+    useEffect(() => () => {
+        if (rendererRef.current) {
+            const context = rendererRef.current.getContext?.();
+            const alreadyLost = Boolean(context?.isContextLost?.());
+
+            rendererRef.current.dispose();
+            if (!alreadyLost) {
+                rendererRef.current.forceContextLoss();
+            }
+            rendererRef.current = null;
+        }
+    }, []);
+
+    const resolveClosetSlot = useCallback((category?: string): GarmentSlot => {
+        const lowered = String(category || '').toLowerCase();
+        if (lowered.includes('outer') || lowered.includes('coat') || lowered.includes('jacket')) {
+            return 'outerwear';
+        }
+        if (lowered.includes('dress') || lowered.includes('dam') || lowered.includes('vay')) {
+            return 'dresses';
+        }
+        if (lowered.includes('bottom') || lowered.includes('pant') || lowered.includes('jean') || lowered.includes('quan')) {
+            return 'bottoms';
+        }
+        return 'tops';
+    }, []);
+
+    const findItemIndexForClosetItem = useCallback((closetItem: ClosetItem) => {
+        const normalizedClosetId = String(closetItem.productId || closetItem.id || '').replace(/^closet-/, '');
+        return items.findIndex((item) => {
+            if (String(item.id) === normalizedClosetId) {
+                return true;
+            }
+
+            if (closetItem.productId && String(item.id) === String(closetItem.productId)) {
+                return true;
+            }
+
+            return String(item.name || '').trim().toLowerCase() === closetItem.name.trim().toLowerCase();
+        });
+    }, [items]);
+
+    const resolvePurchasedColorHex = useCallback((model3D: ProductWithModel['model3D'] | undefined, purchasedColor?: string) => {
+        const rawColor = String(purchasedColor || '').trim();
+        if (!rawColor) {
+            return '';
+        }
+
+        const normalized = rawColor.toLowerCase();
+        const palette = model3D?.colors || [];
+        const matched = palette.find((color) => {
+            const hex = String(color.hex || '').trim().toLowerCase();
+            const name = String(color.name || '').trim().toLowerCase();
+            return hex === normalized || name === normalized;
+        });
+
+        if (matched?.hex) {
+            return matched.hex;
+        }
+
+        if (normalized.startsWith('#')) {
+            return rawColor;
+        }
+
+        if (normalized.includes('đen') || normalized.includes('black')) return '#222222';
+        if (normalized.includes('trắng') || normalized.includes('white')) return '#f5f5f5';
+        if (normalized.includes('navy') || normalized.includes('xanh navy')) return '#1f2a44';
+        if (normalized.includes('be') || normalized.includes('beige')) return '#d4c3a3';
+        if (normalized.includes('xám') || normalized.includes('gray') || normalized.includes('grey')) return '#9ca3af';
+        if (normalized.includes('đỏ') || normalized.includes('red')) return '#dc2626';
+        if (normalized.includes('xanh lá') || normalized.includes('green')) return '#16a34a';
+        if (normalized.includes('xanh dương') || normalized.includes('blue')) return '#2563eb';
+
+        return '';
+    }, []);
+
+    const closetGarmentModels = useMemo(() => {
+        const wornClosetItems = Object.values(layeredGarments).filter((item): item is SilentWearItem => Boolean(item?.itemId));
+
+        return wornClosetItems
+            .filter((closetItem) => !items.some((product) => String(product.id) === String(closetItem.productId || closetItem.itemId)))
+            .map((closetItem) => {
+                const sourceProduct = {
+                    id: closetItem.productId || closetItem.itemId,
+                    name: closetItem.name,
+                    price: 0,
+                    category: closetItem.category,
+                    model3D: closetItem.model3D,
+                } as TryOnProduct;
+
+                const model3D = (closetItem.model3D as ProductWithModel['model3D'] | undefined) || resolveModel3D(sourceProduct);
+                const selectedSize = String(closetItem.purchasedSize || '').trim().toUpperCase();
+                const selectedColor = resolvePurchasedColorHex(model3D, closetItem.purchasedColor) || String(closetItem.purchasedColor || '').trim();
+
+                return {
+                    key: `closet-${closetItem.itemId}`,
+                    model3D,
+                    selectedSize,
+                    selectedColor,
+                };
+            })
+            .filter((entry) => Boolean(entry.model3D));
+    }, [items, layeredGarments, resolveModel3D, resolvePurchasedColorHex]);
 
     // Resolve active item's model for sidebar controls
     const activeModel3D = useMemo(() => resolveModel3D(activeItem), [activeItem]);
@@ -973,6 +1138,139 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
         setItemColors(prev => ({ ...prev, [key]: color }));
     }, [activeItem]);
 
+    const handleWearClosetItem = useCallback(async (closetItem: ClosetItem, selectedColor?: string, selectedSize?: string) => {
+        applySilentWear({
+            itemId: closetItem.itemId || closetItem.id,
+            productId: closetItem.productId,
+            name: closetItem.name,
+            category: closetItem.slotCategory,
+            purchasedSize: selectedSize || closetItem.purchasedSize,
+            purchasedColor: selectedColor || closetItem.purchasedColor,
+            model3D: closetItem.model3D,
+            thumbnail: closetItem.thumbnail,
+            source: closetItem.source,
+        });
+
+        const token = localStorage.getItem('token');
+        if (token && closetItem.itemId) {
+            try {
+                await fetch(`${API_URL}/api/virtual-closet/wear/${closetItem.itemId}`, {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+            } catch (err) {
+                console.error('Wear tracking failed:', err);
+            }
+        }
+
+        showToast(`SmartFit da mac ${closetItem.name} (Silent Wear).`, 'success');
+    }, [applySilentWear, showToast]);
+
+    const handleViewClosetItemDetails = useCallback(async (closetItem: ClosetItem) => {
+        const targetIdx = findItemIndexForClosetItem(closetItem);
+        if (targetIdx >= 0) {
+            setActiveItemIdx(targetIdx);
+        }
+
+        const cacheKey = String(closetItem.productId || closetItem.id || closetItem.name).trim().toLowerCase();
+        const cached = productSpecCache[cacheKey];
+        if (cached) {
+            setSelectedSidebarProduct(cached);
+            showToast(`Da cap nhat chi tiet cho ${closetItem.name}.`, 'success');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/api/products`);
+            if (!response.ok) {
+                throw new Error('Unable to fetch product specs');
+            }
+
+            const products = await response.json();
+            const list = Array.isArray(products) ? products : [];
+            const matched = list.find((candidate: TryOnProduct) => {
+                if (closetItem.productId && String(candidate.id) === String(closetItem.productId)) {
+                    return true;
+                }
+                const normalizedCandidateId = String(candidate.id || '').trim().toLowerCase();
+                const normalizedClosetId = String(closetItem.id || '').replace(/^closet-/, '').trim().toLowerCase();
+                if (normalizedCandidateId && normalizedCandidateId === normalizedClosetId) {
+                    return true;
+                }
+                return String(candidate.name || '').trim().toLowerCase() === closetItem.name.trim().toLowerCase();
+            }) as TryOnProduct | undefined;
+
+            const resolvedProduct: TryOnProduct = matched || {
+                id: closetItem.productId || closetItem.id,
+                name: closetItem.name,
+                category: closetItem.category,
+                price: 0,
+                img: closetItem.thumbnail,
+            };
+
+            setSelectedSidebarProduct(resolvedProduct);
+            setProductSpecCache((prev) => ({
+                ...prev,
+                [cacheKey]: resolvedProduct,
+            }));
+            showToast(`Da cap nhat chi tiet cho ${closetItem.name}.`, 'success');
+        } catch {
+            setSelectedSidebarProduct({
+                id: closetItem.productId || closetItem.id,
+                name: closetItem.name,
+                category: closetItem.category,
+                price: 0,
+                img: closetItem.thumbnail,
+            });
+            showToast('Khong tai duoc thong so chi tiet, dang hien thi du lieu co san.', 'warning');
+        }
+    }, [findItemIndexForClosetItem, productSpecCache, showToast]);
+
+    useEffect(() => {
+        if (!lastSilentWear) {
+            return;
+        }
+
+        const targetIdx = findItemIndexForClosetItem({
+            id: lastSilentWear.itemId,
+            itemId: lastSilentWear.itemId,
+            productId: lastSilentWear.productId,
+            name: lastSilentWear.name,
+            thumbnail: lastSilentWear.thumbnail || '',
+            category: lastSilentWear.category,
+            categoryKey: String(lastSilentWear.category || '').trim().toLowerCase(),
+            slotCategory: resolveClosetSlot(lastSilentWear.category),
+            purchasedSize: lastSilentWear.purchasedSize,
+            purchasedColor: lastSilentWear.purchasedColor,
+            isOwned: true,
+            source: lastSilentWear.source || 'order',
+        });
+
+        if (targetIdx < 0) {
+            return;
+        }
+
+        const targetItem = items[targetIdx];
+        if (!targetItem) {
+            return;
+        }
+
+        const targetModel3D = resolveModel3D(targetItem);
+
+        const key = String(targetItem.id);
+        if (lastSilentWear.purchasedSize) {
+            setItemSizes((prev) => ({ ...prev, [key]: lastSilentWear.purchasedSize || '' }));
+            setSelectedSize(lastSilentWear.purchasedSize || null);
+        }
+
+        if (lastSilentWear.purchasedColor) {
+            const purchasedColorHex = resolvePurchasedColorHex(targetModel3D, lastSilentWear.purchasedColor) || lastSilentWear.purchasedColor;
+            setItemColors((prev) => ({ ...prev, [key]: purchasedColorHex }));
+        }
+    }, [findItemIndexForClosetItem, items, lastSilentWear, resolveModel3D, resolvePurchasedColorHex, setSelectedSize]);
+
     const handleSizeCompareLeftChange = useCallback((nextLeft: string) => {
         setSizeComparePair((prev) => {
             if (nextLeft !== prev.right) {
@@ -1029,25 +1327,123 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
         }
     }, [activeItem, isMultiProduct, showToast]);
 
+    const refreshSavedOutfits = useCallback(async (signal?: AbortSignal) => {
+        const authToken = localStorage.getItem('token');
+        if (!authToken) {
+            setSavedOutfits([]);
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/api/saved-outfits`, {
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                },
+                signal,
+            });
+            if (!response.ok) {
+                console.warn(`[saved-outfits] API returned ${response.status}, using empty list`);
+                setSavedOutfits([]);
+                return;
+            }
+
+            const data = await response.json();
+            setSavedOutfits(Array.isArray(data?.outfits) ? data.outfits : []);
+        } catch (err) {
+            if (err instanceof Error && err.name === 'AbortError') {
+                return;
+            }
+            console.error('Failed to load saved outfits:', err);
+            setSavedOutfits([]);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (savedOutfitsLoadedRef.current) {
+            return;
+        }
+        if (!token) {
+            return;
+        }
+
+        savedOutfitsLoadedRef.current = true;
+        const controller = new AbortController();
+        refreshSavedOutfits(controller.signal);
+
+        return () => {
+            controller.abort();
+        };
+    }, [refreshSavedOutfits, token]);
+
+    const handleApplySavedOutfit = useCallback((outfit: SavedOutfit) => {
+        const slots = outfit.slots || {};
+        (['tops', 'bottoms', 'outerwear', 'dresses'] as const).forEach((slot) => {
+            const item = slots[slot];
+            if (!item?.itemId) {
+                return;
+            }
+
+            applySilentWear({
+                itemId: item.itemId,
+                name: item.name || 'Saved item',
+                category: slot,
+                thumbnail: item.thumbnailUrl,
+                source: 'import',
+            });
+        });
+
+        showToast(`Đã áp dụng outfit: ${outfit.name || 'Outfit chưa đặt tên'}`, 'success');
+    }, [applySilentWear, showToast]);
+
     // Save outfit handler
-    const handleSaveOutfit = useCallback(() => {
+    const handleSaveOutfit = useCallback(async (name: string) => {
         if (!isActiveItemReadyToWear) {
             showToast('Chọn đủ màu và size trước khi lưu outfit.', 'error');
             return;
         }
 
-        const outfit = {
-            id: Date.now(),
-            size: activeSelectedSize,
-            color: activeSelectedColor,
-            date: new Date().toLocaleDateString('vi-VN'),
-        };
-        setSavedOutfits(prev => [outfit, ...prev].slice(0, 10));
-        const label = isMultiProduct
-            ? `outfit ${items.length} sản phẩm`
-            : `${activeItem.name} — ${outfit.size}`;
-        showToast(`Đã lưu outfit: ${label}`);
-    }, [activeItem, activeSelectedColor, activeSelectedSize, isActiveItemReadyToWear, items.length, isMultiProduct, showToast]);
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showToast('Vui lòng đăng nhập để lưu outfit.', 'warning');
+            return;
+        }
+
+        const slotsPayload = (['tops', 'bottoms', 'outerwear', 'dresses'] as const).reduce((acc, slot) => {
+            const wornItem = layeredGarments[slot];
+            if (wornItem) {
+                acc[slot] = {
+                    itemId: wornItem.itemId,
+                    name: wornItem.name,
+                    thumbnailUrl: wornItem.thumbnail,
+                };
+            }
+            return acc;
+        }, {} as Record<string, { itemId: string; name: string; thumbnailUrl?: string }>);
+
+        try {
+            const response = await fetch(`${API_URL}/api/saved-outfits`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    name,
+                    slots: slotsPayload,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Unable to save outfit');
+            }
+
+            await refreshSavedOutfits();
+            showToast(`Đã lưu outfit: ${name}`, 'success');
+        } catch (err) {
+            console.error('Save outfit failed:', err);
+            showToast('Không thể lưu outfit, thử lại sau.', 'error');
+        }
+    }, [isActiveItemReadyToWear, layeredGarments, refreshSavedOutfits, showToast]);
 
     return (
         <div className="vto-container">
@@ -1107,14 +1503,30 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
 
             {/* ─── Workspace ─── */}
             <div className="vto-workspace">
+                {/* ─── Virtual Personal Closet Drawer (Left Sidebar) ─── */}
+                <VirtualPersonalClosetDrawer
+                    viewedProduct={activeItem}
+                    onWearItem={handleWearClosetItem}
+                    onViewDetails={handleViewClosetItemDetails}
+                    onApplySavedOutfit={handleApplySavedOutfit}
+                    savedOutfitsCount={savedOutfits.length}
+                    isOpen={isClosetOpen}
+                    onClose={() => setIsClosetOpen(false)}
+                />
+
                 {/* 3D Preview – renders ALL garments layered by category */}
                 <div className="vto-canvas-area">
                     <Canvas
                         ref={canvasRef}
+                        frameloop={isWebglContextLost ? 'never' : 'always'}
                         dpr={[1, 1.5]}
                         camera={{ position: [0, 0.7, 4.5], fov: 32 }}
                         shadows
                         gl={{ antialias: true, preserveDrawingBuffer: true, powerPreference: 'high-performance' }}
+                        onCreated={({ gl }) => {
+                            rendererRef.current = gl;
+                            setRendererReady(true);
+                        }}
                     >
 
 
@@ -1176,6 +1588,28 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                                     );
                                 })}
 
+                                {closetGarmentModels.map(({ key, model3D, selectedSize, selectedColor }) => {
+                                    const selectedColorConfigForItem = resolveColorConfig(model3D, selectedColor);
+                                    const canRenderGarment = selectedSize.length > 0 && selectedColor.length > 0;
+
+                                    if (!canRenderGarment) {
+                                        return null;
+                                    }
+
+                                    return (
+                                        <GarmentModel
+                                            key={key}
+                                            config={model3D}
+                                            selectedSize={selectedSize}
+                                            selectedColor={selectedColor}
+                                            fabricOverride={selectedColorConfigForItem?.fabric}
+                                            avatarScene={avatarScene}
+                                            heatmapEnabled={isHeatmapOpen}
+                                            heatmapZones={[]}
+                                        />
+                                    );
+                                })}
+
                                 <ContactShadows position={[0, 0.01, 0]} opacity={0.45} blur={1.8} resolution={512} frames={1} far={3} />
                             </group>
                         </Suspense>
@@ -1225,6 +1659,22 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                         </div>
                     </div>
 
+                    <div className="vto-canvas-overlay vto-canvas-overlay--top-left">
+                        <button
+                            type="button"
+                            className="vto-closet-button"
+                            onClick={() => setIsClosetOpen(true)}
+                            aria-label="Mở tủ đồ cá nhân"
+                            title="Virtual Personal Closet"
+                            data-testid="open-closet-btn"
+                        >
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+                                <path d="M20 6h-2.15a2.5 2.5 0 0 0-4.7 0H6.85a2.5 2.5 0 0 0-4.7 0H2a1 1 0 0 0-1 1v11a3 3 0 0 0 3 3h16a3 3 0 0 0 3-3V7a1 1 0 0 0-1-1zm-9-2a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0zm9 13H4a1 1 0 0 1-1-1V8h18v10a1 1 0 0 1-1 1z" />
+                            </svg>
+                            <span className="vto-closet-button__label">Tủ đồ</span>
+                        </button>
+                    </div>
+
                     {/* Heatmap legend */}
                     <div className={`vto-heatmap-legend ${isHeatmapOpen ? 'visible' : ''}`}>
                         <span className="vto-heatmap-legend__title">Phân tích độ vừa</span>
@@ -1250,10 +1700,15 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
 
                     {/* Active heatmap border glow */}
                     <div className={`vto-heatmap-glow ${isHeatmapOpen ? 'active' : ''}`} />
+
+                    <OutfitPanel
+                        layeredGarments={layeredGarments}
+                        onSave={handleSaveOutfit}
+                    />
                 </div>
 
                 {/* ─── Sidebar ─── */}
-                <aside className={`vto-sidebar ${hasSidebarScrollFade ? 'has-scroll-fade' : ''}`}>
+                <aside className={`vto-sidebar ${hasSidebarScrollFade ? 'has-scroll-fade' : ''}`} data-testid="product-panel">
                     <div className="vto-sidebar__scroll" ref={sidebarScrollRef}>
                         {/* Multi-item list (outfit mode) */}
                         {isMultiProduct && (
@@ -1292,14 +1747,14 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                         {/* Active product info */}
                         <div className="vto-product-card">
                             <div className="vto-product-card__image">
-                                <img src={activeItem.img || activeItem.image} alt={activeItem.name} />
+                                <img src={rightSidebarProduct.img || rightSidebarProduct.image} alt={rightSidebarProduct.name} />
                             </div>
                             <div className="vto-product-card__info">
                                 <span className="vto-badge">
                                     {isMultiProduct ? `Sản phẩm ${activeItemIdx + 1}/${items.length}` : 'Phòng thử đồ'}
                                 </span>
-                                <h2 className="vto-product-card__name">{activeItem.name}</h2>
-                                <p className="vto-product-card__price">{Number(activeItem.price)?.toLocaleString()} đ</p>
+                                <h2 className="vto-product-card__name">{rightSidebarProduct.name}</h2>
+                                <p className="vto-product-card__price">{Number(rightSidebarProduct.price)?.toLocaleString()} đ</p>
                             </div>
                         </div>
 
@@ -1355,7 +1810,7 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
                                     <span>Chụp ảnh</span>
                                 </button>
-                                <button className="vto-action-btn" onClick={handleSaveOutfit}>
+                                <button className="vto-action-btn" onClick={() => handleSaveOutfit('Outfit nhanh')}>
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /></svg>
                                     <span>Lưu outfit</span>
                                 </button>
@@ -1409,22 +1864,6 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                                 </svg>
                             </button>
                         </Accordion>
-
-                        {/* Saved outfits */}
-                        {savedOutfits.length > 0 && (
-                            <div className="vto-sidebar-card">
-                                <label className="vto-section-label">Outfit đã lưu</label>
-                                <div className="vto-saved-outfits__list">
-                                    {savedOutfits.map(o => (
-                                        <div key={o.id} className="vto-saved-outfit">
-                                            <span className="vto-saved-outfit__color" style={{ backgroundColor: o.color }} />
-                                            <span className="vto-saved-outfit__info">Size {o.size}</span>
-                                            <span className="vto-saved-outfit__date">{o.date}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
 
                     </div>
 

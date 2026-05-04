@@ -24,6 +24,8 @@ const AdminPage = lazy(() => import('./pages/AdminPage'));
 const AdminLayout = lazy(() => import('./admin/layout/AdminLayout'));
 // @ts-ignore
 const AdminDashboard = lazy(() => import('./admin/pages/AdminDashboard'));
+// @ts-ignore
+const AIManagerPage = lazy(() => import('./admin/pages/AIManagerPage'));
 const AdminOrders = lazy(() => import('./pages/AdminOrders'));
 const AdminProducts = lazy(() => import('./pages/AdminProducts'));
 const AdminCategories = lazy(() => import('./pages/AdminCategories'));
@@ -649,6 +651,10 @@ function App() {
                   <Route
                     path="chat"
                     element={<AdminChat showToast={showToast} />}
+                  />
+                  <Route
+                    path="ai-manager"
+                    element={<AIManagerPage />}
                   />
                 </Routes>
               </AdminLayout>

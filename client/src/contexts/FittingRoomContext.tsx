@@ -17,6 +17,21 @@ export interface Profile {
     legLength: number;
 }
 
+export type GarmentSlot = 'tops' | 'bottoms' | 'outerwear' | 'dresses';
+
+export interface SilentWearItem {
+    itemId: string;
+    productId?: string | number;
+    name: string;
+    category: GarmentSlot;
+    purchasedSize?: string;
+    purchasedColor?: string;
+    thumbnail?: string;
+    source?: 'order' | 'fallback' | 'import';
+    updatedAt: number;
+    model3D?: Record<string, unknown>;
+}
+
 interface FittingRoomContextType {
     avatars: Profile[];
     currentAvatarId: string | null;
@@ -37,6 +52,11 @@ interface FittingRoomContextType {
     setActiveProfileId: (id: string) => void;
     updateProfile: (id: string, updates: Partial<Profile>) => void;
     addProfile: (profile: Profile) => void;
+
+    // Virtual closet silent-wear state.
+    layeredGarments: Partial<Record<GarmentSlot, SilentWearItem>>;
+    lastSilentWear: SilentWearItem | null;
+    applySilentWear: (item: Omit<SilentWearItem, 'updatedAt'>) => void;
 }
 
 const FittingRoomContext = createContext<FittingRoomContextType | undefined>(undefined);
@@ -148,6 +168,8 @@ export const FittingRoomProvider: React.FC<{ children: React.ReactNode }> = ({ c
     const [currentAvatarId, setCurrentAvatarIdState] = useState<string | null>(loadStoredActiveAvatarId);
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
     const [isHeatmapOpen, setIsHeatmapOpen] = useState(false);
+    const [layeredGarments, setLayeredGarments] = useState<Partial<Record<GarmentSlot, SilentWearItem>>>({});
+    const [lastSilentWear, setLastSilentWear] = useState<SilentWearItem | null>(null);
 
     useEffect(() => {
         if (avatars.length === 0) {
@@ -244,6 +266,19 @@ export const FittingRoomProvider: React.FC<{ children: React.ReactNode }> = ({ c
         }
     };
 
+    const applySilentWear = (item: Omit<SilentWearItem, 'updatedAt'>) => {
+        const payload: SilentWearItem = {
+            ...item,
+            updatedAt: Date.now(),
+        };
+
+        setLayeredGarments((prev) => ({
+            ...prev,
+            [payload.category]: payload,
+        }));
+        setLastSilentWear(payload);
+    };
+
     const value: FittingRoomContextType = {
         avatars,
         currentAvatarId,
@@ -263,6 +298,10 @@ export const FittingRoomProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setActiveProfileId: setCurrentAvatarId,
         updateProfile: updateAvatar,
         addProfile: addAvatar,
+
+        layeredGarments,
+        lastSilentWear,
+        applySilentWear,
     };
 
     return (

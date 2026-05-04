@@ -5,6 +5,7 @@ function AuthModal({ isOpen, onClose, onLogin }) {
     const [isRegister, setIsRegister] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
 
     if (!isOpen) return null;
 
@@ -34,13 +35,31 @@ function AuthModal({ isOpen, onClose, onLogin }) {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
-                        <input
-                            type="password"
-                            className="auth-input"
-                            placeholder="Mật khẩu"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
+                        <div style={{ position: 'relative' }}>
+                            <input
+                                type={showPassword ? 'text' : 'password'}
+                                className="auth-input"
+                                placeholder="Mật khẩu"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword((s) => !s)}
+                                style={{
+                                    position: 'absolute',
+                                    right: 10,
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    background: 'transparent',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                }}
+                                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                            >
+                                {showPassword ? '🙈' : '👁️'}
+                            </button>
+                        </div>
                         {isRegister && (
                             <input
                                 type="password"

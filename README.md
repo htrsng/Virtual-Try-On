@@ -360,6 +360,22 @@ Lưu ý: hiện một số cấu hình server đang để trực tiếp trong `s
 | `npm run preview` | Preview bản build production |
 | `npm run lint` | Kiểm tra code với ESLint |
 
+### Migration database
+
+Để copy toàn bộ dữ liệu từ DB cũ sang DB mới, chạy script migration trong thư mục `server`:
+
+```bash
+SOURCE_MONGODB_URI="<old_mongodb_uri>" TARGET_MONGODB_URI="<new_mongodb_uri>" npm run migrate:db
+```
+
+Nếu DB có tên riêng, có thể thêm:
+
+```bash
+SOURCE_DB_NAME=old_db TARGET_DB_NAME=new_db npm run migrate:db
+```
+
+Mặc định script sẽ xóa collection ở DB đích trước khi copy để đồng bộ sạch dữ liệu. Muốn giữ collection hiện có, đặt `RESET_TARGET=false`.
+
 ---
 
 ## 📡 API Endpoints

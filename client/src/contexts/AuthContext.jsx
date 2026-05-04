@@ -46,9 +46,12 @@ export const AuthProvider = ({ children }) => {
             // Chỉ xóa dữ liệu user cũ
             localStorage.removeItem('currentUser');
 
+            const normalizedEmail = String(email || '').trim().toLowerCase();
+            const normalizedPassword = String(password || '');
+
             const response = await axios.post('http://localhost:3000/api/auth/login', {
-                email,
-                password
+                email: normalizedEmail,
+                password: normalizedPassword
             });
 
             const { token: newToken, user: userData } = response.data;

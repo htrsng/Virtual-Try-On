@@ -13,7 +13,17 @@ import PaymentMethod from './checkout/PaymentMethod';
 import TrustSignals from './checkout/TrustSignals';
 import OutfitPreview from './checkout/OutfitPreview';
 import ShippingForm from './checkout/ShippingForm';
+import { MODEL_INJECTION } from '../data/ThreeDConfig.js';
 import './CheckoutPage.css';
+
+const resolveCheckoutModel3D = (item) => {
+    if (item?.model3D) {
+        return item.model3D;
+    }
+
+    const direct = MODEL_INJECTION[String(item?.id)] || MODEL_INJECTION[String(Number(item?.id))];
+    return direct || undefined;
+};
 
 function CheckoutPage({ onCheckoutSuccess, showToast, suggestionProducts, onAddToCart }) {
     const navigate = useNavigate();
@@ -539,7 +549,16 @@ function CheckoutPage({ onCheckoutSuccess, showToast, suggestionProducts, onAddT
                     name: item.name,
                     price: parsePrice(item.price),
                     quantity: item.quantity,
-                    img: item.img
+                    img: item.img,
+                    color: item.color || item.selectedColor || item.variant?.color,
+                    size: item.size || item.selectedSize || item.variant?.size,
+                    selectedColor: item.selectedColor || item.color || item.variant?.color,
+                    selectedSize: item.selectedSize || item.size || item.variant?.size,
+                    model3D: resolveCheckoutModel3D(item),
+                    variant: item.variant ? {
+                        color: item.variant.color,
+                        size: item.variant.size,
+                    } : undefined,
                 })),
                 totalAmount: finalAmount, // Dùng finalAmount đã trừ giảm giá và cộng phí ship
                 shippingFee: shippingFee,

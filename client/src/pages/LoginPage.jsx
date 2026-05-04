@@ -11,6 +11,8 @@ function LoginPage({ showToast }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPass, setConfirmPass] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     // Thông tin bổ sung cho đăng ký
     const [fullName, setFullName] = useState('');
@@ -125,24 +127,60 @@ function LoginPage({ showToast }) {
                         </>
                     )}
 
-                    <input
-                        className="auth-input"
-                        type="password"
-                        placeholder="Mật khẩu"
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        required
-                    />
-
-                    {isRegister && (
+                    <div style={{ position: 'relative' }}>
                         <input
                             className="auth-input"
-                            type="password"
-                            placeholder="Nhập lại mật khẩu"
-                            value={confirmPass}
-                            onChange={e => setConfirmPass(e.target.value)}
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="Mật khẩu"
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
                             required
                         />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword((s) => !s)}
+                            style={{
+                                position: 'absolute',
+                                right: 10,
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                background: 'transparent',
+                                border: 'none',
+                                cursor: 'pointer',
+                            }}
+                            aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        >
+                            {showPassword ? '🙈' : '👁️'}
+                        </button>
+                    </div>
+
+                    {isRegister && (
+                        <div style={{ position: 'relative' }}>
+                            <input
+                                className="auth-input"
+                                type={showConfirmPassword ? 'text' : 'password'}
+                                placeholder="Nhập lại mật khẩu"
+                                value={confirmPass}
+                                onChange={e => setConfirmPass(e.target.value)}
+                                required
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowConfirmPassword((s) => !s)}
+                                style={{
+                                    position: 'absolute',
+                                    right: 10,
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    background: 'transparent',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                }}
+                                aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                            >
+                                {showConfirmPassword ? '🙈' : '👁️'}
+                            </button>
+                        </div>
                     )}
 
                     <button

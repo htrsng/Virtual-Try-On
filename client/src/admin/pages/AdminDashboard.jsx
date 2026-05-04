@@ -62,6 +62,7 @@ export default function AdminDashboard() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [chartRange, setChartRange] = useState('12m'); // '7d' | '30d' | '12m'
+    const [aiStats, setAiStats] = useState({ totalRequests: 0, last7Days: [], recentPrompts: [] });
 
     /* ---------- fetch ---------- */
     useEffect(() => {
@@ -83,6 +84,47 @@ export default function AdminDashboard() {
         };
         load();
     }, []);
+
+    useEffect(() => {
+        const loadAiStats = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const headers = token ? { Authorization: `Bearer ${token}` } : {};
+                const { data } = await axios.get(`${API}/api/admin/ai-stats`, { headers });
+                setAiStats({
+                    totalRequests: Number(data?.totalRequests) || 0,
+                    last7Days: Array.isArray(data?.last7Days) ? data.last7Days : [],
+                    recentPrompts: Array.isArray(data?.recentPrompts) ? data.recentPrompts : [],
+                });
+            } catch (_) {
+                // Keep dashboard stable if AI API is unavailable
+            }
+        };
+        loadAiStats();
+    }, []);
+
+    const aiChartData = useMemo(() => {
+        const today = new Date();
+        const counts = (aiStats.last7Days || []).reduce((acc, day) => {
+            if (day?._id) {
+                acc[day._id] = Number(day.count) || 0;
+            }
+            return acc;
+        }, {});
+
+        const result = [];
+        for (let i = 6; i >= 0; i -= 1) {
+            const d = new Date(today);
+            d.setDate(today.getDate() - i);
+            const key = d.toISOString().slice(0, 10);
+            result.push({
+                _id: key,
+                day: d.getDate(),
+                count: counts[key] || 0,
+            });
+        }
+        return result;
+    }, [aiStats.last7Days]);
 
     /* ---------- derived ---------- */
     const derived = useMemo(() => {
@@ -281,6 +323,46 @@ export default function AdminDashboard() {
                     trendUp
                     color="warning"
                 />
+            </div>
+
+            <div className="ai-stats-row">
+                <div className="ai-stat-widget">
+                    <div className="ai-stat-icon">🤖</div>
+                    <div className="ai-stat-content">
+                        <div className="ai-stat-num">{aiStats.totalRequests}</div>
+                        <div className="ai-stat-label">Lượt dùng AI Outfit</div>
+                        <div className="ai-stat-sub">Tổng từ khi ra mắt</div>
+                    </div>
+                    <div className="ai-stat-trend">
+                        {aiChartData.length > 0 && (
+                            <span className="trend-up">
+                                +{aiChartData[aiChartData.length - 1]?.count ?? 0} hôm nay
+                            </span>
+                        )}
+                    </div>
+                </div>
+
+                <div className="ai-stat-widget ai-stat-widget--chart">
+                    <div className="ai-stat-header">
+                        <span className="ai-stat-icon">📈</span>
+                        <span className="ai-stat-title">AI requests - 7 ngày qua</span>
+                    </div>
+                    <div className="ai-mini-chart">
+                        {aiChartData.map((day, i) => {
+                            const max = Math.max(...aiChartData.map((d) => d.count), 1);
+                            const height = Math.max((day.count / max) * 48, 4);
+                            return (
+                                <div key={i} className="ai-bar-wrap" title={`${day._id}: ${day.count} requests`}>
+                                    <div className="ai-bar" style={{ height: `${height}px` }} />
+                                    <div className="ai-bar-label">{day.day}</div>
+                                </div>
+                            );
+                        })}
+                        {aiChartData.length === 0 && (
+                            <div className="ai-no-data">Chưa có dữ liệu</div>
+                        )}
+                    </div>
+                </div>
             </div>
 
             {/* ---- Revenue chart ---- */}

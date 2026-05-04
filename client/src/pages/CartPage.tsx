@@ -464,9 +464,21 @@ export default function CartPage({
                                         {/* Image */}
                                         <div className="cp-item-img-wrap">
                                             <img
-                                                src={item.img || item.image || ''}
+                                                src={
+                                                    item.imageUrl ||
+                                                    item.img ||
+                                                    item.image ||
+                                                    item.thumbnail ||
+                                                    item.thumbnailUrl ||
+                                                    (Array.isArray(item.images) && item.images[0]) ||
+                                                    'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"%3E%3Crect width="80" height="80" fill="%23f5f5f3"/%3E%3Ctext x="40" y="45" text-anchor="middle" fill="%23ccc" font-size="32"%3E👕%3C/text%3E%3C/svg%3E'
+                                                }
                                                 alt={item.name}
                                                 className="cp-item-img"
+                                                onError={(e) => {
+                                                    const img = e.target as HTMLImageElement;
+                                                    img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"%3E%3Crect width="80" height="80" fill="%23f5f5f3"/%3E%3Ctext x="40" y="45" text-anchor="middle" fill="%23ccc" font-size="32"%3E👕%3C/text%3E%3C/svg%3E';
+                                                }}
                                             />
                                             {has3D && (
                                                 <span className="cp-item-3d" title="Hỗ trợ thử đồ 3D">3D</span>

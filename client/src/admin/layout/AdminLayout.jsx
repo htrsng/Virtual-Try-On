@@ -5,7 +5,7 @@ import {
     FiMenu, FiChevronDown, FiLogOut, FiHome,
     FiActivity, FiPackage, FiShoppingCart, FiTag,
     FiUsers, FiImage, FiFileText, FiBox, FiList,
-    FiGift, FiTrendingUp, FiSearch, FiBell,
+    FiGift, FiTrendingUp, FiSearch, FiBell, FiCpu,
     FiUser, FiSun, FiMoon, FiDatabase, FiX, FiCheckCircle, FiMessageSquare
 } from 'react-icons/fi';
 import axios from 'axios';
@@ -43,6 +43,13 @@ const MENU_GROUPS = [
         items: [
             { path: '/admin/flash-sale', label: 'Flash Sale', icon: <FiTrendingUp size={18} /> },
             { path: '/admin/vouchers', label: 'Vouchers', icon: <FiGift size={18} /> },
+        ],
+    },
+    {
+        id: 'ai-tech',
+        label: 'AI & CÔNG NGHỆ',
+        items: [
+            { path: '/admin/ai-manager', label: 'AI Manager', icon: <FiCpu size={18} /> },
         ],
     },
     {

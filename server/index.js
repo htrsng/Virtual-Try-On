@@ -3,170 +3,63 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const nodemailer = require("nodemailer");
+const { JWT_SECRET, MONGODB_URI } = require("./config/env");
+const { requireDbReady, authenticateToken, requireAdmin } = require("./middleware");
+const {
+  ProductModel,
+  UserModel,
+  OrderModel,
+  WishlistModel,
+  ReviewModel,
+  ChatMessageModel,
+  NotificationModel,
+  ViewHistoryModel,
+  NewsletterModel,
+  UsedCouponModel,
+  BannerContentModel,
+  VirtualClosetModel,
+  SavedOutfitModel,
+  AILog,
+  normalizeProductInventory,
+} = require("./models");
+const {
+  sendOrderConfirmationEmail,
+  normalizeProductNumericIds,
+  seedBannerContents,
+  syncOrderItemsToCloset,
+  buildLegacyProductVariants,
+  normalizeProductForClient,
+} = require("./services");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Logging middleware
+// Logging middleware7868
 app.use((req, res, next) => {
   console.log(`📨 ${req.method} ${req.path}`);
   next();
 });
 
-// JWT Secret Key
-const JWT_SECRET = "your-secret-key-change-this-in-production";
-
-// --- CẤU HÌNH EMAIL (Nodemailer) ---
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: "thanhtb2005@gmail.com",
-    pass: "xndu nxcu wuea aizn",
-  },
-});
-
-// Verify email transporter khi server khởi động
-transporter.verify((error, success) => {
-  if (error) {
-    console.error("❌ Email transporter lỗi:", error.message);
-  } else {
-    console.log("✅ Email transporter sẵn sàng gửi mail!");
-  }
-});
-
-// Hàm gửi email xác nhận đơn hàng
-async function sendOrderConfirmationEmail(userEmail, order, shippingInfo) {
-  const productRows = order.products
-    .map(
-      (p) => `
-    <tr>
-      <td style="padding: 12px; border-bottom: 1px solid #eee;">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          ${p.img ? `<img src="${p.img}" alt="${p.name}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;"/>` : ""}
-          <span>${p.name}</span>
-        </div>
-      </td>
-      <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center;">${p.quantity}</td>
-      <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">${Number(p.price).toLocaleString("vi-VN")}đ</td>
-      <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; font-weight: 600;">${(p.price * p.quantity).toLocaleString("vi-VN")}đ</td>
-    </tr>
-  `,
-    )
-    .join("");
-
-  const discountRow =
-    order.discountAmount > 0
-      ? `
-    <tr>
-      <td colspan="3" style="padding: 8px 12px; text-align: right; color: #e74c3c;">Giảm giá (${order.discountCode}):</td>
-      <td style="padding: 8px 12px; text-align: right; color: #e74c3c; font-weight: 600;">-${Number(order.discountAmount).toLocaleString("vi-VN")}đ</td>
-    </tr>
-  `
-      : "";
-
-  const voucherRow =
-    order.voucherDiscount > 0
-      ? `
-    <tr>
-      <td colspan="3" style="padding: 8px 12px; text-align: right; color: #e74c3c;">Voucher (${order.voucherCode}):</td>
-      <td style="padding: 8px 12px; text-align: right; color: #e74c3c; font-weight: 600;">-${Number(order.voucherDiscount).toLocaleString("vi-VN")}đ</td>
-    </tr>
-  `
-      : "";
-
-  const htmlContent = `
-  <!DOCTYPE html>
-  <html>
-  <head><meta charset="UTF-8"></head>
-  <body style="margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif;background:#f5f5f5;">
-    <div style="max-width:600px;margin:20px auto;background:white;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.1);">
-      
-      <!-- Header -->
-      <div style="background: linear-gradient(135deg, #c8956c, #a0714f);padding:30px;text-align:center;">
-        <h1 style="color:white;margin:0;font-size:24px;">✅ ĐẶT HÀNG THÀNH CÔNG!</h1>
-        <p style="color:rgba(255,255,255,0.9);margin:8px 0 0;font-size:14px;">Cảm ơn bạn đã mua sắm tại Shopee Fashion</p>
-      </div>
-
-      <!-- Order Info -->
-      <div style="padding:25px;">
-        <div style="background:#f8f9fa;border-radius:8px;padding:15px;margin-bottom:20px;">
-          <p style="margin:0 0 5px;"><strong>Mã đơn hàng:</strong> ${order._id}</p>
-          <p style="margin:0 0 5px;"><strong>Ngày đặt:</strong> ${new Date(order.createdAt).toLocaleString("vi-VN")}</p>
-          <p style="margin:0 0 5px;"><strong>Phương thức thanh toán:</strong> ${order.paymentMethod === "COD" ? "Thanh toán khi nhận hàng (COD)" : order.paymentMethod === "banking" ? "Chuyển khoản ngân hàng" : "Thanh toán online"}</p>
-          <p style="margin:0;"><strong>Trạng thái:</strong> <span style="color:#27ae60;font-weight:600;">Đang xử lý</span></p>
-        </div>
-
-        <!-- Products Table -->
-        <h3 style="color:#333;margin:0 0 10px;">📦 Chi tiết đơn hàng</h3>
-        <table style="width:100%;border-collapse:collapse;">
-          <thead>
-            <tr style="background:#f8f9fa;">
-              <th style="padding:12px;text-align:left;">Sản phẩm</th>
-              <th style="padding:12px;text-align:center;">SL</th>
-              <th style="padding:12px;text-align:right;">Đơn giá</th>
-              <th style="padding:12px;text-align:right;">Thành tiền</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${productRows}
-          </tbody>
-          <tfoot>
-            ${discountRow}
-            ${voucherRow}
-            <tr>
-              <td colspan="3" style="padding:12px;text-align:right;font-size:16px;font-weight:700;color:#c8956c;">Tổng cộng:</td>
-              <td style="padding:12px;text-align:right;font-size:18px;font-weight:700;color:#c8956c;">${Number(order.totalAmount).toLocaleString("vi-VN")}đ</td>
-            </tr>
-          </tfoot>
-        </table>
-
-        <!-- Shipping Info -->
-        <div style="margin-top:20px;background:#f0f7ff;border-radius:8px;padding:15px;border-left:4px solid #3498db;">
-          <h3 style="color:#333;margin:0 0 10px;">🚚 Thông tin giao hàng</h3>
-          <p style="margin:4px 0;"><strong>Người nhận:</strong> ${shippingInfo.fullName}</p>
-          <p style="margin:4px 0;"><strong>SĐT:</strong> ${shippingInfo.phone}</p>
-          <p style="margin:4px 0;"><strong>Địa chỉ:</strong> ${shippingInfo.address}${shippingInfo.ward ? ", " + shippingInfo.ward : ""}${shippingInfo.district ? ", " + shippingInfo.district : ""}${shippingInfo.city ? ", " + shippingInfo.city : ""}</p>
-        </div>
-      </div>
-
-      <!-- Footer -->
-      <div style="background:#f8f9fa;padding:20px;text-align:center;border-top:1px solid #eee;">
-        <p style="color:#888;font-size:13px;margin:0;">Nếu bạn có bất kỳ thắc mắc nào, vui lòng liên hệ với chúng tôi.</p>
-        <p style="color:#aaa;font-size:12px;margin:8px 0 0;">Shopee Fashion Vietnam © ${new Date().getFullYear()}</p>
-      </div>
-    </div>
-  </body>
-  </html>
-  `;
-
-  const mailOptions = {
-    from: '"Shopee Fashion" <thanhtb2005@gmail.com>',
-    to: userEmail,
-    subject: `✅ Đặt hàng thành công - Đơn hàng #${order._id.toString().slice(-8).toUpperCase()}`,
-    html: htmlContent,
-  };
-
-  await transporter.sendMail(mailOptions);
-  console.log(`✉️ Email xác nhận đã gửi tới: ${userEmail}`);
+if (!MONGODB_URI) {
+  console.error("❌ Thiếu MONGODB_URI. Hãy đặt giá trị này trong server/.env hoặc biến môi trường hệ thống.");
 }
 
 // Kết nối MongoDB với kiểm tra chi tiết
-mongoose
-  .connect(
-    "mongodb+srv://thanhtb2005:thanhthcsldp1@cluster.awvl3k3.mongodb.net/virtual-try-on?retryWrites=true&w=majority",
-  )
-  .then(() => {
-    console.log("✅ Đã kết nối thành công đến MongoDB Atlas!");
-    console.log("📊 Database:", mongoose.connection.name);
-    console.log("🔗 Host:", mongoose.connection.host);
-    console.log("📡 Connection state:", mongoose.connection.readyState); // 1 = connected
-  })
-  .catch((err) => {
-    console.error("❌ Lỗi kết nối MongoDB Atlas:", err);
-    process.exit(1);
-  });
+if (MONGODB_URI) {
+  mongoose
+    .connect(MONGODB_URI)
+    .then(() => {
+      console.log("✅ Đã kết nối thành công đến MongoDB Atlas!");
+      console.log("📊 Database:", mongoose.connection.name);
+      console.log("🔗 Host:", mongoose.connection.host);
+      console.log("📡 Connection state:", mongoose.connection.readyState); // 1 = connected
+    })
+    .catch((err) => {
+      console.error("❌ Lỗi kết nối MongoDB Atlas:", err);
+      // Keep HTTP server alive so clients get explicit API errors instead of random 404s.
+    });
+}
 
 // Theo dõi trạng thái database
 mongoose.connection.on("connected", () => {
@@ -187,350 +80,65 @@ mongoose.connection.on("disconnected", () => {
   console.log("🟠 MongoDB disconnected");
 });
 
-// --- SCHEMA SẢN PHẨM ---
-const ProductSchema = new mongoose.Schema({
-  id: Number, // ID numeric tự tăng
-  name: String,
-  price: Number,
-  img: String,
-  category: String,
-  sold: Number,
-});
-const ProductModel = mongoose.model("products", ProductSchema);
-
-const normalizeProductNumericIds = async () => {
-  const products = await ProductModel.find().sort({ _id: 1 });
-  if (!products.length) {
-    return {
-      total: 0,
-      updated: 0,
-      message: "Không có sản phẩm để chuẩn hóa ID",
-    };
-  }
-
-  const usedIds = new Set();
-  let maxId = 0;
-
-  products.forEach((product) => {
-    const numericId = Number(product.id);
-    if (
-      Number.isInteger(numericId) &&
-      numericId > 0 &&
-      !usedIds.has(numericId)
-    ) {
-      usedIds.add(numericId);
-      maxId = Math.max(maxId, numericId);
-    }
-  });
-
-  const updates = [];
-  const getNextId = () => {
-    let candidate = Math.max(1, maxId + 1);
-    while (usedIds.has(candidate)) {
-      candidate += 1;
-    }
-    usedIds.add(candidate);
-    maxId = Math.max(maxId, candidate);
-    return candidate;
-  };
-
-  products.forEach((product) => {
-    const numericId = Number(product.id);
-    const isValid = Number.isInteger(numericId) && numericId > 0;
-    if (!isValid || usedIds.has(`dup:${numericId}`)) {
-      updates.push({
-        updateOne: {
-          filter: { _id: product._id },
-          update: { $set: { id: getNextId() } },
-        },
-      });
-    } else {
-      usedIds.add(`dup:${numericId}`);
-    }
-  });
-
-  if (updates.length > 0) {
-    await ProductModel.bulkWrite(updates);
-  }
-
-  return {
-    total: products.length,
-    updated: updates.length,
-    message: `Đã chuẩn hóa ID sản phẩm (${updates.length}/${products.length})`,
-  };
-};
-
-// --- SCHEMA NGƯỜI DÙNG ---
-const UserSchema = new mongoose.Schema({
-  id: Number, // ID numeric tự tăng
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  role: { type: String, default: "user" }, // 'admin' hoặc 'user'
-  fullName: { type: String, default: "" },
-  phone: { type: String, default: "" },
-  address: { type: String, default: "" },
-  city: { type: String, default: "" },
-  district: { type: String, default: "" },
-  ward: { type: String, default: "" },
-  createdAt: { type: Date, default: Date.now },
-});
-const UserModel = mongoose.model("users", UserSchema);
-
-// --- SCHEMA ĐƠN HÀNG ---
-const OrderSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "users",
-    required: true,
-  },
-  products: [
-    {
-      productId: { type: mongoose.Schema.Types.Mixed }, // Chấp nhận cả ObjectId và Number
-      name: String,
-      price: Number,
-      quantity: Number,
-      img: String,
-    },
-  ],
-  totalAmount: { type: Number, required: true },
-  discountCode: { type: String, default: "" },
-  discountAmount: { type: Number, default: 0 },
-  voucherCode: { type: String, default: "" },
-  voucherDiscount: { type: Number, default: 0 },
-  shippingFee: { type: Number, default: 0 },
-  shippingMethod: { type: String, default: "Tiêu chuẩn" },
-  shippingInfo: {
-    fullName: String,
-    phone: String,
-    address: String,
-    city: String,
-    district: String,
-    ward: String,
-  },
-  paymentMethod: { type: String, default: "COD" },
-  status: { type: String, default: "Đang xử lý" }, // Đang xử lý, Đã giao, Đã hủy
-  createdAt: { type: Date, default: Date.now },
-  cancelledAt: { type: Date },
-  cancelReason: { type: String },
-});
-const OrderModel = mongoose.model("orders", OrderSchema);
-
-// --- SCHEMA WISHLIST (ĐỒNG BỘ SERVER) ---
-const WishlistSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "users",
-    required: true,
-  },
-  products: [
-    {
-      productId: { type: mongoose.Schema.Types.Mixed },
-      name: String,
-      price: Number,
-      img: String,
-      category: String,
-      addedAt: { type: Date, default: Date.now },
-    },
-  ],
-  updatedAt: { type: Date, default: Date.now },
-});
-WishlistSchema.index({ userId: 1 }, { unique: true });
-const WishlistModel = mongoose.model("wishlists", WishlistSchema);
-
-// --- SCHEMA ĐÁNH GIÁ SẢN PHẨM (REVIEW) ---
-const ReviewSchema = new mongoose.Schema({
-  productId: { type: mongoose.Schema.Types.Mixed, required: true },
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "users",
-    required: true,
-  },
-  userName: { type: String, default: "Ẩn danh" },
-  rating: { type: Number, required: true, min: 1, max: 5 },
-  comment: { type: String, default: "" },
-  images: [String],
-  likes: { type: Number, default: 0 },
-  createdAt: { type: Date, default: Date.now },
-});
-ReviewSchema.index({ productId: 1, userId: 1 }, { unique: true });
-const ReviewModel = mongoose.model("reviews", ReviewSchema);
-
-// --- SCHEMA CHAT (HỖ TRỢ KHÁCH HÀNG) ---
-const ChatMessageSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
-  sender: { type: String, enum: ["user", "bot", "admin"], default: "user" },
-  message: { type: String, required: true },
-  type: { type: String, enum: ["text", "image", "product"], default: "text" },
-  metadata: { type: mongoose.Schema.Types.Mixed },
-  isRead: { type: Boolean, default: false },
-  createdAt: { type: Date, default: Date.now },
-});
-const ChatMessageModel = mongoose.model("chat_messages", ChatMessageSchema);
-
-// --- SCHEMA THÔNG BÁO (NOTIFICATION) ---
-const NotificationSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
-  title: { type: String, required: true },
-  message: { type: String, required: true },
-  type: {
-    type: String,
-    enum: ["order", "promo", "system", "cart_reminder"],
-    default: "system",
-  },
-  link: { type: String, default: "" },
-  isRead: { type: Boolean, default: false },
-  createdAt: { type: Date, default: Date.now },
-});
-const NotificationModel = mongoose.model("notifications", NotificationSchema);
-
-// --- SCHEMA LỊCH SỬ XEM SẢN PHẨM (cho gợi ý thông minh) ---
-const ViewHistorySchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
-  productId: { type: mongoose.Schema.Types.Mixed, required: true },
-  category: { type: String },
-  viewCount: { type: Number, default: 1 },
-  lastViewedAt: { type: Date, default: Date.now },
-});
-ViewHistorySchema.index({ userId: 1, productId: 1 }, { unique: true });
-const ViewHistoryModel = mongoose.model("view_histories", ViewHistorySchema);
-
-// --- SCHEMA NEWSLETTER (MỚI) ---
-const NewsletterSchema = new mongoose.Schema({
-  email: { type: String, required: true, unique: true },
-  couponCode: { type: String, required: true },
-  isUsed: { type: Boolean, default: false },
-  createdAt: { type: Date, default: Date.now },
-});
-const NewsletterModel = mongoose.model("newsletters", NewsletterSchema);
-
-// --- SCHEMA USED COUPONS (tracking mã giảm giá đã sử dụng) ---
-const UsedCouponSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "users",
-    required: true,
-  },
-  couponCode: { type: String, required: true },
-  orderId: { type: mongoose.Schema.Types.ObjectId, ref: "orders" },
-  usedAt: { type: Date, default: Date.now },
-});
-UsedCouponSchema.index({ userId: 1, couponCode: 1 }, { unique: true });
-const UsedCouponModel = mongoose.model("usedcoupons", UsedCouponSchema);
-
-// --- SCHEMA BANNER CONTENT (MỚI) ---
-const BannerContentSchema = new mongoose.Schema({
-  bannerId: { type: String, required: true, unique: true }, // banner1, banner2, banner3
-  title: { type: String, required: true },
-  content: { type: String, required: true },
-  imageUrl: { type: String },
-  isActive: { type: Boolean, default: true },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
-});
-const BannerContentModel = mongoose.model(
-  "banner_contents",
-  BannerContentSchema,
-);
-
-// --- SEED BANNER CONTENT (đảm bảo có dữ liệu mặc định) ---
-const seedBannerContents = async () => {
-  const defaults = [
-    {
-      bannerId: "banner1",
-      title: "Ưu đãi hôm nay",
-      content: "Giảm giá hấp dẫn cho các sản phẩm mới nhất.",
-      imageUrl: "",
-      isActive: true,
-    },
-    {
-      bannerId: "banner2",
-      title: "Bộ sưu tập mới",
-      content: "Khám phá phong cách mới cùng công nghệ thử đồ ảo.",
-      imageUrl: "",
-      isActive: true,
-    },
-    {
-      bannerId: "banner3",
-      title: "Miễn phí vận chuyển",
-      content: "Áp dụng cho đơn hàng từ 499K.",
-      imageUrl: "",
-      isActive: true,
-    },
-  ];
-
-  await Promise.all(
-    defaults.map((banner) =>
-      BannerContentModel.updateOne(
-        { bannerId: banner.bannerId },
-        { $setOnInsert: banner },
-        { upsert: true },
-      ),
-    ),
-  );
-  console.log("✅ Seed banner contents done");
-};
-
-// --- MIDDLEWARE XÁC THỰC JWT ---
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-
-  if (!token) {
-    console.log("❌ No token provided");
-    return res.status(401).json({ message: "Không có token xác thực" });
-  }
-
-  jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) {
-      console.log("❌ Invalid token:", err.message);
-      return res.status(403).json({ message: "Token không hợp lệ" });
-    }
-    console.log("✅ Token verified for user:", user.email);
-    req.user = user;
-    next();
-  });
-};
-
-// --- API SẢN PHẨM ---
 app.get("/api/products", async (req, res) => {
   try {
     await normalizeProductNumericIds();
-    const products = await ProductModel.find().sort({ id: 1 });
-    res.json(products);
+    const products = await ProductModel.find().sort({ id: 1, _id: 1 });
+    res.json(products.map(normalizeProductForClient));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.post("/api/products", async (req, res) => {
+app.get("/api/products/next-id", authenticateToken, requireDbReady, async (req, res) => {
   try {
-    // Tìm ID lớn nhất hiện có
-    const maxProduct = await ProductModel.findOne().sort({ id: -1 }).limit(1);
-    const nextId = maxProduct && maxProduct.id ? maxProduct.id + 1 : 1;
+    const lastProduct = await ProductModel
+      .findOne({ id: { $type: "number" } })
+      .sort({ id: -1 })
+      .select("id");
 
-    console.log("🆕 Tạo sản phẩm mới với ID:", nextId);
-
-    const newProduct = new ProductModel({
-      ...req.body,
-      id: nextId, // Gán ID numeric tự động tăng
-    });
-    await newProduct.save();
-
-    console.log("✅ Đã lưu với ID:", newProduct.id);
-    res.json(newProduct);
+    const nextId = (lastProduct?.id ?? 0) + 1;
+    res.json({ nextId });
   } catch (err) {
-    console.error("❌ Lỗi POST:", err.message);
+    res.status(500).json({ error: "Failed to generate ID" });
+  }
+});
+
+app.get("/api/products/:id/stock", async (req, res) => {
+  try {
+    const product = await ProductModel.findOne({
+      $or: [{ _id: req.params.id }, { id: Number(req.params.id) }],
+    });
+
+    if (!product) {
+      return res.status(404).json({ error: "Không tìm thấy sản phẩm" });
+    }
+
+    const inventory = normalizeProductInventory(product.toObject());
+    res.json({
+      id: product.id,
+      totalStock: inventory.totalStock,
+      stock: inventory.stock,
+      variants: inventory.variants,
+    });
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
 app.put("/api/products/:id", async (req, res) => {
   try {
-    const updatedProduct = await ProductModel.findByIdAndUpdate(
-      req.params.id,
-      req.body,
+    const inventory = normalizeProductInventory(req.body);
+    const updatedProduct = await ProductModel.findOneAndUpdate(
+      { $or: [{ _id: req.params.id }, { id: Number(req.params.id) }] },
+      { $set: { ...req.body, ...inventory } },
       { new: true },
     );
+
+    if (!updatedProduct) {
+      return res.status(404).json({ error: "Không tìm thấy sản phẩm" });
+    }
+
     res.json(updatedProduct);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -539,7 +147,14 @@ app.put("/api/products/:id", async (req, res) => {
 
 app.delete("/api/products/:id", async (req, res) => {
   try {
-    await ProductModel.findByIdAndDelete(req.params.id);
+    const deletedProduct = await ProductModel.findOneAndDelete({
+      $or: [{ _id: req.params.id }, { id: Number(req.params.id) }],
+    });
+
+    if (!deletedProduct) {
+      return res.status(404).json({ error: "Không tìm thấy sản phẩm" });
+    }
+
     res.json({ message: "Deleted" });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -555,257 +170,71 @@ app.post("/api/admin/products/normalize-ids", async (req, res) => {
   }
 });
 
-// --- API NEWSLETTER ---
-// 1. Đăng ký nhận tin và nhận mã giảm giá
-app.post("/api/newsletter/subscribe", async (req, res) => {
+app.post("/api/admin/migrate-products", authenticateToken, requireAdmin, requireDbReady, async (req, res) => {
   try {
-    const { email } = req.body;
+    const legacyProducts = await ProductModel.find({
+      $or: [
+        { variants: { $exists: false } },
+        { variants: { $size: 0 } },
+      ],
+    });
 
-    if (!email) {
-      return res.status(400).json({ message: "Email là bắt buộc" });
-    }
+    let migrated = 0;
 
-    // Kiểm tra email đã đăng ký chưa
-    const existingSubscriber = await NewsletterModel.findOne({ email });
-    if (existingSubscriber) {
-      return res.status(400).json({
-        message: "Email này đã đăng ký nhận tin rồi!",
-        alreadySubscribed: true,
+    for (const product of legacyProducts) {
+      const legacyVariants = buildLegacyProductVariants(product.toObject());
+      const totalStock = Number(product.totalStock ?? product.stock) || 0;
+
+      await ProductModel.findByIdAndUpdate(product._id, {
+        $set: {
+          variants: legacyVariants,
+          totalStock,
+          stock: totalStock,
+        },
       });
-    }
-
-    // Tạo mã giảm giá unique cho email này
-    const timestamp = Date.now().toString(36);
-    const randomStr = Math.random().toString(36).substring(2, 7).toUpperCase();
-    const couponCode = `NEWS10${randomStr}`;
-
-    // Lưu vào database
-    const newSubscriber = new NewsletterModel({
-      email,
-      couponCode,
-      isUsed: false,
-    });
-    await newSubscriber.save();
-
-    res.json({
-      message: "Đăng ký thành công!",
-      couponCode,
-      discount: 10,
-    });
-  } catch (err) {
-    console.error("Lỗi đăng ký newsletter:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// 2. Kiểm tra và sử dụng mã giảm giá từ newsletter
-app.post("/api/newsletter/validate-coupon", async (req, res) => {
-  try {
-    const { couponCode, email } = req.body;
-
-    if (!couponCode) {
-      return res.status(400).json({ message: "Mã giảm giá là bắt buộc" });
-    }
-
-    // Tìm mã giảm giá
-    const subscriber = await NewsletterModel.findOne({ couponCode });
-
-    if (!subscriber) {
-      return res.status(404).json({
-        message: "Mã giảm giá không hợp lệ",
-        valid: false,
-      });
-    }
-
-    if (subscriber.isUsed) {
-      return res.status(400).json({
-        message: "Mã giảm giá này đã được sử dụng",
-        valid: false,
-      });
+      migrated += 1;
     }
 
     res.json({
-      message: "Mã giảm giá hợp lệ",
-      valid: true,
-      discount: 10,
-      email: subscriber.email,
+      success: true,
+      message: `Đã migrate ${migrated} sản phẩm`,
+      migrated,
     });
   } catch (err) {
-    console.error("Lỗi kiểm tra mã:", err);
-    res.status(500).json({ error: err.message });
+    console.error("Migration error:", err);
+    res.status(500).json({ error: "Migration failed", detail: err.message });
   }
 });
 
-// 3. Đánh dấu mã đã sử dụng
-app.post("/api/newsletter/use-coupon", async (req, res) => {
+app.post("/api/products", async (req, res) => {
   try {
-    const { couponCode } = req.body;
+    // Tìm ID lớn nhất hiện có hoặc nhận ID do frontend cấp
+    const requestedId = Number(req.body.id);
+    const maxProduct = await ProductModel.findOne({ id: { $type: "number" } }).sort({ id: -1 }).limit(1);
+    const nextId = Number.isInteger(requestedId) && requestedId > 0
+      ? requestedId
+      : (maxProduct && maxProduct.id ? maxProduct.id + 1 : 1);
+    const inventory = normalizeProductInventory(req.body);
 
-    const subscriber = await NewsletterModel.findOne({ couponCode });
-    if (!subscriber) {
-      return res.status(404).json({ message: "Mã không tồn tại" });
-    }
+    console.log("🆕 Tạo sản phẩm mới với ID:", nextId);
 
-    if (subscriber.isUsed) {
-      return res.status(400).json({ message: "Mã đã được sử dụng" });
-    }
-
-    subscriber.isUsed = true;
-    await subscriber.save();
-
-    res.json({ message: "Đã đánh dấu mã đã sử dụng" });
-  } catch (err) {
-    console.error("Lỗi sử dụng mã:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// 4. Kiểm tra mã giảm giá đã sử dụng chưa (cho user)
-app.post("/api/check-coupon-used", authenticateToken, async (req, res) => {
-  try {
-    const normalizedCouponCode = String(req.body?.couponCode || "")
-      .trim()
-      .toUpperCase();
-
-    if (!normalizedCouponCode) {
-      return res
-        .status(400)
-        .json({ message: "Thiếu mã giảm giá", used: false });
-    }
-
-    const usedCoupon = await UsedCouponModel.findOne({
-      userId: req.user.id,
-      couponCode: normalizedCouponCode,
-    });
-
-    res.json({
-      used: !!usedCoupon,
-      message: usedCoupon ? "Mã đã được sử dụng" : "Mã có thể sử dụng",
-    });
-  } catch (err) {
-    console.error("Lỗi kiểm tra mã:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// 5. Lấy danh sách tất cả mã đã sử dụng của user
-app.get("/api/used-coupons", authenticateToken, async (req, res) => {
-  try {
-    const usedCoupons = await UsedCouponModel.find({
-      userId: req.user.id,
-    });
-
-    const couponCodes = usedCoupons.map((item) => item.couponCode);
-
-    res.json({
-      coupons: couponCodes,
-      count: couponCodes.length,
-    });
-  } catch (err) {
-    console.error("Lỗi lấy danh sách mã đã dùng:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// --- API KIỂM TRA DATABASE ---
-app.get("/api/health", async (req, res) => {
-  try {
-    const dbState = mongoose.connection.readyState;
-    const states = {
-      0: "disconnected",
-      1: "connected",
-      2: "connecting",
-      3: "disconnecting",
-    };
-
-    const health = {
-      status: dbState === 1 ? "OK" : "ERROR",
-      database: {
-        state: states[dbState],
-        name: mongoose.connection.name,
-        host: mongoose.connection.host,
-      },
-      timestamp: new Date().toISOString(),
-    };
-
-    // Thử query để chắc chắn database hoạt động
-    if (dbState === 1) {
-      const productCount = await ProductModel.countDocuments();
-      const userCount = await UserModel.countDocuments();
-      const orderCount = await OrderModel.countDocuments();
-      health.database.collections = {
-        products: productCount,
-        users: userCount,
-        orders: orderCount,
-      };
-    }
-
-    res.json(health);
-  } catch (err) {
-    res.status(500).json({
-      status: "ERROR",
-      message: err.message,
-    });
-  }
-});
-
-// --- API NGƯỜI DÙNG ---
-// 1. Đăng ký
-app.post("/api/auth/register", async (req, res) => {
-  try {
-    const { email, password, fullName, phone, address } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({ message: "Email và password là bắt buộc" });
-    }
-
-    // Kiểm tra trùng lặp
-    const existingUser = await UserModel.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: "Tài khoản đã tồn tại" });
-    }
-
-    // Mã hóa mật khẩu
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Tìm ID lớn nhất hiện có
-    const maxUser = await UserModel.findOne().sort({ id: -1 }).limit(1);
-    const nextId = maxUser && maxUser.id ? maxUser.id + 1 : 1;
-
-    const newUser = new UserModel({
-      email,
-      password: hashedPassword,
-      fullName: fullName || "",
-      phone: phone || "",
-      address: address || "",
+    const newProduct = new ProductModel({
+      ...req.body,
       id: nextId, // Gán ID numeric tự động tăng
+      ...inventory,
+      ai_attributes: req.body.ai_attributes || {}
     });
-    await newUser.save();
 
-    // Tạo JWT token
-    const token = jwt.sign(
-      { id: newUser._id, email: newUser.email, role: newUser.role },
-      JWT_SECRET,
-      { expiresIn: "7d" },
-    );
+    // Mark the field as modified to ensure it gets saved
+    newProduct.markModified('ai_attributes');
+    newProduct.markModified('variants');
 
-    res.json({
-      message: "Đăng ký thành công",
-      token,
-      user: {
-        id: newUser._id,
-        email: newUser.email,
-        role: newUser.role,
-        fullName: newUser.fullName,
-        phone: newUser.phone,
-        address: newUser.address,
-        city: newUser.city || "",
-        district: newUser.district || "",
-        ward: newUser.ward || "",
-      },
-    });
+    await newProduct.save();
+
+    console.log("✅ Đã lưu với ID:", newProduct.id);
+    res.json(newProduct);
   } catch (err) {
-    console.error("Lỗi đăng ký:", err);
+    console.error("❌ Lỗi tạo sản phẩm:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -813,18 +242,23 @@ app.post("/api/auth/register", async (req, res) => {
 // 2. Đăng nhập
 app.post("/api/auth/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const emailInput = String(req.body?.email || "").trim();
+    const normalizedEmail = emailInput.toLowerCase();
+    const password = String(req.body?.password || "");
 
-    if (!email || !password) {
+    if (!emailInput || !password) {
       return res.status(400).json({ message: "Email và password là bắt buộc" });
     }
 
     // Tìm user
-    const user = await UserModel.findOne({ email });
+    let user = await UserModel.findOne({ email: normalizedEmail });
+    if (!user && emailInput !== normalizedEmail) {
+      user = await UserModel.findOne({ email: emailInput });
+    }
     if (!user) {
       return res
-        .status(401)
-        .json({ message: "Email hoặc mật khẩu không đúng" });
+        .status(404)
+        .json({ message: "Không tìm thấy tài khoản với email này" });
     }
 
     // Kiểm tra mật khẩu
@@ -1166,6 +600,7 @@ app.put("/api/orders/:id", async (req, res) => {
       { status },
       { new: true },
     );
+
     // Gửi thông báo cho user
     if (updatedOrder && updatedOrder.userId) {
       const statusMessages = {
@@ -1181,7 +616,29 @@ app.put("/api/orders/:id", async (req, res) => {
         "order",
         "/profile",
       );
+
+      // STEP 1 & 3: Automatically sync items to virtual closet when order is delivered
+      const successStatuses = ["Đã giao", "hoàn thành", "delivered", "completed"];
+      if (
+        successStatuses.some((s) =>
+          String(status).toLowerCase().includes(s.toLowerCase())
+        )
+      ) {
+        console.log(
+          `🏷️ Order marked as delivered, syncing items to closet...`,
+        );
+        const syncResult = await syncOrderItemsToCloset(
+          updatedOrder.userId,
+          updatedOrder._id,
+          updatedOrder.products,
+        );
+        console.log(
+          `✅ Closet sync result:`,
+          syncResult,
+        );
+      }
     }
+
     res.json(updatedOrder);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -1236,6 +693,360 @@ app.put("/api/orders/:id/cancel", authenticateToken, async (req, res) => {
   } catch (err) {
     console.error("Lỗi hủy đơn hàng:", err);
     res.status(500).json({ error: err.message });
+  }
+});
+
+// =============================================
+// API VIRTUAL CLOSET (TỦ ĐỒ CÁ NHÂN)
+// =============================================
+// Step 4 & 5: 3D Fitting Room Integration + Mix-and-Match Simulation
+
+// 1. Lấy tủ đồ của user (Step 4: User views closet drawer)
+app.get("/api/virtual-closet", authenticateToken, requireDbReady, async (req, res) => {
+  try {
+    const closet = await VirtualClosetModel.findOne({ userId: req.user.id });
+
+    if (!closet) {
+      // Return empty closet if not found
+      return res.json({
+        userId: req.user.id,
+        items: [],
+        totalItems: 0,
+        categoryCounts: {},
+        groupedByCategory: {},
+        message: "Closet is empty. Start shopping to build your collection!",
+      });
+    }
+
+    // Personalized closet: only purchased-success items synced from delivered orders.
+    const purchasedItems = closet.items.filter(
+      (item) => item.isActive && item.source === "order",
+    );
+    const normalizedItems = purchasedItems.map((item) => ({
+      ...item.toObject(),
+      thumbnailUrl: item.thumbnailUrl || item.imageUrl || item.img || "",
+      imageUrl: item.imageUrl || item.thumbnailUrl || item.img || "",
+      img: item.img || item.imageUrl || item.thumbnailUrl || "",
+    }));
+
+    const groupedByCategory = normalizedItems.reduce((acc, item) => {
+      const key = String(item.category || "Khác").trim() || "Khác";
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(item);
+      return acc;
+    }, {});
+
+    const categoryCounts = Object.entries(groupedByCategory).reduce(
+      (acc, [category, items]) => {
+        acc[String(category)] = items.length;
+        return acc;
+      },
+      {},
+    );
+
+    res.json({
+      ...closet.toObject(),
+      items: normalizedItems,
+      totalItems: normalizedItems.length,
+      categoryCounts,
+      groupedByCategory,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 2. Lấy tủ đồ theo danh mục
+app.get("/api/virtual-closet/category/:category", authenticateToken, requireDbReady, async (req, res) => {
+  try {
+    const { category } = req.params;
+    const closet = await VirtualClosetModel.findOne({ userId: req.user.id });
+
+    if (!closet || !closet.items.length) {
+      return res.json({ items: [] });
+    }
+
+    const filtered = closet.items.filter(
+      (item) =>
+        item.isActive &&
+        item.source === "order" &&
+        item.category.toLowerCase() === category.toLowerCase(),
+    );
+
+    const normalized = filtered.map((item) => ({
+      ...item.toObject(),
+      thumbnailUrl: item.thumbnailUrl || item.imageUrl || item.img || "",
+      imageUrl: item.imageUrl || item.thumbnailUrl || item.img || "",
+      img: item.img || item.imageUrl || item.thumbnailUrl || "",
+    }));
+
+    res.json({ items: normalized, count: normalized.length });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 3. Wear/Try on item from closet (Step 5: Mix-and-Match Simulation)
+app.post("/api/virtual-closet/wear/:itemId", authenticateToken, requireDbReady, async (req, res) => {
+  try {
+    const { itemId } = req.params;
+    const now = new Date();
+    const updateResult = await VirtualClosetModel.updateOne(
+      { userId: req.user.id, "items.itemId": itemId },
+      {
+        $inc: {
+          "items.$.wearCount": 1,
+          "items.$.wornCount": 1,
+        },
+        $set: {
+          "items.$.lastWorn": now,
+          "items.$.lastWornAt": now,
+          updatedAt: now,
+        },
+      },
+    );
+
+    if (!updateResult.matchedCount) {
+      return res.status(404).json({ message: "Closet not found" });
+    }
+
+    const closet = await VirtualClosetModel.findOne(
+      { userId: req.user.id },
+      { items: { $elemMatch: { itemId } } },
+    );
+    const item = closet?.items?.[0] || null;
+
+    res.json({
+      message: "Item selected for try-on",
+      item,
+      wearCount: item?.wearCount || 0,
+      wornCount: item?.wornCount || item?.wearCount || 0,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 4. Remove item from closet
+app.delete("/api/virtual-closet/:itemId", authenticateToken, requireDbReady, async (req, res) => {
+  try {
+    const { itemId } = req.params;
+    const closet = await VirtualClosetModel.findOne({ userId: req.user.id });
+
+    if (!closet) {
+      return res.status(404).json({ message: "Closet not found" });
+    }
+
+    closet.items = closet.items.filter((item) => item.itemId !== itemId);
+    closet.totalItems = closet.items.length;
+    closet.updatedAt = new Date();
+    await closet.save();
+
+    res.json({ message: "Item removed from closet", totalItems: closet.items.length });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 5. Get closet stats (for AI Stylist - Step 6)
+app.get("/api/virtual-closet/stats/summary", authenticateToken, requireDbReady, async (req, res) => {
+  try {
+    const closet = await VirtualClosetModel.findOne({ userId: req.user.id });
+
+    if (!closet) {
+      return res.json({
+        totalItems: 0,
+        categories: {},
+        mostWorn: null,
+        averagePrice: 0,
+      });
+    }
+
+    // Calculate stats
+    const categories = closet.items.reduce((acc, item) => {
+      acc[item.category] = (acc[item.category] || 0) + 1;
+      return acc;
+    }, {});
+
+    const mostWorn = [...closet.items].sort(
+      (a, b) => (b.wearCount || 0) - (a.wearCount || 0),
+    )[0];
+
+    const avgPrice =
+      closet.items.reduce((sum, item) => sum + (item.price || 0), 0) /
+      closet.items.length || 0;
+
+    res.json({
+      totalItems: closet.items.length,
+      categories,
+      mostWorn,
+      averagePrice: Math.round(avgPrice),
+      lastSyncedAt: closet.lastSyncedAt,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 6. Manually add item to closet (for admin or import features)
+app.post("/api/virtual-closet/add", authenticateToken, requireDbReady, async (req, res) => {
+  try {
+    const { productId, name, category, price, img, imageUrl, thumbnailUrl } =
+      req.body;
+
+    if (!productId || !name || !category) {
+      return res
+        .status(400)
+        .json({ message: "Missing required fields: productId, name, category" });
+    }
+
+    let closet = await VirtualClosetModel.findOne({ userId: req.user.id });
+    if (!closet) {
+      closet = new VirtualClosetModel({
+        userId: req.user.id,
+        items: [],
+      });
+    }
+
+    const itemId = `closet-manual-${Date.now()}-${productId}`;
+    const resolvedImage = thumbnailUrl || imageUrl || img || "";
+    closet.items.push({
+      itemId,
+      productId,
+      name,
+      category,
+      price,
+      img: resolvedImage,
+      imageUrl: imageUrl || resolvedImage,
+      thumbnailUrl: thumbnailUrl || resolvedImage,
+      dateAdded: new Date(),
+      source: "import",
+      isActive: true,
+    });
+
+    closet.totalItems = closet.items.length;
+    closet.updatedAt = new Date();
+    await closet.save();
+
+    res.json({
+      message: "Item added to closet successfully",
+      item: closet.items[closet.items.length - 1],
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/saved-outfits", authenticateToken, requireDbReady, async (req, res) => {
+  try {
+    const { name, slots } = req.body;
+    if (!slots || typeof slots !== "object") {
+      return res.status(400).json({ success: false, error: "slots is required" });
+    }
+
+    const outfit = await SavedOutfitModel.create({
+      userId: req.user.id,
+      name: String(name || "").trim() || "Outfit chưa đặt tên",
+      slots,
+    });
+    res.status(201).json({ success: true, outfit });
+  } catch (err) {
+    console.error("[saved-outfits POST]", err);
+    res.status(500).json({ success: false, error: "Failed to save outfit" });
+  }
+});
+
+app.get("/api/saved-outfits", authenticateToken, requireDbReady, async (req, res) => {
+  try {
+    const outfits = await SavedOutfitModel
+      .find({ userId: req.user.id })
+      .sort({ createdAt: -1 })
+      .lean();
+    res.json({ success: true, outfits });
+  } catch (err) {
+    console.error("[saved-outfits GET]", err);
+    res.status(500).json({ success: false, error: "Failed to load saved outfits" });
+  }
+});
+
+app.delete("/api/saved-outfits/:id", authenticateToken, requireDbReady, async (req, res) => {
+  try {
+    const result = await SavedOutfitModel.deleteOne({ _id: req.params.id, userId: req.user.id });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ success: false, error: "Outfit not found" });
+    }
+    res.json({ success: true });
+  } catch (err) {
+    console.error("[saved-outfits DELETE]", err);
+    res.status(500).json({ success: false, error: "Failed to delete outfit" });
+  }
+});
+
+app.post("/api/ai/outfit-suggest", authenticateToken, requireDbReady, async (req, res) => {
+  try {
+    const userPrompt = String(req.body?.userPrompt || "").trim();
+    const outfit = Array.isArray(req.body?.outfit) ? req.body.outfit : [];
+    const missing = Array.isArray(req.body?.missing) ? req.body.missing : [];
+
+    const result = { outfit, missing };
+
+    await AILog.create({
+      userId: req.user?.id || undefined,
+      userPrompt,
+      outfitCount: result.outfit?.length ?? 0,
+      missingCount: result.missing?.length ?? 0,
+    });
+
+    res.json({ success: true, ...result });
+  } catch (err) {
+    console.error("[ai outfit suggest]", err);
+    res.status(500).json({ success: false, error: "AI suggest failed" });
+  }
+});
+
+app.get("/api/admin/ai-stats", authenticateToken, requireAdmin, requireDbReady, async (req, res) => {
+  try {
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+    const [totalRequests, last7Days, recentPrompts] = await Promise.all([
+      AILog.countDocuments(),
+      AILog.aggregate([
+        {
+          $match: {
+            createdAt: { $gte: sevenDaysAgo },
+          },
+        },
+        {
+          $group: {
+            _id: {
+              $dateToString: {
+                format: "%Y-%m-%d",
+                date: "$createdAt",
+              },
+            },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ]),
+      AILog.find()
+        .sort({ createdAt: -1 })
+        .limit(10)
+        .select("userPrompt createdAt outfitCount missingCount")
+        .lean(),
+    ]);
+
+    res.json({
+      success: true,
+      totalRequests,
+      last7Days,
+      recentPrompts,
+    });
+  } catch (err) {
+    console.error("[admin ai stats]", err);
+    res.status(500).json({ success: false, error: "Failed to fetch AI stats" });
   }
 });
 
@@ -1429,6 +1240,77 @@ app.post("/api/wishlist/sync", authenticateToken, async (req, res) => {
 // =============================================
 // API ĐÁNH GIÁ SẢN PHẨM (REVIEW)
 // =============================================
+
+// 0. Kiểm tra xem user có thể đánh giá sản phẩm không
+app.get("/api/products/:productId/can-review", authenticateToken, async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const userId = req.user.id;
+
+    // Kiểm tra xem đã đánh giá chưa
+    const existingReview = await ReviewModel.findOne({
+      productId,
+      userId,
+    });
+
+    if (existingReview) {
+      return res.json({
+        canReview: false,
+        hasPurchased: true,
+        hasReviewed: true,
+        message: "Bạn đã đánh giá sản phẩm này rồi",
+      });
+    }
+
+    // Tìm order của user cho product này
+    const order = await OrderModel.findOne({
+      userId,
+      "items.productId": productId,
+      $or: [
+        { status: "completed" },
+        { status: "delivered" },
+        { status: "Hoàn thành" },
+        { status: "Đã giao" },
+      ],
+    });
+
+    if (order) {
+      return res.json({
+        canReview: true,
+        hasPurchased: true,
+        hasReviewed: false,
+        message: "Bạn có thể đánh giá sản phẩm này",
+      });
+    }
+
+    // Kiểm tra xem user đã mua nhưng chưa giao
+    const pendingOrder = await OrderModel.findOne({
+      userId,
+      "items.productId": productId,
+    });
+
+    if (pendingOrder) {
+      return res.json({
+        canReview: false,
+        hasPurchased: true,
+        hasReviewed: false,
+        status: pendingOrder.status,
+        message: "Vui lòng chờ đơn hàng được giao trước khi đánh giá",
+      });
+    }
+
+    // Chưa mua
+    return res.json({
+      canReview: false,
+      hasPurchased: false,
+      hasReviewed: false,
+      message: "Bạn cần mua sản phẩm này trước khi đánh giá",
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // 1. Lấy đánh giá theo sản phẩm
 app.get("/api/reviews/:productId", async (req, res) => {
   try {
@@ -1438,8 +1320,8 @@ app.get("/api/reviews/:productId", async (req, res) => {
     const avgRating =
       reviews.length > 0
         ? (
-            reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-          ).toFixed(1)
+          reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+        ).toFixed(1)
         : 0;
     res.json({
       reviews,
@@ -1451,13 +1333,14 @@ app.get("/api/reviews/:productId", async (req, res) => {
   }
 });
 
-// 2. Thêm đánh giá (cần đăng nhập)
+// 2. Thêm đánh giá (chỉ cần đăng nhập)
 app.post("/api/reviews", authenticateToken, async (req, res) => {
   try {
     const { productId, rating, comment, images } = req.body;
     if (!productId || !rating) {
       return res.status(400).json({ message: "Thiếu thông tin đánh giá" });
     }
+
     // Kiểm tra đã review chưa
     const existing = await ReviewModel.findOne({
       productId,
@@ -1468,6 +1351,7 @@ app.post("/api/reviews", authenticateToken, async (req, res) => {
         .status(400)
         .json({ message: "Bạn đã đánh giá sản phẩm này rồi" });
     }
+
     const user = await UserModel.findById(req.user.id);
     const review = new ReviewModel({
       productId,

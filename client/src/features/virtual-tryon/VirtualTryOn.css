@@ -227,6 +227,11 @@
     left: 0;
 }
 
+/* ─── Closet Modal (Legacy - Hidden) ─── */
+.vto-closet-modal {
+    display: none;
+}
+
 /* Canvas overlay zones */
 .vto-canvas-overlay {
     position: absolute;
@@ -242,6 +247,50 @@
 .vto-canvas-overlay--top-right {
     top: 16px;
     right: 16px;
+}
+
+.vto-canvas-overlay--top-left {
+    top: 16px;
+    left: 16px;
+}
+
+/* ─── Closet Toggle Button ─── */
+.vto-closet-button {
+    position: relative;
+    min-height: 52px;
+    padding: 0 16px 0 14px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(247, 238, 222, 0.98) 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(47, 35, 25, 0.12);
+    color: var(--text-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 10px 26px rgba(31, 26, 23, 0.14);
+    z-index: 90;
+}
+
+.vto-closet-button:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, #ffffff 0%, #fbf2e2 100%);
+    border-color: rgba(198, 169, 105, 0.45);
+    box-shadow: 0 14px 32px rgba(31, 26, 23, 0.18);
+}
+
+.vto-closet-button:active {
+    transform: scale(0.99);
+}
+
+.vto-closet-button__label {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
 }
 
 /* ─── Heatmap Toggle Switch ─── */
@@ -411,6 +460,174 @@
     opacity: 1;
     border-color: rgba(239, 68, 68, 0.15);
     animation: vto-heatmap-pulse 3s ease-in-out infinite;
+}
+
+.vto-outfit-panel {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    z-index: 105;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(31, 26, 23, 0.1);
+    border-radius: 14px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 10px 24px rgba(31, 26, 23, 0.12);
+}
+
+.vto-outfit-fab {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    width: 46px;
+    height: 46px;
+    border: none;
+    border-radius: 999px;
+    background: #111827;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 106;
+    box-shadow: 0 10px 24px rgba(17, 24, 39, 0.28);
+    transition: transform 0.18s ease, box-shadow 0.2s ease;
+}
+
+.vto-outfit-fab:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px rgba(17, 24, 39, 0.34);
+}
+
+.vto-outfit-panel__collapse {
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 999px;
+    background: rgba(17, 24, 39, 0.1);
+    color: #111827;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.vto-outfit-panel__slots {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(72px, 1fr));
+    gap: 8px;
+    flex: 1;
+}
+
+.vto-outfit-panel__slot {
+    background: #f9f7f2;
+    border: 1px solid rgba(31, 26, 23, 0.08);
+    border-radius: 10px;
+    padding: 6px;
+    min-height: 70px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    justify-content: center;
+    align-items: center;
+}
+
+.vto-outfit-panel__slot-label {
+    font-size: 10px;
+    color: #6b7280;
+}
+
+.vto-outfit-panel__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+}
+
+.vto-outfit-panel__thumb {
+    width: 28px;
+    height: 34px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.vto-outfit-panel__name {
+    font-size: 10px;
+    color: #111827;
+    max-width: 64px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.vto-outfit-panel__placeholder {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px dashed rgba(31, 26, 23, 0.2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+}
+
+.vto-outfit-panel__save {
+    height: 40px;
+    border: none;
+    border-radius: 10px;
+    padding: 0 14px;
+    font-weight: 700;
+    background: #111827;
+    color: #fff;
+    cursor: pointer;
+}
+
+.vto-outfit-panel__prompt {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.vto-outfit-panel__prompt input {
+    height: 36px;
+    border: 1px solid rgba(31, 26, 23, 0.2);
+    border-radius: 8px;
+    padding: 0 10px;
+    min-width: 140px;
+}
+
+.vto-outfit-panel__prompt button {
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    padding: 0 10px;
+    font-weight: 600;
+    background: #1d9e75;
+    color: #fff;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .vto-outfit-panel {
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        padding: 9px;
+        gap: 8px;
+    }
+
+    .vto-outfit-panel__slots {
+        grid-template-columns: repeat(2, minmax(64px, 1fr));
+    }
+
+    .vto-outfit-fab {
+        right: 12px;
+        bottom: 12px;
+    }
 }
 
 @keyframes vto-heatmap-pulse {
@@ -3186,6 +3403,13 @@
 @media (max-width: 640px) {
     .vto-workspace {
         flex-direction: column;
+    }
+
+    .vto-closet-button {
+        width: 48px;
+        height: 48px;
+        bottom: 16px;
+        right: 16px;
     }
 
     .vto-canvas-area {

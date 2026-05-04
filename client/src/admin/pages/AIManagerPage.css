@@ -1,0 +1,148 @@
+.ai-manager {
+    padding: 24px;
+    max-width: 1000px;
+}
+
+.ai-manager-header {
+    margin-bottom: 24px;
+}
+
+.ai-manager-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 4px;
+}
+
+.ai-manager-sub {
+    font-size: 13px;
+    color: #888;
+}
+
+.ai-kpi-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+}
+
+.ai-kpi {
+    background: #fff;
+    border: 0.5px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+}
+
+.ai-kpi-num {
+    display: block;
+    font-size: 32px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 6px;
+}
+
+.ai-kpi-lbl {
+    font-size: 12px;
+    color: #888;
+}
+
+.ai-logs-section {
+    background: #fff;
+    border: 0.5px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.ai-logs-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 14px;
+}
+
+.ai-loading,
+.ai-empty {
+    font-size: 13px;
+    color: #bbb;
+    padding: 20px 0;
+    text-align: center;
+}
+
+.ai-logs-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.ai-logs-table th {
+    text-align: left;
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #888;
+    border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.ai-logs-table td {
+    padding: 10px 12px;
+    border-bottom: 0.5px solid rgba(0, 0, 0, 0.05);
+}
+
+.log-time {
+    color: #999;
+    white-space: nowrap;
+}
+
+.log-prompt {
+    color: #333;
+    font-style: italic;
+}
+
+.log-count {
+    font-size: 11px;
+    font-weight: 500;
+    background: #EEEDFE;
+    color: #3C3489;
+    padding: 2px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+.ai-config-section {
+    background: #fff;
+    border: 0.5px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.ai-config-note {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 12px;
+    line-height: 1.6;
+}
+
+.ai-prompt-preview {
+    background: #F8F8F6;
+    border: 0.5px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    padding: 14px;
+}
+
+.ai-prompt-preview code {
+    font-size: 12px;
+    color: #555;
+    line-height: 1.6;
+    font-family: monospace;
+}
+
+@media (max-width: 900px) {
+    .ai-kpi-row {
+        grid-template-columns: 1fr;
+    }
+}
