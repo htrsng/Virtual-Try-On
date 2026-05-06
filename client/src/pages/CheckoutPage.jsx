@@ -1,18 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { FiX, FiZoomIn, FiPackage, FiTruck, FiShield, FiCheckCircle } from 'react-icons/fi';
 import axios from 'axios';
 import OnlinePaymentModal from '../components/OnlinePaymentModal';
-import AddressPicker from '../components/AddressPicker';
+import AddressCard from '../components/AddressCard';
+import AddressModal from '../components/AddressModal';
+import AddressFormModal from '../components/AddressFormModal';
 import VoucherSelector from '../components/VoucherSelector';
 import { calculateDiscount } from '../data/voucherData';
 import OrderSummary from './checkout/OrderSummary';
 import PaymentMethod from './checkout/PaymentMethod';
 import TrustSignals from './checkout/TrustSignals';
 import OutfitPreview from './checkout/OutfitPreview';
-import ShippingForm from './checkout/ShippingForm';
 import { MODEL_INJECTION } from '../data/ThreeDConfig.js';
 import './CheckoutPage.css';
 
@@ -125,6 +126,11 @@ function CheckoutPage({ onCheckoutSuccess, showToast, suggestionProducts, onAddT
     const [city, setCity] = useState('');
     const [district, setDistrict] = useState('');
     const [ward, setWard] = useState('');
+    const [selectedAddress, setSelectedAddress] = useState(() => (user?.defaultAddress ?? null));
+    const [userAddresses, setUserAddresses] = useState([]);
+    const [showAddressModal, setShowAddressModal] = useState(false);
+    const [showAddressForm, setShowAddressForm] = useState(false);
+    const [editAddress, setEditAddress] = useState(null);
     const [paymentMethod, setPaymentMethod] = useState('COD');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showOnlinePayment, setShowOnlinePayment] = useState(false);
@@ -259,6 +265,36 @@ function CheckoutPage({ onCheckoutSuccess, showToast, suggestionProducts, onAddT
     }, [isAuthenticated]);
 
 
+
+    // Load user addresses for Address modal
+    useEffect(() => {
+        if (!isAuthenticated) return;
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        let mounted = true;
+        (async () => {
+            try {
+                const res = await fetch('http://localhost:3000/api/user/addresses', { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (!mounted) return;
+                setUserAddresses(data.addresses || []);
+                const def = (data.addresses || []).find(a => a.isDefault) || (data.addresses || [])[0];
+                if (def) {
+                    setSelectedAddress(def);
+                    setFullName(def.fullName || '');
+                    setPhone(def.phone || '');
+                    setAddress(def.street || '');
+                    setCity(def.province || '');
+                    setDistrict(def.district || '');
+                    setWard(def.ward || '');
+                }
+            } catch (err) {
+                console.warn('Không thể tải địa chỉ người dùng', err);
+            }
+        })();
+        return () => { mounted = false; };
+    }, [isAuthenticated]);
 
     const parsePrice = (price) => {
         if (typeof price === 'number') {
@@ -638,7 +674,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast, suggestionProducts, onAddT
 
             // Chuyển sang trang đơn hàng của tôi sau 1.5s
             setTimeout(() => {
-                navigate('/profile');
+                navigate('/orders');
             }, 1500);
 
         } catch (error) {
@@ -787,16 +823,17 @@ function CheckoutPage({ onCheckoutSuccess, showToast, suggestionProducts, onAddT
                                             <td className="product-cell">
                                                 <div className="product-info">
                                                     <div
-                                                        className="product-image-wrapper"
+                                                        className="product-image-wrapper cart-item-img"
                                                         onClick={() => {
                                                             setSelectedImage(item.img);
                                                             setImageModalOpen(true);
                                                         }}
                                                     >
                                                         <img
-                                                            src={item.img}
+                                                            src={item.img || item.image || ''}
                                                             alt={item.name}
                                                             className="product-image"
+                                                            onError={(e) => { e.target.onerror = null; e.target.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80"><rect width="100%" height="100%" fill="%23f3f4f6" /><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23999" font-size="10">No image</text></svg>'; }}
                                                         />
                                                         <div className="zoom-icon">
                                                             <FiZoomIn size={20} />
@@ -804,7 +841,13 @@ function CheckoutPage({ onCheckoutSuccess, showToast, suggestionProducts, onAddT
                                                     </div>
                                                     <div className="product-details">
                                                         <div className="product-name">{item.name}</div>
-                                                        <span className="product-size">Size: {item.size}</span>
+                                                        <div className="cart-item-variants">
+                                                            <span className="variant-tag">
+                                                                <span className="variant-color-dot" style={{ background: (item.selectedColorHex || item.colorHex) || undefined }} />
+                                                                {item.selectedColor || item.color || item.variant?.color || ''}
+                                                            </span>
+                                                            <span className="variant-tag">Size {item.selectedSize || item.size || item.variant?.size || ''}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </td>
@@ -822,6 +865,12 @@ function CheckoutPage({ onCheckoutSuccess, showToast, suggestionProducts, onAddT
                                 </tbody>
                             </table>
                         </div>
+
+                        {/* Address Card (Shopee style) */}
+                        <AddressCard
+                            address={selectedAddress}
+                            onChangeClick={() => setShowAddressModal(true)}
+                        />
 
                         {/* Shipping Options */}
                         <div className="checkout-card">
@@ -972,20 +1021,6 @@ function CheckoutPage({ onCheckoutSuccess, showToast, suggestionProducts, onAddT
 
                             {/* Card 3: Shipping & Payment */}
                             <div className="checkout-card right-card">
-                                <ShippingForm
-                                    fullName={fullName} setFullName={setFullName}
-                                    phone={phone} setPhone={setPhone}
-                                    address={address} setAddress={setAddress}
-                                    city={city} setCity={setCity}
-                                    district={district} setDistrict={setDistrict}
-                                    ward={ward} setWard={setWard}
-                                    onAddressChange={handleAddressChange}
-                                    hasSavedAddress={!!(user?.fullName && user?.phone && (user?.address || user?.city))}
-                                    t={t}
-                                />
-
-                                <div className="right-card__divider" />
-
                                 <PaymentMethod
                                     paymentMethod={paymentMethod}
                                     setPaymentMethod={setPaymentMethod}
@@ -1009,7 +1044,8 @@ function CheckoutPage({ onCheckoutSuccess, showToast, suggestionProducts, onAddT
                             {/* Order Button */}
                             <button
                                 type="submit"
-                                disabled={isSubmitting}
+                                disabled={!selectedAddress || isSubmitting}
+                                title={!selectedAddress ? 'Vui lòng thêm địa chỉ giao hàng' : ''}
                                 className="checkout-btn"
                             >
                                 <span className="checkout-btn-content">
@@ -1026,11 +1062,87 @@ function CheckoutPage({ onCheckoutSuccess, showToast, suggestionProducts, onAddT
                                 </span>
                             </button>
 
+                            {!selectedAddress && (
+                                <p className="no-address-warning">
+                                    ⚠️ Vui lòng thêm địa chỉ giao hàng để tiếp tục đặt hàng
+                                </p>
+                            )}
+
                             <TrustSignals />
                         </form>
                     </div>
                 </div>
             </div>
+
+            {/* Address selection modal + form */}
+            <AddressModal
+                open={showAddressModal}
+                onClose={() => setShowAddressModal(false)}
+                addresses={userAddresses}
+                selectedId={selectedAddress?._id ?? null}
+                onSelect={(addr) => {
+                    setSelectedAddress(addr);
+                    setFullName(addr.fullName || '');
+                    setPhone(addr.phone || '');
+                    setAddress(addr.street || '');
+                    setCity(addr.province || '');
+                    setDistrict(addr.district || '');
+                    setWard(addr.ward || '');
+                }}
+                onAddNew={() => { setShowAddressModal(false); setShowAddressForm(true); setEditAddress(null); }}
+                onEditAddress={(addr) => { setShowAddressModal(false); setShowAddressForm(true); setEditAddress(addr); }}
+            />
+
+            <AddressFormModal
+                open={showAddressForm}
+                onClose={() => setShowAddressForm(false)}
+                editAddress={editAddress}
+                onSave={async (addr) => {
+                    try {
+                        const token = localStorage.getItem('token');
+                        if (!token) {
+                            showToast('Vui lòng đăng nhập để thêm địa chỉ', 'warning');
+                            return;
+                        }
+
+                        const isEditing = Boolean(editAddress?._id);
+                        const endpoint = isEditing
+                            ? `http://localhost:3000/api/user/addresses/${editAddress._id}`
+                            : 'http://localhost:3000/api/user/addresses';
+                        const method = isEditing ? 'PUT' : 'POST';
+
+                        const res = await fetch(endpoint, {
+                            method,
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify(addr)
+                        });
+                        if (!res.ok) {
+                            showToast('Không thể lưu địa chỉ', 'error');
+                            return;
+                        }
+                        const data = await res.json();
+                        const savedAddress = data.address || data.updatedAddress || addr;
+                        setUserAddresses(prev => {
+                            if (isEditing) {
+                                return prev.map(item => (String(item._id) === String(savedAddress._id) ? savedAddress : item));
+                            }
+                            return [...prev, savedAddress];
+                        });
+                        setSelectedAddress(savedAddress);
+                        setFullName(savedAddress.fullName || '');
+                        setPhone(savedAddress.phone || '');
+                        setAddress(savedAddress.street || '');
+                        setCity(savedAddress.province || '');
+                        setDistrict(savedAddress.district || '');
+                        setWard(savedAddress.ward || '');
+                        setEditAddress(null);
+                        setShowAddressForm(false);
+                    } catch (err) {
+                        console.error('Lỗi lưu địa chỉ:', err);
+                        showToast('Lỗi lưu địa chỉ', 'error');
+                    }
+                }}
+            />
 
             {/* Modal Thanh toán Online */}
             {showOnlinePayment && (

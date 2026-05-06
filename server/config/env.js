@@ -34,4 +34,5 @@ module.exports = {
     MONGODB_URI: process.env.MONGODB_URI,
     EMAIL_USER: process.env.EMAIL_USER || "thanhtb2005@gmail.com",
     EMAIL_PASS: process.env.EMAIL_PASS || "xndu nxcu wuea aizn",
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY,
 };

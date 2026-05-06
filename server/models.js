@@ -102,6 +102,17 @@ const UserSchema = new mongoose.Schema({
   city: { type: String, default: "" },
   district: { type: String, default: "" },
   ward: { type: String, default: "" },
+  addresses: [{
+    _id: { type: mongoose.Schema.Types.ObjectId, default: () => new mongoose.Types.ObjectId() },
+    fullName: String,
+    phone: String,
+    province: String,
+    district: String,
+    ward: String,
+    street: String,
+    isDefault: { type: Boolean, default: false },
+    type: { type: String, enum: ['home', 'office'], default: 'home' }
+  }],
   createdAt: { type: Date, default: Date.now },
 });
 const UserModel = mongoose.model("users", UserSchema);

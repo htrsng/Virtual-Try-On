@@ -12,6 +12,7 @@ import SizeRecommendation, { recommendSizes } from './components/SizeRecommendat
 import { ColorSelector } from './components/ProductOptions';
 import VirtualPersonalClosetDrawer, { type ClosetItem } from './components/VirtualPersonalClosetDrawer';
 import OutfitPanel from './components/OutfitPanel';
+import AIOutfitChat from '../../components/AIOutfitChat';
 import './VirtualTryOn.css';
 import * as THREE from 'three';
 
@@ -703,13 +704,7 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
 
     useEffect(() => () => {
         if (rendererRef.current) {
-            const context = rendererRef.current.getContext?.();
-            const alreadyLost = Boolean(context?.isContextLost?.());
-
             rendererRef.current.dispose();
-            if (!alreadyLost) {
-                rendererRef.current.forceContextLoss();
-            }
             rendererRef.current = null;
         }
     }, []);
@@ -1625,6 +1620,24 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                             maxDistance={5.5}
                         />
                     </Canvas>
+
+                    {/* AI Outfit Chat */}
+                    <AIOutfitChat
+                        closetItems={Object.values(layeredGarments).filter((item): item is SilentWearItem => Boolean(item?.itemId))}
+                        avatarData={currentBodyData}
+                        token={localStorage.getItem('token') || ''}
+                        onWearOutfit={(items) => {
+                            items.forEach(item => {
+                                const wornItem = Object.values(layeredGarments).find(c => c?.itemId === item.itemId);
+                                if (wornItem) {
+                                    applySilentWear(wornItem);
+                                }
+                            });
+                        }}
+                        onAddToCart={(productId) => {
+                            navigate(`/product/${productId}`);
+                        }}
+                    />
 
                     {/* Camera controls overlay */}
                     <div className="vto-canvas-overlay vto-canvas-overlay--bottom-left">

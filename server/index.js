@@ -3,7 +3,8 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const { JWT_SECRET, MONGODB_URI } = require("./config/env");
+const { JWT_SECRET, MONGODB_URI, GEMINI_API_KEY } = require("./config/env");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { requireDbReady, authenticateToken, requireAdmin } = require("./middleware");
 const {
   ProductModel,
@@ -35,11 +36,43 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Logging middleware7868
-app.use((req, res, next) => {
-  console.log(`📨 ${req.method} ${req.path}`);
-  next();
-});
+// ============================================================
+// GEMINI AI CLIENT INITIALIZATION
+// ============================================================
+let geminiModel = null;
+if (GEMINI_API_KEY) {
+  try {
+    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+    geminiModel = genAI.getGenerativeModel({
+      model: 'gemini-1.5-flash',
+      generationConfig: {
+        response_mime_type: 'application/json',
+        temperature: 0.7,
+        max_output_tokens: 1000,
+      }
+    });
+    console.log('✅ Gemini AI initialized successfully');
+  } catch (err) {
+    console.error('❌ Failed to initialize Gemini AI:', err.message);
+  }
+} else {
+  console.warn('⚠️ GEMINI_API_KEY not found in environment variables');
+}
+
+const buildProductLookupFilter = (productId) => {
+  const trimmedId = String(productId || '').trim();
+  const numericId = Number(trimmedId);
+
+  if (mongoose.Types.ObjectId.isValid(trimmedId)) {
+    return { _id: trimmedId };
+  }
+
+  if (Number.isInteger(numericId)) {
+    return { id: numericId };
+  }
+
+  return { _id: trimmedId };
+};
 
 if (!MONGODB_URI) {
   console.error("❌ Thiếu MONGODB_URI. Hãy đặt giá trị này trong server/.env hoặc biến môi trường hệ thống.");
@@ -80,6 +113,109 @@ mongoose.connection.on("disconnected", () => {
   console.log("🟠 MongoDB disconnected");
 });
 
+// ===== ADDRESS MANAGEMENT ENDPOINTS =====
+
+// GET /api/user/addresses - Fetch all saved addresses for the authenticated user
+app.get('/api/user/addresses', authenticateToken, requireDbReady, async (req, res) => {
+  try {
+    const user = await UserModel.findById(req.user.id).select('addresses');
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.json({ addresses: user.addresses || [] });
+  } catch (err) {
+    console.error('Error fetching addresses:', err);
+    res.status(500).json({ error: 'Failed to fetch addresses' });
+  }
+});
+
+// POST /api/user/addresses - Add a new address for the authenticated user
+app.post('/api/user/addresses', authenticateToken, requireDbReady, async (req, res) => {
+  try {
+    const { fullName, phone, province, district, ward, street, isDefault, type } = req.body;
+
+    if (!fullName || !phone || !province || !district || !ward || !street) {
+      return res.status(400).json({ error: 'Missing required address fields' });
+    }
+
+    const newAddr = {
+      _id: new mongoose.Types.ObjectId(),
+      fullName,
+      phone,
+      province,
+      district,
+      ward,
+      street,
+      isDefault: !!isDefault,
+      type: type || 'home'
+    };
+
+    const user = await UserModel.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (newAddr.isDefault) {
+      user.addresses.forEach((address) => {
+        address.isDefault = false;
+      });
+    }
+
+    user.addresses.push(newAddr);
+    await user.save();
+
+    res.json({ success: true, address: newAddr });
+  } catch (err) {
+    console.error('Error adding address:', err);
+    res.status(500).json({ error: 'Failed to add address' });
+  }
+});
+
+// PUT /api/user/addresses/:addressId - Update an existing address in place
+app.put('/api/user/addresses/:addressId', authenticateToken, requireDbReady, async (req, res) => {
+  try {
+    const { addressId } = req.params;
+    const { fullName, phone, province, district, ward, street, isDefault, type } = req.body;
+
+    if (!fullName || !phone || !province || !district || !ward || !street) {
+      return res.status(400).json({ error: 'Missing required address fields' });
+    }
+
+    const user = await UserModel.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const address = user.addresses.id(addressId);
+    if (!address) {
+      return res.status(404).json({ error: 'Address not found' });
+    }
+
+    address.fullName = fullName;
+    address.phone = phone;
+    address.province = province;
+    address.district = district;
+    address.ward = ward;
+    address.street = street;
+    address.isDefault = !!isDefault;
+    address.type = type || 'home';
+
+    if (address.isDefault) {
+      user.addresses.forEach((item) => {
+        if (String(item._id) !== String(address._id)) {
+          item.isDefault = false;
+        }
+      });
+    }
+
+    await user.save();
+    res.json({ success: true, address: address.toObject() });
+  } catch (err) {
+    console.error('Error updating address:', err);
+    res.status(500).json({ error: 'Failed to update address' });
+  }
+});
+
 app.get("/api/products", async (req, res) => {
   try {
     await normalizeProductNumericIds();
@@ -106,9 +242,7 @@ app.get("/api/products/next-id", authenticateToken, requireDbReady, async (req, 
 
 app.get("/api/products/:id/stock", async (req, res) => {
   try {
-    const product = await ProductModel.findOne({
-      $or: [{ _id: req.params.id }, { id: Number(req.params.id) }],
-    });
+    const product = await ProductModel.findOne(buildProductLookupFilter(req.params.id));
 
     if (!product) {
       return res.status(404).json({ error: "Không tìm thấy sản phẩm" });
@@ -130,7 +264,7 @@ app.put("/api/products/:id", async (req, res) => {
   try {
     const inventory = normalizeProductInventory(req.body);
     const updatedProduct = await ProductModel.findOneAndUpdate(
-      { $or: [{ _id: req.params.id }, { id: Number(req.params.id) }] },
+      buildProductLookupFilter(req.params.id),
       { $set: { ...req.body, ...inventory } },
       { new: true },
     );
@@ -148,7 +282,7 @@ app.put("/api/products/:id", async (req, res) => {
 app.delete("/api/products/:id", async (req, res) => {
   try {
     const deletedProduct = await ProductModel.findOneAndDelete({
-      $or: [{ _id: req.params.id }, { id: Number(req.params.id) }],
+      ...buildProductLookupFilter(req.params.id),
     });
 
     if (!deletedProduct) {
@@ -1992,6 +2126,191 @@ app.post("/api/admin/check-sync", async (req, res) => {
 // Override API cập nhật trạng thái đơn hàng để gửi notification
 const originalOrderUpdate = app.put;
 
-app.listen(3000, () => {
-  console.log("Server đang chạy tại cloud");
+// ============================================================
+// AI OUTFIT GENERATOR — POST /api/ai/outfit-suggest
+// ============================================================
+app.post('/api/ai/outfit-suggest', authenticateToken, requireDbReady, async (req, res) => {
+  try {
+    if (!geminiModel) {
+      return res.status(503).json({ error: 'AI service is not available', code: 'AI_NOT_INITIALIZED' });
+    }
+
+    const { userPrompt, closetItems = [], avatarData = {} } = req.body;
+
+    if (!userPrompt || userPrompt.trim().length === 0) {
+      return res.status(400).json({ error: 'Vui lòng nhập câu hỏi' });
+    }
+
+    // ── Lấy sản phẩm shop (chỉ lấy những field cần thiết cho AI) ──
+    const shopProducts = await ProductModel.find({ status: 'active' })
+      .select('id name category price ai_attributes variants')
+      .limit(30)
+      .lean();
+
+    // ── Tóm tắt data để tiết kiệm token ──
+    const closetSummary = closetItems.slice(0, 10).map(item => ({
+      id: item.itemId,
+      name: item.name,
+      category: item.slotCategory ?? item.category,
+      color: item.purchasedColor,
+      size: item.purchasedSize,
+    }));
+
+    const shopSummary = shopProducts.map(p => ({
+      id: p.id,
+      name: p.name,
+      price: p.price,
+      category: p.ai_attributes?.category ?? p.category,
+      style: p.ai_attributes?.style ?? [],
+      weather: p.ai_attributes?.weather ?? [],
+      occasion: p.ai_attributes?.occasion ?? [],
+      colorTone: p.ai_attributes?.color_tone,
+      fit: p.ai_attributes?.fit,
+      material: p.ai_attributes?.material,
+    }));
+
+    const avatarSummary = avatarData ? {
+      height: avatarData.height,
+      weight: avatarData.weight,
+      chest: avatarData.chest,
+      waist: avatarData.waist,
+      hip: avatarData.hip,
+    } : null;
+
+    // ── Build prompt ──
+    const prompt = `
+Bạn là AI Stylist cho ứng dụng thời trang VFitAI.
+Nhiệm vụ: Gợi ý outfit phù hợp dựa trên yêu cầu của người dùng.
+
+YÊU CẦU CỦA NGƯỜI DÙNG: "${userPrompt}"
+
+TỦ ĐỒ HIỆN CÓ (đồ đã mua):
+${JSON.stringify(closetSummary, null, 2)}
+
+SẢN PHẨM TRONG SHOP:
+${JSON.stringify(shopSummary, null, 2)}
+
+${avatarSummary ? `SỐ ĐO CƠ THỂ: ${JSON.stringify(avatarSummary)}` : ''}
+
+QUY TẮC:
+1. Ưu tiên dùng đồ từ TỦ ĐỒ trước, chỉ gợi ý mua thêm nếu thực sự cần
+2. Outfit phải đầy đủ (tops + bottoms/dress, có thể thêm outerwear)
+3. Màu sắc, phong cách phải hài hòa với nhau
+4. Lý do gợi ý phải ngắn gọn, tự nhiên bằng tiếng Việt
+
+TRẢ VỀ JSON theo đúng format sau (không thêm text bên ngoài JSON):
+{
+  "outfit": [
+    {
+      "itemId": "id của item trong tủ đồ",
+      "name": "tên sản phẩm",
+      "source": "closet",
+      "slot": "tops/bottoms/outerwear/dress",
+      "reason": "lý do chọn ngắn gọn"
+    }
+  ],
+  "suggestions": [
+    {
+      "productId": id số của sản phẩm trong shop,
+      "name": "tên sản phẩm",
+      "price": giá,
+      "source": "shop",
+      "slot": "tops/bottoms/outerwear",
+      "reason": "lý do nên mua thêm"
+    }
+  ],
+  "explanation": "Một câu tổng kết outfit, tự nhiên như stylist thật nói",
+  "occasion": "dịp phù hợp",
+  "weatherTip": "gợi ý về thời tiết nếu có"
+}`;
+
+    // ── Gọi Gemini API ──
+    const result = await geminiModel.generateContent(prompt);
+    let rawText;
+    try {
+      if (result?.response && typeof result.response.text === 'function') {
+        rawText = await result.response.text();
+      } else if (typeof result === 'string') {
+        rawText = result;
+      } else {
+        rawText = JSON.stringify(result);
+      }
+    } catch (e) {
+      rawText = String(result);
+    }
+
+    let parsed;
+    try {
+      parsed = JSON.parse(rawText);
+    } catch (parseErr) {
+      const cleaned = rawText.replace(/```json|```/g, '').trim();
+      parsed = JSON.parse(cleaned);
+    }
+
+    // ── Log để Admin theo dõi ──
+    try {
+      const AILogModel = mongoose.models.AILog || mongoose.model('AILog',
+        new mongoose.Schema({
+          userId: mongoose.Schema.Types.ObjectId,
+          userPrompt: String,
+          outfitCount: Number,
+          suggestCount: Number,
+          createdAt: { type: Date, default: Date.now }
+        })
+      );
+      await AILogModel.create({
+        userId: req.user.id,
+        userPrompt: userPrompt.trim(),
+        outfitCount: parsed.outfit?.length ?? 0,
+        suggestCount: parsed.suggestions?.length ?? 0,
+      });
+    } catch (_) { /* log fail không block response */ }
+
+    let finalSuggestions = parsed.suggestions ?? [];
+    if ((!Array.isArray(finalSuggestions) || finalSuggestions.length === 0) && shopSummary.length > 0) {
+      const q = String(userPrompt || '').toLowerCase();
+      const keywords = ['đi làm', 'công sở', 'hẹn hò', 'đi biển', 'dự tiệc', 'cafe', 'sáng', 'tối', 'mát', 'nóng', 'lạnh'];
+      const matched = shopSummary.filter(p => {
+        const text = `${p.name} ${(p.style || []).join(' ')} ${(p.occasion || []).join(' ')} ${p.category}`.toLowerCase();
+        return keywords.some(k => q.includes(k) && text.includes(k.replace(/đi /, ''))) || keywords.some(k => q.includes(k) && text.includes(k));
+      });
+
+      const pick = (matched.length > 0 ? matched : shopSummary).slice(0, 3);
+      finalSuggestions = pick.map(p => ({
+        productId: p.id,
+        name: p.name,
+        price: p.price,
+        source: 'shop',
+        slot: p.category || 'tops',
+        reason: 'Gợi ý tạm thời — phù hợp với yêu cầu của bạn'
+      }));
+    }
+
+    res.json({
+      success: true,
+      outfit: parsed.outfit ?? [],
+      suggestions: finalSuggestions,
+      explanation: parsed.explanation ?? '',
+      occasion: parsed.occasion ?? '',
+      weatherTip: parsed.weatherTip ?? '',
+    });
+
+  } catch (err) {
+    console.error('[AI outfit-suggest]', err);
+    const PORT = process.env.PORT || 3000;
+    // Rate limit error
+    if (err.message?.includes('429') || err.message?.includes('quota')) {
+      return res.status(429).json({
+        error: 'AI đang bận, vui lòng thử lại sau vài giây',
+        code: 'RATE_LIMIT'
+      });
+    }
+
+    res.status(500).json({ error: 'AI tạm thời không khả dụng', code: 'AI_ERROR' });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server đang chạy tại http://localhost:${PORT}`);
 });

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
 
 /**
@@ -40,24 +40,30 @@ export default function OrderSummary({
 
             {expanded && (
                 <div className="co-mini-products__list">
-                    {selectedProducts.map(item => (
-                        <div key={item.cartId} className="co-mini-product">
-                            <img
-                                className="co-mini-product__img"
-                                src={item.img || item.image || ''}
-                                alt={item.name}
-                            />
-                            <div className="co-mini-product__info">
-                                <span className="co-mini-product__name">{item.name}</span>
-                                <span className="co-mini-product__meta">
-                                    Size {item.size} &bull; x{item.quantity}
+                    {selectedProducts.map(item => {
+                        const color = item.selectedColor || item.color || item.variant?.color || '';
+                        const size = item.selectedSize || item.size || item.variant?.size || '';
+                        const variantLabel = `${color ? color + ' · ' : ''}${size ? 'Size ' + size : ''}`.trim();
+                        return (
+                            <div key={item.cartId} className="co-mini-product">
+                                <img
+                                    className="co-mini-product__img"
+                                    src={item.img || item.image || ''}
+                                    alt={item.name}
+                                    onError={(e) => { e.target.onerror = null; e.target.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80"><rect width="100%" height="100%" fill="%23f3f4f6" /><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23999" font-size="10">No image</text></svg>'; }}
+                                />
+                                <div className="co-mini-product__info">
+                                    <span className="co-mini-product__name">{item.name}</span>
+                                    <span className="co-mini-product__meta">
+                                        {variantLabel} &bull; x{item.quantity}
+                                    </span>
+                                </div>
+                                <span className="co-mini-product__price">
+                                    {formatPrice(parsePrice(item.price) * item.quantity)}
                                 </span>
                             </div>
-                            <span className="co-mini-product__price">
-                                {formatPrice(parsePrice(item.price) * item.quantity)}
-                            </span>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
 
