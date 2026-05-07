@@ -57,6 +57,7 @@ interface FittingRoomContextType {
     layeredGarments: Partial<Record<GarmentSlot, SilentWearItem>>;
     lastSilentWear: SilentWearItem | null;
     applySilentWear: (item: Omit<SilentWearItem, 'updatedAt'>) => void;
+    applyFullOutfit: (items: Array<Omit<SilentWearItem, 'updatedAt'>>) => void;
 }
 
 const FittingRoomContext = createContext<FittingRoomContextType | undefined>(undefined);
@@ -279,6 +280,27 @@ export const FittingRoomProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setLastSilentWear(payload);
     };
 
+    const applyFullOutfit = (items: Array<Omit<SilentWearItem, 'updatedAt'>>) => {
+        const now = Date.now();
+        const newGarments: Partial<Record<GarmentSlot, SilentWearItem>> = {};
+
+        items.forEach((item) => {
+            const payload: SilentWearItem = {
+                ...item,
+                updatedAt: now,
+            };
+            newGarments[payload.category] = payload;
+        });
+
+        setLayeredGarments(newGarments);
+        if (items.length > 0) {
+            setLastSilentWear({
+                ...items[items.length - 1],
+                updatedAt: now,
+            } as SilentWearItem);
+        }
+    };
+
     const value: FittingRoomContextType = {
         avatars,
         currentAvatarId,
@@ -302,6 +324,7 @@ export const FittingRoomProvider: React.FC<{ children: React.ReactNode }> = ({ c
         layeredGarments,
         lastSilentWear,
         applySilentWear,
+        applyFullOutfit,
     };
 
     return (

@@ -46,6 +46,7 @@ const ChatWidget = lazy(() => import('./components/ChatWidget'));
 // --- 2. IMPORT TÍNH NĂNG 3D (MỚI) ---
 const VirtualTryOn = lazy(() => import('./features/virtual-tryon/VirtualTryOn.tsx'));
 const AvatarStudioPage = lazy(() => import('./pages/AvatarStudioPage'));
+const AIOutfitRoom = lazy(() => import('./pages/AIOutfitRoom'));
 
 // --- 3. IMPORT CONTEXTS ---
 import { AuthProvider } from './contexts/AuthContext';
@@ -518,7 +519,7 @@ function App() {
 
   const AppShell = () => {
     const location = useLocation();
-    const isTryOnPage = location.pathname === '/try-on' || location.pathname === '/avatar-studio';
+    const isTryOnPage = location.pathname === '/try-on' || location.pathname === '/avatar-studio' || location.pathname === '/ai-outfit';
     const isAdminRoute = location.pathname.startsWith('/admin');
 
     return (
@@ -711,6 +712,9 @@ function App() {
 
             {/* TRANG QUẢN LÝ AVATAR */}
             <Route path="/avatar-studio" element={<AvatarStudioPage />} />
+
+            {/* TRANG AI OUTFIT ROOM - PHÒNG AI GỢI Ý PHỐI ĐỒ */}
+            <Route path="/ai-outfit" element={<AIOutfitRoom />} />
 
             {/* TRANG NỘI DUNG BANNER */}
             <Route path="/banner/:bannerId" element={<BannerContentPage />} />

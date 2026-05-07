@@ -123,7 +123,7 @@ function HomePage({ products, categories, topSearch, bannerData, flashSaleProduc
                             </div>
                             <h3 className="feature-title">AI Outfit Generator</h3>
                             <p className="feature-desc">Nhập mô tả "đi cafe cuối tuần" — AI tạo outfit hoàn chỉnh từ tủ đồ của bạn</p>
-                            <span className="feature-coming">Sắp ra mắt</span>
+                            <a href="/ai-outfit" className="feature-cta">Phối đồ ngay →</a>
                         </div>
 
                     </div>
