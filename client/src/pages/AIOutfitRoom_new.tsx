@@ -248,6 +248,8 @@ export default function AIOutfitRoom() {
     const navigate = useNavigate();
     const [isWebglContextLost, setIsWebglContextLost] = useState(false);
     const { avatars, currentAvatarId, setCurrentAvatarId } = useFittingRoom();
+    const canvasAreaRef = useRef<HTMLDivElement | null>(null);
+    const canvasElementRef = useRef<HTMLCanvasElement | null>(null);
     const webglContextHandlersRef = useRef<{ handleContextLost?: (e: Event) => void; handleContextRestored?: () => void }>({});
 
     // Camera controls state
@@ -280,6 +282,7 @@ export default function AIOutfitRoom() {
             };
 
             const canvas = gl.domElement;
+            canvasElementRef.current = canvas;
             canvas.addEventListener('webglcontextlost', handleContextLost, false);
             canvas.addEventListener('webglcontextrestored', handleContextRestored, false);
 
@@ -293,17 +296,14 @@ export default function AIOutfitRoom() {
     useEffect(() => {
         return () => {
             const handlers = webglContextHandlersRef.current;
-            if (handlers.handleContextLost && handlers.handleContextRestored) {
-                const canvases = document.querySelectorAll('canvas');
-                canvases.forEach((canvas) => {
-                    if (handlers.handleContextLost) {
-                        canvas.removeEventListener('webglcontextlost', handlers.handleContextLost, false);
-                    }
-                    if (handlers.handleContextRestored) {
-                        canvas.removeEventListener('webglcontextrestored', handlers.handleContextRestored, false);
-                    }
-                });
+            const canvas = canvasElementRef.current;
+            if (canvas && handlers.handleContextLost && handlers.handleContextRestored) {
+                canvas.removeEventListener('webglcontextlost', handlers.handleContextLost, false);
+                canvas.removeEventListener('webglcontextrestored', handlers.handleContextRestored, false);
             }
+
+            canvasElementRef.current = null;
+            webglContextHandlersRef.current = {};
         };
     }, []);
 
@@ -358,8 +358,9 @@ export default function AIOutfitRoom() {
                 {/* Main Workspace */}
                 <div className="vto-workspace">
                     {/* 3D Canvas Area with Fixed Height */}
-                    <div className="vto-canvas-area" style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+                    <div ref={canvasAreaRef} className="vto-canvas-area" style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
                         <Canvas
+                            eventSource={canvasAreaRef}
                             frameloop={isWebglContextLost ? 'never' : 'always'}
                             dpr={[1, 1.5]}
                             camera={{ position: cameraPos, fov: 32 }}

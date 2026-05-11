@@ -662,6 +662,7 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
     const [isClosetOpen, setIsClosetOpen] = useState(false);
     const [isWebglContextLost, setIsWebglContextLost] = useState(false);
     const sidebarScrollRef = useRef<HTMLDivElement | null>(null);
+    const [canvasEventSource, setCanvasEventSource] = useState<HTMLElement | undefined>(undefined);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
     const [rendererReady, setRendererReady] = useState(false);
@@ -1510,9 +1511,10 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                 />
 
                 {/* 3D Preview – renders ALL garments layered by category */}
-                <div className="vto-canvas-area">
+                <div ref={(node) => setCanvasEventSource(node || undefined)} className="vto-canvas-area">
                     <Canvas
                         ref={canvasRef}
+                        eventSource={canvasEventSource}
                         frameloop={isWebglContextLost ? 'never' : 'always'}
                         dpr={[1, 1.5]}
                         camera={{ position: [0, 0.7, 4.5], fov: 32 }}

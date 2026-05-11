@@ -1,7 +1,11 @@
 import { useState, useRef } from 'react';
 import './AIOutfitChat.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const RAW_API_URL = import.meta.env.VITE_API_URL || '';
+const API_BASE_URL = RAW_API_URL.trim().replace(/\/$/, '');
+const AI_OUTFIT_SUGGEST_ENDPOINT = API_BASE_URL
+    ? `${API_BASE_URL}/api/ai/outfit-suggest`
+    : '/api/ai/outfit-suggest';
 
 interface OutfitItem {
     itemId?: string;
@@ -72,7 +76,7 @@ export default function AIOutfitChat({ closetItems, avatarData, token, onWearOut
         setError('');
 
         try {
-            const res = await fetch(`${API_URL}/api/ai/outfit-suggest`, {
+            const res = await fetch(AI_OUTFIT_SUGGEST_ENDPOINT, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -2,8 +2,11 @@ import React, { useState, useRef } from 'react';
 import type { AIOutfit } from '../types/aiOutfit';
 import OutfitCard from './OutfitCard.tsx';
 
-const RAW_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-const API_URL = RAW_API_URL.startsWith(':') ? `http://localhost${RAW_API_URL}` : RAW_API_URL;
+const RAW_API_URL = import.meta.env.VITE_API_URL || '';
+const API_BASE_URL = RAW_API_URL.trim().replace(/\/$/, '');
+const AI_OUTFIT_SUGGEST_ENDPOINT = API_BASE_URL
+    ? `${API_BASE_URL}/api/ai/outfit-suggest`
+    : '/api/ai/outfit-suggest';
 
 export default function AIOutfitSidebar() {
     const [prompt, setPrompt] = useState('');
@@ -30,7 +33,7 @@ export default function AIOutfitSidebar() {
                 return;
             }
 
-            const response = await fetch(`${API_URL}/api/ai/outfit-suggest`, {
+            const response = await fetch(AI_OUTFIT_SUGGEST_ENDPOINT, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

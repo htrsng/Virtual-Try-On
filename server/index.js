@@ -31,6 +31,7 @@ const {
   buildLegacyProductVariants,
   normalizeProductForClient,
 } = require("./services");
+const { createAiRouter } = require("./routes/ai.routes");
 
 const app = express();
 app.use(cors());
@@ -43,15 +44,30 @@ let geminiModel = null;
 if (GEMINI_API_KEY) {
   try {
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+    const modelCandidates = [
+      process.env.GEMINI_MODEL,
+      "gemini-2.5-flash",
+      "gemini-flash-latest",
+      "gemini-2.0-flash",
+    ].filter(Boolean);
+
+    const generationConfig = {
+      response_mime_type: "application/json",
+      temperature: 0.7,
+      max_output_tokens: 1000,
+    };
+
     geminiModel = genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
-      generationConfig: {
-        response_mime_type: 'application/json',
-        temperature: 0.7,
-        max_output_tokens: 1000,
-      }
+      model: modelCandidates[0],
+      generationConfig,
     });
-    console.log('✅ Gemini AI initialized successfully');
+
+    // Keep candidates for runtime fallback in case primary model becomes unavailable.
+    geminiModel.__fallbackCandidates = modelCandidates;
+    geminiModel.__genAI = genAI;
+    geminiModel.__generationConfig = generationConfig;
+
+    console.log(`✅ Gemini AI initialized successfully (${modelCandidates[0]})`);
   } catch (err) {
     console.error('❌ Failed to initialize Gemini AI:', err.message);
   }
@@ -1118,28 +1134,6 @@ app.delete("/api/saved-outfits/:id", authenticateToken, requireDbReady, async (r
   }
 });
 
-app.post("/api/ai/outfit-suggest", authenticateToken, requireDbReady, async (req, res) => {
-  try {
-    const userPrompt = String(req.body?.userPrompt || "").trim();
-    const outfit = Array.isArray(req.body?.outfit) ? req.body.outfit : [];
-    const missing = Array.isArray(req.body?.missing) ? req.body.missing : [];
-
-    const result = { outfit, missing };
-
-    await AILog.create({
-      userId: req.user?.id || undefined,
-      userPrompt,
-      outfitCount: result.outfit?.length ?? 0,
-      missingCount: result.missing?.length ?? 0,
-    });
-
-    res.json({ success: true, ...result });
-  } catch (err) {
-    console.error("[ai outfit suggest]", err);
-    res.status(500).json({ success: false, error: "AI suggest failed" });
-  }
-});
-
 app.get("/api/admin/ai-stats", authenticateToken, requireAdmin, requireDbReady, async (req, res) => {
   try {
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
@@ -2127,188 +2121,18 @@ app.post("/api/admin/check-sync", async (req, res) => {
 const originalOrderUpdate = app.put;
 
 // ============================================================
-// AI OUTFIT GENERATOR — POST /api/ai/outfit-suggest
+// AI OUTFIT GENERATOR ROUTES
 // ============================================================
-app.post('/api/ai/outfit-suggest', authenticateToken, requireDbReady, async (req, res) => {
-  try {
-    if (!geminiModel) {
-      return res.status(503).json({ error: 'AI service is not available', code: 'AI_NOT_INITIALIZED' });
-    }
-
-    const { userPrompt, closetItems = [], avatarData = {} } = req.body;
-
-    if (!userPrompt || userPrompt.trim().length === 0) {
-      return res.status(400).json({ error: 'Vui lòng nhập câu hỏi' });
-    }
-
-    // ── Lấy sản phẩm shop (chỉ lấy những field cần thiết cho AI) ──
-    const shopProducts = await ProductModel.find({ status: 'active' })
-      .select('id name category price ai_attributes variants')
-      .limit(30)
-      .lean();
-
-    // ── Tóm tắt data để tiết kiệm token ──
-    const closetSummary = closetItems.slice(0, 10).map(item => ({
-      id: item.itemId,
-      name: item.name,
-      category: item.slotCategory ?? item.category,
-      color: item.purchasedColor,
-      size: item.purchasedSize,
-    }));
-
-    const shopSummary = shopProducts.map(p => ({
-      id: p.id,
-      name: p.name,
-      price: p.price,
-      category: p.ai_attributes?.category ?? p.category,
-      style: p.ai_attributes?.style ?? [],
-      weather: p.ai_attributes?.weather ?? [],
-      occasion: p.ai_attributes?.occasion ?? [],
-      colorTone: p.ai_attributes?.color_tone,
-      fit: p.ai_attributes?.fit,
-      material: p.ai_attributes?.material,
-    }));
-
-    const avatarSummary = avatarData ? {
-      height: avatarData.height,
-      weight: avatarData.weight,
-      chest: avatarData.chest,
-      waist: avatarData.waist,
-      hip: avatarData.hip,
-    } : null;
-
-    // ── Build prompt ──
-    const prompt = `
-Bạn là AI Stylist cho ứng dụng thời trang VFitAI.
-Nhiệm vụ: Gợi ý outfit phù hợp dựa trên yêu cầu của người dùng.
-
-YÊU CẦU CỦA NGƯỜI DÙNG: "${userPrompt}"
-
-TỦ ĐỒ HIỆN CÓ (đồ đã mua):
-${JSON.stringify(closetSummary, null, 2)}
-
-SẢN PHẨM TRONG SHOP:
-${JSON.stringify(shopSummary, null, 2)}
-
-${avatarSummary ? `SỐ ĐO CƠ THỂ: ${JSON.stringify(avatarSummary)}` : ''}
-
-QUY TẮC:
-1. Ưu tiên dùng đồ từ TỦ ĐỒ trước, chỉ gợi ý mua thêm nếu thực sự cần
-2. Outfit phải đầy đủ (tops + bottoms/dress, có thể thêm outerwear)
-3. Màu sắc, phong cách phải hài hòa với nhau
-4. Lý do gợi ý phải ngắn gọn, tự nhiên bằng tiếng Việt
-
-TRẢ VỀ JSON theo đúng format sau (không thêm text bên ngoài JSON):
-{
-  "outfit": [
-    {
-      "itemId": "id của item trong tủ đồ",
-      "name": "tên sản phẩm",
-      "source": "closet",
-      "slot": "tops/bottoms/outerwear/dress",
-      "reason": "lý do chọn ngắn gọn"
-    }
-  ],
-  "suggestions": [
-    {
-      "productId": id số của sản phẩm trong shop,
-      "name": "tên sản phẩm",
-      "price": giá,
-      "source": "shop",
-      "slot": "tops/bottoms/outerwear",
-      "reason": "lý do nên mua thêm"
-    }
-  ],
-  "explanation": "Một câu tổng kết outfit, tự nhiên như stylist thật nói",
-  "occasion": "dịp phù hợp",
-  "weatherTip": "gợi ý về thời tiết nếu có"
-}`;
-
-    // ── Gọi Gemini API ──
-    const result = await geminiModel.generateContent(prompt);
-    let rawText;
-    try {
-      if (result?.response && typeof result.response.text === 'function') {
-        rawText = await result.response.text();
-      } else if (typeof result === 'string') {
-        rawText = result;
-      } else {
-        rawText = JSON.stringify(result);
-      }
-    } catch (e) {
-      rawText = String(result);
-    }
-
-    let parsed;
-    try {
-      parsed = JSON.parse(rawText);
-    } catch (parseErr) {
-      const cleaned = rawText.replace(/```json|```/g, '').trim();
-      parsed = JSON.parse(cleaned);
-    }
-
-    // ── Log để Admin theo dõi ──
-    try {
-      const AILogModel = mongoose.models.AILog || mongoose.model('AILog',
-        new mongoose.Schema({
-          userId: mongoose.Schema.Types.ObjectId,
-          userPrompt: String,
-          outfitCount: Number,
-          suggestCount: Number,
-          createdAt: { type: Date, default: Date.now }
-        })
-      );
-      await AILogModel.create({
-        userId: req.user.id,
-        userPrompt: userPrompt.trim(),
-        outfitCount: parsed.outfit?.length ?? 0,
-        suggestCount: parsed.suggestions?.length ?? 0,
-      });
-    } catch (_) { /* log fail không block response */ }
-
-    let finalSuggestions = parsed.suggestions ?? [];
-    if ((!Array.isArray(finalSuggestions) || finalSuggestions.length === 0) && shopSummary.length > 0) {
-      const q = String(userPrompt || '').toLowerCase();
-      const keywords = ['đi làm', 'công sở', 'hẹn hò', 'đi biển', 'dự tiệc', 'cafe', 'sáng', 'tối', 'mát', 'nóng', 'lạnh'];
-      const matched = shopSummary.filter(p => {
-        const text = `${p.name} ${(p.style || []).join(' ')} ${(p.occasion || []).join(' ')} ${p.category}`.toLowerCase();
-        return keywords.some(k => q.includes(k) && text.includes(k.replace(/đi /, ''))) || keywords.some(k => q.includes(k) && text.includes(k));
-      });
-
-      const pick = (matched.length > 0 ? matched : shopSummary).slice(0, 3);
-      finalSuggestions = pick.map(p => ({
-        productId: p.id,
-        name: p.name,
-        price: p.price,
-        source: 'shop',
-        slot: p.category || 'tops',
-        reason: 'Gợi ý tạm thời — phù hợp với yêu cầu của bạn'
-      }));
-    }
-
-    res.json({
-      success: true,
-      outfit: parsed.outfit ?? [],
-      suggestions: finalSuggestions,
-      explanation: parsed.explanation ?? '',
-      occasion: parsed.occasion ?? '',
-      weatherTip: parsed.weatherTip ?? '',
-    });
-
-  } catch (err) {
-    console.error('[AI outfit-suggest]', err);
-    const PORT = process.env.PORT || 3000;
-    // Rate limit error
-    if (err.message?.includes('429') || err.message?.includes('quota')) {
-      return res.status(429).json({
-        error: 'AI đang bận, vui lòng thử lại sau vài giây',
-        code: 'RATE_LIMIT'
-      });
-    }
-
-    res.status(500).json({ error: 'AI tạm thời không khả dụng', code: 'AI_ERROR' });
-  }
-});
+app.use(
+  "/api/ai",
+  createAiRouter({
+    authenticateToken,
+    requireDbReady,
+    geminiModel,
+    ProductModel,
+    mongoose,
+  }),
+);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
