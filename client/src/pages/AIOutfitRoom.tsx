@@ -15,45 +15,78 @@ import type { OutfitFilter } from '../types/outfit';
 import '../features/virtual-tryon/VirtualTryOn.css';
 
 const AI_OUTFIT_ROOM_STYLES = `
+    /* Left panel — warm cream */
     .ai-outfit-left-container {
-        width: 320px;
-        border-right: 1px solid #e8e4df;
-        background: #fff;
+        width: 300px;
+        border-right: 1px solid rgba(200,168,103,0.18);
+        background: linear-gradient(180deg, #fffdf9 0%, #faf5ec 100%);
         display: flex;
         flex-direction: column;
         overflow: hidden;
         flex-shrink: 0;
     }
 
+    /* Right panel — dark luxury */
     .ai-outfit-right-container {
-        width: 380px;
-    border-left: 1px solid #e8e4df;
-    background: #fff;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    flex-shrink: 0;
-  }
+        width: 360px;
+        border-left: 1px solid rgba(200,168,103,0.18);
+        background: linear-gradient(180deg, #1a1612 0%, #211c17 100%);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
 
+    /* Right header */
     .ai-outfit-right-header {
-        padding: 16px;
-        border-bottom: 1px solid #e8e4df;
-        background: linear-gradient(135deg, #fafaf8 0%, #f5f1e8 100%);
+        padding: 18px 20px 14px;
+        border-bottom: 1px solid rgba(200,168,103,0.15);
+        background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+        position: relative;
+    }
+
+    .ai-outfit-right-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0; left: 20px; right: 20px;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(200,168,103,0.3), transparent);
+    }
+
+    .ai-outfit-right-eyebrow {
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(200,168,103,0.7);
+        margin: 0 0 5px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .ai-outfit-right-eyebrow::before {
+        content: '✦';
+        font-size: 8px;
+        color: rgba(200,168,103,0.55);
     }
 
     .ai-outfit-right-title {
-        margin: 0 0 4px 0;
+        margin: 0 0 3px 0;
         font-size: 16px;
         font-weight: 700;
-        color: #333;
+        color: rgba(255,255,255,0.92);
+        letter-spacing: -0.01em;
     }
 
     .ai-outfit-right-subtitle {
         margin: 0;
-        font-size: 12px;
-        color: #999;
+        font-size: 11px;
+        color: rgba(255,255,255,0.38);
+        line-height: 1.4;
     }
 
+    /* Right scroll area */
     .ai-outfit-right-scroll {
         flex: 1;
         overflow-y: auto;
@@ -61,73 +94,145 @@ const AI_OUTFIT_ROOM_STYLES = `
         display: flex;
         flex-direction: column;
         gap: 12px;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(200,168,103,0.25) transparent;
     }
 
+    .ai-outfit-right-scroll::-webkit-scrollbar { width: 5px; }
+    .ai-outfit-right-scroll::-webkit-scrollbar-thumb {
+        background: rgba(200,168,103,0.25);
+        border-radius: 4px;
+    }
+
+    /* Empty state */
     .ai-outfit-right-empty {
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
-        min-height: 180px;
-        color: #999;
-        font-size: 13px;
-        text-align: center;
+        min-height: 260px;
+        gap: 14px;
+        padding: 20px;
     }
 
+    .ai-outfit-right-empty-icon {
+        font-size: 36px;
+        line-height: 1;
+        filter: drop-shadow(0 4px 12px rgba(200,168,103,0.3));
+    }
+
+    .ai-outfit-right-empty-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: rgba(255,255,255,0.75);
+        text-align: center;
+        margin: 0;
+    }
+
+    .ai-outfit-right-empty-desc {
+        font-size: 12px;
+        color: rgba(255,255,255,0.38);
+        text-align: center;
+        margin: 0;
+        line-height: 1.5;
+        max-width: 220px;
+    }
+
+    /* Loading state */
     .ai-outfit-right-loading {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        min-height: 180px;
-        gap: 10px;
-        color: #666;
+        min-height: 220px;
+        gap: 14px;
     }
 
+    .ai-outfit-right-loading p {
+        font-size: 13px;
+        color: rgba(255,255,255,0.55);
+        margin: 0;
+        font-weight: 500;
+        letter-spacing: 0.02em;
+    }
+
+    /* Gold spinner */
     .ai-outfit-spinner {
-        width: 28px;
-        height: 28px;
-        border: 2px solid #e8e4df;
-        border-top-color: #ee4d2d;
+        width: 32px;
+        height: 32px;
+        border: 2.5px solid rgba(200,168,103,0.15);
+        border-top-color: rgba(200,168,103,0.8);
         border-radius: 50%;
-        animation: spin 0.8s linear infinite;
+        animation: aio-spin 0.85s linear infinite;
     }
 
+    @keyframes aio-spin { to { transform: rotate(360deg); } }
+
+    /* Error state */
     .ai-outfit-error {
         margin: 12px 16px 0;
-        border: 1px solid #f5c2c7;
-        background: #fff5f5;
-        color: #b42318;
-        border-radius: 10px;
-        padding: 10px 12px;
+        border: 1px solid rgba(239,68,68,0.25);
+        background: rgba(239,68,68,0.08);
+        color: rgba(255,160,160,0.9);
+        border-radius: 12px;
+        padding: 11px 14px;
         font-size: 13px;
+        backdrop-filter: blur(8px);
     }
 
     .ai-outfit-error strong {
         display: block;
         margin-bottom: 4px;
+        color: rgba(255,120,120,0.95);
     }
 
-  @media (max-width: 1024px) {
-        .ai-outfit-left-container {
-            width: 280px;
-        }
-
-        .ai-outfit-right-container {
-            width: 320px;
+    /* Tab buttons in nav */
+    .ai-outfit-nav-tabs {
+        display: flex;
+        gap: 6px;
+        margin-left: 12px;
     }
-  }
 
-  @media (max-width: 768px) {
+    .ai-outfit-tab-btn {
+        padding: 7px 14px;
+        border-radius: 100px;
+        border: 1px solid rgba(200,168,103,0.25);
+        background: rgba(255,255,255,0.06);
+        color: rgba(255,255,255,0.75);
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.18s ease;
+        font-family: inherit;
+        letter-spacing: 0.01em;
+    }
+
+    .ai-outfit-tab-btn:hover {
+        background: rgba(200,168,103,0.12);
+        border-color: rgba(200,168,103,0.40);
+        color: #f5d9a0;
+    }
+
+    .ai-outfit-tab-btn--on {
+        background: linear-gradient(135deg, rgba(200,168,103,0.22) 0%, rgba(200,168,103,0.14) 100%);
+        border-color: rgba(200,168,103,0.50);
+        color: #f5d9a0;
+        box-shadow: 0 0 14px rgba(200,168,103,0.18);
+    }
+
+    @media (max-width: 1024px) {
+        .ai-outfit-left-container { width: 270px; }
+        .ai-outfit-right-container { width: 300px; }
+    }
+
+    @media (max-width: 768px) {
         .ai-outfit-left-container,
-        .ai-outfit-right-container {
-      display: none;
+        .ai-outfit-right-container { display: none; }
     }
-  }
 
-    .vto-canvas-overlay--bottom-left {
-        z-index: 3;
-  }
+    .vto-canvas-overlay--bottom-left { z-index: 3; }
 `;
+
 
 const RAW_API_URL = import.meta.env.VITE_API_URL || '';
 const API_BASE_URL = RAW_API_URL.trim().replace(/\/$/, '');
@@ -308,39 +413,6 @@ function SceneContent({ environmentPreset, cameraPos, cameraTarget, isRotating }
                 shadow-camera-bottom={-2}
                 shadow-bias={-0.0005}
             />
-            <div style={{ display: 'flex', gap: 8, marginLeft: 12 }}>
-                <button
-                    type="button"
-                    onClick={() => setActiveTab('describe')}
-                    style={{
-                        border: '1px solid #cbd5e1',
-                        background: activeTab === 'describe' ? '#0f172a' : '#fff',
-                        color: activeTab === 'describe' ? '#fff' : '#475569',
-                        borderRadius: 999,
-                        padding: '8px 12px',
-                        cursor: 'pointer',
-                        fontSize: 13,
-                    }}
-                >
-                    Gợi ý theo mô tả
-                </button>
-                <button
-                    type="button"
-                    onClick={() => setActiveTab('occasion')}
-                    style={{
-                        border: '1px solid #cbd5e1',
-                        background: activeTab === 'occasion' ? '#0f172a' : '#fff',
-                        color: activeTab === 'occasion' ? '#fff' : '#475569',
-                        borderRadius: 999,
-                        padding: '8px 12px',
-                        cursor: 'pointer',
-                        fontSize: 13,
-                    }}
-                >
-                    Chọn theo dịp
-                </button>
-            </div>
-
             <directionalLight position={[-2, 3, -2]} intensity={0.3} />
             {/* Hemisphere light for soft ambient occlusion feel */}
             <hemisphereLight args={['#f5f0e8', '#3a3228', 0.35]} />
@@ -644,6 +716,24 @@ export default function AIOutfitRoom() {
                         </button>
                     </div>
 
+                    {/* Tab buttons in nav */}
+                    <div className="ai-outfit-nav-tabs">
+                        <button
+                            type="button"
+                            className={`ai-outfit-tab-btn${activeTab === 'describe' ? ' ai-outfit-tab-btn--on' : ''}`}
+                            onClick={() => setActiveTab('describe')}
+                        >
+                            Gợi ý theo mô tả
+                        </button>
+                        <button
+                            type="button"
+                            className={`ai-outfit-tab-btn${activeTab === 'occasion' ? ' ai-outfit-tab-btn--on' : ''}`}
+                            onClick={() => setActiveTab('occasion')}
+                        >
+                            Chọn theo dịp
+                        </button>
+                    </div>
+
                     <span className="vto-nav__help-btn" style={{ marginLeft: 'auto' }} title="Phòng AI Gợi Ý Phối Đồ">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <circle cx="12" cy="12" r="10" />
@@ -681,19 +771,22 @@ export default function AIOutfitRoom() {
 
                     <div className="ai-outfit-right-container">
                         <div className="ai-outfit-right-header">
-                            <h2 className="ai-outfit-right-title">AI Suggestions</h2>
-                            <p className="ai-outfit-right-subtitle">Gemini trả về các outfit có thể thử ngay trên avatar</p>
+                            <p className="ai-outfit-right-eyebrow">Gemini AI Stylist</p>
+                            <h2 className="ai-outfit-right-title">Gợi ý AI</h2>
+                            <p className="ai-outfit-right-subtitle">Outfit được tạo riêng cho bạn</p>
                         </div>
 
                         <div className="ai-outfit-right-scroll">
                             {isGenerating ? (
                                 <div className="ai-outfit-right-loading">
                                     <div className="ai-outfit-spinner" />
-                                    <p>Đang tạo gợi ý...</p>
+                                    <p>Đang tạo gợi ý outfit...</p>
                                 </div>
                             ) : outfits.length === 0 ? (
                                 <div className="ai-outfit-right-empty">
-                                    Nhập mô tả ở panel bên trái rồi bấm Tạo outfit với AI.
+                                    <span className="ai-outfit-right-empty-icon">✨</span>
+                                    <p className="ai-outfit-right-empty-title">Chưa có gợi ý nào</p>
+                                    <p className="ai-outfit-right-empty-desc">Nhập mô tả ở panel bên trái rồi bấm <strong style={{color:'rgba(200,168,103,0.85)'}}>Tạo outfit với AI</strong></p>
                                 </div>
                             ) : (
                                 outfits.map((outfit) => (

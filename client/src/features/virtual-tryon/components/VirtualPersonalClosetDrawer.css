@@ -744,9 +744,16 @@
 
 /* STATS ROW */
 .closet-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
-.closet-stat { background: var(--color-background-secondary); border-radius: 8px; padding: 7px 8px; text-align: center; }
-.closet-stat-num { display: block; font-size: 17px; font-weight: 500; color: var(--color-text-primary); }
-.closet-stat-lbl { display: block; font-size: 9px; color: var(--color-text-tertiary); margin-top: 1px; }
+.closet-stat {
+    background: linear-gradient(135deg, #FDF8EE 0%, #FAF0D8 100%);
+    border: 1px solid rgba(200,168,103,0.20);
+    border-radius: 10px;
+    padding: 8px 8px;
+    text-align: center;
+}
+.closet-stat-num { display: block; font-size: 18px; font-weight: 700; color: #5c4317; }
+.closet-stat-lbl { display: block; font-size: 9px; color: #9a8a78; margin-top: 1px; font-weight: 500; }
+
 
 /* TABS */
 .closet-tabs { display: flex; border-bottom: 0.5px solid var(--color-border-tertiary); padding: 0 16px; overflow-x: auto; }
@@ -765,12 +772,13 @@
 .closet-items-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 9px;
+    gap: 10px;
     padding: 12px;
     overflow-y: auto;
     flex: 1;
-    align-items: start;   /* BẮT BUỘC */
+    align-items: start;
 }
+
 
 /* EMPTY STATE */
 .closet-empty { text-align: center; padding: 40px 20px; color: var(--color-text-tertiary); font-size: 12px; line-height: 1.8; }
@@ -886,3 +894,117 @@
 .ci-cancel  { background: transparent; color: var(--color-text-tertiary); border: 0.5px solid var(--color-border-tertiary) !important; }
 .ci-worn    { background: #E1F5EE; color: #085041; font-weight: 500; cursor: default; }
 .ci-worn:hover { opacity: 1; }
+
+/* =========================================
+   SIZE & COLOR PURCHASE DISPLAY
+   ========================================= */
+
+/* Container holding size + color badges */
+.ci-purchase-tags {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+
+/* Size badge — gold pill */
+.ci-size-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: linear-gradient(135deg, #FDF8EE 0%, #FAF0D8 100%);
+    border: 1px solid rgba(200,168,103,0.35);
+    border-radius: 100px;
+    padding: 2px 7px 2px 5px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #7A5C2E;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+.ci-size-icon {
+    font-size: 9px;
+    line-height: 1;
+}
+
+/* Color tag — dot + label */
+.ci-color-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(0,0,0,0.04);
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 100px;
+    padding: 2px 7px 2px 4px;
+    font-size: 10px;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    max-width: 90px;
+    overflow: hidden;
+}
+
+.ci-color-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.12);
+    flex-shrink: 0;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.3);
+}
+
+.ci-color-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+    max-width: 55px;
+}
+
+/* Picker — color dot with "bought" checkmark */
+.ci-dot {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ci-dot--bought {
+    outline: 2px solid rgba(29, 158, 117, 0.6);
+    outline-offset: 1px;
+}
+
+.ci-dot__bought-mark {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 0 2px rgba(0,0,0,0.5);
+    pointer-events: none;
+}
+
+/* Picker — size button with "bought" star */
+.ci-sz {
+    position: relative;
+}
+
+.ci-sz__bought-star {
+    font-size: 7px;
+    color: #c8a867;
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    line-height: 1;
+}
+
+.ci-sz--bought {
+    border-color: rgba(200,168,103,0.5);
+    color: #7A5C2E;
+    background: linear-gradient(135deg, #FDF8EE 0%, #FAF0D8 100%);
+    padding-right: 12px;
+}

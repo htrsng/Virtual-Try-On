@@ -32,18 +32,15 @@ function Category({ data }) {
                         className="category-item"
                         style={{ textDecoration: 'none', color: 'inherit' }}
                     >
-                        <div style={{ height: '70%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <img
-                                src={item.img}
-                                alt={item.name}
-                                className="category-img"
-                                // 👇 ĐÃ SỬA: Đổi sang placehold.co và thêm chặn lặp vô hạn
-                                onError={(e) => {
-                                    e.target.onerror = null;
-                                    e.target.src = "https://placehold.co/100?text=Anh+Loi"
-                                }}
-                            />
-                        </div>
+                        <img
+                            src={item.img}
+                            alt={item.name}
+                            className="category-img"
+                            onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = "https://placehold.co/200x260/f0ece4/8B6F47?text=" + encodeURIComponent(item.name);
+                            }}
+                        />
                         <div className="icon-text">{item.name}</div>
                     </Link>
                 ))}

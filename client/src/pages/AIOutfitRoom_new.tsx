@@ -157,6 +157,31 @@ function SceneContent({ environmentPreset, cameraPos, cameraTarget, isRotating }
     const { currentAvatar, layeredGarments } = useFittingRoom();
     const [avatarScene, setAvatarScene] = useState<THREE.Group | null>(null);
 
+    // Debug helper: show axes and bounding box when avatarScene becomes available
+    function AvatarDebug({ sceneGroup }: { sceneGroup: THREE.Group | null }) {
+        useEffect(() => {
+            if (!sceneGroup) return;
+
+            console.info('[AvatarDebug] avatarScene ready:', sceneGroup);
+
+            const axes = new THREE.AxesHelper(0.6);
+            const box = new THREE.Box3().setFromObject(sceneGroup);
+            const size = new THREE.Vector3();
+            box.getSize(size);
+            const boxHelper = new THREE.Box3Helper(box, new THREE.Color(0xffaa00));
+
+            sceneGroup.add(axes);
+            sceneGroup.add(boxHelper);
+
+            return () => {
+                axes.removeFromParent();
+                boxHelper.removeFromParent();
+            };
+        }, [sceneGroup]);
+
+        return null;
+    }
+
     return (
         <>
             {/* Lighting Setup */}
@@ -182,22 +207,29 @@ function SceneContent({ environmentPreset, cameraPos, cameraTarget, isRotating }
             {/* Environment & Background */}
             <color attach="background" args={['#f5f1e8']} />
             <Environment preset={environmentPreset} />
-            <ContactShadows position={[0, -1.6, 0]} opacity={0.3} scale={12} blur={2.5} far={20} />
-
-            {/* Grid for reference */}
-            <Grid args={[10, 10]} cellSize={0.5} fadeDistance={10} fadeStrength={0.3} />
+            {/* Ground group: align avatar, grid and shadows consistently with AvatarStudio */}
+            <group position={[0, -1.15, 0]}>
+                <ContactShadows position={[0, 0.01, 0]} opacity={0.3} scale={12} blur={2.5} far={20} />
+                {/* Grid for reference */}
+                <Grid position={[0, 0, 0]} args={[10, 10]} cellSize={0.5} fadeDistance={10} fadeStrength={0.3} />
+            </group>
 
             {/* Camera animator for smooth transitions */}
             <CameraAnimator targetPosition={cameraPos} targetLookAt={cameraTarget} />
 
             {/* Avatar Base */}
             <Suspense fallback={<LoadingScreen />}>
-                <Avatar
-                    body={currentAvatar}
-                    pose="T"
-                    onSceneReady={setAvatarScene}
-                />
+                <group position={[0, -1.15, 0]}>
+                    <Avatar
+                        body={currentAvatar}
+                        pose="T"
+                        onSceneReady={setAvatarScene}
+                    />
+                </group>
             </Suspense>
+
+            {/* Debug visuals for avatarScene */}
+            {avatarScene && <AvatarDebug sceneGroup={avatarScene} />}
 
             {/* Render Garments */}
             {Object.entries(layeredGarments).map(([slot, garment]) => {

@@ -1495,6 +1495,9 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                     <span>Hướng dẫn</span>
                 </button>
                 <div className="vto-nav__spacer" />
+                <span className="vto-nav__room-label">✦ Virtual Fitting Studio</span>
+                <div className="vto-nav__spacer" />
+
             </header>
 
             {/* ─── Workspace ─── */}

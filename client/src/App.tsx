@@ -47,6 +47,7 @@ const ChatWidget = lazy(() => import('./components/ChatWidget'));
 const VirtualTryOn = lazy(() => import('./features/virtual-tryon/VirtualTryOn.tsx'));
 const AvatarStudioPage = lazy(() => import('./pages/AvatarStudioPage'));
 const AIOutfitGenerator = lazy(() => import('./pages/AIOutfitGenerator'));
+const AIOutfitRoom = lazy(() => import('./pages/AIOutfitRoom'));
 
 // --- 3. IMPORT CONTEXTS ---
 import { AuthProvider } from './contexts/AuthContext';
@@ -713,10 +714,10 @@ function App() {
             {/* TRANG QUẢN LÝ AVATAR */}
             <Route path="/avatar-studio" element={<AvatarStudioPage />} />
 
-            {/* TRANG AI OUTFIT ROOM - PHÒNG AI GỢI Ý PHỐI ĐỒ */}
-            <Route path="/ai-outfit" element={<AIOutfitGenerator />} />
+            {/* TRANG AI OUTFIT ROOM - PHÒNG AI GỢI Ý PHỐI ĐỒ (3D + AI) */}
+            <Route path="/ai-outfit" element={<AIOutfitRoom />} />
 
-            {/* TRANG AI OUTFIT GENERATOR - PHÒNG TẠO OUTFIT VỚI AI */}
+            {/* TRANG AI OUTFIT GENERATOR - PHIÊN BẢN CHAT CŨ */}
             <Route path="/ai-outfit-generator" element={<AIOutfitGenerator />} />
 
             {/* TRANG NỘI DUNG BANNER */}

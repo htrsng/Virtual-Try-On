@@ -1,107 +1,218 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, Autoplay } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const HERO_SLIDES = [
+    {
+        eyebrow: '✦ Phòng thử đồ 3D · Công nghệ AI',
+        headline: ['Mặc thử trước', 'Mua sau — chuẩn size'],
+        sub: 'Avatar 3D theo đúng số đo cơ thể. Thử ngàn bộ trang phục trong vài giây, không lo trả hàng.',
+        cta: { label: 'Vào phòng thử đồ 3D', path: '/try-on' },
+        ctaSecondary: { label: 'Khám phá sản phẩm', path: '/products' },
+    },
+    {
+        eyebrow: '✦ AI Size Recommendation',
+        headline: ['Size đúng ngay', 'lần đầu tiên'],
+        sub: 'AI phân tích số đo cơ thể, gợi ý size chính xác — giảm 90% đơn trả hàng do không vừa.',
+        cta: { label: 'Thử AI sizing ngay', path: '/try-on' },
+        ctaSecondary: { label: 'Xem bộ sưu tập', path: '/products' },
+    },
+    {
+        eyebrow: '✦ Heatmap Fit Analysis',
+        headline: ['Xem vùng vừa,', 'vùng chật trên 3D'],
+        sub: 'Bản đồ nhiệt hiển thị trực tiếp: đỏ là chật, xanh là vừa vặn hoàn hảo cho từng vùng cơ thể.',
+        cta: { label: 'Xem Heatmap →', path: '/try-on' },
+        ctaSecondary: { label: 'Tìm hiểu thêm', path: '/about' },
+    },
+];
+
+const STATS = [
+    { value: '10,000+', label: 'Sản phẩm' },
+    { value: '3D Real-time', label: 'Try-On' },
+    { value: 'AI', label: 'Gợi ý size' },
+    { value: '99%', label: 'Hài lòng' },
+];
 
 function Banner({ bannerData }) {
     const navigate = useNavigate();
+    const [current, setCurrent] = useState(0);
+    const intervalRef = useRef(null);
 
-    // Sử dụng dữ liệu từ props hoặc fallback
-    const defaultBanners = {
-        big: [
-            "https://cf.shopee.vn/file/vn-50009109-c8c772213d4eb0c102a2815c32d9136c_xxhdpi",
-            "https://cf.shopee.vn/file/vn-50009109-7756e18722421c4558e8b0b5550a2995_xxhdpi",
-            "https://cf.shopee.vn/file/vn-50009109-ca7d751537233ba49a37e199f36f339c_xxhdpi"
-        ],
-        smallTop: "https://cf.shopee.vn/file/vn-50009109-1a8df9e82936a71e721c5db605021571_xhdpi",
-        smallBottom: "https://cf.shopee.vn/file/vn-50009109-00569106043234b68e77a10271b0586e_xhdpi"
+    useEffect(() => {
+        intervalRef.current = setInterval(() => {
+            setCurrent(c => (c + 1) % HERO_SLIDES.length);
+        }, 5500);
+        return () => clearInterval(intervalRef.current);
+    }, []);
+
+    const textVariants = {
+        hidden: { opacity: 0, y: 36, filter: 'blur(6px)' },
+        visible: (i) => ({
+            opacity: 1, y: 0, filter: 'blur(0px)',
+            transition: { duration: 0.6, delay: i * 0.11, ease: [0.22, 1, 0.36, 1] }
+        }),
+        exit: { opacity: 0, y: -16, transition: { duration: 0.25 } },
     };
 
-    const banners = bannerData || defaultBanners;
-
-    const mainBanners = banners.big.map((img, idx) => ({
-        id: idx + 1,
-        image: img,
-        link: "/"
-    }));
-
-    const sideBanners = [
-        {
-            id: 1,
-            image: banners.smallTop,
-            link: "/"
-        },
-        {
-            id: 2,
-            image: banners.smallBottom,
-            link: "/"
-        }
-    ];
+    const slide = HERO_SLIDES[current];
 
     return (
-        <div className="shopee-banner-container">
-            <div className="container">
-                <div className="banner-layout">
-                    {/* Main Banner Slider - Bên trái */}
-                    <div className="main-banner">
-                        <Swiper
-                            modules={[Pagination, Autoplay]}
-                            pagination={{ clickable: true }}
-                            autoplay={{ delay: 3000, disableOnInteraction: false }}
-                            loop={mainBanners.length >= 3}
-                            speed={800}
-                            className="main-banner-swiper"
-                        >
-                            {mainBanners.map((banner, index) => (
-                                <SwiperSlide key={banner.id}>
-                                    <div
-                                        onClick={() => navigate(`/banner/banner${index + 1}`)}
-                                        className="banner-link"
-                                        style={{ cursor: 'pointer' }}
-                                    >
-                                        <img
-                                            src={banner.image}
-                                            alt={`Banner ${banner.id}`}
-                                            className="banner-image"
-                                            onError={(e) => {
-                                                e.target.onerror = null;
-                                                e.target.src = "https://placehold.co/800x300/6C63FF/white?text=VFitAI";
-                                            }}
-                                        />
-                                    </div>
-                                </SwiperSlide>
+        <section className="vf-hero" aria-label="Hero banner">
+            {/* Dark bg with gold gradient overlay */}
+            <div className="vf-hero__bg">
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={current}
+                        className="vf-hero__glow"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 1.2 }}
+                    />
+                </AnimatePresence>
+                <div className="vf-hero__noise" />
+                <div className="vf-hero__fade-bottom" />
+            </div>
+
+            {/* Content */}
+            <div className="vf-hero__content container">
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={current}
+                        className="vf-hero__text"
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                    >
+                        {/* Eyebrow */}
+                        <motion.span className="vf-hero__eyebrow" custom={0} variants={textVariants}>
+                            {slide.eyebrow}
+                        </motion.span>
+
+                        {/* Headline */}
+                        <motion.h1 className="vf-hero__headline">
+                            {slide.headline.map((line, i) => (
+                                <motion.span
+                                    key={i}
+                                    style={{ display: 'block' }}
+                                    custom={i + 1}
+                                    variants={textVariants}
+                                >
+                                    {i === 0
+                                        ? <span className="vf-hero__headline-gold">{line}</span>
+                                        : line
+                                    }
+                                </motion.span>
                             ))}
-                        </Swiper>
+                        </motion.h1>
+
+                        {/* Sub */}
+                        <motion.p className="vf-hero__sub" custom={3} variants={textVariants}>
+                            {slide.sub}
+                        </motion.p>
+
+                        {/* CTA */}
+                        <motion.div className="vf-hero__cta-row" custom={4} variants={textVariants}>
+                            <button
+                                className="vf-btn vf-btn--gold"
+                                onClick={() => navigate(slide.cta.path)}
+                            >
+                                {slide.cta.label}
+                            </button>
+                            <button
+                                className="vf-btn vf-btn--outline"
+                                onClick={() => navigate(slide.ctaSecondary.path)}
+                            >
+                                {slide.ctaSecondary.label}
+                            </button>
+                        </motion.div>
+                    </motion.div>
+                </AnimatePresence>
+
+                {/* Right: decorative floating card */}
+                <motion.div
+                    className="vf-hero__deco"
+                    initial={{ opacity: 0, x: 48 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.9, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                >
+                    {/* Floating avatar card */}
+                    <div className="vf-deco-card">
+                        <div className="vf-deco-label">AI Heatmap Analysis</div>
+                        <div className="vf-deco-avatar">
+                            <svg viewBox="0 0 100 140" fill="none" xmlns="http://www.w3.org/2000/svg" width="90" height="126">
+                                {/* Head */}
+                                <ellipse cx="50" cy="30" rx="18" ry="20" fill="rgba(255,255,255,0.10)" stroke="rgba(200,168,103,0.45)" strokeWidth="1.2"/>
+                                <circle cx="50" cy="30" r="11" fill="rgba(255,255,255,0.14)"/>
+                                {/* Body */}
+                                <path d="M18 140 Q18 82 50 74 Q82 82 82 140Z" fill="rgba(200,168,103,0.20)" stroke="rgba(200,168,103,0.50)" strokeWidth="1.2"/>
+                                {/* Heatmap dots */}
+                                <circle cx="50" cy="93"  r="7"  fill="rgba(52,211,153,0.75)"/>
+                                <circle cx="37" cy="104" r="5"  fill="rgba(52,211,153,0.60)"/>
+                                <circle cx="63" cy="104" r="5"  fill="rgba(52,211,153,0.60)"/>
+                                <circle cx="43" cy="115" r="5"  fill="rgba(251,191,36,0.70)"/>
+                                <circle cx="57" cy="115" r="5"  fill="rgba(251,191,36,0.70)"/>
+                                <circle cx="50" cy="126" r="6"  fill="rgba(239,68,68,0.65)"/>
+                            </svg>
+                        </div>
+                        <div className="vf-deco-pills">
+                            <div className="vf-deco-pill vf-deco-pill--green">
+                                <span className="vf-dot vf-dot--green"/>Vừa vặn
+                            </div>
+                            <div className="vf-deco-pill vf-deco-pill--amber">
+                                <span className="vf-dot vf-dot--amber"/>Hơi chật
+                            </div>
+                            <div className="vf-deco-pill vf-deco-pill--red">
+                                <span className="vf-dot vf-dot--red"/>Cần size to hơn
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Side Banners - Bên phải */}
-                    <div className="side-banners">
-                        {sideBanners.map((banner, index) => (
-                            <motion.div
-                                key={banner.id}
-                                onClick={() => navigate(`/banner/banner${index + 4}`)}
-                                className="side-banner-item"
-                                style={{ cursor: 'pointer' }}
-                            >
-                                <img
-                                    src={banner.image}
-                                    alt={`Side Banner ${index + 1}`}
-                                    className="side-banner-image"
-                                    onError={(e) => {
-                                        e.target.onerror = null;
-                                        e.target.src = "https://placehold.co/400x150/ee4d2d/white?text=Banner";
-                                    }}
-                                />
-                            </motion.div>
-                        ))}
-                    </div>
+                    {/* Floating badge */}
+                    <motion.div
+                        className="vf-float-badge"
+                        animate={{ y: [0, -8, 0] }}
+                        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                    >
+                        <span className="vf-float-badge__icon">✓</span>
+                        <div>
+                            <div className="vf-float-badge__title">AI gợi ý: Size M</div>
+                            <div className="vf-float-badge__sub">Phù hợp 96%</div>
+                        </div>
+                    </motion.div>
+                </motion.div>
+            </div>
+
+            {/* Stats bar */}
+            <div className="vf-hero__stats">
+                <div className="container vf-hero__stats-inner">
+                    {STATS.map((s, i) => (
+                        <motion.div
+                            key={i}
+                            className="vf-hero__stat"
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.7 + i * 0.1 }}
+                        >
+                            <span className="vf-hero__stat-value">{s.value}</span>
+                            <span className="vf-hero__stat-label">{s.label}</span>
+                        </motion.div>
+                    ))}
                 </div>
             </div>
-        </div>
+
+            {/* Slide dots */}
+            <div className="vf-hero__dots">
+                {HERO_SLIDES.map((_, i) => (
+                    <button
+                        key={i}
+                        className={`vf-hero__dot${i === current ? ' active' : ''}`}
+                        onClick={() => setCurrent(i)}
+                        aria-label={`Slide ${i + 1}`}
+                    />
+                ))}
+            </div>
+        </section>
     );
 }
 

@@ -1,0 +1,491 @@
+/* ══════════════════════════════════════════════════════════════
+   Closet Item Card — Professional Fashion App Style
+   CIC = Closet Item Card
+   ══════════════════════════════════════════════════════════════ */
+
+/* ─── Card Container ─── */
+.cic {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-radius: 14px;
+    border: 1px solid rgba(31, 26, 23, 0.07);
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(31,26,23,0.06);
+    transition:
+        transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.22s ease,
+        border-color 0.2s ease;
+    will-change: transform;
+}
+
+.cic:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(31,26,23,0.12);
+    border-color: rgba(200,168,103,0.30);
+}
+
+.cic--open {
+    border-color: rgba(200,168,103,0.45);
+    box-shadow: 0 0 0 2px rgba(200,168,103,0.15), 0 8px 24px rgba(31,26,23,0.10);
+}
+
+.cic--wearing {
+    border-color: rgba(29,158,117,0.5);
+    box-shadow: 0 0 0 2px rgba(29,158,117,0.12), 0 8px 20px rgba(31,26,23,0.10);
+}
+
+/* ─── Image Zone ─── */
+.cic__img-wrap {
+    position: relative;
+    height: 148px;
+    background: linear-gradient(145deg, #F7F4EF 0%, #EDE5D8 100%);
+    overflow: hidden;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.cic__img-wrap:hover .cic__img {
+    transform: scale(1.04);
+}
+
+.cic__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+    display: block;
+}
+
+.cic__img-ph {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    color: rgba(31,26,23,0.15);
+}
+
+/* ─── Overlay badges ─── */
+.cic__overlay-top {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 4px;
+    pointer-events: none;
+}
+
+/* "Đã mua" badge — green checkmark */
+.cic__badge-bought {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: rgba(29, 158, 117, 0.90);
+    backdrop-filter: blur(6px);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 3px 7px;
+    border-radius: 100px;
+    text-transform: uppercase;
+    box-shadow: 0 2px 6px rgba(29,158,117,0.3);
+}
+
+/* Worn count badge */
+.cic__badge-worn {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(6px);
+    color: #5c4317;
+    font-size: 9px;
+    font-weight: 600;
+    padding: 3px 7px;
+    border-radius: 100px;
+    border: 1px solid rgba(200,168,103,0.25);
+}
+
+/* Match score badge */
+.cic__badge-match {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    background: linear-gradient(135deg, #1d9e75 0%, #0d8a63 100%);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 100px;
+    letter-spacing: 0.01em;
+    box-shadow: 0 2px 6px rgba(29,158,117,0.3);
+    pointer-events: none;
+}
+
+/* Expand hint */
+.cic__hint {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(6px);
+    color: #7a5c2e;
+    font-size: 9px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 100px;
+    border: 1px solid rgba(200,168,103,0.2);
+    pointer-events: none;
+}
+
+/* Wearing overlay */
+.cic__wearing-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(29,158,117,0.18);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.cic__wearing-overlay span {
+    background: rgba(29,158,117,0.90);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 100px;
+    letter-spacing: 0.05em;
+}
+
+/* ─── Info Zone ─── */
+.cic__info {
+    padding: 10px 12px 8px;
+    border-bottom: 1px solid rgba(31,26,23,0.05);
+}
+
+.cic__name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1f1a16;
+    line-height: 1.35;
+    margin: 0 0 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* ─── Attrs row (size + color) ─── */
+.cic__attrs {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.cic__attr {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+/* Size attribute */
+.cic__attr--size {
+    background: linear-gradient(135deg, #FDF8EE 0%, #FAF0D8 100%);
+    border: 1px solid rgba(200,168,103,0.35);
+    color: #7A5C2E;
+}
+
+.cic__attr-label {
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    opacity: 0.65;
+    text-transform: uppercase;
+}
+
+.cic__attr-val {
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+/* Color attribute */
+.cic__attr--color {
+    background: rgba(31,26,23,0.04);
+    border: 1px solid rgba(31,26,23,0.08);
+    color: #3d3530;
+    max-width: 90px;
+    overflow: hidden;
+}
+
+.cic__attr--color .cic__attr-val {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Empty attrs */
+.cic__attr--empty {
+    opacity: 0.5;
+}
+
+.cic__color-swatch {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.12);
+    flex-shrink: 0;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.25);
+}
+
+/* ─── Picker Zone ─── */
+.cic__picker {
+    padding: 10px 12px 8px;
+    background: #FFFDF9;
+    border-bottom: 1px solid rgba(31,26,23,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    animation: cic-expand 0.22s ease-out;
+}
+
+@keyframes cic-expand {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.cic__picker-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cic__picker-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #9a8a78;
+    width: 28px;
+    flex-shrink: 0;
+}
+
+/* Color dots in picker */
+.cic__color-list {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.cic__cdot {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    outline: 1px solid rgba(0,0,0,0.12);
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+}
+
+.cic__cdot:hover {
+    transform: scale(1.15);
+    outline-color: rgba(0,0,0,0.25);
+}
+
+.cic__cdot--on {
+    border-color: #1f1a16;
+    outline-color: transparent;
+    transform: scale(1.2);
+    box-shadow: 0 0 0 2px rgba(31,26,23,0.15);
+}
+
+.cic__cdot--bought {
+    outline: 2px solid #1d9e75;
+    outline-offset: 1.5px;
+}
+
+.cic__cdot-check {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 0 3px rgba(0,0,0,0.6);
+    pointer-events: none;
+}
+
+/* Size buttons in picker */
+.cic__size-list {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.cic__sbtn {
+    position: relative;
+    padding: 4px 9px;
+    font-size: 10px;
+    font-weight: 600;
+    border: 1px solid rgba(31,26,23,0.12);
+    border-radius: 6px;
+    cursor: pointer;
+    color: #3d3530;
+    background: #fff;
+    transition: all 0.15s ease;
+    font-family: inherit;
+    min-width: 32px;
+    text-align: center;
+}
+
+.cic__sbtn:hover {
+    border-color: rgba(31,26,23,0.25);
+    background: #f9f6f0;
+}
+
+.cic__sbtn--on {
+    background: #1f1a16;
+    color: #fff;
+    border-color: #1f1a16;
+}
+
+/* Purchased size — gold accent */
+.cic__sbtn--bought {
+    border-color: rgba(200,168,103,0.5);
+    color: #7A5C2E;
+    background: linear-gradient(135deg, #FDF8EE 0%, #FAF0D8 100%);
+    padding-right: 16px;
+}
+
+.cic__sbtn--bought.cic__sbtn--on {
+    background: linear-gradient(135deg, #c8a867 0%, #b8963e 100%);
+    color: #fff;
+    border-color: #c8a867;
+}
+
+.cic__sbtn-star {
+    position: absolute;
+    top: -4px;
+    right: -2px;
+    font-size: 8px;
+    color: #c8a867;
+    line-height: 1;
+}
+
+/* ─── Action Zone ─── */
+.cic__actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    padding: 8px 10px 10px;
+    background: #fff;
+}
+
+.cic__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 7px 6px;
+    border-radius: 9px;
+    font-size: 11px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.18s ease;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+}
+
+.cic__btn--wear {
+    background: #1f1a16;
+    color: #fff;
+    box-shadow: 0 3px 8px rgba(31,26,23,0.2);
+}
+
+.cic__btn--wear:hover {
+    background: #2e2720;
+    transform: translateY(-1px);
+    box-shadow: 0 5px 14px rgba(31,26,23,0.25);
+}
+
+.cic__btn--detail {
+    background: transparent;
+    color: #7a6d62;
+    border: 1px solid rgba(31,26,23,0.12);
+}
+
+.cic__btn--detail:hover {
+    background: #f5f0e8;
+    border-color: rgba(200,168,103,0.3);
+    color: #5c4317;
+}
+
+.cic__btn--confirm {
+    background: linear-gradient(135deg, #1d9e75 0%, #0d8a63 100%);
+    color: #fff;
+    box-shadow: 0 3px 8px rgba(29,158,117,0.25);
+}
+
+.cic__btn--confirm:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 14px rgba(29,158,117,0.35);
+}
+
+.cic__btn--cancel {
+    background: transparent;
+    color: #9a8a78;
+    border: 1px solid rgba(31,26,23,0.10);
+}
+
+.cic__btn--cancel:hover {
+    background: #f5f0e8;
+}
+
+.cic__btn--worn {
+    background: rgba(29,158,117,0.08);
+    color: #0d7a5c;
+    border: 1px solid rgba(29,158,117,0.2);
+    cursor: default;
+    font-size: 10px;
+}
+
+.cic__btn--worn:hover {
+    transform: none;
+}
+
+/* ─── Focus states ─── */
+.cic__img-wrap:focus-visible {
+    outline: 2px solid #c8a867;
+    outline-offset: -2px;
+}
+
+.cic__cdot:focus-visible,
+.cic__sbtn:focus-visible,
+.cic__btn:focus-visible {
+    outline: 2px solid #c8a867;
+    outline-offset: 2px;
+}

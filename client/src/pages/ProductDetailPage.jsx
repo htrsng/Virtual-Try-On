@@ -65,19 +65,9 @@ function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, onBu
     const [activeImgIdx, setActiveImgIdx] = useState(0);
     const [reviewFilter, setReviewFilter] = useState('all');
     const [sizeFilter, setSizeFilter] = useState('Tất cả');
-    const [userReviews, setUserReviews] = useState([]);
-    const [newReview, setNewReview] = useState({ rating: 5, comment: '', images: [] });
+    const [userReviews] = useState([]);
     const [aiConfidenceScore] = useState(user ? Math.floor(70 + Math.random() * 28) : 0);
 
-    // Review eligibility state
-    const [reviewEligibility, setReviewEligibility] = useState({
-        canReview: false,
-        hasPurchased: false,
-        hasReviewed: false,
-        status: null,
-        message: ''
-    });
-    const [loadingEligibility, setLoadingEligibility] = useState(false);
 
     // Sample reviews data
     const [allReviews] = useState([
@@ -140,43 +130,6 @@ function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, onBu
         }
     }, [finalProduct]);
 
-    // ✅ Check if user already reviewed this product
-    useEffect(() => {
-        if (!user || !finalProduct?.id) {
-            setReviewEligibility({
-                canReview: false,
-                hasPurchased: false,
-                hasReviewed: false,
-                status: null,
-                message: ''
-            });
-            return;
-        }
-
-        // Fetch reviews to check if user already reviewed
-        axios.get(`http://localhost:3000/api/reviews/${finalProduct.id}`)
-            .then(res => {
-                const userReview = res.data.reviews?.find(r => r.userId === user.id);
-                setReviewEligibility({
-                    canReview: true,
-                    hasPurchased: true,
-                    hasReviewed: !!userReview,
-                    status: null,
-                    message: userReview ? "Đã đánh giá" : "Có thể đánh giá"
-                });
-            })
-            .catch(err => {
-                console.error('Error checking review status:', err);
-                setReviewEligibility({
-                    canReview: true,
-                    hasPurchased: true,
-                    hasReviewed: false,
-                    status: null,
-                    message: 'Có thể đánh giá'
-                });
-            })
-            .finally(() => setLoadingEligibility(false));
-    }, [user, finalProduct?.id]);
 
     // Filter reviews based on selected criteria
     const filteredReviews = [...allReviews, ...userReviews].filter(review => {
@@ -203,53 +156,7 @@ function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, onBu
         images: [...allReviews, ...userReviews].filter(r => r.images.length > 0).length
     };
 
-    // Handle review submission
-    const handleSubmitReview = (e) => {
-        e.preventDefault();
-        console.log('Submit review clicked', { isAuthenticated, user });
 
-        if (!isAuthenticated) {
-            if (showToast) {
-                showToast(t('please_login_review'), 'error');
-            } else {
-                alert(t('please_login_review'));
-            }
-            setTimeout(() => navigate('/login'), 1500);
-            return;
-        }
-
-        if (!newReview.comment.trim()) {
-            if (showToast) {
-                showToast(t('please_enter_review'), 'error');
-            } else {
-                alert(t('please_enter_review'));
-            }
-            return;
-        }
-
-        const review = {
-            id: Date.now(),
-            user: user?.fullName || user?.email || 'Người dùng',
-            avatar: (user?.fullName?.[0] || user?.email?.[0] || 'U').toUpperCase(),
-            rating: newReview.rating,
-            date: new Date().toISOString().split('T')[0],
-            variant: activeVariant ? `${activeVariant.colorName}, Size ${selectedSize || 'M'}` : t('not_selected'),
-            comment: newReview.comment,
-            images: newReview.images,
-            shopReply: null,
-            gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-        };
-
-        console.log('Adding review:', review);
-        setUserReviews([review, ...userReviews]);
-        setNewReview({ rating: 5, comment: '', images: [] });
-
-        if (showToast) {
-            showToast(`✅ ${t('review_submitted')}`, 'success');
-        } else {
-            alert(`✅ ${t('review_submitted')}`);
-        }
-    };
 
     if (!products && !flashSaleProducts) return <div style={{ padding: '50px', textAlign: 'center' }}>{t('loading')}</div>;
     if (!finalProduct) return <div style={{ padding: '50px', textAlign: 'center' }}>{t('product_not_found')}</div>;
@@ -679,65 +586,15 @@ function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, onBu
                     </button>
                 </div>
 
-                {/* ✅ REVIEW FORM - 2 STATES */}
-                {!isAuthenticated ? (
-                    // STATE 1: Not logged in
-                    <div className="review-login-gate">
-                        <div className="review-gate-icon">🔒</div>
-                        <h4 className="review-gate-title">{t('login_to_review')}</h4>
-                        <p className="review-gate-text">{t('login_to_review_desc')}</p>
-                        <button
-                            onClick={() => navigate('/login')}
-                            className="review-gate-btn primary"
-                        >
-                            {t('login_now')}
-                        </button>
-                    </div>
-                ) : reviewEligibility.hasReviewed ? (
-                    // STATE 2: Already reviewed
-                    <div className="review-success-message">
-                        <div className="review-success-icon">✅</div>
-                        <h4 className="review-success-title">Cảm ơn bạn!</h4>
-                        <p className="review-success-text">Bạn đã đánh giá sản phẩm này. Cảm ơn vì đã chia sẻ trải nghiệm của bạn với cộng đồng.</p>
-                    </div>
-                ) : (
-                    // STATE 5: Can review - Show form
-                    <div className="review-form">
-                        <h4 className="review-form-title">{t('write_your_review')}</h4>
-                        <form onSubmit={handleSubmitReview}>
-                            <div className="review-form-group">
-                                <label className="review-form-label">{t('your_rating')}</label>
-                                <div className="review-star-group">
-                                    {[5, 4, 3, 2, 1].map(star => (
-                                        <button
-                                            key={star}
-                                            type="button"
-                                            onClick={() => setNewReview({ ...newReview, rating: star })}
-                                            className={`review-star-button ${newReview.rating === star ? 'selected' : ''}`}
-                                        >
-                                            {star} ⭐
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
 
-                            <div className="review-form-group">
-                                <label className="review-form-label">{t('your_comment')}</label>
-                                <textarea
-                                    value={newReview.comment}
-                                    onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
-                                    placeholder={t('share_experience')}
-                                    className="review-textarea"
-                                    required
-                                />
-                            </div>
-
-                            <button type="submit" className="review-submit-btn">
-                                {t('submit_review_btn')}
-                            </button>
-                        </form>
+                {/* Ghi chú: Viết đánh giá tại trang Đơn Hàng */}
+                {isAuthenticated && (
+                    <div className="review-write-note">
+                        <span className="review-note-icon">✏️</span>
+                        <span>Để viết đánh giá, vào <strong>Đơn Hàng</strong> → chọn đơn đã nhận → nhấn <strong>Đánh Giá</strong></span>
                     </div>
                 )}
+
 
                 {/* Danh sách đánh giá */}
                 <div className="review-list">
