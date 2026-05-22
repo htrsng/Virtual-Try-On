@@ -1,7 +1,7 @@
 import { Suspense, useState, useRef, useEffect, useCallback } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows, Html, Grid } from '@react-three/drei';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import * as THREE from 'three';
 import { Avatar } from '../three/controls/avatar/Avatar';
 import { useFittingRoom } from '../contexts/FittingRoomContext';
@@ -278,9 +278,10 @@ function SceneContent({ environmentPreset, cameraPos, cameraTarget, isRotating }
 
 export default function AIOutfitRoom() {
     const navigate = useNavigate();
+    const location = useLocation();
     const [isWebglContextLost, setIsWebglContextLost] = useState(false);
     const { avatars, currentAvatarId, setCurrentAvatarId } = useFittingRoom();
-    const canvasAreaRef = useRef<HTMLDivElement | null>(null);
+    const canvasAreaRef = useRef<HTMLElement>(null!);
     const canvasElementRef = useRef<HTMLCanvasElement | null>(null);
     const webglContextHandlersRef = useRef<{ handleContextLost?: (e: Event) => void; handleContextRestored?: () => void }>({});
 
@@ -292,6 +293,9 @@ export default function AIOutfitRoom() {
 
     // Environment state
     const [environmentPreset, setEnvironmentPreset] = useState<'city' | 'studio'>('city');
+    const initialPrompt = typeof location.state === 'object' && location.state !== null && 'initialPrompt' in location.state
+        ? String((location.state as { initialPrompt?: unknown }).initialPrompt || '')
+        : '';
 
     const handleBackToHome = useCallback(() => {
         navigate('/');
@@ -390,7 +394,13 @@ export default function AIOutfitRoom() {
                 {/* Main Workspace */}
                 <div className="vto-workspace">
                     {/* 3D Canvas Area with Fixed Height */}
-                    <div ref={canvasAreaRef} className="vto-canvas-area" style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+                    <div
+                        ref={(node) => {
+                            canvasAreaRef.current = node as HTMLElement;
+                        }}
+                        className="vto-canvas-area"
+                        style={{ flex: 1, position: 'relative', overflow: 'hidden' }}
+                    >
                         <Canvas
                             eventSource={canvasAreaRef}
                             frameloop={isWebglContextLost ? 'never' : 'always'}
@@ -474,7 +484,7 @@ export default function AIOutfitRoom() {
 
                     {/* Right Sidebar: AI Outfit Sidebar */}
                     <div className="ai-outfit-sidebar-container">
-                        <AIOutfitSidebar />
+                        <AIOutfitSidebar initialPrompt={initialPrompt} />
                     </div>
                 </div>
             </div>

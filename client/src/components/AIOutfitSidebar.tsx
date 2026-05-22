@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import type { AIOutfit } from '../types/aiOutfit';
 import OutfitCard from './OutfitCard.tsx';
 
@@ -8,12 +8,18 @@ const AI_OUTFIT_SUGGEST_ENDPOINT = API_BASE_URL
     ? `${API_BASE_URL}/api/ai/outfit-suggest`
     : '/api/ai/outfit-suggest';
 
-export default function AIOutfitSidebar() {
-    const [prompt, setPrompt] = useState('');
+export default function AIOutfitSidebar({ initialPrompt = '' }: { initialPrompt?: string }) {
+    const [prompt, setPrompt] = useState(initialPrompt);
     const [outfits, setOutfits] = useState<AIOutfit[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const suggestionsRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (initialPrompt.trim()) {
+            setPrompt(initialPrompt);
+        }
+    }, [initialPrompt]);
 
     const handleGenerateOutfits = async () => {
         if (!prompt.trim()) {
@@ -97,7 +103,7 @@ export default function AIOutfitSidebar() {
         <div className="ai-outfit-sidebar">
             {/* Header */}
             <div className="ai-outfit-header">
-                <h2 className="ai-outfit-title">✨ AI Phối Đồ</h2>
+                <h2 className="ai-outfit-title">✦ AI Phối Đồ</h2>
                 <p className="ai-outfit-subtitle">Nhập yêu cầu phối đồ của bạn</p>
             </div>
 
