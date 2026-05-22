@@ -47,7 +47,7 @@ function FlashSale({ products = [] }) {
                 background: 'var(--surface-subtle)',
                 border: '1px solid var(--gold-border)',
                 borderRadius: '24px',
-                margin: '0 0 var(--section-gap)',
+                margin: '0',
                 padding: '28px 32px',
                 position: 'relative',
                 overflow: 'hidden'

@@ -181,7 +181,7 @@ function HomePage({ products, categories, topSearch, bannerData, flashSaleProduc
 
                 <div className="gold-divider" />
 
-                <motion.section variants={sectionVariants} className="section-spacing" style={sectionWrapperStyle}>
+                <motion.section variants={sectionVariants} className="section-spacing" style={{ ...sectionWrapperStyle, marginBottom: '10px' }}>
                     <div className="container">
                         <TopSearch products={topSearch} />
                     </div>
@@ -189,7 +189,7 @@ function HomePage({ products, categories, topSearch, bannerData, flashSaleProduc
 
                 <div className="gold-divider" />
 
-                <motion.section variants={sectionVariants} className="section-spacing" style={sectionWrapperStyle}>
+                <motion.section variants={sectionVariants} className="section-spacing" style={{ ...sectionWrapperStyle, marginBottom: '20px' }}>
                     <FlashSale products={flashSaleProducts} />
                 </motion.section>
 
@@ -210,32 +210,7 @@ function HomePage({ products, categories, topSearch, bannerData, flashSaleProduc
                     <ReviewCarousel />
                 </motion.section>
 
-                <div className="gold-divider" />
 
-                <motion.section variants={sectionVariants} className="tech-section" style={sectionWrapperStyle}>
-                    <div className="tech-inner">
-                        <div className="tech-header">
-                            <span className="tech-eyebrow">Được xây dựng bởi</span>
-                            <h2 className="tech-title">Công nghệ hiện đại</h2>
-                        </div>
-                        <div className="tech-grid">
-                            {[
-                                { name: 'React.js', desc: 'Giao diện người dùng', icon: '⚛️' },
-                                { name: 'Three.js', desc: 'Đồ họa 3D Avatar', icon: '🎮' },
-                                { name: 'Node.js', desc: 'Backend & API', icon: '🟢' },
-                                { name: 'MongoDB', desc: 'Cơ sở dữ liệu', icon: '🍃' },
-                                { name: 'Claude AI', desc: 'AI Stylist & Sizing', icon: '✦' },
-                                { name: 'WebGL', desc: 'Render 3D thời gian thực', icon: '🖼️' },
-                            ].map(tech => (
-                                <div key={tech.name} className="tech-item">
-                                    <span className="tech-icon">{tech.icon}</span>
-                                    <span className="tech-name">{tech.name}</span>
-                                    <span className="tech-desc">{tech.desc}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </motion.section>
             </motion.div>
         </div>
     );

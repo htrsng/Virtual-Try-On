@@ -262,7 +262,7 @@
    ======================================================== */
 .ts-section {
     padding: 0;
-    margin-bottom: 40px;
+    margin-bottom: 0;
 }
 
 .ts-section__header-left {
