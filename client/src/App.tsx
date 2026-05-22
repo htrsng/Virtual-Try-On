@@ -643,6 +643,22 @@ function App() {
                     element={<AdminProducts showToast={showToast} categories={categories} />}
                   />
                   <Route
+                    path="top-search"
+                    element={
+                      <AdminPage
+                        products={suggestionProducts} setProducts={setSuggestionProducts}
+                        topSearch={topSearch} setTopSearch={setTopSearch}
+                        topProducts={topProducts} setTopProducts={setTopProducts}
+                        categories={categories} setCategories={setCategories}
+                        users={users} setUsers={setUsers}
+                        bannerData={bannerData} setBannerData={setBannerData}
+                        flashSaleProducts={flashSaleProducts} setFlashSaleProducts={setFlashSaleProducts}
+                        currentUser={currentUser} showToast={showToast}
+                        initialTab="top_search"
+                      />
+                    }
+                  />
+                  <Route
                     path="vouchers"
                     element={<AdminCoupons showToast={showToast} />}
                   />

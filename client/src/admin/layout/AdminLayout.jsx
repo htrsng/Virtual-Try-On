@@ -34,6 +34,7 @@ const MENU_GROUPS = [
         items: [
             { path: '/admin/products-list', label: 'Sản phẩm', icon: <FiPackage size={18} /> },
             { path: '/admin/categories', label: 'Danh mục', icon: <FiTag size={18} /> },
+            { path: '/admin/top-search', label: 'Top Search (AI Gợi ý)', icon: <FiSearch size={18} /> },
             { path: '/admin/3d-assets', label: 'Assets 3D', icon: <FiBox size={18} /> },
         ],
     },
