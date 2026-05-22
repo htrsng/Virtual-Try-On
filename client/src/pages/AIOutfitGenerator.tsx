@@ -22,6 +22,7 @@ export default function AIOutfitGenerator() {
     currentAvatar,
     currentAvatarId,
     setCurrentAvatarId,
+    avatars,
     layeredGarments,
     applySilentWear,
     applyFullOutfit,
@@ -222,8 +223,8 @@ export default function AIOutfitGenerator() {
       height: '100vh',
       display: 'flex',
       flexDirection: 'column',
-      background: 'linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%)',
-      color: '#0f172a',
+      background: 'var(--bg-primary)',
+      color: 'var(--text-primary)',
       overflow: 'hidden',
     }}>
       <style>{`
@@ -261,60 +262,141 @@ export default function AIOutfitGenerator() {
 
       {/* Topbar */}
       <header style={{
-        height: 56,
-        borderBottom: '1px solid #e2e8f0',
-        background: 'rgba(255,255,255,0.88)',
+        background: 'rgba(15,11,7,0.96)',
+        borderBottom: '1px solid var(--gold-divider)',
+        backdropFilter: 'blur(12px)',
+        padding: '0 20px',
+        height: '52px',
         display: 'flex',
         alignItems: 'center',
-        padding: '0 16px',
-        gap: 12,
+        gap: '8px',
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
         flexShrink: 0,
-        backdropFilter: 'blur(14px)',
       }}>
         <button
           onClick={() => navigate(-1)}
-          className="ai-gen-btn"
+          style={{
+            background: 'transparent',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '20px',
+            color: 'var(--text-secondary)',
+            padding: '6px 14px',
+            fontSize: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            cursor: 'pointer',
+          }}
         >
           <span>←</span>
-          <span className="text-sm">Quay lại</span>
+          <span>Quay lại</span>
         </button>
 
-        <div style={{ width: 1, height: 24, background: '#e2e8f0' }} />
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Sparkles size={16} color="#0f172a" />
-          <span style={{ fontSize: 14, fontWeight: 700, letterSpacing: 0.2 }}>AI Outfit Generator</span>
-        </div>
-
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, padding: 4, background: '#f1f5f9', borderRadius: 12 }}>
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            background: 'rgba(255,255,255,0.06)',
+            border: '1px solid rgba(255,255,255,0.12)',
+            borderRadius: '20px',
+            padding: '4px 14px',
+            gap: '8px',
+          }}>
+            <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)', fontWeight: '600', letterSpacing: '0.05em' }}>
+              AVATAR
+            </span>
+            <select
+              value={currentAvatarId || ''}
+              onChange={(e) => setCurrentAvatarId(e.target.value)}
+              disabled={avatars?.length === 0}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--text-primary)',
+                fontSize: '12px',
+                fontWeight: '500',
+                outline: 'none',
+                cursor: 'pointer',
+                appearance: 'none',
+                paddingRight: '12px',
+              }}
+            >
+              {(!avatars || avatars.length === 0) && <option value="" style={{ color: '#000' }}>Khách mặc định</option>}
+              {avatars?.map((avatar) => (
+                <option key={avatar.id} value={avatar.id} style={{ color: '#000' }}>
+                  {avatar.name}
+                </option>
+              ))}
+            </select>
+            <div style={{ width: '1px', height: '14px', background: 'rgba(255,255,255,0.15)' }} />
+            <button
+              type="button"
+              onClick={() => navigate('/avatar-studio', { state: { returnTo: '/ai-outfit' } })}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--gold-primary)',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                padding: '0 4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+              title="Tạo avatar mới"
+            >
+              +
+            </button>
+          </div>
+          
           <button
             onClick={() => setActiveTab('describe')}
-            className={`ai-gen-tab ${activeTab === 'describe' ? 'active' : ''}`}
+            style={{
+              background: activeTab === 'describe' ? 'var(--gold-primary)' : 'transparent',
+              border: activeTab === 'describe' ? '1px solid var(--gold-primary)' : '1px solid rgba(255,255,255,0.08)',
+              borderRadius: '20px',
+              color: activeTab === 'describe' ? '#0F0B07' : 'rgba(255,255,255,0.45)',
+              padding: '6px 16px',
+              fontSize: '12px',
+              fontWeight: activeTab === 'describe' ? '600' : '400',
+              transition: 'all 0.2s ease',
+              cursor: 'pointer',
+            }}
           >
             Gợi ý theo mô tả
           </button>
+
           <button
             onClick={() => setActiveTab('occasion')}
-            className={`ai-gen-tab ${activeTab === 'occasion' ? 'active' : ''}`}
+            style={{
+              background: activeTab === 'occasion' ? 'var(--gold-primary)' : 'transparent',
+              border: activeTab === 'occasion' ? '1px solid var(--gold-primary)' : '1px solid rgba(255,255,255,0.08)',
+              borderRadius: '20px',
+              color: activeTab === 'occasion' ? '#0F0B07' : 'rgba(255,255,255,0.45)',
+              padding: '6px 16px',
+              fontSize: '12px',
+              fontWeight: activeTab === 'occasion' ? '600' : '400',
+              transition: 'all 0.2s ease',
+              cursor: 'pointer',
+            }}
           >
             Chọn theo dịp
           </button>
-          <button
-            onClick={handleGenerate}
-            className="ai-gen-tab"
-            style={{
-              marginLeft: 6,
-              borderColor: '#10b981',
-              borderWidth: 1,
-              borderStyle: 'solid',
-              color: '#065f46',
-              background: '#ecfdf5',
-              cursor: isGenerating ? 'wait' : 'pointer',
-            }}
-          >
-            <MessageCircle size={14} />
-            {isGenerating ? 'Đang tạo...' : 'Tạo outfit với AI'}
-          </button>
+          
+          <div style={{ 
+            padding: '6px 16px', 
+            fontSize: '12px', 
+            color: 'var(--gold-primary)', 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '6px',
+            fontWeight: '600'
+          }}>
+            ✨ AI Phối Đồ
+          </div>
         </div>
       </header>
 
@@ -353,21 +435,19 @@ export default function AIOutfitGenerator() {
         </div>
       )}
 
-      {/* Main Content - 3-Column Grid Layout */}
       <div style={{
-        flex: 1,
         display: 'grid',
-        gridTemplateColumns: '290px 1fr 480px',
+        gridTemplateColumns: '260px 1fr 420px',
+        height: 'calc(100vh - 52px)',
+        background: 'var(--bg-primary)',
         overflow: 'hidden',
-        backgroundColor: '#fff',
       }}>
         {/* Left Column - Filter Panel */}
         <div style={{
           display: 'flex',
           flexDirection: 'column',
-          borderRight: '0.5px solid #e5e7eb',
+          height: '100%',
           overflow: 'hidden',
-          backgroundColor: '#fafafa',
         }}>
           <LeftPanel
             activeTab={activeTab}
@@ -383,9 +463,8 @@ export default function AIOutfitGenerator() {
         <div style={{
           display: 'flex',
           flexDirection: 'column',
-          borderRight: '0.5px solid #e5e7eb',
+          height: '100%',
           overflow: 'hidden',
-          backgroundColor: '#f5f4f0',
         }}>
           <AvatarPanel
             selectedOutfit={selectedOutfit}
@@ -399,8 +478,8 @@ export default function AIOutfitGenerator() {
         <div style={{
           display: 'flex',
           flexDirection: 'column',
+          height: '100%',
           overflow: 'hidden',
-          backgroundColor: '#fff',
         }}>
           <AIOutfitSuggestionsPanel
             isOpen={true}

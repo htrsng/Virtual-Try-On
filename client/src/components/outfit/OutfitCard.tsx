@@ -24,195 +24,368 @@ export default function OutfitCard({
         setExpanded(isSelected);
     }, [isSelected]);
 
-    const items = outfit.items ?? [];
-    const totalCount = items.length;
-    const ownedCount = items.filter((item) => item.owned).length;
-    const shopCount = items.filter((item) => item.source === 'shop').length;
-    const totalBuyPrice = items.filter((item) => item.source === 'shop').reduce((sum, item) => sum + (item.price ?? 0), 0);
-
-    const score = outfit.matchScore ?? 0;
-    const scoreColor = score >= 90 ? '#639922' : score >= 75 ? '#EF9F27' : '#9ca3af';
+    const items = outfit.items ?? (outfit as any).products ?? [];
+    const rawScore = outfit.matchScore ?? (outfit as any).score ?? 0;
+    const score = Math.round(parseFloat(String(rawScore)) || 0);
+    
+    let scoreColor = 'var(--text-secondary)';
+    let scoreFill = 'var(--text-secondary)';
+    if (score >= 90) {
+        scoreColor = '#4CAF50';
+        scoreFill = 'linear-gradient(90deg, #4CAF50, #81C784)';
+    } else if (score >= 70) {
+        scoreColor = 'var(--gold-primary)';
+        scoreFill = 'linear-gradient(90deg, var(--gold-primary), #E8B84B)';
+    }
 
     return (
         <div
+            className={`outfit-card ${isSelected ? 'selected' : ''}`}
+            onClick={() => onSelect(outfit.id)}
             style={{
-                border: isSelected ? '1.5px solid #1a1a1a' : '0.5px solid #e5e7eb',
-                borderRadius: 12,
+                position: 'relative',
+                background: 'var(--surface-card)',
+                border: isSelected ? '1.5px solid var(--gold-primary)' : '1px solid var(--gold-border)',
+                borderRadius: '14px',
                 overflow: 'hidden',
-                background: '#fff',
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s',
+                cursor: 'pointer',
+                boxShadow: isSelected ? '0 0 0 3px var(--gold-light)' : 'none',
                 flexShrink: 0,
             }}
         >
-            <div
-                onClick={() => {
-                    setExpanded((current) => !current);
-                    onSelect(outfit.id);
-                }}
-                style={{
-                    padding: '10px 12px',
-                    background: isSelected ? '#f9fafb' : '#fff',
-                    borderBottom: '0.5px solid #f3f4f6',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    cursor: 'pointer',
-                    gap: 10,
-                }}
-            >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
-                    <span style={{
-                        width: 20,
-                        height: 20,
-                        borderRadius: '50%',
-                        background: '#1a1a1a',
-                        color: '#fff',
-                        fontSize: 10,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontWeight: 500,
-                        flexShrink: 0,
+            <style>{`
+                .outfit-card:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 24px rgba(201,150,63,0.1);
+                    border-color: var(--gold-primary);
+                }
+                .ai-reason-content {
+                    max-height: 0;
+                    overflow: hidden;
+                    transition: max-height 0.25s ease;
+                }
+                .ai-reason-content.expanded {
+                    max-height: 200px;
+                }
+            `}</style>
+
+            {isSelected && (
+                <div style={{
+                    position: 'absolute',
+                    top: '8px',
+                    right: '8px',
+                    background: 'var(--gold-primary)',
+                    color: '#0F0B07',
+                    borderRadius: '6px',
+                    padding: '2px 8px',
+                    fontSize: '9px',
+                    fontWeight: '700',
+                    letterSpacing: '0.06em',
+                    zIndex: 2
+                }}>
+                    ĐANG XEM
+                </div>
+            )}
+
+            <div style={{ padding: '12px 14px 10px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                    <div style={{
+                        display: 'inline-block',
+                        background: 'var(--gold-light)',
+                        border: '1px solid var(--gold-border)',
+                        borderRadius: '6px',
+                        padding: '2px 8px',
+                        fontSize: '10px',
+                        color: 'var(--gold-primary)',
+                        fontWeight: '600'
                     }}>
-                        {index + 1}
-                    </span>
-                    <span style={{
-                        fontSize: 13,
-                        fontWeight: 500,
-                        minWidth: 0,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'normal',
-                        lineHeight: 1.35,
-                        display: '-webkit-box',
-                        WebkitBoxOrient: 'vertical',
-                        WebkitLineClamp: 2,
-                    }}>
-                        {outfit.name}
-                    </span>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                    {isLocalFallback && (
-                        <span style={{ fontSize: 9, padding: '2px 6px', borderRadius: 10, background: '#f3f4f6', color: '#6b7280' }}>
-                            Nội bộ
-                        </span>
-                    )}
-                    <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 10, background: '#ede9fe', color: '#5b21b6' }}>
-                        {outfit.occasion || 'Outfit'}
-                    </span>
-                    <span style={{ fontSize: 12, color: '#9ca3af' }}>{expanded ? '▲' : '▼'}</span>
-                </div>
-            </div>
-
-            <div style={{ padding: '8px 12px 0' }}>
-                <div style={{ height: 4, background: '#e5e7eb', borderRadius: 999, overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${Math.min(99, Math.max(0, score))}%`, background: scoreColor }} />
-                </div>
-            </div>
-
-            {expanded && (
-                <>
-                    <div style={{ padding: '6px 12px', background: '#f9fafb', borderBottom: '0.5px solid #f3f4f6', fontSize: 11, color: '#6b7280', display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                        <span>🧺 Có {ownedCount}/{totalCount} món</span>
-                        <span>🛒 Cần mua: {totalBuyPrice.toLocaleString('vi-VN')}đ</span>
+                        Outfit {index + 1}
                     </div>
-
-                    <div>
-                        {items.map((item, itemIndex) => (
-                            <div
-                                key={`${outfit.id}-${itemIndex}`}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    onTryItem(item);
-                                }}
-                                style={{
-                                    display: 'flex',
-                                    gap: 10,
-                                    alignItems: 'flex-start',
-                                    padding: '10px 12px',
-                                    borderBottom: '0.5px solid #f9fafb',
-                                    cursor: 'pointer',
-                                }}
-                            >
-                                <div style={{ width: 56, height: 56, borderRadius: 8, overflow: 'hidden', flexShrink: 0, background: '#f3f4f6', position: 'relative' }}>
-                                    {item.imageUrl ? (
+                    {outfit.name && (
+                        <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)', marginTop: '4px' }}>
+                            {outfit.name}
+                        </div>
+                    )}
+                    {/* Mini product thumbnails */}
+                    <div style={{
+                        display: 'flex',
+                        gap: '4px',
+                        marginTop: '8px',
+                    }}>
+                        {items.slice(0, 3).map((p: any, i: number) => {
+                            const pImage = p.image || p.thumbnail || p.img || p.imageUrl || p.images?.[0];
+                            return (
+                                <div key={i} style={{
+                                    width: '32px',
+                                    height: '40px',
+                                    borderRadius: '6px',
+                                    overflow: 'hidden',
+                                    background: 'var(--gold-light)',
+                                    border: '1px solid var(--gold-border)',
+                                    flexShrink: 0,
+                                }}>
+                                    {pImage && (
                                         <img
-                                            src={item.imageUrl}
-                                            alt={item.name}
+                                            src={pImage}
+                                            alt=""
                                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                            loading="lazy"
-                                            onError={(e) => {
-                                                (e.currentTarget as HTMLImageElement).src = '/placeholder.png';
-                                            }}
                                         />
-                                    ) : (
-                                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#9ca3af' }}>Ảnh</div>
                                     )}
                                 </div>
+                            );
+                        })}
+                        {items.length > 3 && (
+                            <div style={{
+                                width: '32px', height: '40px',
+                                borderRadius: '6px',
+                                background: 'var(--gold-light)',
+                                border: '1px solid var(--gold-border)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontSize: '10px', color: 'var(--gold-primary)', fontWeight: '600',
+                            }}>
+                                +{items.length - 3}
+                            </div>
+                        )}
+                    </div>
+                </div>
+                {!isSelected && (
+                    <div style={{ fontSize: '13px', fontWeight: '700', color: scoreColor }}>
+                        {score}%
+                    </div>
+                )}
+                {isSelected && <div style={{ width: 60 }} />}
+            </div>
 
-                                <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ margin: '0 14px 10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ fontSize: '9px', color: 'var(--text-secondary)', letterSpacing: '0.06em', minWidth: '28px' }}>ĐỘ PHÙ HỢP</div>
+                <div style={{ flex: 1, height: '3px', background: 'var(--gold-light)', borderRadius: '2px', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{
+                        position: 'absolute',
+                        left: 0,
+                        top: 0,
+                        height: '3px',
+                        borderRadius: '2px',
+                        background: scoreFill,
+                        width: `${score}%`,
+                        transition: 'width 0.6s ease 0.1s'
+                    }} />
+                </div>
+                <div style={{ fontSize: '9px', fontWeight: '700', color: scoreColor }}>{score}%</div>
+            </div>
+
+            <div style={{ padding: '0 14px 10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {items.map((item, i) => {
+                    const isCloset = item.source === 'closet' || item.owned || (item as any).fromCloset || (item as any).inCloset;
+                    const itemImage = (item as any).image || (item as any).thumbnail || (item as any).img || (item as any).imageUrl || (item as any).images?.[0];
+                    return (
+                        <div
+                            key={i}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                                padding: '8px 10px',
+                                background: 'var(--surface-subtle)',
+                                borderRadius: '10px',
+                                marginBottom: '6px',
+                                cursor: 'pointer',
+                                transition: 'background 0.15s',
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'var(--gold-light)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'var(--surface-subtle)'}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onTryItem(item);
+                            }}
+                        >
+                            {/* THUMBNAIL */}
+                            <div style={{
+                                width: '52px',
+                                height: '64px',
+                                flexShrink: 0,
+                                borderRadius: '8px',
+                                overflow: 'hidden',
+                                background: 'var(--surface-card)',
+                                border: '1px solid var(--gold-border)',
+                            }}>
+                                {itemImage ? (
+                                    <img
+                                        src={itemImage}
+                                        alt={item.name}
+                                        style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            objectFit: 'cover',
+                                            display: 'block',
+                                        }}
+                                        onError={e => {
+                                            e.currentTarget.style.display = 'none';
+                                            if (e.currentTarget.parentElement) {
+                                                e.currentTarget.parentElement.style.background = 'var(--gold-light)';
+                                            }
+                                        }}
+                                    />
+                                ) : (
                                     <div style={{
-                                        fontSize: 12,
-                                        fontWeight: 500,
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                        whiteSpace: 'normal',
-                                        lineHeight: 1.35,
-                                        display: '-webkit-box',
-                                        WebkitBoxOrient: 'vertical',
-                                        WebkitLineClamp: 2,
-                                        color: '#111',
+                                        width: '100%', height: '100%',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        fontSize: '18px', opacity: 0.3,
                                     }}>
-                                        {item.name}
+                                        👕
                                     </div>
-                                    <div style={{ fontSize: 11, color: '#6b7280', marginTop: 2 }}>
-                                        {(item.price ?? 0).toLocaleString('vi-VN')}đ
-                                    </div>
-                                    <div style={{ display: 'flex', gap: 4, marginTop: 4, flexWrap: 'wrap' }}>
-                                        {item.suggestedSize && (
-                                            <span title={item.sizeReason || ''} style={{ fontSize: 9, padding: '2px 6px', borderRadius: 8, background: '#14532d', color: '#fff', fontWeight: 500 }}>
-                                                Size {item.suggestedSize}
-                                            </span>
-                                        )}
-                                        <span style={{ fontSize: 9, padding: '2px 6px', borderRadius: 8, background: item.owned ? '#dcfce7' : '#fff7ed', color: item.owned ? '#166534' : '#c2410c' }}>
-                                            {item.owned ? '✓ Đã có trong tủ' : '🛒 Cần mua'}
+                                )}
+                            </div>
+
+                            {/* PRODUCT INFO */}
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{
+                                    fontSize: '11px',
+                                    fontWeight: '500',
+                                    color: 'var(--text-primary)',
+                                    lineHeight: '1.4',
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden',
+                                    marginBottom: '4px',
+                                }}>
+                                    {item.name}
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
+                                    {isCloset ? (
+                                        <span style={{
+                                            background: 'rgba(76,175,80,0.1)',
+                                            border: '1px solid rgba(76,175,80,0.3)',
+                                            color: '#4CAF50',
+                                            borderRadius: '4px',
+                                            padding: '1px 6px',
+                                            fontSize: '9px',
+                                            fontWeight: '600',
+                                            letterSpacing: '0.04em',
+                                        }}>TỦ ĐỒ ✓</span>
+                                    ) : (
+                                        <span style={{
+                                            background: 'var(--gold-light)',
+                                            border: '1px solid var(--gold-border)',
+                                            color: 'var(--gold-primary)',
+                                            borderRadius: '4px',
+                                            padding: '1px 6px',
+                                            fontSize: '9px',
+                                            fontWeight: '500',
+                                        }}>Mua mới</span>
+                                    )}
+                                    {(item.suggestedSize || (item as any).size) && (
+                                        <span style={{
+                                            background: 'var(--surface-card)',
+                                            border: '1px solid var(--gold-border)',
+                                            color: 'var(--text-secondary)',
+                                            borderRadius: '4px',
+                                            padding: '1px 6px',
+                                            fontSize: '9px',
+                                        }}>
+                                            Size {item.suggestedSize || (item as any).size}
                                         </span>
-                                    </div>
+                                    )}
                                 </div>
                             </div>
-                        ))}
-                    </div>
 
-                    {outfit.aiReason && (
-                        <div
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setExpanded((current) => current);
-                            }}
-                            style={{ margin: '0 12px 12px', background: '#f0fdf4', border: '0.5px solid #bbf7d0', borderRadius: 8, padding: 10, fontSize: 11, color: '#166534' }}
-                        >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                <span>AI gợi ý</span>
+                            {/* PRICE + ACTION */}
+                            <div style={{
+                                flexShrink: 0,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'flex-end',
+                                gap: '6px',
+                            }}>
+                                {item.price && (
+                                    <span style={{
+                                        fontSize: '12px',
+                                        fontWeight: '700',
+                                        color: 'var(--gold-primary)',
+                                        whiteSpace: 'nowrap',
+                                    }}>
+                                        {typeof item.price === 'number'
+                                            ? item.price.toLocaleString('vi-VN') + 'đ'
+                                            : item.price}
+                                    </span>
+                                )}
+                                <button
+                                    onClick={e => {
+                                        e.stopPropagation();
+                                        const productId = (item as any)._id || item.id || (item as any).productId;
+                                        if (productId) {
+                                            window.open(`/product/${productId}`, '_blank');
+                                        }
+                                    }}
+                                    style={{
+                                        background: 'transparent',
+                                        border: '1px solid var(--gold-border)',
+                                        borderRadius: '6px',
+                                        padding: '3px 8px',
+                                        fontSize: '9px',
+                                        color: 'var(--gold-primary)',
+                                        cursor: 'pointer',
+                                        whiteSpace: 'nowrap',
+                                        transition: 'all 0.15s',
+                                    }}
+                                    onMouseEnter={e => {
+                                        e.currentTarget.style.background = 'var(--gold-primary)';
+                                        e.currentTarget.style.color = '#0F0B07';
+                                    }}
+                                    onMouseLeave={e => {
+                                        e.currentTarget.style.background = 'transparent';
+                                        e.currentTarget.style.color = 'var(--gold-primary)';
+                                    }}
+                                >
+                                    Xem →
+                                </button>
                             </div>
-                            <div style={{ marginTop: 8, fontSize: 10, lineHeight: 1.5 }}>{outfit.aiReason}</div>
                         </div>
-                    )}
+                    )
+                })}
+            </div>
 
-                    <div style={{ padding: '10px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, borderTop: '0.5px solid #e5e7eb', background: '#f9fafb', flexWrap: 'wrap', fontSize: 12, color: '#64748b' }}>
-                        <div>
-                            Tổng: {outfit.totalPrice.toLocaleString('vi-VN')}đ
+            {outfit.aiReason && (
+                <div style={{ borderTop: '1px solid var(--gold-divider)' }}>
+                    <div
+                        style={{
+                            padding: '8px 14px',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            cursor: 'pointer'
+                        }}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setExpanded(!expanded);
+                        }}
+                    >
+                        <div style={{ fontSize: '10px', color: 'var(--text-secondary)', letterSpacing: '0.04em' }}>
+                            ✦ LÝ DO AI CHỌN
                         </div>
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onTryItem(items[0] ?? (null as unknown as OutfitItem));
-                            }}
-                            style={{ padding: '8px 12px', borderRadius: 8, border: '0.5px solid #e5e7eb', background: '#1a1a1a', color: '#fff', cursor: 'pointer', fontSize: 11, fontWeight: 500 }}
-                        >
-                            👕 Thử bộ
-                        </button>
+                        <div style={{
+                            fontSize: '10px',
+                            color: 'var(--text-secondary)',
+                            transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                            transition: 'transform 0.2s ease'
+                        }}>
+                            ▼
+                        </div>
                     </div>
-                </>
+                    <div className={`ai-reason-content ${expanded ? 'expanded' : ''}`}>
+                        <div style={{
+                            padding: '0 14px 12px',
+                            fontSize: '11px',
+                            color: 'var(--text-secondary)',
+                            lineHeight: '1.6',
+                            background: 'var(--surface-subtle)',
+                            borderRadius: '0 0 8px 8px'
+                        }}>
+                            {outfit.aiReason}
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

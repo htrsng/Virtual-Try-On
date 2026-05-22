@@ -40,47 +40,6 @@ const COLORS = [
 ]
 
 export default function LeftPanel({ activeTab, filter, onChange, onGenerate, isGenerating, shopLoading = false }: LeftPanelProps) {
-    const panelStyle: React.CSSProperties = {
-        width: 270,
-        minWidth: 270,
-        maxWidth: 270,
-        flexShrink: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-        borderRadius: 24,
-        border: '1px solid rgba(148,163,184,0.35)',
-        background: 'rgba(255,255,255,0.92)',
-        boxShadow: '0 12px 36px rgba(15,23,42,0.10)',
-    }
-
-    const scrollStyle: React.CSSProperties = {
-        flex: 1,
-        overflowY: 'auto',
-        padding: 16,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 18,
-    }
-
-    const labelStyle: React.CSSProperties = {
-        fontSize: 11,
-        fontWeight: 700,
-        letterSpacing: 0.8,
-        color: '#64748b',
-        textTransform: 'uppercase',
-    }
-
-    const buttonBase: React.CSSProperties = {
-        fontSize: 12,
-        borderRadius: 10,
-        border: '1px solid #dbe2ea',
-        background: '#fff',
-        color: '#475569',
-        cursor: 'pointer',
-        transition: 'all 150ms ease',
-    }
-
     const toggleOccasion = (occasion: Occasion) => {
         const next = filter.occasions.includes(occasion)
             ? filter.occasions.filter((value) => value !== occasion)
@@ -111,35 +70,113 @@ export default function LeftPanel({ activeTab, filter, onChange, onGenerate, isG
     const isDisabled = isGenerating || shopLoading || !canGenerate
 
     return (
-        <div style={panelStyle}>
-            <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(226,232,240,0.9)', background: 'rgba(248,250,252,0.96)' }}>
-                <h2 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#0f172a' }}>Bộ lọc</h2>
-                <p style={{ margin: '4px 0 0', fontSize: 12, color: '#64748b' }}>Chọn ngữ cảnh để AI tạo outfit</p>
+        <div style={{
+            background: 'var(--surface-elevated)',
+            borderRight: '1px solid var(--gold-divider)',
+            height: '100%',
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            scrollbarWidth: 'none',
+        }}>
+            <style>{`
+                .lp-textarea:focus {
+                    border-color: var(--gold-primary) !important;
+                }
+                .lp-textarea::placeholder {
+                    color: var(--text-secondary);
+                    opacity: 0.5;
+                }
+                .lp-occasion-chip:hover {
+                    background: var(--gold-light) !important;
+                    border-color: var(--gold-border) !important;
+                }
+                .lp-style-chip:hover {
+                    background: var(--surface-card);
+                }
+                .lp-cta-btn:hover:not(:disabled) {
+                    transform: translateY(-1px);
+                    box-shadow: 0 6px 20px rgba(201,150,63,0.35) !important;
+                }
+                .lp-cta-btn:active:not(:disabled) {
+                    transform: translateY(0);
+                }
+                .lp-spinner {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 4px;
+                }
+                .lp-spinner span {
+                    width: 4px;
+                    height: 4px;
+                    background: #0F0B07;
+                    border-radius: 50%;
+                    animation: lp-bounce 1.4s infinite ease-in-out both;
+                }
+                .lp-spinner span:nth-child(1) { animation-delay: -0.32s; }
+                .lp-spinner span:nth-child(2) { animation-delay: -0.16s; }
+                @keyframes lp-bounce {
+                    0%, 80%, 100% { transform: scale(0); }
+                    40% { transform: scale(1); }
+                }
+            `}</style>
+
+            <div style={{ padding: '20px 20px 0' }}>
+                <div style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    fontSize: '9px',
+                    letterSpacing: '0.12em',
+                    color: 'var(--gold-primary)',
+                    opacity: 0.7,
+                    marginBottom: '4px'
+                }}>
+                    ✦ AI STYLIST
+                </div>
+                <h2 style={{ fontSize: '18px', fontWeight: '600', color: 'var(--text-primary)', margin: '0 0 2px' }}>
+                    Bộ lọc
+                </h2>
+                <p style={{ fontSize: '11px', color: 'var(--text-secondary)', margin: '0 0 16px' }}>
+                    Chọn ngữ cảnh để AI tạo outfit
+                </p>
             </div>
 
-            <div style={scrollStyle}>
+            <div style={{ height: '1px', background: 'var(--gold-divider)', margin: '0 20px 16px' }} />
+
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 {activeTab === 'describe' && (
                     <div>
-                        <label style={labelStyle}>
-                            Mô tả trang phục
-                        </label>
+                        <div style={{
+                            fontSize: '10px',
+                            letterSpacing: '0.1em',
+                            color: 'var(--text-secondary)',
+                            fontWeight: '500',
+                            padding: '0 20px',
+                            marginBottom: '8px'
+                        }}>
+                            MÔ TẢ TRANG PHỤC
+                        </div>
                         <textarea
+                            className="lp-textarea"
                             style={{
-                                marginTop: 6,
-                                width: '100%',
-                                minHeight: 108,
+                                margin: '0 16px',
+                                width: 'calc(100% - 32px)',
+                                background: 'var(--surface-subtle)',
+                                border: '1px solid var(--gold-border)',
+                                borderRadius: '12px',
+                                padding: '12px 14px',
+                                fontSize: '12px',
+                                color: 'var(--text-primary)',
+                                lineHeight: '1.6',
                                 resize: 'none',
-                                borderRadius: 14,
-                                border: '1px solid #dbe2ea',
-                                padding: 12,
-                                fontSize: 13,
-                                lineHeight: 1.5,
-                                color: '#0f172a',
+                                minHeight: '90px',
+                                transition: 'border-color 0.2s',
                                 outline: 'none',
-                                boxSizing: 'border-box',
+                                boxSizing: 'border-box'
                             }}
                             rows={4}
-                            placeholder="VD: Tôi muốn mặc đi cafe cuối tuần, phong cách nhẹ nhàng, không quá formal, tông màu trung tính..."
+                            placeholder="VD: Tôi muốn mặc đi cafe cuối tuần, phong cách nhẹ nhàng..."
                             value={filter.description}
                             onChange={(event) => onChange({ ...filter, description: event.target.value })}
                         />
@@ -147,88 +184,165 @@ export default function LeftPanel({ activeTab, filter, onChange, onGenerate, isG
                 )}
 
                 {activeTab === 'occasion' && (
-                    <div>
-                        <label style={labelStyle}>
-                            Dịp mặc
-                        </label>
-                        <div style={{ marginTop: 6, display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8 }}>
-                            {OCCASIONS.map((occasion) => (
-                                <button
-                                    key={occasion.value}
-                                    onClick={() => toggleOccasion(occasion.value)}
-                                    style={{
-                                        ...buttonBase,
-                                        padding: '10px 10px',
-                                        textAlign: 'left',
-                                        borderColor: filter.occasions.includes(occasion.value) ? '#3b82f6' : '#dbe2ea',
-                                        background: filter.occasions.includes(occasion.value) ? '#eff6ff' : '#fff',
-                                        color: filter.occasions.includes(occasion.value) ? '#1d4ed8' : '#475569',
-                                    }}
-                                >
-                                    {occasion.emoji} {occasion.label}
-                                </button>
-                            ))}
+                    <>
+                        <div style={{
+                            fontSize: '10px',
+                            letterSpacing: '0.1em',
+                            color: 'var(--text-secondary)',
+                            fontWeight: '500',
+                            padding: '0 20px',
+                            marginBottom: '8px'
+                        }}>
+                            DỊP MẶC
                         </div>
-                    </div>
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: '1fr 1fr',
+                            gap: '8px',
+                            padding: '0 16px',
+                            marginBottom: '16px'
+                        }}>
+                            {OCCASIONS.map((occasion) => {
+                                const isSelected = filter.occasions.includes(occasion.value);
+                                return (
+                                    <div
+                                        key={occasion.value}
+                                        className="lp-occasion-chip"
+                                        onClick={() => toggleOccasion(occasion.value)}
+                                        style={{
+                                            background: isSelected ? 'var(--gold-light)' : 'var(--surface-card)',
+                                            border: isSelected ? '1.5px solid var(--gold-primary)' : '1px solid var(--gold-border)',
+                                            borderRadius: '10px',
+                                            padding: '10px 12px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.18s ease',
+                                            fontSize: '12px',
+                                            color: isSelected ? 'var(--gold-primary)' : 'var(--text-primary)',
+                                            fontWeight: isSelected ? '500' : 'normal',
+                                            boxSizing: 'border-box'
+                                        }}
+                                    >
+                                        <span style={{ fontSize: '14px' }}>{occasion.emoji}</span>
+                                        <span>{occasion.label}</span>
+                                        {isSelected && (
+                                            <span style={{ color: 'var(--gold-primary)', fontSize: '10px', marginLeft: 'auto' }}>✓</span>
+                                        )}
+                                    </div>
+                                )
+                            })}
+                        </div>
+
+                        <div style={{
+                            fontSize: '10px',
+                            letterSpacing: '0.1em',
+                            color: 'var(--text-secondary)',
+                            fontWeight: '500',
+                            padding: '0 20px',
+                            marginBottom: '8px'
+                        }}>
+                            PHONG CÁCH
+                        </div>
+                        <div style={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: '6px',
+                            padding: '0 16px',
+                            marginBottom: '16px'
+                        }}>
+                            {STYLES.map((style) => {
+                                const isSelected = filter.styles.includes(style);
+                                return (
+                                    <div
+                                        key={style}
+                                        className="lp-style-chip"
+                                        onClick={() => toggleStyle(style)}
+                                        style={{
+                                            background: isSelected ? 'var(--gold-light)' : 'var(--surface-subtle)',
+                                            border: isSelected ? '1px solid var(--gold-primary)' : '1px solid var(--gold-border)',
+                                            borderRadius: '20px',
+                                            padding: '5px 14px',
+                                            fontSize: '11px',
+                                            color: isSelected ? 'var(--gold-primary)' : 'var(--text-secondary)',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.15s ease',
+                                            fontWeight: isSelected ? '500' : 'normal',
+                                        }}
+                                    >
+                                        {style}
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </>
                 )}
 
-                <div>
-                    <label style={labelStyle}>
-                        Phong cách
-                    </label>
-                    <div style={{ marginTop: 6, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                        {STYLES.map((style) => (
-                            <button
-                                key={style}
-                                onClick={() => toggleStyle(style)}
-                                style={{
-                                    ...buttonBase,
-                                    borderRadius: 999,
-                                    padding: '7px 10px',
-                                    borderColor: filter.styles.includes(style) ? '#10b981' : '#dbe2ea',
-                                    background: filter.styles.includes(style) ? '#ecfdf5' : '#fff',
-                                    color: filter.styles.includes(style) ? '#047857' : '#475569',
-                                }}
-                            >
-                                {style}
-                            </button>
-                        ))}
-                    </div>
+                <div style={{
+                    fontSize: '10px',
+                    letterSpacing: '0.1em',
+                    color: 'var(--text-secondary)',
+                    fontWeight: '500',
+                    padding: '0 20px',
+                    marginBottom: '8px',
+                    marginTop: activeTab === 'describe' ? '16px' : 0
+                }}>
+                    TÔNG MÀU
                 </div>
-
-                <div>
-                    <label style={labelStyle}>
-                        Tông màu
-                    </label>
-                    <div style={{ marginTop: 6, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                        {COLORS.map((color) => (
-                            <button
+                <div style={{ padding: '0 16px', display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+                    {COLORS.map((color) => {
+                        const isSelected = filter.colors.includes(color.hex);
+                        return (
+                            <div
                                 key={color.hex}
                                 onClick={() => toggleColor(color.hex)}
                                 title={color.label}
                                 style={{
-                                    width: 30,
-                                    height: 30,
+                                    width: '26px',
+                                    height: '26px',
                                     borderRadius: '50%',
-                                    border: filter.colors.includes(color.hex) ? '2px solid #64748b' : '2px solid #e2e8f0',
-                                    boxShadow: filter.colors.includes(color.hex) ? '0 0 0 3px rgba(100,116,139,0.15)' : 'none',
-                                    backgroundColor: color.hex,
                                     cursor: 'pointer',
+                                    transition: 'transform 0.15s, box-shadow 0.15s',
+                                    border: isSelected ? '2px solid var(--gold-primary)' : '2px solid transparent',
+                                    backgroundColor: color.hex,
+                                    transform: isSelected ? 'scale(1.15)' : 'none',
+                                    boxShadow: isSelected ? '0 0 0 2px var(--gold-light)' : '0 1px 3px rgba(0,0,0,0.1)',
+                                    boxSizing: 'border-box'
                                 }}
                             />
-                        ))}
-                    </div>
+                        )
+                    })}
                 </div>
 
-                <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <label style={labelStyle}>
-                            Ngân sách
-                        </label>
-                        <span style={{ fontSize: 12, fontWeight: 700, color: '#334155' }}>
-                            {new Intl.NumberFormat('vi-VN').format(filter.budget)}đ
-                        </span>
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '0 16px',
+                    marginBottom: '8px'
+                }}>
+                    <div style={{
+                        fontSize: '10px',
+                        letterSpacing: '0.1em',
+                        color: 'var(--text-secondary)',
+                        fontWeight: '500'
+                    }}>
+                        NGÂN SÁCH
                     </div>
+                    <div style={{
+                        background: 'var(--gold-light)',
+                        border: '1px solid var(--gold-border)',
+                        borderRadius: '8px',
+                        padding: '2px 10px',
+                        fontSize: '11px',
+                        color: 'var(--gold-primary)',
+                        fontWeight: '600'
+                    }}>
+                        {new Intl.NumberFormat('vi-VN').format(filter.budget)}đ
+                    </div>
+                </div>
+                <div style={{ padding: '0 16px', marginBottom: '16px' }}>
                     <input
                         type="range"
                         min={200000}
@@ -236,55 +350,57 @@ export default function LeftPanel({ activeTab, filter, onChange, onGenerate, isG
                         step={100000}
                         value={filter.budget}
                         onChange={(event) => onChange({ ...filter, budget: Number(event.target.value) })}
-                        style={{ width: '100%', marginTop: 8 }}
+                        style={{ width: '100%', accentColor: 'var(--gold-primary)' }}
                     />
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4, fontSize: 11, color: '#94a3b8' }}>
-                        <span>200k</span>
-                        <span>5tr</span>
-                    </div>
                 </div>
             </div>
 
-            <div style={{ padding: 12, borderTop: '1px solid #e2e8f0', background: '#fff' }}>
-                {!canGenerate && (
-                    <p style={{ fontSize: 12, color: '#94a3b8', textAlign: 'center', margin: '0 0 8px' }}>
-                        {activeTab === 'describe'
-                            ? 'Nhập mô tả để AI gợi ý outfit'
-                            : 'Chọn ít nhất 1 dịp hoặc phong cách'}
-                    </p>
-                )}
-                {shopLoading && (
-                    <p style={{ fontSize: 12, color: '#94a3b8', textAlign: 'center', margin: '0 0 8px' }}>
-                        Đang tải danh sách sản phẩm...
-                    </p>
-                )}
+            <div style={{
+                marginTop: 'auto',
+                padding: '16px',
+                borderTop: '1px solid var(--gold-divider)',
+            }}>
+                <div style={{
+                    fontSize: '11px',
+                    color: 'var(--text-secondary)',
+                    textAlign: 'center',
+                    marginBottom: '10px',
+                    opacity: 0.6
+                }}>
+                    {activeTab === 'describe'
+                        ? 'Nhập mô tả để AI gợi ý outfit'
+                        : 'Chọn ít nhất 1 dịp hoặc phong cách'}
+                </div>
                 <button
+                    className="lp-cta-btn"
                     onClick={onGenerate}
                     disabled={isDisabled}
                     style={{
                         width: '100%',
-                        padding: '12px 14px',
-                        borderRadius: 14,
+                        background: 'linear-gradient(135deg, var(--gold-primary) 0%, #E8B84B 100%)',
                         border: 'none',
-                        background: isDisabled ? '#e2e8f0' : '#0f172a',
-                        color: isDisabled ? '#94a3b8' : '#fff',
-                        fontSize: 14,
-                        fontWeight: 700,
+                        borderRadius: '12px',
+                        padding: '13px',
+                        fontSize: '13px',
+                        fontWeight: '600',
+                        color: '#0F0B07',
                         cursor: isDisabled ? 'not-allowed' : 'pointer',
-                        boxShadow: isDisabled ? 'none' : '0 8px 20px rgba(15,23,42,0.14)',
+                        letterSpacing: '0.03em',
+                        boxShadow: '0 4px 16px rgba(201,150,63,0.25)',
+                        transition: 'transform 0.15s, box-shadow 0.15s',
+                        opacity: isDisabled ? 0.45 : 1,
+                        transform: isDisabled ? 'none' : undefined
                     }}
                 >
                     {shopLoading ? (
                         '⏳ Đang tải sản phẩm...'
                     ) : isGenerating ? (
-                        <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.37 0 0 5.37 0 12h4z" />
-                            </svg>
-                            Đang tạo...
-                        </span>
-                    ) : '✨ Tạo outfit với AI'}
+                        <div className="lp-spinner">
+                            <span /><span /><span />
+                        </div>
+                    ) : (
+                        <><span style={{ marginRight: '6px' }}>✨</span> Tạo outfit với AI</>
+                    )}
                 </button>
             </div>
         </div>

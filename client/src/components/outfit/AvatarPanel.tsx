@@ -88,6 +88,7 @@ function AvatarPanel({
 
   const handleCanvasCreated = useCallback(({ gl }: { gl: THREE.WebGLRenderer }) => {
     if (!gl || !gl.domElement) return
+    setIsWebglContextLost(false)
 
     const handleContextLost = (event: Event) => {
       event.preventDefault()
@@ -135,14 +136,10 @@ function AvatarPanel({
   const panelStyle: React.CSSProperties = {
     flex: 1,
     minWidth: 0,
-    borderRadius: 24,
-    border: '1px solid rgba(148,163,184,0.35)',
-    background: 'linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(241,245,249,0.96) 100%)',
-    boxShadow: '0 12px 36px rgba(15,23,42,0.10)',
+    background: 'var(--bg-primary)',
     position: 'relative',
     display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: 'column',
     overflow: 'hidden',
   }
 
@@ -183,13 +180,87 @@ function AvatarPanel({
 
   return (
     <div style={panelStyle}>
+      <style>{`
+        .ap-grid-overlay {
+          position: absolute;
+          inset: 0;
+          background-image: radial-gradient(circle, rgba(201,150,63,0.04) 1px, transparent 1px);
+          background-size: 32px 32px;
+          pointer-events: none;
+          z-index: 0;
+        }
+        @keyframes avatarPulse {
+          0%, 100% { opacity: 0.4; transform: scale(1); }
+          50% { opacity: 0.7; transform: scale(1.02); }
+        }
+        .ap-silhouette {
+          width: 120px;
+          height: 200px;
+          background: linear-gradient(180deg, var(--gold-light) 0%, transparent 100%);
+          border-radius: 60px 60px 40px 40px;
+          border: 1px dashed var(--gold-border);
+          margin: 0 auto 24px;
+          position: relative;
+          animation: avatarPulse 3s ease-in-out infinite;
+        }
+        .ap-head {
+          position: absolute;
+          top: -20px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background: var(--gold-light);
+          border: 1px dashed var(--gold-border);
+        }
+      `}</style>
+      
       {/* Badge */}
       <div style={badgeStyle}>
         {isGenerating ? 'Generating outfit...' : `Current Outfit: ${selectedOutfit?.name ?? 'Default Preview'}`}
       </div>
 
-      {/* Avatar Placeholder */}
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle_at_top, rgba(16,185,129,0.08), transparent 55%)' }} />
+      {/* Empty State */}
+      {!currentAvatar && !selectedOutfit && (
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1,
+          pointerEvents: 'none'
+        }}>
+          <div className="ap-silhouette">
+            <div className="ap-head" />
+          </div>
+          <div style={{
+            fontSize: '15px',
+            fontWeight: '500',
+            color: 'var(--text-primary)',
+            opacity: 0.6,
+            marginBottom: '6px',
+            textAlign: 'center'
+          }}>
+            Chưa có avatar của bạn
+          </div>
+          <div style={{
+            fontSize: '12px',
+            color: 'var(--text-secondary)',
+            opacity: 0.45,
+            textAlign: 'center',
+            lineHeight: 1.5,
+            whiteSpace: 'pre-wrap'
+          }}>
+            Nhập mô tả ở panel trái{'\n'}rồi bấm Tạo outfit với AI
+          </div>
+        </div>
+      )}
+
+      {/* Grid Pattern Overlay */}
+      <div className="ap-grid-overlay" />
 
       <div
         ref={canvasAreaRef}
@@ -260,18 +331,19 @@ function AvatarPanel({
         {/* Canvas Container */}
         <div style={{ flex: 1, position: 'relative', width: '100%', overflow: 'hidden' }}>
           <Canvas
+            key={`canvas-vto-${lossCount}`}
             frameloop={isWebglContextLost ? 'never' : 'always'}
-            dpr={fallbackMode ? 1 : [1, 1]}
+            dpr={fallbackMode ? 1 : [1, 1.2]}
             performance={{ min: fallbackMode ? 0.25 : 0.5 }}
             camera={{ position: cameraPreset.position, fov: 32 }}
             shadows={false}
             gl={{
               antialias: false,
               preserveDrawingBuffer: false,
-              powerPreference: 'low-power',
+              powerPreference: 'default',
               stencil: false,
               depth: true,
-              alpha: false,
+              alpha: true,
             }}
             onCreated={handleCanvasCreated}
             style={{ width: '100%', height: '100%', display: 'block' }}
@@ -283,8 +355,6 @@ function AvatarPanel({
             />
             <directionalLight position={[-2, 3, -2]} intensity={0.3} />
             <hemisphereLight args={['#f5f0e8', '#3a3228', 0.35]} />
-
-            <color attach="background" args={['#f5f1e8']} />
 
             <CameraViewController view={viewAngle} controlsRef={controlsRef} />
 
@@ -307,26 +377,7 @@ function AvatarPanel({
             />
           </Canvas>
 
-          {/* Floating item chips */}
-          {selectedOutfit && (
-            <>
-              {topItem && (
-                <div style={{ position: 'absolute', top: 78, left: 8, background: 'rgba(255,255,255,0.95)', border: '1px solid #a7f3d0', borderRadius: 999, fontSize: 11, padding: '4px 8px', whiteSpace: 'nowrap', color: '#334155', boxShadow: '0 2px 8px rgba(15,23,42,0.08)' }}>
-                  {topItem.name}
-                </div>
-              )}
-              {bottomItem && (
-                <div style={{ position: 'absolute', top: 165, left: 8, background: 'rgba(255,255,255,0.95)', border: '1px solid #a7f3d0', borderRadius: 999, fontSize: 11, padding: '4px 8px', whiteSpace: 'nowrap', color: '#334155', boxShadow: '0 2px 8px rgba(15,23,42,0.08)' }}>
-                  {bottomItem.name}
-                </div>
-              )}
-              {shoeItem && (
-                <div style={{ position: 'absolute', bottom: 48, left: 8, background: 'rgba(255,255,255,0.95)', border: '1px solid #a7f3d0', borderRadius: 999, fontSize: 11, padding: '4px 8px', whiteSpace: 'nowrap', color: '#334155', boxShadow: '0 2px 8px rgba(15,23,42,0.08)' }}>
-                  {shoeItem.name}
-                </div>
-              )}
-            </>
-          )}
+
         </div>
 
         {/* Loading Overlay */}

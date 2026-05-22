@@ -146,9 +146,15 @@ function createAiRouter(deps) {
             // ============================================
             // STEP 1: Use client-filtered products if provided, otherwise query DB
             // ============================================
+            const productQuery = { isActive: true };
+            if (promptBudget) {
+                // Pre-filter: Ensure we only feed Gemini products within budget
+                productQuery.price = { $lte: promptBudget };
+            }
+
             let products = Array.isArray(clientProducts) && clientProducts.length > 0
                 ? clientProducts
-                : await withTimeout(ProductModel.find({ isActive: true })
+                : await withTimeout(ProductModel.find(productQuery)
                     .select(`
                         _id name price imageUrl category slug
                         aiStylist.styles
@@ -257,6 +263,44 @@ OUTPUT FORMAT (JSON thuần, không markdown, không giải thích):
   ]
 }`;
 
+            const geminiResponseSchema = {
+                type: "object",
+                properties: {
+                    outfits: {
+                        type: "array",
+                        description: "Danh sách 3 outfit gợi ý",
+                        items: {
+                            type: "object",
+                            properties: {
+                                id: { type: "number" },
+                                name: { type: "string" },
+                                style: { type: "string" },
+                                occasion: { type: "string" },
+                                colorStory: { type: "string" },
+                                whyThisOutfit: { type: "string" },
+                                items: {
+                                    type: "array",
+                                    items: {
+                                        type: "object",
+                                        properties: {
+                                            productId: { type: "string" },
+                                            name: { type: "string" },
+                                            category: { type: "string" },
+                                            price: { type: "number" },
+                                            recommendedSize: { type: "string" },
+                                            sizeReason: { type: "string" }
+                                        },
+                                        required: ["productId", "name", "category", "price", "recommendedSize", "sizeReason"]
+                                    }
+                                }
+                            },
+                            required: ["id", "name", "style", "occasion", "colorStory", "whyThisOutfit", "items"]
+                        }
+                    }
+                },
+                required: ["outfits"]
+            };
+
             let result;
             try {
                 // ─── Gemini call with server-side timeout signal ───
@@ -279,6 +323,7 @@ OUTPUT FORMAT (JSON thuần, không markdown, không giải thích):
                             topK: 40,
                             maxOutputTokens: 4096,
                             responseMimeType: "application/json",
+                            responseSchema: geminiResponseSchema,
                         },
                     }), 15000, "gemini generation"),
                     timeoutPromise
@@ -329,6 +374,7 @@ OUTPUT FORMAT (JSON thuần, không markdown, không giải thích):
                                 topK: 40,
                                 maxOutputTokens: 4096,
                                 responseMimeType: "application/json",
+                                responseSchema: geminiResponseSchema,
                             },
                         }), 15000, "gemini fallback generation");
                         console.warn(`[AI outfit-suggest] Fallback model in use: ${modelName}`);
@@ -534,17 +580,42 @@ OUTPUT FORMAT (JSON thuần, không markdown, không giải thích):
 
             // STEP 4.3: enrich by DB data and recompute totals
             for (const outfit of outfits) {
+                let validItems = [];
                 for (const item of outfit.items) {
-                    const productId = String(item.productId || "");
+                    let productId = String(item.productId || "");
+                    const targetCategory = String(item.category || "tops").toLowerCase();
 
                     // Prefer cached products from initial query
                     let dbProduct = products.find((p) => String(p._id) === productId);
 
                     // Fallback: direct DB lookup per item when not in initial pool
                     if (!dbProduct && mongoose.Types.ObjectId.isValid(productId)) {
-                        dbProduct = await ProductModel.findById(productId)
-                            .select("name price imageUrl category")
-                            .lean();
+                        try {
+                            dbProduct = await ProductModel.findById(productId)
+                                .select("name price imageUrl category")
+                                .lean();
+                        } catch (_) {}
+                    }
+
+                    // AUTO-RECOVERY: If Gemini hallucinated a productId, find a real product from the list!
+                    if (!dbProduct && products.length > 0) {
+                        console.warn(`[AI] Hallucinated productId ${productId} detected. Attempting auto-recovery for category: ${targetCategory}`);
+                        // Try to find a product in the same category that hasn't been used yet in this outfit
+                        const usedIds = new Set(validItems.map(i => String(i.productId)));
+                        dbProduct = products.find((p) => 
+                            String(p.category || "tops").toLowerCase() === targetCategory &&
+                            !usedIds.has(String(p._id))
+                        );
+                        // If no matching category, just pick any random product that hasn't been used
+                        if (!dbProduct) {
+                            dbProduct = products.find((p) => !usedIds.has(String(p._id))) || products[0];
+                        }
+                        
+                        if (dbProduct) {
+                            productId = String(dbProduct._id || dbProduct.id);
+                            item.productId = productId;
+                            console.warn(`[AI] Auto-recovered with real product: ${dbProduct.name} (${productId})`);
+                        }
                     }
 
                     if (dbProduct) {
@@ -552,15 +623,18 @@ OUTPUT FORMAT (JSON thuần, không markdown, không giải thích):
                         item.price = Number(dbProduct.price || item.price || 0);
                         item.imageUrl = dbProduct.imageUrl || item.imageUrl || "";
                         item.category = String(dbProduct.category || item.category || "tops").toLowerCase();
-                    }
+                        
+                        const slot = String(item.category || item.slot || "tops").toLowerCase();
+                        const size = item.recommendedSize || item.suggestedSize || buildSyntheticSize(slot);
+                        item.recommendedSize = size;
+                        item.suggestedSize = size;
+                        item.sizeReason = item.sizeReason || buildSizeReason(slot, size);
+                        item.owned = ownedIdSet.has(productId);
 
-                    const slot = String(item.category || item.slot || "tops").toLowerCase();
-                    const size = item.recommendedSize || item.suggestedSize || buildSyntheticSize(slot);
-                    item.recommendedSize = size;
-                    item.suggestedSize = size;
-                    item.sizeReason = item.sizeReason || buildSizeReason(slot, size);
-                    item.owned = ownedIdSet.has(productId);
+                        validItems.push(item);
+                    }
                 }
+                outfit.items = validItems; // Only keep items that are real products
 
                 outfit.totalPrice = (outfit.items || []).reduce((sum, i) => sum + Number(i.price || 0), 0);
                 outfit.totalBuyPrice = (outfit.items || [])

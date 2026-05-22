@@ -731,7 +731,7 @@ function App() {
             <Route path="/avatar-studio" element={<AvatarStudioPage />} />
 
             {/* TRANG AI OUTFIT ROOM - PHÒNG AI GỢI Ý PHỐI ĐỒ (3D + AI) */}
-            <Route path="/ai-outfit" element={<AIOutfitRoom />} />
+            <Route path="/ai-outfit" element={<AIOutfitGenerator />} />
 
             {/* TRANG AI OUTFIT GENERATOR - PHIÊN BẢN CHAT CŨ */}
             <Route path="/ai-outfit-generator" element={<AIOutfitGenerator />} />
