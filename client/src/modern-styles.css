@@ -4671,3 +4671,89 @@ tbody tr:hover {
     border-radius: 14px;
   }
 }
+
+/* ========================================================
+   PREMIUM HOME BACKGROUND (Noise + Spotlight)
+   ======================================================== */
+.premium-home-bg {
+    position: relative;
+    background-color: var(--bg-primary); /* Base color */
+    overflow-x: hidden;
+}
+
+/* Noise Texture Overlay */
+.premium-home-bg::before {
+    content: '';
+    position: absolute; 
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.035; /* Very subtle grain */
+}
+
+/* Spotlight Glows */
+.premium-home-bg::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: 
+        radial-gradient(circle at 15% 15%, rgba(200, 168, 103, 0.08) 0%, transparent 35%),
+        radial-gradient(circle at 85% 45%, rgba(200, 168, 103, 0.07) 0%, transparent 35%),
+        radial-gradient(circle at 50% 85%, rgba(200, 168, 103, 0.09) 0%, transparent 40%);
+}
+
+.home-page {
+    position: relative;
+    z-index: 1; /* Keep content above the background effects */
+}
+
+/* ========================================================
+   PART 1 - Dark Section Tokens (Concept B) & Gold Divider
+   ======================================================== */
+:root {
+  --bg-dark-section: #1C1409;
+  --text-dark-primary: #E8DCC8;
+  --text-dark-secondary: #5A4A35;
+  --border-dark: rgba(201, 150, 63, 0.15);
+  --border-dark-hot: rgba(201, 150, 63, 0.45);
+  --surface-dark-card: rgba(255, 255, 255, 0.03);
+  --surface-dark-hot: rgba(201, 150, 63, 0.05);
+}
+
+.gold-divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(201,150,63,0.18) 20%,
+    rgba(201,150,63,0.4) 50%,
+    rgba(201,150,63,0.18) 80%,
+    transparent 100%
+  );
+  margin: 0;
+}
+
+/* Editorial Layout Grid for TopSearch */
+.editorial-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .editorial-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .editorial-grid {
+    grid-template-columns: 1fr;
+  }
+}

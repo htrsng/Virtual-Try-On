@@ -39,7 +39,7 @@ function TopSearch({ products }) {
 
     const getAIReason = (index) => AI_REASONS[index % AI_REASONS.length];
 
-    const displayProducts = useMemo(() => (products || []).slice(0, 6), [products]);
+    const displayProducts = useMemo(() => (products || []).slice(0, 5), [products]);
 
     useEffect(() => {
         const target = sectionRef.current;
@@ -90,170 +90,160 @@ function TopSearch({ products }) {
     };
 
     if (displayProducts.length === 0) {
-        return (
-            <section className="ts-section">
-                <div className="ts-section__header">
-                    <div className="ts-section__header-left">
-                        <span className="ts-section__eyebrow ts-section__eyebrow--pill">
-                            ✦ AI ĐANG GỢI Ý CHO BẠN
-                        </span>
-                        <h2 className="ts-section__title ts-section__title--accented">
-                            <span className="ts-section__title-word">Được</span> Chọn Riêng Cho Bạn
-                        </h2>
-                    </div>
-                    <Link to="/top-products" className="ts-section__viewall">
-                        <span>Xem tất cả</span>
-                        <svg className="ts-section__viewall-icon ts-section__brain-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                            <path d="M9.5 5a3.5 3.5 0 0 1 6.8 1.2A3.2 3.2 0 0 1 19 9.3a3.5 3.5 0 0 1-1.3 6.7V17a3 3 0 0 1-3 3h-5a3 3 0 0 1-3-3v-.8A3.5 3.5 0 0 1 6.8 9.2 3.2 3.2 0 0 1 9.5 5Z" />
-                            <path d="M9 10.2c.8-.7 1.9-1 3-1s2.2.3 3 1" />
-                            <path d="M9 13.8c.8.7 1.9 1 3 1s2.2-.3 3-1" />
-                        </svg>
-                    </Link>
-                </div>
-
-                <div className="ts-track ts-track--skeleton" aria-hidden="true">
-                    {Array.from({ length: 6 }).map((_, index) => (
-                        <article key={`ts-skeleton-${index}`} className="ts-card ts-card--skeleton">
-                            <div className="ts-card__media">
-                                <div className="ts-card__skeleton ts-card__skeleton-media" />
-                                <div className="ts-card__skeleton ts-card__skeleton-badge" />
-                                <div className="ts-card__skeleton ts-card__skeleton-chip" />
-                            </div>
-                            <div className="ts-card__body">
-                                <div className="ts-card__skeleton ts-card__skeleton-line ts-card__skeleton-line--name" />
-                                <div className="ts-card__skeleton-row">
-                                    <div className="ts-card__skeleton ts-card__skeleton-line ts-card__skeleton-line--price" />
-                                    <div className="ts-card__skeleton ts-card__skeleton-line" style={{ width: '56px' }} />
-                                </div>
-                                <div className="ts-card__score">
-                                    <div className="ts-card__skeleton-row">
-                                        <div className="ts-card__skeleton ts-card__skeleton-line" style={{ width: '88px', height: '10px' }} />
-                                        <div className="ts-card__skeleton ts-card__skeleton-line" style={{ width: '34px', height: '10px' }} />
-                                    </div>
-                                    <div className="ts-card__skeleton ts-card__skeleton-line ts-card__skeleton-line--score" />
-                                </div>
-                                <div className="ts-card__actions">
-                                    <div className="ts-card__skeleton" style={{ width: '30px', height: '30px', borderRadius: '999px' }} />
-                                    <div className="ts-card__skeleton" style={{ width: '76px', height: '26px', borderRadius: '20px' }} />
-                                </div>
-                            </div>
-                        </article>
-                    ))}
-                </div>
-            </section>
-        );
+        return null;
     }
 
-    return (
-        <section ref={sectionRef} className="ts-section">
-            {/* Header */}
-            <div className="ts-section__header">
-                <div className="ts-section__header-left">
-                    <span className="ts-section__eyebrow ts-section__eyebrow--pill">
-                        ✦ AI ĐANG GỢI Ý CHO BẠN
-                    </span>
-                    <h2 className="ts-section__title ts-section__title--accented">
-                        <span className="ts-section__title-word">Được</span> Chọn Riêng Cho Bạn
-                    </h2>
+    const renderHeroCard = (item, index, aiReason, score) => {
+        const isLiked = likedIds.has(item.id);
+        return (
+            <div
+                key={item.id}
+                onClick={() => handleCardClick(item)}
+                onKeyDown={(e) => handleCardKeyDown(e, item)}
+                role="button"
+                tabIndex={0}
+                style={{
+                    background: 'var(--surface-card)',
+                    borderRadius: '14px',
+                    overflow: 'hidden',
+                    boxShadow: '0 2px 12px rgba(139,105,20,0.13), 0 0 0 1px rgba(201,150,63,0.18)',
+                    gridRow: 'span 2',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column'
+                }}
+            >
+                <div style={{ height: '260px', background: '#F4F4F4', position: 'relative', overflow: 'hidden' }}>
+                    <img
+                        src={item.img}
+                        alt={item.name}
+                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                    />
+                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '100px', background: 'linear-gradient(transparent, rgba(15,11,7,0.95))' }} />
+                    <div style={{ position: 'absolute', bottom: '16px', left: '16px' }}>
+                        <div style={{ fontSize: '12px', color: '#D4AF37', letterSpacing: '0.07em', marginBottom: '6px', fontWeight: '800' }}>
+                            ✦ #1 · {aiReason.text}
+                        </div>
+                        <div style={{ fontSize: '24px', color: '#FFFFFF', fontWeight: '800', letterSpacing: '-0.02em', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+                            {item.name}
+                        </div>
+                    </div>
                 </div>
-                <Link to="/top-products" className="ts-section__viewall">
-                    <span>Xem tất cả</span>
-                    <svg className="ts-section__viewall-icon ts-section__brain-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <path d="M9.5 5a3.5 3.5 0 0 1 6.8 1.2A3.2 3.2 0 0 1 19 9.3a3.5 3.5 0 0 1-1.3 6.7V17a3 3 0 0 1-3 3h-5a3 3 0 0 1-3-3v-.8A3.5 3.5 0 0 1 6.8 9.2 3.2 3.2 0 0 1 9.5 5Z" />
-                        <path d="M9 10.2c.8-.7 1.9-1 3-1s2.2.3 3 1" />
-                        <path d="M9 13.8c.8.7 1.9 1 3 1s2.2-.3 3-1" />
-                    </svg>
+                <div style={{ padding: '12px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ fontSize: '16px', color: 'var(--gold-primary)', fontWeight: '700' }}>
+                        {typeof item.price === 'number' ? item.price.toLocaleString('vi-VN') : item.price}đ
+                    </div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                        Độ phù hợp AI: {score}% · Vừa vặn
+                    </div>
+                    <div style={{ width: '100%', height: '2px', background: '#E8E0D0', marginTop: '6px', borderRadius: '2px', overflow: 'hidden' }}>
+                        <div style={{ width: `${score}%`, height: '100%', background: 'linear-gradient(90deg, #C9963F 0%, #E8B84B 100%)' }} />
+                    </div>
+                    <div style={{ marginTop: 'auto', paddingTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); toggleWishlist(item.id); }}
+                            style={{ background: 'none', border: 'none', color: isLiked ? 'var(--gold-primary)' : 'var(--text-secondary)', cursor: 'pointer', padding: '4px' }}
+                        >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill={isLiked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z" />
+                            </svg>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={(e) => handleTryOn(e, item)}
+                            style={{ border: '1px solid var(--gold-primary)', color: 'var(--gold-primary)', background: 'transparent', fontSize: '11px', fontWeight: '700', borderRadius: '20px', padding: '4px 12px', cursor: 'pointer' }}
+                        >
+                            Thử 3D →
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const renderSmallCard = (item, index, aiReason, score) => {
+        return (
+            <div
+                key={item.id}
+                onClick={() => handleCardClick(item)}
+                onKeyDown={(e) => handleCardKeyDown(e, item)}
+                role="button"
+                tabIndex={0}
+                style={{
+                    background: 'var(--surface-card)',
+                    borderRadius: '10px',
+                    overflow: 'hidden',
+                    boxShadow: '0 1px 6px rgba(139,105,20,0.09)',
+                    border: '0.5px solid rgba(201,150,63,0.12)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column'
+                }}
+            >
+                <div style={{ height: '130px', position: 'relative', background: '#F4F4F4' }}>
+                    <img src={item.img} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    <div style={{ position: 'absolute', top: '6px', right: '6px', background: 'rgba(15,11,7,0.75)', border: '0.5px solid rgba(201,150,63,0.4)', borderRadius: '10px', padding: '4px 8px', fontSize: '10px', color: '#D4AF37', fontWeight: '700' }}>
+                        ✦ #{index + 1}
+                    </div>
+                    <div style={{ position: 'absolute', bottom: '6px', left: '6px', background: 'rgba(15,11,7,0.75)', borderRadius: '8px', padding: '4px 8px', fontSize: '9px', color: '#E8DCC8', fontWeight: '600' }}>
+                        {aiReason.icon} {aiReason.text}
+                    </div>
+                </div>
+                <div style={{ padding: '7px 9px 9px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <div style={{ fontSize: '12px', fontWeight: '700', color: '#1C1409', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {item.name}
+                    </div>
+                    <div style={{ fontSize: '11px', color: '#B38B36', fontWeight: '700' }}>
+                        {typeof item.price === 'number' ? item.price.toLocaleString('vi-VN') : item.price}đ
+                    </div>
+                    <div style={{ width: '100%', height: '2px', background: '#E8E0D0', borderRadius: '2px', overflow: 'hidden' }}>
+                        <div style={{ width: `${score}%`, height: '100%', background: 'linear-gradient(90deg, #C9963F 0%, #E8B84B 100%)' }} />
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    return (
+        <section ref={sectionRef} className="ts-section" style={{ padding: '20px 0' }}>
+            <div className="container">
+                <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0' }}>
+                    <div style={{ fontSize: '52px', fontWeight: '500', color: 'rgba(201,150,63,0.1)', lineHeight: '1', marginRight: '8px', fontFamily: 'Georgia, serif', userSelect: 'none', flexShrink: 0 }}>
+                        AI
+                    </div>
+                    <div>
+                        <div style={{ fontSize: '10px', letterSpacing: '0.12em', color: '#8B6914', fontWeight: '700', marginBottom: '4px' }}>
+                            ✦ ĐƯỢC CHỌN RIÊNG CHO BẠN
+                        </div>
+                        <div style={{ fontSize: '20px', fontWeight: '700', color: '#1C1409', margin: 0, letterSpacing: '-0.02em' }}>
+                            Picks hôm nay
+                        </div>
+                    </div>
+                </div>
+                <Link to="/top-products" style={{ fontSize: '11px', color: 'var(--gold-primary)', textDecoration: 'none' }}>
+                    Xem tất cả →
                 </Link>
             </div>
 
-            <div className="ts-track">
-                {displayProducts.map((item, index) => {
-                    const aiReason = getAIReason(index);
-                    const score = SCORE_VALUES[index % SCORE_VALUES.length];
-                    const originalPrice = item.originalPrice || item.oldPrice || null;
-                    const hasDiscount = Boolean(item.discount || originalPrice);
-                    const isLiked = likedIds.has(item.id);
+            <div className="editorial-grid">
+                {displayProducts.length > 0 && renderHeroCard(displayProducts[0], 0, getAIReason(0), SCORE_VALUES[0])}
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {displayProducts.slice(1, 3).map((item, i) => {
+                        const actualIndex = i + 1;
+                        return renderSmallCard(item, actualIndex, getAIReason(actualIndex), SCORE_VALUES[actualIndex % SCORE_VALUES.length]);
+                    })}
+                </div>
 
-                    return (
-                        <article
-                            key={item.id}
-                            className={`ts-card${isVisible ? ' ts-card--visible' : ''}`}
-                            style={{ transitionDelay: `${index * 80}ms` }}
-                            onClick={() => handleCardClick(item)}
-                            onKeyDown={(event) => handleCardKeyDown(event, item)}
-                            role="button"
-                            tabIndex={0}
-                            aria-label={`Xem sản phẩm gợi ý ${item.name}`}
-                        >
-                            <div className="ts-card__media">
-                                <div className="ts-card__image-wrap">
-                                    <TrendingImage src={item.img} alt={item.name} />
-                                </div>
-
-                                <div className="ts-card__image-gradient" />
-
-                                <span className="ts-card__rank-pill" aria-hidden="true">
-                                    ✦ #{index + 1}
-                                </span>
-
-                                <span className="ts-card__reason-chip" aria-hidden="true">
-                                    <span className="ts-card__reason-icon">{aiReason.icon}</span>
-                                    {aiReason.text}
-                                </span>
-                            </div>
-
-                            <div className="ts-card__body">
-                                <p className="ts-card__name">{item.name}</p>
-
-                                <div className="ts-card__price-row">
-                                    <span className="ts-card__price">
-                                        {item.price}
-                                    </span>
-                                    {hasDiscount && originalPrice && (
-                                        <span className="ts-card__original-price">
-                                            {originalPrice}
-                                        </span>
-                                    )}
-                                </div>
-
-                                <div className="ts-card__score">
-                                    <div className="ts-card__score-head">
-                                        <span>Độ phù hợp AI</span>
-                                        <strong>{score}%</strong>
-                                    </div>
-                                    <div className="ts-card__score-bar" aria-hidden="true">
-                                        <span style={{ width: isVisible ? `${score}%` : '0%' }} />
-                                    </div>
-                                </div>
-
-                                <div className="ts-card__actions">
-                                    <button
-                                        type="button"
-                                        className={`ts-card__heart-btn ${isLiked ? 'is-active' : ''}`}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            toggleWishlist(item.id);
-                                        }}
-                                        aria-label={isLiked ? `Bỏ yêu thích ${item.name}` : `Thêm ${item.name} vào yêu thích`}
-                                    >
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill={isLiked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                                            <path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z" />
-                                        </svg>
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        className="ts-card__try-btn"
-                                        onClick={(e) => handleTryOn(e, item)}
-                                        aria-label={`Thử 3D ${item.name}`}
-                                    >
-                                        Thử 3D →
-                                    </button>
-                                </div>
-                            </div>
-                        </article>
-                    );
-                })}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {displayProducts.slice(3, 5).map((item, i) => {
+                        const actualIndex = i + 3;
+                        return renderSmallCard(item, actualIndex, getAIReason(actualIndex), SCORE_VALUES[actualIndex % SCORE_VALUES.length]);
+                    })}
+                </div>
+            </div>
             </div>
         </section>
     );

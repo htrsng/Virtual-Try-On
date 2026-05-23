@@ -59,7 +59,7 @@ function HomePage({ products, categories, topSearch, bannerData, flashSaleProduc
     };
 
     return (
-        <div style={{ background: 'var(--bg-primary)', minHeight: '100vh' }}>
+        <div className="premium-home-bg" style={{ minHeight: '100vh' }}>
             <motion.div
                 variants={pageVariants}
                 initial="initial"
@@ -174,17 +174,13 @@ function HomePage({ products, categories, topSearch, bannerData, flashSaleProduc
                 <div className="gold-divider" />
 
                 <motion.section variants={sectionVariants} className="section-spacing" style={sectionWrapperStyle}>
-                    <div className="container">
-                        <Category data={categories} />
-                    </div>
+                    <Category data={categories} />
                 </motion.section>
 
                 <div className="gold-divider" />
 
                 <motion.section variants={sectionVariants} className="section-spacing" style={{ ...sectionWrapperStyle, marginBottom: '10px' }}>
-                    <div className="container">
-                        <TopSearch products={topSearch} />
-                    </div>
+                    <TopSearch products={topSearch} />
                 </motion.section>
 
                 <div className="gold-divider" />

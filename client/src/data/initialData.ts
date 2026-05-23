@@ -46,6 +46,24 @@ export const fallbackSuggestions = [
         ]
     },
     {
+        id: 8,
+        category: "Áo Croptop",
+        name: 'Áo Croptop Dây Rút (Có 3D)',
+        price: 250000,
+        img: 'https://images.unsplash.com/photo-1564859228273-274232fdb516?w=500&h=600&fit=crop',
+        discount: 25,
+        sold: 934
+    },
+    {
+        id: 16,
+        category: "Áo Khoác",
+        name: 'Blazer Nữ Công Sở (Có 3D)',
+        price: 680000,
+        img: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=500&h=600&fit=crop',
+        discount: 40,
+        sold: 432
+    },
+    {
         id: 2,
         category: "Quần Jeans",
         name: 'Quần Jean Ống Rộng',
@@ -99,15 +117,7 @@ export const fallbackSuggestions = [
         discount: 30,
         sold: 1089
     },
-    {
-        id: 8,
-        category: "Áo Croptop",
-        name: 'Áo Croptop Dây Rút',
-        price: 250000,
-        img: 'https://images.unsplash.com/photo-1564859228273-274232fdb516?w=500&h=600&fit=crop',
-        discount: 25,
-        sold: 934
-    },
+    // ID 8 moved to top
     {
         id: 9,
         category: "Quần Short",
@@ -171,15 +181,7 @@ export const fallbackSuggestions = [
         discount: 35,
         sold: 654
     },
-    {
-        id: 16,
-        category: "Áo Khoác",
-        name: 'Blazer Nữ Công Sở',
-        price: 680000,
-        img: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=500&h=600&fit=crop',
-        discount: 40,
-        sold: 432
-    },
+    // ID 16 moved to top
     {
         id: 17,
         category: "Áo Thun",

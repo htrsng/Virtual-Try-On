@@ -3,8 +3,8 @@
 // Mỗi sản phẩm khai báo từng size riêng với file GLB tương ứng.
 
 export const MODEL_INJECTION = {
-    // Sản phẩm ID 3 — Áo Thun
-    "3": {
+    // Sản phẩm ID 1 — Áo Thun
+    "1": {
         enable: true,
 
         colors: [
@@ -106,8 +106,8 @@ export const MODEL_INJECTION = {
         }
     },
 
-    // Sản phẩm ID 11
-    "11": {
+    // Sản phẩm ID 8 — Quần
+    "8": {
         enable: true,
 
         colors: [
@@ -192,6 +192,94 @@ export const MODEL_INJECTION = {
                     morphInfluence: 0.68,
                     morphSmoothing: 0.18,
                     maxMorphInfluence: 0.84
+                }
+            }
+        }
+    },
+
+    // Sản phẩm ID 16 — Váy
+    "16": {
+        enable: true,
+
+        colors: [
+            { name: 'Beige', hex: '#E8DCC8', fabric: { preset: 'silk' } },
+            { name: 'Đen', hex: '#1A1A1A', fabric: { preset: 'silk' } },
+            { name: 'Trắng', hex: '#FFFFFF', fabric: { preset: 'silk' } }
+        ],
+
+        softness: {
+            roughness: 0.6,
+            metalness: 0.1,
+            envMapIntensity: 0.6,
+            skinOffset: 0.004
+        },
+
+        fabric: {
+            preset: 'silk'
+        },
+
+        measurementProfile: {
+            garmentType: 'dress',
+            sizeSpecs: {
+                S: {
+                    chest: 84,
+                    waist: 66,
+                    hips: 90,
+                    garmentLength: 85,
+                    stretchWarp: 0.04,
+                    stretchWeft: 0.06,
+                    fitIntent: 'regular'
+                },
+                M: {
+                    chest: 88,
+                    waist: 70,
+                    hips: 94,
+                    garmentLength: 87,
+                    stretchWarp: 0.04,
+                    stretchWeft: 0.06,
+                    fitIntent: 'regular'
+                },
+                L: {
+                    chest: 92,
+                    waist: 74,
+                    hips: 98,
+                    garmentLength: 89,
+                    stretchWarp: 0.04,
+                    stretchWeft: 0.06,
+                    fitIntent: 'regular'
+                }
+            }
+        },
+
+        sizes: {
+            S: {
+                url: "/models/vay1-S.glb",
+                autoNormalize: false,
+                followAvatarBones: true,
+                softness: {
+                    morphInfluence: 0.85,
+                    morphSmoothing: 0.25,
+                    maxMorphInfluence: 0.95
+                }
+            },
+            M: {
+                url: "/models/vay1-M.glb",
+                autoNormalize: false,
+                followAvatarBones: true,
+                softness: {
+                    morphInfluence: 0.8,
+                    morphSmoothing: 0.22,
+                    maxMorphInfluence: 0.9
+                }
+            },
+            L: {
+                url: "/models/vay1-L.glb",
+                autoNormalize: false,
+                followAvatarBones: true,
+                softness: {
+                    morphInfluence: 0.75,
+                    morphSmoothing: 0.2,
+                    maxMorphInfluence: 0.85
                 }
             }
         }
