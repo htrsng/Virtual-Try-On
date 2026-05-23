@@ -17,11 +17,96 @@ export const Avatar: React.FC<AvatarProps & { skinColor?: string; onSceneReady?:
     body,
     pose = 'Idle',
     onSceneReady,
+    skinColor,
 }) => {
     const group = useRef<THREE.Group>(null);
     const { scene, animations } = useGLTF(MODEL_PATH) as { scene: THREE.Group; animations: THREE.AnimationClip[] };
     // Clone scene per instance because a Three.js Object3D cannot be attached to two parents.
-    const avatarScene = useMemo(() => cloneSkeleton(scene) as THREE.Group, [scene]);
+    const avatarScene = useMemo(() => {
+        const cloned = cloneSkeleton(scene) as THREE.Group;
+        
+        cloned.traverse((child: THREE.Object3D) => {
+            if ((child as THREE.Mesh).isMesh) {
+                const mesh = child as THREE.Mesh;
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+
+                const applyModestyShader = (mat: THREE.Material) => {
+                    const stdMat = mat as THREE.MeshStandardMaterial;
+                    stdMat.roughness = 0.6;
+                    stdMat.metalness = 0.1;
+                    stdMat.customProgramCacheKey = () => 'modesty_suit_v3';
+
+                    stdMat.onBeforeCompile = (shader) => {
+                        shader.vertexShader = shader.vertexShader.replace(
+                            '#include <common>',
+                            '#include <common>\nvarying vec3 vOrigPos;'
+                        );
+                        shader.vertexShader = shader.vertexShader.replace(
+                            '#include <begin_vertex>',
+                            '#include <begin_vertex>\nvOrigPos = position;'
+                        );
+
+                        shader.fragmentShader = shader.fragmentShader.replace(
+                            '#include <common>',
+                            '#include <common>\nvarying vec3 vOrigPos;'
+                        );
+                        
+                        shader.fragmentShader = shader.fragmentShader.replace(
+                            '#include <color_fragment>',
+                            `#include <color_fragment>
+                            float y = vOrigPos.y;
+                            float x = abs(vOrigPos.x);
+                            
+                            // Viền mờ để không bị cắt sắc nét (Đẩy phần ngực cao hơn 1.41 - 1.45)
+                            float topEdge = smoothstep(1.41, 1.45, y);      // Viền cổ áo ngang ngực cao
+                            float bottomEdge = smoothstep(0.62, 0.68, y);   // Viền gấu quần giữa đùi
+                            
+                            // Loại bỏ cánh tay (Thân thường có x nhỏ hơn 0.22, tay xa hơn 0.25)
+                            float armMask = smoothstep(0.28, 0.21, x);
+                            
+                            // Khoét lỗ nách áo (Armpit hole)
+                            float armpit = smoothstep(1.20, 1.30, y) * smoothstep(0.14, 0.18, x);
+                            
+                            // Tính toán độ bao phủ tổng thể (Alpha)
+                            float suitAlpha = bottomEdge * (1.0 - topEdge) * armMask * (1.0 - armpit);
+                            float totalAlpha = suitAlpha;
+                            
+                            if (totalAlpha > 0.02) {
+                                // Màu đen xám tối
+                                vec3 baseColor = vec3(0.18, 0.18, 0.19);
+                                
+                                // Tạo texture vải dệt kim dày dặn hơn
+                                float knitPattern = sin(vOrigPos.x * 250.0) * sin(vOrigPos.y * 250.0);
+                                vec3 suitColor = baseColor - (knitPattern * 0.05);
+                                
+                                // Làm viền áo tối hằn sâu hơn
+                                float isBorder = max(
+                                    smoothstep(1.39, 1.41, y) - smoothstep(1.42, 1.44, y), 
+                                    smoothstep(0.66, 0.68, y) - smoothstep(0.69, 0.71, y)
+                                );
+                                suitColor -= isBorder * 0.12;
+
+                                // Trộn mượt mà lớp vải lên da thịt
+                                diffuseColor.rgb = mix(diffuseColor.rgb, suitColor, totalAlpha * 0.98);
+                            }
+                            `
+                        );
+                    };
+                };
+
+                if (Array.isArray(mesh.material)) {
+                    mesh.material = mesh.material.map(m => m.clone());
+                    mesh.material.forEach(applyModestyShader);
+                } else {
+                    mesh.material = mesh.material.clone();
+                    applyModestyShader(mesh.material);
+                }
+            }
+        });
+        return cloned;
+    }, [scene]);
+
     const { actions, names } = useAnimations(animations, group);
     const avatarDataRef = useRef<{ legs: THREE.Bone[]; spine: THREE.Bone[]; hips: THREE.Bone | null; morphMeshes: THREE.SkinnedMesh[] }>({
         legs: [],
@@ -30,7 +115,7 @@ export const Avatar: React.FC<AvatarProps & { skinColor?: string; onSceneReady?:
         morphMeshes: []
     });
 
-    // 1. CHỈ QUÉT MODEL 1 LẦN: Lưu 2 mesh 'Plane003' và 'Plane003_1' vào bộ nhớ
+    // 1. CHỈ QUÉT MODEL 1 LẦN: Lưu các Bone và Mesh vào bộ nhớ
     useEffect(() => {
         const map: { legs: THREE.Bone[], spine: THREE.Bone[], hips: THREE.Bone | null, morphMeshes: THREE.SkinnedMesh[] } = {
             legs: [], spine: [], hips: null, morphMeshes: []
@@ -46,14 +131,29 @@ export const Avatar: React.FC<AvatarProps & { skinColor?: string; onSceneReady?:
             if (child instanceof THREE.SkinnedMesh && child.morphTargetDictionary) {
                 map.morphMeshes.push(child);
             }
-            // Enable shadows on every avatar mesh
-            if ((child as THREE.Mesh).isMesh) {
-                child.castShadow = true;
-                child.receiveShadow = true;
-            }
         });
         avatarDataRef.current = map;
     }, [avatarScene]);
+
+    // 1b. Cập nhật màu da (skinColor) một cách an toàn mà không clone lại material
+    useEffect(() => {
+        if (!skinColor) return;
+        const updateColor = (mat: THREE.Material) => {
+            if ((mat as THREE.MeshStandardMaterial).color) {
+                (mat as THREE.MeshStandardMaterial).color.set(skinColor);
+            }
+        };
+        avatarScene.traverse((child: THREE.Object3D) => {
+            if ((child as THREE.Mesh).isMesh) {
+                const mesh = child as THREE.Mesh;
+                if (Array.isArray(mesh.material)) {
+                    mesh.material.forEach(updateColor);
+                } else if (mesh.material) {
+                    updateColor(mesh.material);
+                }
+            }
+        });
+    }, [avatarScene, skinColor]);
 
     useEffect(() => {
         if (onSceneReady) {

@@ -13,6 +13,7 @@ import {
 } from '../utils/bodyProfileConstraints';
 import BodyShapeIndicator from '../features/virtual-tryon/components/BodyPresets';
 import CustomSlider from '../features/virtual-tryon/components/CustomSlider';
+import PhotoUploadFlow from '../components/tryon/PhotoUploadFlow';
 import '../features/virtual-tryon/VirtualTryOn.css';
 import './AvatarStudioPage.css';
 
@@ -144,6 +145,7 @@ export default function AvatarStudioPage() {
     const noticeTimerRef = useRef<number | null>(null);
     const advancedRef = useRef<HTMLDivElement>(null);
     const [advancedHeight, setAdvancedHeight] = useState(0);
+    const [setupMethod, setSetupMethod] = useState<'photo' | 'manual'>('photo');
 
     const isCreateMode = isCreatingNew || !editingAvatarId;
     const displayDraftName = draftAvatar.name.trim() || 'Avatar mới';
@@ -253,6 +255,15 @@ export default function AvatarStudioPage() {
             ...DEFAULT_AVATAR_BODY,
         }));
         showNotice('Đã đưa số đo về mặc định.');
+    }, [showNotice]);
+
+    const handlePhotoUploadComplete = useCallback((measurements: any) => {
+        setDraftAvatar((prev) => sanitizeBodyMeasurements({
+            ...prev,
+            ...measurements
+        }));
+        setSetupMethod('manual');
+        showNotice('Đã nhận số đo từ ảnh!');
     }, [showNotice]);
 
     const navigateToTryOn = useCallback(() => {
@@ -405,9 +416,87 @@ export default function AvatarStudioPage() {
                         <span className="avatar-studio__editor-bmi">BMI {bmi}</span>
                     </div>
 
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 1fr',
+                        gap: '12px',
+                        marginBottom: '16px',
+                        marginTop: '16px',
+                        padding: '0 16px'
+                    }}>
+                        {/* Option A — Ảnh chụp */}
+                        <button
+                            onClick={() => setSetupMethod('photo')}
+                            style={{
+                                background: setupMethod === 'photo' ? 'var(--gold-light)' : 'var(--surface-subtle)',
+                                border: setupMethod === 'photo'
+                                    ? '1.5px solid var(--gold-primary)'
+                                    : '1px solid var(--gold-border)',
+                                borderRadius: '14px',
+                                padding: '18px 14px',
+                                cursor: 'pointer',
+                                textAlign: 'left',
+                                transition: 'all 0.2s ease',
+                            }}
+                        >
+                            <div style={{ fontSize: '24px', marginBottom: '8px' }}>📸</div>
+                            <div style={{
+                                fontSize: '13px', fontWeight: '600',
+                                color: 'var(--text-primary)', marginBottom: '4px',
+                            }}>
+                                Chụp ảnh
+                            </div>
+                            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+                                AI tự đo từ 2 ảnh của bạn
+                            </div>
+                            {setupMethod === 'photo' && (
+                                <div style={{
+                                    marginTop: '8px', fontSize: '10px',
+                                    color: 'var(--gold-primary)', fontWeight: '500',
+                                }}>
+                                    ✦ Nhanh hơn • Chính xác hơn
+                                </div>
+                            )}
+                        </button>
+
+                        {/* Option B — Nhập tay */}
+                        <button
+                            onClick={() => setSetupMethod('manual')}
+                            style={{
+                                background: setupMethod === 'manual' ? 'var(--gold-light)' : 'var(--surface-subtle)',
+                                border: setupMethod === 'manual'
+                                    ? '1.5px solid var(--gold-primary)'
+                                    : '1px solid var(--gold-border)',
+                                borderRadius: '14px',
+                                padding: '18px 14px',
+                                cursor: 'pointer',
+                                textAlign: 'left',
+                                transition: 'all 0.2s ease',
+                            }}
+                        >
+                            <div style={{ fontSize: '24px', marginBottom: '8px' }}>📏</div>
+                            <div style={{
+                                fontSize: '13px', fontWeight: '600',
+                                color: 'var(--text-primary)', marginBottom: '4px',
+                            }}>
+                                Nhập số đo
+                            </div>
+                            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+                                Tự nhập chiều cao, cân nặng...
+                            </div>
+                        </button>
+                    </div>
+
                     <div className="avatar-studio__editor-body">
-                        <div className="avatar-studio__name-group">
-                            <label className="avatar-studio__name-label" htmlFor="avatar-name-input">Tên avatar</label>
+                        {setupMethod === 'photo' ? (
+                            <PhotoUploadFlow 
+                                onComplete={handlePhotoUploadComplete} 
+                                onSwitchToManual={() => setSetupMethod('manual')} 
+                            />
+                        ) : (
+                            <>
+                                <div className="avatar-studio__name-group">
+                                    <label className="avatar-studio__name-label" htmlFor="avatar-name-input">Tên avatar</label>
                             <input
                                 id="avatar-name-input"
                                 className="avatar-studio__name-input"
@@ -486,6 +575,8 @@ export default function AvatarStudioPage() {
                                 })}
                             </div>
                         </div>
+                            </>
+                        )}
                     </div>
 
                     <div className="avatar-studio__editor-footer">
