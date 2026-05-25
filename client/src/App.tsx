@@ -309,7 +309,20 @@ function App() {
               product.model3D = MODEL_INJECTION[productId];
             }
 
+            // Fallback: Nếu tên sản phẩm có chữ "Váy quây Corset" thì tự động map vào model Váy (ID 16)
+            if (String(item.name || '').includes('Váy quây Corset') && !product.model3D) {
+              console.log(`=> Tự động kích hoạt 3D Váy cho sản phẩm: ${item.name}`);
+              product.model3D = MODEL_INJECTION["16"];
+            }
+
             return product;
+          });
+
+          // SẮP XẾP: Ưu tiên các sản phẩm có hỗ trợ 3D lên đầu danh sách
+          formattedData.sort((a, b) => {
+            if (a.model3D && !b.model3D) return -1;
+            if (!a.model3D && b.model3D) return 1;
+            return 0;
           });
 
           // Cập nhật State (không cache products vào localStorage)

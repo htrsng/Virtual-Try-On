@@ -51,6 +51,7 @@ type ResolvedGarmentConfig = {
     followAvatarBones: boolean;
     softness: GarmentSoftnessConfig;
     fabric?: GarmentFabricProfile;
+    garmentType?: string;
 };
 
 interface GarmentModelProps {
@@ -104,6 +105,7 @@ const resolveGarmentConfig = (
         followAvatarBones: sizeConfig.followAvatarBones ?? config.followAvatarBones ?? false,
         softness: mergeSoftnessConfig(config.softness, sizeConfig.softness),
         fabric: mergeFabricConfig(config.fabric, sizeConfig.fabric),
+        garmentType: (config as any).measurementProfile?.garmentType,
     };
 };
 
@@ -136,6 +138,22 @@ function GarmentInstance({
                 const center = box.getCenter(new THREE.Vector3());
                 cloned.position.sub(center);
             }
+        }
+
+        // Manual scale adjustment for dresses: some dress GLBs are authored
+        // smaller than the avatar. Apply a modest uniform scale so the
+        // garment better matches the avatar body. Tweak `dressScale` as needed.
+        try {
+            const isDress = (garment.garmentType || '').toLowerCase() === 'dress' || /vay/i.test(garment.url);
+            if (isDress) {
+                const dressScale = 1.18; // increase if garment appears too small
+                cloned.scale.multiplyScalar(dressScale);
+            }
+        } catch (e) {
+            // swallow any unexpected errors here to avoid breaking rendering
+            // in case cloned.scale is not present for some reason.
+            // eslint-disable-next-line no-console
+            console.warn('[GarmentModel] Failed to apply dress scale', e);
         }
 
         prepareGarmentMaterialsWithTuning(cloned, {

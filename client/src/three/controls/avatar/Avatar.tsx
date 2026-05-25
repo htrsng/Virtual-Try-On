@@ -24,7 +24,7 @@ export const Avatar: React.FC<AvatarProps & { skinColor?: string; onSceneReady?:
     // Clone scene per instance because a Three.js Object3D cannot be attached to two parents.
     const avatarScene = useMemo(() => {
         const cloned = cloneSkeleton(scene) as THREE.Group;
-        
+
         cloned.traverse((child: THREE.Object3D) => {
             if ((child as THREE.Mesh).isMesh) {
                 const mesh = child as THREE.Mesh;
@@ -51,7 +51,7 @@ export const Avatar: React.FC<AvatarProps & { skinColor?: string; onSceneReady?:
                             '#include <common>',
                             '#include <common>\nvarying vec3 vOrigPos;'
                         );
-                        
+
                         shader.fragmentShader = shader.fragmentShader.replace(
                             '#include <color_fragment>',
                             `#include <color_fragment>
@@ -157,7 +157,14 @@ export const Avatar: React.FC<AvatarProps & { skinColor?: string; onSceneReady?:
 
     useEffect(() => {
         if (onSceneReady) {
-            onSceneReady(avatarScene);
+            // Pass the parent group (which includes the global scale/transform)
+            // so downstream binding/heatmap calculations see the avatar with
+            // the correct world transform applied.
+            if (group.current) {
+                onSceneReady(group.current);
+            } else {
+                onSceneReady(avatarScene);
+            }
         }
     }, [onSceneReady, avatarScene]);
 

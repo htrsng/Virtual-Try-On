@@ -92,115 +92,180 @@ function LoginPage({ showToast }) {
     };
 
     return (
-        <div className="auth-container auth-page">
-            <div className={`auth-card ${isRegister ? 'auth-card-wide' : ''}`}>
-                <h2 className="auth-title">
-                    {isRegister ? '🎉 Đăng Ký Tài Khoản' : '👋 Đăng Nhập'}
-                </h2>
+        <div className="modern-auth-container">
+            <div className="auth-split-wrapper">
+                
+                {/* LEFT SIDEBAR */}
+                <div className="auth-sidebar" key={`sidebar-${isRegister}`}>
+                    <div className="auth-logo">VFitAI</div>
+                    <div className="auth-subtitle">Thử đồ 3D - AI Stylist</div>
+                    
+                    <h2 className="auth-sidebar-title">
+                        {isRegister ? 'Bắt đầu hành trình thời trang thông minh' : 'Chào mừng trở lại!'}
+                    </h2>
+                    
+                    <p className="auth-sidebar-desc">
+                        {isRegister 
+                            ? 'Tạo tài khoản miễn phí và khám phá cách AI thay đổi cách bạn mua sắm.' 
+                            : 'Đăng nhập để tiếp tục trải nghiệm mua sắm thông minh với AI & 3D.'}
+                    </p>
+                    
+                    <div className="auth-features-list">
+                        <div className="auth-feature-item">
+                            <div className="auth-feature-icon">✦</div>
+                            <div className="auth-feature-text">
+                                <h4>AI Outfit Generator</h4>
+                                <p>Gợi ý outfit cá nhân hóa mỗi ngày</p>
+                            </div>
+                        </div>
+                        <div className="auth-feature-item">
+                            <div className="auth-feature-icon">✦</div>
+                            <div className="auth-feature-text">
+                                <h4>Phòng thử đồ 3D</h4>
+                                <p>Thử quần áo trước khi mua</p>
+                            </div>
+                        </div>
+                        <div className="auth-feature-item">
+                            <div className="auth-feature-icon">✦</div>
+                            <div className="auth-feature-text">
+                                <h4>Tủ đồ cá nhân</h4>
+                                <p>Lưu lại phối đồ đã mua bất cứ lúc nào</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="auth-sidebar-footer">
+                        © 2026 VFitAI - Bảo mật SSL
+                    </div>
+                </div>
 
-                <form onSubmit={handleSubmit}>
-                    <input
-                        className="auth-input"
-                        type="email"
-                        placeholder="Email"
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
-                        required
-                    />
+                {/* RIGHT FORM AREA */}
+                <div className="auth-form-area" key={`form-${isRegister}`}>
+                    <div className="auth-form-header">
+                        <h2 className="auth-form-title">
+                            {isRegister ? 'Tạo tài khoản' : 'Đăng nhập'}
+                        </h2>
+                        <p className="auth-form-subtitle">
+                            {isRegister ? 'Đã có tài khoản? ' : 'Chưa có tài khoản? '}
+                            <span 
+                                className="auth-link" 
+                                onClick={() => {
+                                    setIsRegister(!isRegister);
+                                    resetForm();
+                                }}
+                            >
+                                {isRegister ? 'Đăng nhập ngay' : 'Đăng ký miễn phí'}
+                            </span>
+                        </p>
+                    </div>
 
-                    {isRegister && (
-                        <>
-                            <input
-                                className="auth-input"
-                                type="text"
-                                placeholder="Họ và tên"
-                                value={fullName}
-                                onChange={e => setFullName(e.target.value)}
-                            />
-                            <input
-                                className="auth-input"
-                                type="tel"
-                                placeholder="Số điện thoại"
-                                value={phone}
-                                onChange={e => setPhone(e.target.value)}
-                            />
-                        </>
-                    )}
-
-                    <div style={{ position: 'relative' }}>
-                        <input
-                            className="auth-input"
-                            type={showPassword ? 'text' : 'password'}
-                            placeholder="Mật khẩu"
-                            value={password}
-                            onChange={e => setPassword(e.target.value)}
-                            required
-                        />
-                        <button
-                            type="button"
-                            onClick={() => setShowPassword((s) => !s)}
-                            style={{
-                                position: 'absolute',
-                                right: 10,
-                                top: '50%',
-                                transform: 'translateY(-50%)',
-                                background: 'transparent',
-                                border: 'none',
-                                cursor: 'pointer',
-                            }}
-                            aria-label={showPassword ? 'Hide password' : 'Show password'}
-                        >
-                            {showPassword ? '🙈' : '👁️'}
+                    <div className="social-login-group">
+                        <button className="social-btn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                            </svg>
+                            Google
+                        </button>
+                        <button className="social-btn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="#1877F2" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.5c-1.5 0-1.96.93-1.96 1.89v2.26h3.32l-.53 3.5h-2.8V24C19.62 23.1 24 18.1 24 12.07z"/>
+                            </svg>
+                            Facebook
                         </button>
                     </div>
 
-                    {isRegister && (
-                        <div style={{ position: 'relative' }}>
+                    <div className="auth-divider">hoặc</div>
+
+                    <form className="modern-auth-form" onSubmit={handleSubmit}>
+                        {isRegister && (
+                            <div className="form-group-row">
+                                <input
+                                    className="modern-auth-input"
+                                    type="text"
+                                    placeholder="Họ và tên"
+                                    value={fullName}
+                                    onChange={e => setFullName(e.target.value)}
+                                />
+                                <input
+                                    className="modern-auth-input"
+                                    type="tel"
+                                    placeholder="Số điện thoại"
+                                    value={phone}
+                                    onChange={e => setPhone(e.target.value)}
+                                />
+                            </div>
+                        )}
+
+                        <input
+                            className="modern-auth-input"
+                            type="email"
+                            placeholder="Email"
+                            value={email}
+                            onChange={e => setEmail(e.target.value)}
+                            required
+                        />
+
+                        <div className="input-with-icon">
                             <input
-                                className="auth-input"
-                                type={showConfirmPassword ? 'text' : 'password'}
-                                placeholder="Nhập lại mật khẩu"
-                                value={confirmPass}
-                                onChange={e => setConfirmPass(e.target.value)}
+                                className="modern-auth-input"
+                                type={showPassword ? 'text' : 'password'}
+                                placeholder="Mật khẩu"
+                                value={password}
+                                onChange={e => setPassword(e.target.value)}
                                 required
                             />
                             <button
                                 type="button"
-                                onClick={() => setShowConfirmPassword((s) => !s)}
-                                style={{
-                                    position: 'absolute',
-                                    right: 10,
-                                    top: '50%',
-                                    transform: 'translateY(-50%)',
-                                    background: 'transparent',
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                }}
-                                aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                                className="input-icon-btn"
+                                onClick={() => setShowPassword((s) => !s)}
                             >
-                                {showConfirmPassword ? '🙈' : '👁️'}
+                                {showPassword ? '🙈' : '👁️'}
                             </button>
+                            {isRegister && (
+                                <div className={`password-hint ${password.length > 0 && password.length < 8 ? 'warning' : ''}`}>
+                                    {password.length > 0 && password.length < 8 ? 'Mật khẩu quá ngắn' : 'Tối thiểu 8 ký tự'}
+                                </div>
+                            )}
                         </div>
-                    )}
 
-                    <button
-                        className="auth-btn"
-                        type="submit"
-                    >
-                        {isRegister ? '✨ ĐĂNG KÝ' : '🚀 ĐĂNG NHẬP'}
-                    </button>
-                </form>
+                        {!isRegister && (
+                            <div className="forgot-password">
+                                <span>Quên mật khẩu?</span>
+                            </div>
+                        )}
 
-                <div className="auth-switch">
-                    {isRegister ? 'Bạn đã có tài khoản?' : 'Bạn mới biết đến VFitAI?'}
-                    <span
-                        className="auth-switch-link"
-                        onClick={() => {
-                            setIsRegister(!isRegister);
-                            resetForm();
-                        }}>
-                        {isRegister ? 'Đăng nhập ngay' : 'Đăng ký ngay'}
-                    </span>
+                        {isRegister && (
+                            <div className="input-with-icon">
+                                <input
+                                    className="modern-auth-input"
+                                    type={showConfirmPassword ? 'text' : 'password'}
+                                    placeholder="Nhập lại mật khẩu"
+                                    value={confirmPass}
+                                    onChange={e => setConfirmPass(e.target.value)}
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    className="input-icon-btn"
+                                    onClick={() => setShowConfirmPassword((s) => !s)}
+                                >
+                                    {showConfirmPassword ? '🙈' : '👁️'}
+                                </button>
+                            </div>
+                        )}
+
+                        <button className="modern-submit-btn" type="submit">
+                            {isRegister ? 'Tạo tài khoản miễn phí' : 'Đăng nhập'}
+                        </button>
+                    </form>
+
+                    <div className="auth-terms">
+                        Bằng cách {isRegister ? 'đăng ký' : 'đăng nhập'}, bạn đồng ý với <br/>
+                        <span>Điều khoản dịch vụ</span> và <span>Chính sách bảo mật</span> của VFitAI.
+                    </div>
                 </div>
             </div>
         </div>
