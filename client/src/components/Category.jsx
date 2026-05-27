@@ -33,7 +33,7 @@ function Category({ data }) {
     };
 
     return (
-        <div className="cat-section" style={{ background: 'var(--bg-dark-section)', padding: '40px 0' }}>
+        <div className="cat-section" style={{ background: 'linear-gradient(180deg, #1C1409 0%, #2C1F0E 8%, #2C1F0E 92%, #1C1409 100%)', padding: '40px 0' }}>
             <div className="container">
             <style>
                 {`

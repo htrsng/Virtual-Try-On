@@ -44,7 +44,7 @@ function FlashSale({ products = [] }) {
         <div
             className="flash-sale-section"
             style={{
-                background: 'var(--bg-dark-section)',
+                background: 'linear-gradient(180deg, #1C1409 0%, #2C1F0E 8%, #2C1F0E 92%, #1C1409 100%)',
                 borderTop: '1px solid var(--border-dark)',
                 borderBottom: '1px solid var(--border-dark)',
                 borderRadius: '0',
@@ -74,9 +74,15 @@ function FlashSale({ products = [] }) {
                     background: rgba(201,150,63,0.04) !important;
                 }
                 .dark-flash-timer-box {
-                    background: rgba(201,150,63,0.08) !important;
-                    border: 0.5px solid var(--border-dark) !important;
-                    color: #D4AF37 !important;
+                    background: rgba(255,255,255,0.08) !important;
+                    border: 0.5px solid rgba(255,255,255,0.2) !important;
+                    color: #FFFFFF !important;
+                }
+                .dark-flash-timer-box .timer-value {
+                    color: #FFFFFF !important;
+                }
+                .dark-flash-timer-box .timer-unit {
+                    color: rgba(255,255,255,0.8) !important;
                 }
                 .dark-flash-title {
                     color: #D4AF37 !important;
@@ -147,7 +153,7 @@ function FlashSale({ products = [] }) {
                                 <span className="timer-value">{formatTime(timeLeft.hours)}</span>
                                 <span className="timer-unit">h</span>
                             </motion.div>
-                            <span className="timer-separator" style={{ color: '#D4AF37' }}>:</span>
+                            <span className="timer-separator" style={{ color: '#FFFFFF' }}>:</span>
                             <motion.div
                                 className="timer-box dark-flash-timer-box"
                                 animate={{ scale: [1, 1.05, 1] }}
@@ -164,7 +170,7 @@ function FlashSale({ products = [] }) {
                                 <span className="timer-value">{formatTime(timeLeft.minutes)}</span>
                                 <span className="timer-unit">m</span>
                             </motion.div>
-                            <span className="timer-separator" style={{ color: '#D4AF37' }}>:</span>
+                            <span className="timer-separator" style={{ color: '#FFFFFF' }}>:</span>
                             <motion.div
                                 className="timer-box dark-flash-timer-box"
                                 animate={{ scale: [1, 1.05, 1] }}

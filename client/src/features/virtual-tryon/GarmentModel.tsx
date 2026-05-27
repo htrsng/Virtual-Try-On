@@ -32,6 +32,10 @@ type GarmentSizeConfig = {
     url: string;
     autoNormalize?: boolean;
     followAvatarBones?: boolean;
+    /** Optional uniform scale to apply to the garment when rendered (1 = original). */
+    scale?: number;
+    /** Optional translation [x,y,z] (model units) applied after normalization and scaling. */
+    translate?: [number, number, number];
     softness?: GarmentSoftnessConfig;
     fabric?: GarmentFabricProfile;
 };
@@ -52,6 +56,8 @@ type ResolvedGarmentConfig = {
     softness: GarmentSoftnessConfig;
     fabric?: GarmentFabricProfile;
     garmentType?: string;
+    scale: number;
+    translate: [number, number, number];
 };
 
 interface GarmentModelProps {
@@ -106,6 +112,8 @@ const resolveGarmentConfig = (
         softness: mergeSoftnessConfig(config.softness, sizeConfig.softness),
         fabric: mergeFabricConfig(config.fabric, sizeConfig.fabric),
         garmentType: (config as any).measurementProfile?.garmentType,
+        scale: typeof sizeConfig.scale === 'number' ? sizeConfig.scale : (typeof (config as any).scale === 'number' ? (config as any).scale : 1),
+        translate: Array.isArray(sizeConfig.translate) ? sizeConfig.translate as [number, number, number] : (Array.isArray((config as any).translate) ? (config as any).translate as [number, number, number] : [0, 0, 0]),
     };
 };
 
@@ -144,10 +152,19 @@ function GarmentInstance({
         // smaller than the avatar. Apply a modest uniform scale so the
         // garment better matches the avatar body. Tweak `dressScale` as needed.
         try {
-            const isDress = (garment.garmentType || '').toLowerCase() === 'dress' || /vay/i.test(garment.url);
-            if (isDress) {
-                const dressScale = 1.18; // increase if garment appears too small
-                cloned.scale.multiplyScalar(dressScale);
+            // Apply uniform scale if provided (useful for garments authored at different sizes).
+            if (typeof garment.scale === 'number' && Math.abs(garment.scale - 1) > 1e-6) {
+                cloned.scale.multiplyScalar(garment.scale);
+            }
+
+            // Apply optional translation after centering and scaling.
+            try {
+                const t = garment.translate || [0, 0, 0];
+                if (Array.isArray(t) && t.length === 3 && (t[0] !== 0 || t[1] !== 0 || t[2] !== 0)) {
+                    cloned.position.add(new THREE.Vector3(t[0], t[1], t[2]));
+                }
+            } catch (innerErr) {
+                // ignore translate errors
             }
         } catch (e) {
             // swallow any unexpected errors here to avoid breaking rendering

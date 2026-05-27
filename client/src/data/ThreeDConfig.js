@@ -211,7 +211,7 @@ export const MODEL_INJECTION = {
             roughness: 0.6,
             metalness: 0.1,
             envMapIntensity: 0.6,
-            skinOffset: 0.004
+            skinOffset: 0.005
         },
 
         fabric: {
@@ -254,8 +254,11 @@ export const MODEL_INJECTION = {
         sizes: {
             S: {
                 url: "/models/vay1-S.glb",
-                autoNormalize: false,
+                autoNormalize: true,
                 followAvatarBones: true,
+                scale: 1.24,
+                // raise dress slightly to align with avatar pelvis/hips
+                translate: [0, 0.12, 0],
                 softness: {
                     morphInfluence: 0.85,
                     morphSmoothing: 0.25,
@@ -264,8 +267,11 @@ export const MODEL_INJECTION = {
             },
             M: {
                 url: "/models/vay1-M.glb",
-                autoNormalize: false,
+                autoNormalize: true,
                 followAvatarBones: true,
+                scale: 1.22,
+                // raise dress slightly for medium size
+                translate: [0, 0.10, 0],
                 softness: {
                     morphInfluence: 0.8,
                     morphSmoothing: 0.22,
@@ -274,8 +280,103 @@ export const MODEL_INJECTION = {
             },
             L: {
                 url: "/models/vay1-L.glb",
-                autoNormalize: false,
+                autoNormalize: true,
                 followAvatarBones: true,
+                scale: 1.20,
+                // raise dress slightly for large size
+                translate: [0, 0.08, 0],
+                softness: {
+                    morphInfluence: 0.75,
+                    morphSmoothing: 0.2,
+                    maxMorphInfluence: 0.85
+                }
+            }
+        }
+    },
+
+    // Sản phẩm ID 17 — Váy 2
+    "17": {
+        enable: true,
+
+        colors: [
+            { name: 'Beige', hex: '#E8DCC8', fabric: { preset: 'silk' } },
+            { name: 'Trắng', hex: '#FFFFFF', fabric: { preset: 'silk' } }
+        ],
+
+        softness: {
+            roughness: 0.6,
+            metalness: 0.1,
+            envMapIntensity: 0.6,
+            skinOffset: 0.005
+        },
+
+        fabric: {
+            preset: 'silk'
+        },
+
+        measurementProfile: {
+            garmentType: 'dress',
+            sizeSpecs: {
+                S: {
+                    chest: 84,
+                    waist: 66,
+                    hips: 90,
+                    garmentLength: 85,
+                    stretchWarp: 0.04,
+                    stretchWeft: 0.06,
+                    fitIntent: 'regular'
+                },
+                M: {
+                    chest: 88,
+                    waist: 70,
+                    hips: 94,
+                    garmentLength: 87,
+                    stretchWarp: 0.04,
+                    stretchWeft: 0.06,
+                    fitIntent: 'regular'
+                },
+                L: {
+                    chest: 92,
+                    waist: 74,
+                    hips: 98,
+                    garmentLength: 89,
+                    stretchWarp: 0.04,
+                    stretchWeft: 0.06,
+                    fitIntent: 'regular'
+                }
+            }
+        },
+
+        sizes: {
+            S: {
+                url: "/models/vay2-S.glb",
+                autoNormalize: true,
+                followAvatarBones: true,
+                scale: 1.20,
+                // raise dress slightly for small size
+                translate: [0, 0.08, 0],
+                softness: {
+                    morphInfluence: 0.85,
+                    morphSmoothing: 0.25,
+                    maxMorphInfluence: 0.95
+                }
+            },
+            M: {
+                url: "/models/vay2-M.glb",
+                autoNormalize: true,
+                followAvatarBones: true,
+                scale: 1.20,
+                softness: {
+                    morphInfluence: 0.8,
+                    morphSmoothing: 0.22,
+                    maxMorphInfluence: 0.9
+                }
+            },
+            L: {
+                url: "/models/vay2-L.glb",
+                autoNormalize: true,
+                followAvatarBones: true,
+                scale: 1.18,
                 softness: {
                     morphInfluence: 0.75,
                     morphSmoothing: 0.2,

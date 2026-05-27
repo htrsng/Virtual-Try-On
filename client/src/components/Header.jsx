@@ -8,7 +8,7 @@ import { FiShoppingCart, FiUser, FiLogOut, FiHeart, FiSearch, FiSun, FiMoon, FiR
 import NotificationBell from './NotificationBell';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useLanguage } from '../contexts/LanguageContext';
-import logo from '../assets/logo.svg';
+
 
 function Header({ cartCount, onSearch, showToast }) {
     const [inputValue, setInputValue] = useState("");
@@ -90,7 +90,23 @@ function Header({ cartCount, onSearch, showToast }) {
         <div className={`shopee-header ${scrolled ? 'header-scrolled' : ''}`}>
             <div className="container header-content">
                 <Link to="/" className="logo">
-                    <img src={logo} alt="VFitAI logo" className="brand-logo" />
+                    <svg width="110" height="34" viewBox="0 0 110 34" fill="none" xmlns="http://www.w3.org/2000/svg" className="logo-svg">
+                        <defs>
+                            <linearGradient id="logo-gold" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stopColor="#C9963F" />
+                                <stop offset="100%" stopColor="#E8B84B" />
+                            </linearGradient>
+                        </defs>
+                        
+                        {/* Hiệu ứng Chromatic/Shadow cho chữ VFit */}
+                        <text x="-0.8" y="21" fontFamily="Georgia, 'Times New Roman', serif" fontSize="20" fontWeight="700" fill="#2D5B7C" letterSpacing="-0.3">VFit</text>
+                        <text x="0.8" y="21" fontFamily="Georgia, 'Times New Roman', serif" fontSize="20" fontWeight="700" fill="#C9963F" letterSpacing="-0.3">VFit</text>
+                        <text x="0" y="21" fontFamily="Georgia, 'Times New Roman', serif" fontSize="20" fontWeight="700" fill="#F0E6D3" letterSpacing="-0.3">VFit</text>
+                        
+                        {/* Tagline AI STYLIST */}
+                        <line x1="0" y1="29" x2="12" y2="29" stroke="url(#logo-gold)" strokeWidth="1" />
+                        <text x="16" y="30.5" fontFamily="-apple-system, sans-serif" fontSize="7" fontWeight="600" fill="#C9963F" letterSpacing="1.5">AI STYLIST</text>
+                    </svg>
                 </Link>
 
                 <div className="search-box">

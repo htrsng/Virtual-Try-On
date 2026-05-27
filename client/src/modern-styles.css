@@ -8,9 +8,9 @@
   --font-display: "Playfair Display", serif;
 
   /* Colors - Light Mode */
-  --bg-primary: #f7f4ef;
+  --bg-primary: #fbfaf8;
   --bg-secondary: #ffffff;
-  --bg-tertiary: #f1ece4;
+  --bg-tertiary: #f4f2ee;
   --bg-card: #ffffff;
   --text-primary: #1f1a17;
   --text-secondary: #4d463f;
@@ -147,11 +147,11 @@ h6 {
   gap: 0;
   padding-bottom: 0;
   background: linear-gradient(180deg,
-      #FFFDF9 0%,
-      #FAF6EE 25%,
-      #F5EDE2 55%,
-      #FAF6EE 80%,
-      #FFFDF9 100%);
+      #FFFFFF 0%,
+      #FDFCFB 25%,
+      #F9F8F6 55%,
+      #FDFCFB 80%,
+      #FFFFFF 100%);
 }
 
 
@@ -229,6 +229,13 @@ h6 {
   display: block;
   transition: transform var(--transition-fast);
 }
+
+.logo-svg {
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+.logo-svg:hover { opacity: 0.85; }
 
 .logo:hover {
   transform: scale(1.05);
@@ -4717,13 +4724,13 @@ tbody tr:hover {
    PART 1 - Dark Section Tokens (Concept B) & Gold Divider
    ======================================================== */
 :root {
-  --bg-dark-section: #1C1409;
+  --bg-dark-section: #2C1F0E;
   --text-dark-primary: #E8DCC8;
   --text-dark-secondary: #5A4A35;
   --border-dark: rgba(201, 150, 63, 0.15);
   --border-dark-hot: rgba(201, 150, 63, 0.45);
-  --surface-dark-card: rgba(255, 255, 255, 0.03);
-  --surface-dark-hot: rgba(201, 150, 63, 0.05);
+  --surface-dark-card: rgba(255, 255, 255, 0.06);
+  --surface-dark-hot: rgba(201, 150, 63, 0.08);
 }
 
 .gold-divider {
