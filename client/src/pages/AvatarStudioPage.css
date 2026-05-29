@@ -282,8 +282,22 @@
 }
 
 .avatar-studio__name-input:focus {
-    border-color: rgba(var(--accent-rgb), 0.45);
-    box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.1);
+    outline: none;
+    border-color: var(--gold-primary);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+}
+
+.avatar-studio__skin-group {
+    margin-bottom: 24px;
+}
+
+.avatar-studio__skin-options button {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.avatar-studio__skin-options button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
 }
 
 .avatar-studio__editor-footer {

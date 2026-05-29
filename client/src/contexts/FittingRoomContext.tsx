@@ -15,6 +15,7 @@ export interface Profile {
     thigh: number;
     belly: number;
     legLength: number;
+    skinTone?: string;
 }
 
 export type GarmentSlot = 'tops' | 'bottoms' | 'outerwear' | 'dresses';
@@ -76,6 +77,7 @@ const DEFAULT_MEASUREMENTS: Omit<Profile, 'id' | 'name'> = {
     thigh: 50,
     belly: 70,
     legLength: 95,
+    skinTone: '#F2C9AC',
 };
 
 const GUEST_AVATAR: Profile = sanitizeBodyMeasurements({
@@ -115,6 +117,7 @@ const normalizeProfile = (input: unknown, index: number): Profile | null => {
         thigh: toNumber(candidate.thigh, DEFAULT_MEASUREMENTS.thigh),
         belly: toNumber(candidate.belly, DEFAULT_MEASUREMENTS.belly),
         legLength: toNumber(candidate.legLength, DEFAULT_MEASUREMENTS.legLength),
+        skinTone: typeof candidate.skinTone === 'string' ? candidate.skinTone : DEFAULT_MEASUREMENTS.skinTone,
     });
 };
 

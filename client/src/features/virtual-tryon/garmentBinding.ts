@@ -802,6 +802,20 @@ const findAvatarBone = (boneName: string, lookup: AvatarBoneLookup): THREE.Bone 
     );
 };
 
+export const isAvatarMesh = (mesh: THREE.Mesh): boolean => {
+    const meshName = mesh.name.toLowerCase();
+    const regex = /\b(body|skin|avatar|mannequin|flesh|head|face|eye|teeth|hair|shoe|foot|hand|hands|feet)\b/i;
+
+    if (regex.test(meshName)) return true;
+
+    const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+    for (const mat of materials) {
+        const matName = mat.name ? mat.name.toLowerCase() : '';
+        if (regex.test(matName)) return true;
+    }
+    return false;
+};
+
 /**
  * Convert every mesh material to MeshStandardMaterial (PBR) so that
  * roughness / metalness / envMapIntensity are always available.
@@ -811,6 +825,10 @@ export const prepareGarmentMaterials = (garmentRoot: THREE.Object3D) => {
     garmentRoot.traverse((child) => {
         if (!(child instanceof THREE.Mesh)) {
             return;
+        }
+
+        if (isAvatarMesh(child)) {
+            child.visible = false;
         }
 
         child.castShadow = true;
@@ -931,6 +949,11 @@ export const applyGarmentColor = (garmentRoot: THREE.Object3D, color: THREE.Colo
 
     garmentRoot.traverse((child) => {
         if (!(child instanceof THREE.Mesh)) {
+            return;
+        }
+
+        // Do not color the hidden avatar/body meshes
+        if (isAvatarMesh(child)) {
             return;
         }
 

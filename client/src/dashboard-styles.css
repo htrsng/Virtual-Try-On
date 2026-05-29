@@ -4,7 +4,7 @@
 
 /* Main Container */
 .user-dashboard-page {
-    background: linear-gradient(135deg, #f7f4ef 0%, #efe7db 100%);
+    background: linear-gradient(135deg, #faf8f4 0%, #f5efe3 100%);
     min-height: 100vh;
     padding: 20px;
     font-family: 'Manrope', sans-serif;
@@ -12,11 +12,11 @@
 
 /* Header Compact */
 .dashboard-header {
-    background: linear-gradient(135deg, #1d1916 0%, #2b241d 55%, #a98a52 100%);
+    background: linear-gradient(135deg, #14141f 0%, #1e1e30 45%, #c49530 100%);
     padding: 20px;
-    border-radius: 12px;
+    border-radius: 14px;
     margin-bottom: 30px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.18);
 }
 
 .dashboard-header-content {
@@ -297,7 +297,7 @@
 
 /* Security Section */
 .dashboard-security {
-    background: linear-gradient(135deg, #f7f2ea 0%, #efe7db 100%);
+    background: linear-gradient(135deg, #faf8f2 0%, #f5efe3 100%);
 }
 
 .dashboard-security h3 {
@@ -352,7 +352,7 @@
 
 /* Support Section */
 .dashboard-support {
-    background: linear-gradient(135deg, #f7f2ea 0%, #efe7db 100%);
+    background: linear-gradient(135deg, #faf8f2 0%, #f5efe3 100%);
 }
 
 .dashboard-support h3 {
@@ -501,8 +501,8 @@
 .user-dashboard-page {
     padding: clamp(14px, 2.2vw, 24px);
     background-image:
-        radial-gradient(circle at 10% 5%, rgba(255, 255, 255, 0.9) 0%, transparent 42%),
-        radial-gradient(circle at 85% 0%, rgba(200, 168, 103, 0.15) 0%, transparent 38%);
+        radial-gradient(circle at 10% 5%, rgba(255, 255, 255, 0.95) 0%, transparent 45%),
+        radial-gradient(circle at 85% 0%, rgba(212, 169, 66, 0.10) 0%, transparent 40%);
 }
 
 .dashboard-header {

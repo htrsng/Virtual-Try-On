@@ -59,6 +59,15 @@ const ADVANCED_FIELDS: SliderField[] = [
     { key: 'legLength', label: 'Chiều dài chân', unit: 'cm' },
 ];
 
+const SKIN_TONES = [
+    { name: 'Trắng Sáng', hex: '#FCE0C5' },
+    { name: 'Sáng', hex: '#FAD6B1' },
+    { name: 'Tự nhiên', hex: '#F2C9AC' },
+    { name: 'Trung bình', hex: '#D29C7A' },
+    { name: 'Ngăm', hex: '#A8715A' },
+    { name: 'Tối', hex: '#7A4B3A' }
+];
+
 const generateAvatarId = () => `avatar-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
 const createDraftAvatar = (name: string): Profile => {
@@ -394,7 +403,7 @@ export default function AvatarStudioPage() {
                         <Suspense fallback={<StudioLoader />}>
                             <group position={[0, -1.15, 0]}>
                                 <Grid position={[0, 0, 0]} args={[10, 10]} cellColor="#d1d5db" sectionColor="#9ca3af" fadeDistance={20} />
-                                <Avatar body={draftAvatar} pose="Idle" skinColor="#F2C9AC" />
+                                <Avatar body={draftAvatar} pose="Idle" skinColor={draftAvatar.skinTone || '#F2C9AC'} />
                                 <ContactShadows position={[0, 0.01, 0]} opacity={0.3} blur={1.5} resolution={512} frames={1} />
                             </group>
                         </Suspense>
@@ -507,6 +516,29 @@ export default function AvatarStudioPage() {
                                 }}
                                 placeholder="Nhập tên avatar"
                             />
+                        </div>
+
+                        <div className="avatar-studio__skin-group">
+                            <label className="avatar-studio__name-label">Màu da</label>
+                            <div className="avatar-studio__skin-options" style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
+                                {SKIN_TONES.map(tone => (
+                                    <button
+                                        key={tone.hex}
+                                        type="button"
+                                        onClick={() => setDraftAvatar(prev => ({ ...prev, skinTone: tone.hex }))}
+                                        style={{
+                                            width: '32px',
+                                            height: '32px',
+                                            borderRadius: '50%',
+                                            backgroundColor: tone.hex,
+                                            border: (draftAvatar.skinTone || '#F2C9AC') === tone.hex ? '2px solid #000' : '2px solid transparent',
+                                            cursor: 'pointer',
+                                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                        }}
+                                        title={tone.name}
+                                    />
+                                ))}
+                            </div>
                         </div>
 
                         <BodyShapeIndicator profile={draftAvatar} onAutoFill={handleAutoFill} />

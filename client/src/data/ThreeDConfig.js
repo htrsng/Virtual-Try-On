@@ -16,9 +16,9 @@ export const MODEL_INJECTION = {
 
         // Tuning chất liệu vải chung cho mọi size
         softness: {
-            roughness: 0.8,
-            metalness: 0.05,
-            envMapIntensity: 0.5,
+            roughness: 0.95,
+            metalness: 0.0,
+            envMapIntensity: 0.2,
             skinOffset: 0.003
         },
 
@@ -117,9 +117,9 @@ export const MODEL_INJECTION = {
         ],
 
         softness: {
-            roughness: 0.84,
-            metalness: 0.03,
-            envMapIntensity: 0.42,
+            roughness: 1.0,
+            metalness: 0.0,
+            envMapIntensity: 0.1,
             skinOffset: 0.0035
         },
 
@@ -208,9 +208,9 @@ export const MODEL_INJECTION = {
         ],
 
         softness: {
-            roughness: 0.6,
-            metalness: 0.1,
-            envMapIntensity: 0.6,
+            roughness: 0.75,
+            metalness: 0.0,
+            envMapIntensity: 0.4,
             skinOffset: 0.005
         },
 
@@ -254,11 +254,8 @@ export const MODEL_INJECTION = {
         sizes: {
             S: {
                 url: "/models/vay1-S.glb",
-                autoNormalize: true,
+                autoNormalize: false,
                 followAvatarBones: true,
-                scale: 1.24,
-                // raise dress slightly to align with avatar pelvis/hips
-                translate: [0, 0.12, 0],
                 softness: {
                     morphInfluence: 0.85,
                     morphSmoothing: 0.25,
@@ -267,11 +264,8 @@ export const MODEL_INJECTION = {
             },
             M: {
                 url: "/models/vay1-M.glb",
-                autoNormalize: true,
+                autoNormalize: false,
                 followAvatarBones: true,
-                scale: 1.22,
-                // raise dress slightly for medium size
-                translate: [0, 0.10, 0],
                 softness: {
                     morphInfluence: 0.8,
                     morphSmoothing: 0.22,
@@ -280,11 +274,8 @@ export const MODEL_INJECTION = {
             },
             L: {
                 url: "/models/vay1-L.glb",
-                autoNormalize: true,
+                autoNormalize: false,
                 followAvatarBones: true,
-                scale: 1.20,
-                // raise dress slightly for large size
-                translate: [0, 0.08, 0],
                 softness: {
                     morphInfluence: 0.75,
                     morphSmoothing: 0.2,
@@ -304,9 +295,9 @@ export const MODEL_INJECTION = {
         ],
 
         softness: {
-            roughness: 0.6,
-            metalness: 0.1,
-            envMapIntensity: 0.6,
+            roughness: 0.75,
+            metalness: 0.0,
+            envMapIntensity: 0.4,
             skinOffset: 0.005
         },
 
@@ -350,11 +341,8 @@ export const MODEL_INJECTION = {
         sizes: {
             S: {
                 url: "/models/vay2-S.glb",
-                autoNormalize: true,
+                autoNormalize: false,
                 followAvatarBones: true,
-                scale: 1.20,
-                // raise dress slightly for small size
-                translate: [0, 0.08, 0],
                 softness: {
                     morphInfluence: 0.85,
                     morphSmoothing: 0.25,
@@ -363,9 +351,8 @@ export const MODEL_INJECTION = {
             },
             M: {
                 url: "/models/vay2-M.glb",
-                autoNormalize: true,
+                autoNormalize: false,
                 followAvatarBones: true,
-                scale: 1.20,
                 softness: {
                     morphInfluence: 0.8,
                     morphSmoothing: 0.22,
@@ -374,15 +361,117 @@ export const MODEL_INJECTION = {
             },
             L: {
                 url: "/models/vay2-L.glb",
-                autoNormalize: true,
+                autoNormalize: false,
                 followAvatarBones: true,
-                scale: 1.18,
                 softness: {
                     morphInfluence: 0.75,
                     morphSmoothing: 0.2,
                     maxMorphInfluence: 0.85
                 }
             }
+        }
+    },
+
+    // Sản phẩm ID 4 — Áo Croptop
+    "4": {
+        enable: true,
+        colors: [
+            { name: 'Trắng', hex: '#FFFFFF', fabric: { preset: 'cotton-soft' } },
+            { name: 'Đen', hex: '#1A1A1A', fabric: { preset: 'cotton-heavy' } }
+        ],
+        softness: {
+            roughness: 0.95,
+            metalness: 0.0,
+            envMapIntensity: 0.2,
+            skinOffset: 0.003
+        },
+        fabric: {
+            preset: 'cotton-soft'
+        },
+        measurementProfile: {
+            garmentType: 'top',
+            sizeSpecs: {
+                S: { chest: 84, waist: 64, garmentLength: 35, fitIntent: 'tight' },
+                M: { chest: 88, waist: 68, garmentLength: 37, fitIntent: 'tight' },
+                L: { chest: 92, waist: 72, garmentLength: 39, fitIntent: 'tight' }
+            }
+        },
+        sizes: {
+            S: { url: "/models/croptopS.glb", autoNormalize: false, followAvatarBones: true },
+            M: { url: "/models/croptopM.glb", autoNormalize: false, followAvatarBones: true },
+            L: { url: "/models/croptopL.glb", autoNormalize: false, followAvatarBones: true }
+        }
+    },
+
+    // Sản phẩm ID 18 — Váy Hoa
+    "18": {
+        enable: true,
+        colors: [
+            { name: 'Hoa Nhí Trắng', hex: '#fdfbf7', fabric: { preset: 'silk' } },
+            { name: 'Hoa Nhí Đỏ', hex: '#a62e38', fabric: { preset: 'silk' } }
+        ],
+        softness: { roughness: 0.75, metalness: 0.0, envMapIntensity: 0.4, skinOffset: 0.004 },
+        fabric: { preset: 'silk' },
+        measurementProfile: {
+            garmentType: 'dress',
+            sizeSpecs: {
+                S: { chest: 84, waist: 66, hips: 90, garmentLength: 105, fitIntent: 'regular' },
+                M: { chest: 88, waist: 70, hips: 94, garmentLength: 107, fitIntent: 'regular' },
+                L: { chest: 92, waist: 74, hips: 98, garmentLength: 109, fitIntent: 'regular' }
+            }
+        },
+        sizes: {
+            S: { url: "/models/vayhoa - S.glb", autoNormalize: false, followAvatarBones: true },
+            M: { url: "/models/vayhoa - M.glb", autoNormalize: false, followAvatarBones: true },
+            L: { url: "/models/vayhoa - L.glb", autoNormalize: false, followAvatarBones: true }
+        }
+    },
+
+    // Sản phẩm ID 12 — Chân Váy
+    "12": {
+        enable: true,
+        colors: [
+            { name: 'Đen', hex: '#111111', fabric: { preset: 'cotton-heavy' } },
+            { name: 'Beige', hex: '#d4c3a3', fabric: { preset: 'cotton-soft' } }
+        ],
+        softness: { roughness: 0.95, metalness: 0.0, envMapIntensity: 0.2, skinOffset: 0.003 },
+        fabric: { preset: 'cotton' },
+        measurementProfile: {
+            garmentType: 'bottom',
+            sizeSpecs: {
+                S: { waist: 64, hips: 90, garmentLength: 42, fitIntent: 'regular' },
+                M: { waist: 68, hips: 94, garmentLength: 43, fitIntent: 'regular' },
+                L: { waist: 72, hips: 98, garmentLength: 44, fitIntent: 'regular' }
+            }
+        },
+        sizes: {
+            S: { url: "/models/chanvayS.glb", autoNormalize: false, followAvatarBones: true },
+            M: { url: "/models/chanvayM.glb", autoNormalize: false, followAvatarBones: true },
+            L: { url: "/models/chanvayL.glb", autoNormalize: false, followAvatarBones: true }
+        }
+    },
+
+    // Sản phẩm ID 6 — Quần Suông
+    "6": {
+        enable: true,
+        colors: [
+            { name: 'Xanh Đen', hex: '#232f3e', fabric: { preset: 'denim-raw' } },
+            { name: 'Xanh Xám', hex: '#5b6b7a', fabric: { preset: 'denim-stone-washed' } }
+        ],
+        softness: { roughness: 1.0, metalness: 0.0, envMapIntensity: 0.1, skinOffset: 0.004 },
+        fabric: { preset: 'denim-raw' },
+        measurementProfile: {
+            garmentType: 'bottom',
+            sizeSpecs: {
+                S: { waist: 66, hips: 94, thigh: 60, legOpening: 58, garmentLength: 98, fitIntent: 'loose' },
+                M: { waist: 70, hips: 98, thigh: 64, legOpening: 60, garmentLength: 100, fitIntent: 'loose' },
+                L: { waist: 74, hips: 102, thigh: 68, legOpening: 62, garmentLength: 102, fitIntent: 'loose' }
+            }
+        },
+        sizes: {
+            S: { url: "/models/QuanSuongS.glb", autoNormalize: false, followAvatarBones: true },
+            M: { url: "/models/QuanSuongM.glb", autoNormalize: false, followAvatarBones: true },
+            L: { url: "/models/QuanSuongL.glb", autoNormalize: false, followAvatarBones: true }
         }
     }
 };

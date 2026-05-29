@@ -83,8 +83,8 @@ export const fallbackSuggestions = [
     },
     {
         id: 4,
-        category: "Áo Sơ Mi",
-        name: 'Áo Sơ Mi Công Sở',
+        category: "Áo Croptop",
+        name: 'Áo Croptop Kiểu (Có 3D)',
         price: 320000,
         img: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=500&h=600&fit=crop',
         discount: 20,
@@ -101,10 +101,10 @@ export const fallbackSuggestions = [
     },
     {
         id: 6,
-        category: "Phụ Kiện",
-        name: 'Túi Tote Canvas',
+        category: "Quần Jeans",
+        name: 'Quần Suông Ống Rộng (Có 3D)',
         price: 180000,
-        img: 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=500&h=600&fit=crop',
+        img: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=500&h=600&fit=crop',
         discount: 15,
         sold: 1567
     },
@@ -147,10 +147,10 @@ export const fallbackSuggestions = [
     },
     {
         id: 12,
-        category: "Hoodie",
-        name: 'Hoodie Oversize',
+        category: "Chân Váy",
+        name: 'Chân Váy Xếp Ly (Có 3D)',
         price: 520000,
-        img: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=500&h=600&fit=crop',
+        img: 'https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=500&h=600&fit=crop',
         discount: 32,
         sold: 1123
     },
@@ -193,10 +193,10 @@ export const fallbackSuggestions = [
     },
     {
         id: 18,
-        category: "Quần Short",
-        name: 'Quần Short Jean Rách',
+        category: "Váy & Đầm",
+        name: 'Váy Hoa Nhí Vintage (Có 3D)',
         price: 320000,
-        img: 'https://images.unsplash.com/photo-1591195851383-2b18e6a8c7b2?w=500&h=600&fit=crop',
+        img: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500&h=600&fit=crop',
         discount: 22,
         sold: 876
     },

@@ -1,6 +1,6 @@
 import { Suspense, useState, useRef, useMemo, useEffect, useCallback, type ReactNode } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
-import { OrbitControls, Environment, ContactShadows, Html, useProgress, Grid } from '@react-three/drei';
+import { OrbitControls, Environment, ContactShadows, Html, useProgress, Grid, MeshReflectorMaterial } from '@react-three/drei';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Avatar } from '../../three/controls/avatar/Avatar';
 import { useFittingRoom, type GarmentSlot, type Profile, type SilentWearItem } from '../../contexts/FittingRoomContext';
@@ -12,6 +12,7 @@ import SizeRecommendation, { recommendSizes } from './components/SizeRecommendat
 import { ColorSelector } from './components/ProductOptions';
 import VirtualPersonalClosetDrawer, { type ClosetItem } from './components/VirtualPersonalClosetDrawer';
 import OutfitPanel from './components/OutfitPanel';
+import TryOnToolbar from './components/TryOnToolbar';
 import AIOutfitChat from '../../components/AIOutfitChat';
 import './VirtualTryOn.css';
 import * as THREE from 'three';
@@ -271,6 +272,7 @@ type SizeCompareViewportProps = {
     fitScore?: number;
     fitZones?: RecommendationZone[];
     heatmapEnabled: boolean;
+    pose?: string;
 };
 
 function SizeCompareViewport({
@@ -286,6 +288,7 @@ function SizeCompareViewport({
     fitScore,
     fitZones,
     heatmapEnabled,
+    pose,
 }: SizeCompareViewportProps) {
     const [avatarScene, setAvatarScene] = useState<THREE.Group | null>(null);
     const [isSizeSwitching, setIsSizeSwitching] = useState(false);
@@ -359,14 +362,26 @@ function SizeCompareViewport({
             </header>
 
             <div className="vto-size-room__screen-controls">
-                <label className="vto-size-room__field">
-                    <span>Size</span>
-                    <select value={selectedSize} onChange={(event) => onSelectSize(event.target.value)}>
+                <div className="vto-size-room__field vto-size-room__field--pills">
+                    <span style={{ marginBottom: '6px', display: 'inline-block' }}>Kích cỡ:</span>
+                    <div className="vto-premium-pill-group">
                         {availableSizes.map((size) => (
-                            <option key={`${panelLabel}-${size}`} value={size}>{size}</option>
+                            <button
+                                key={`${panelLabel}-pill-${size}`}
+                                type="button"
+                                className={`vto-premium-pill ${size === selectedSize ? 'active' : ''}`}
+                                onClick={() => onSelectSize(size)}
+                            >
+                                {size === selectedSize && (
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                )}
+                                {size}
+                            </button>
                         ))}
-                    </select>
-                </label>
+                    </div>
+                </div>
 
                 <div className="vto-size-room__quick-switch" role="group" aria-label={`Chuyển size nhanh - ${panelLabel}`}>
                     {quickSizeItems.map((size) => (
@@ -405,8 +420,27 @@ function SizeCompareViewport({
                     <Suspense fallback={<Loader />}>
                         <Environment preset="city" />
                         <group position={[0, -1.08, 0]}>
+                            {/* Grid và Sàn phản chiếu */}
                             <Grid position={[0, 0, 0]} args={[10, 10]} cellColor="#d1d5db" sectionColor="#9ca3af" fadeDistance={20} />
-                            <Avatar body={bodyData} pose={'Idle'} skinColor="#F2C9AC" onSceneReady={setAvatarScene} />
+                            
+                            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]}>
+                                <planeGeometry args={[10, 10]} />
+                                <MeshReflectorMaterial
+                                    blur={[300, 100]}
+                                    resolution={1024}
+                                    mixBlur={1}
+                                    mixStrength={40}
+                                    roughness={1}
+                                    depthScale={1.2}
+                                    minDepthThreshold={0.4}
+                                    maxDepthThreshold={1.4}
+                                    color="#e2e8f0"
+                                    metalness={0.5}
+                                    mirror={0.5}
+                                />
+                            </mesh>
+
+                            <Avatar body={bodyData} pose={pose || 'Idle'} skinColor="#F2C9AC" onSceneReady={setAvatarScene} />
                             <GarmentModel
                                 config={modelConfig}
                                 selectedSize={selectedSize}
@@ -416,7 +450,7 @@ function SizeCompareViewport({
                                 heatmapEnabled={heatmapEnabled}
                                 heatmapZones={fitZones}
                             />
-                            <ContactShadows position={[0, 0.01, 0]} opacity={0.3} blur={1.5} resolution={512} frames={1} />
+                            <ContactShadows position={[0, 0.01, 0]} opacity={0.6} scale={5} blur={2.5} resolution={1024} frames={1} />
                         </group>
                     </Suspense>
 
@@ -459,6 +493,18 @@ const FIT_LABELS: Record<RecommendationFitLevel, { text: string; color: string }
 };
 
 const formatDeltaCm = (value: number) => `${value > 0 ? '+' : ''}${value} cm`;
+
+const getZoneIcon = (label: string) => {
+    const l = label.toLowerCase();
+    if (l.includes('ngực') || l.includes('chest') || l.includes('bust')) return '🧥';
+    if (l.includes('eo') || l.includes('waist')) return '📏';
+    if (l.includes('hông') || l.includes('mông') || l.includes('hip')) return '👖';
+    if (l.includes('vai') || l.includes('shoulder')) return '📐';
+    if (l.includes('dài') || l.includes('length')) return '↕️';
+    if (l.includes('tay') || l.includes('sleeve')) return '💪';
+    if (l.includes('đùi') || l.includes('thigh')) return '🦵';
+    return '📏';
+};
 
 /* ─── Category layer helpers ─── */
 const CATEGORY_LAYER_ORDER: Record<string, number> = {
@@ -652,14 +698,18 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
     const [cameraPos, setCameraPos] = useState<[number, number, number]>([0, 0.7, 4.5]);
     const [cameraTarget, setCameraTarget] = useState<[number, number, number]>([0, 0.4, 0]);
     const [savedOutfits, setSavedOutfits] = useState<SavedOutfit[]>([]);
-    const [isWishlisted, setIsWishlisted] = useState(false);
+    // const [isWishlisted, setIsWishlisted] = useState(false);
     const [selectedSidebarProduct, setSelectedSidebarProduct] = useState<TryOnProduct | null>(null);
     const [productSpecCache, setProductSpecCache] = useState<Record<string, TryOnProduct>>({});
     const [isTryOnGuideOpen, setIsTryOnGuideOpen] = useState(false);
     const [isSizeCompareRoomOpen, setIsSizeCompareRoomOpen] = useState(false);
+    const [comparePose, setComparePose] = useState<string>('Idle');
     const [sizeComparePair, setSizeComparePair] = useState({ left: '', right: '' });
-    const [hasSidebarScrollFade, setHasSidebarScrollFade] = useState(false);
+    // const [hasSidebarScrollFade, setHasSidebarScrollFade] = useState(false);
     const [isClosetOpen, setIsClosetOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState<'size'|'fit'|'tools'>('size');
+    const [showMeasurements, setShowMeasurements] = useState(false);
+    const [lightingMode, setLightingMode] = useState<'studio'|'warm'|'cool'|'outdoor'>('studio');
     const [isWebglContextLost, setIsWebglContextLost] = useState(false);
     const sidebarScrollRef = useRef<HTMLDivElement | null>(null);
     const [canvasEventSource, setCanvasEventSource] = useState<HTMLElement | undefined>(undefined);
@@ -839,19 +889,19 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
     const activeSelectedSize = (itemSizes[activeItemKey] || '').trim();
     const activeSelectedColor = (itemColors[activeItemKey] || '').trim();
 
-    const activeFitScopeLabel = useMemo(() => resolveFitScopeLabel(activeGarmentType), [activeGarmentType]);
+    // const activeFitScopeLabel = useMemo(() => resolveFitScopeLabel(activeGarmentType), [activeGarmentType]);
     const isActiveItemReadyToWear = activeSelectedSize.length > 0 && activeSelectedColor.length > 0;
     const activeSelectedColorConfig = useMemo(
         () => resolveColorConfig(activeModel3D, activeSelectedColor),
         [activeModel3D, activeSelectedColor],
     );
 
-    const activeFabricKind = useMemo(() => {
-        const selectedConfig = activeSelectedSize ? activeModel3D?.sizes?.[activeSelectedSize] : undefined;
-        const colorFabric = activeSelectedColorConfig?.fabric;
-        const resolved = colorFabric?.preset || colorFabric?.kind || selectedConfig?.fabric?.preset || selectedConfig?.fabric?.kind || activeModel3D?.fabric?.preset || activeModel3D?.fabric?.kind;
-        return resolved || 'cotton';
-    }, [activeModel3D, activeSelectedColorConfig, activeSelectedSize]);
+    // const activeFabricKind = useMemo(() => {
+    //     const selectedConfig = activeSelectedSize ? activeModel3D?.sizes?.[activeSelectedSize] : undefined;
+    //     const colorFabric = activeSelectedColorConfig?.fabric;
+    //     const resolved = colorFabric?.preset || colorFabric?.kind || selectedConfig?.fabric?.preset || selectedConfig?.fabric?.kind || activeModel3D?.fabric?.preset || activeModel3D?.fabric?.kind;
+    //     return resolved || 'cotton';
+    // }, [activeModel3D, activeSelectedColorConfig, activeSelectedSize]);
 
     const hasConfigurable3DModel = Boolean(activeModel3D?.sizes && Object.keys(activeModel3D.sizes).length > 0);
     const comparePreviewColor = activeSelectedColor || '#f5f5f5';
@@ -950,71 +1000,6 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
 
     const canOpenSizeCompareRoom = hasConfigurable3DModel && comparableSizes.length >= 2;
 
-    const updateSidebarScrollFade = useCallback(() => {
-        const scrollEl = sidebarScrollRef.current;
-        if (!scrollEl) {
-            return;
-        }
-
-        const computedStyle = window.getComputedStyle(scrollEl);
-        const bottomPadding = Number.parseFloat(computedStyle.paddingBottom) || 0;
-        const remaining = scrollEl.scrollHeight - scrollEl.clientHeight - scrollEl.scrollTop;
-        const shouldShowFade = remaining > bottomPadding + 2;
-        setHasSidebarScrollFade((prev) => (prev === shouldShowFade ? prev : shouldShowFade));
-    }, []);
-
-    useEffect(() => {
-        const scrollEl = sidebarScrollRef.current;
-        if (!scrollEl) {
-            return;
-        }
-
-        let frameId: number | null = null;
-        const queueUpdate = () => {
-            if (frameId !== null) {
-                return;
-            }
-
-            frameId = window.requestAnimationFrame(() => {
-                frameId = null;
-                updateSidebarScrollFade();
-            });
-        };
-
-        const onScroll = () => queueUpdate();
-        const onWindowResize = () => queueUpdate();
-        const onTransitionEnd = (event: Event) => {
-            const target = event.target;
-            if (!(target instanceof HTMLElement)) {
-                return;
-            }
-
-            if (target.classList.contains('vto-accordion__body')) {
-                queueUpdate();
-            }
-        };
-
-        scrollEl.addEventListener('scroll', onScroll, { passive: true });
-        scrollEl.addEventListener('transitionend', onTransitionEnd, true);
-        window.addEventListener('resize', onWindowResize);
-
-        const resizeObserver = typeof ResizeObserver !== 'undefined'
-            ? new ResizeObserver(() => queueUpdate())
-            : null;
-        resizeObserver?.observe(scrollEl);
-
-        queueUpdate();
-
-        return () => {
-            scrollEl.removeEventListener('scroll', onScroll);
-            scrollEl.removeEventListener('transitionend', onTransitionEnd, true);
-            window.removeEventListener('resize', onWindowResize);
-            resizeObserver?.disconnect();
-            if (frameId !== null) {
-                window.cancelAnimationFrame(frameId);
-            }
-        };
-    }, [updateSidebarScrollFade]);
 
     useEffect(() => {
         const key = String(activeItem.id);
@@ -1299,9 +1284,13 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
             return;
         }
 
+        if (currentBodyData) {
+            setComparePose('Idle');
+        }
+
         setIsTryOnGuideOpen(false);
         setIsSizeCompareRoomOpen(true);
-    }, [canOpenSizeCompareRoom, showToast]);
+    }, [canOpenSizeCompareRoom, showToast, currentBodyData]);
 
     const handleCloseSizeCompareRoom = useCallback(() => {
         setIsSizeCompareRoomOpen(false);
@@ -1432,7 +1421,6 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
             if (!response.ok) {
                 throw new Error('Unable to save outfit');
             }
-
             await refreshSavedOutfits();
             showToast(`Đã lưu outfit: ${name}`, 'success');
         } catch (err) {
@@ -1442,66 +1430,93 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
     }, [isActiveItemReadyToWear, layeredGarments, refreshSavedOutfits, showToast]);
 
     return (
-        <div className="vto-container">
-            {/* ─── Top Navigation ─── */}
-            <header className="vto-nav">
-                <button className="vto-nav__back" onClick={handleBackToHome}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="15 18 9 12 15 6" /></svg>
-                    <span>Quay lại</span>
-                </button>
-                <div className="vto-nav__avatar-picker">
-                    <span className="vto-nav__avatar-label">Avatar</span>
-                    <select
-                        className="vto-nav__avatar-select"
-                        value={currentAvatarId || ''}
-                        onChange={(event) => setCurrentAvatarId(event.target.value)}
-                        disabled={avatars.length === 0}
-                    >
-                        {avatars.length === 0 && (
-                            <option value="">Khách mặc định</option>
-                        )}
-                        {avatars.map((avatar) => (
-                            <option key={avatar.id} value={avatar.id}>
-                                {avatar.name}
-                            </option>
-                        ))}
-                    </select>
-                    <button
-                        type="button"
-                        className="vto-nav__avatar-add"
-                        onClick={handleOpenAvatarStudio}
-                        aria-label="Mở Avatar Studio"
-                    >
-                        +
-                    </button>
-                </div>
-                {isMultiProduct && (
-                    <span className="vto-nav__outfit-badge">
-                        👗 Outfit {items.length} sản phẩm
-                    </span>
-                )}
+        <div className="tryon-layout">
+            {/* ─── Top Navigation (Topbar) ─── */}
+            <div className="tryon-topbar" style={{
+              background: 'rgba(255,255,255,0.97)',
+              borderBottom: '1px solid rgba(201,150,63,0.15)',
+              backdropFilter: 'blur(12px)',
+              display: 'flex',
+              alignItems: 'center',
+              padding: '0 16px',
+              gap: '10px',
+              position: 'sticky', top: 0, zIndex: 100
+            }}>
                 <button
-                    type="button"
-                    className={`vto-nav__help-btn ${isTryOnGuideOpen ? 'active' : ''}`}
-                    onClick={() => setIsTryOnGuideOpen((prev) => !prev)}
-                    aria-label="Mở hướng dẫn phòng thử đồ"
-                    aria-expanded={isTryOnGuideOpen}
+                  onClick={handleBackToHome}
+                  style={{
+                    background: 'transparent',
+                    border: '1px solid rgba(0,0,0,0.1)',
+                    borderRadius: '20px', padding: '5px 14px',
+                    fontSize: '11px', color: 'rgba(0,0,0,0.6)',
+                    cursor: 'pointer'
+                  }}
                 >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <circle cx="12" cy="12" r="10" />
-                        <path d="M9.1 9a3 3 0 1 1 5.8 1c-.3.8-.9 1.3-1.6 1.7-.7.4-1.3.9-1.3 1.8" />
-                        <circle cx="12" cy="17" r="1" fill="currentColor" stroke="none" />
-                    </svg>
-                    <span>Hướng dẫn</span>
+                    ← Quay lại
                 </button>
-                <div className="vto-nav__spacer" />
-                <span className="vto-nav__room-label">✦ Virtual Fitting Studio</span>
-                <div className="vto-nav__spacer" />
+                <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <span style={{
+                      fontSize: '10px', letterSpacing: '0.14em',
+                      color: 'rgba(201,150,63,0.8)', marginRight: '10px', fontWeight: 600
+                    }}>
+                        ✦ VIRTUAL FITTING STUDIO
+                    </span>
+                    <div style={{
+                      background: 'rgba(201,150,63,0.08)',
+                      border: '1px solid rgba(201,150,63,0.25)',
+                      borderRadius: '20px', padding: '4px 14px',
+                      fontSize: '11px', color: '#2C1F0E', fontWeight: 500,
+                      display: 'flex', alignItems: 'center', gap: '6px'
+                    }}>
+                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#C9963F' }} />
+                        {activeItem.name} · Size {activeSelectedSize || '-'}
+                    </div>
+                </div>
+                <div style={{ display: 'flex', gap: '5px' }}>
+                    <button style={{
+                      background: 'rgba(201,150,63,0.12)',
+                      border: '1px solid rgba(201,150,63,0.3)',
+                      borderRadius: '20px', padding: '5px 12px',
+                      fontSize: '10px', color: '#C9963F', cursor: 'pointer', fontWeight: 600
+                    }}>Mặc định</button>
+                    <button style={{
+                      background: 'rgba(0,0,0,0.03)',
+                      border: '1px solid rgba(0,0,0,0.08)',
+                      borderRadius: '20px', padding: '5px 12px',
+                      fontSize: '10px', color: 'rgba(0,0,0,0.6)', cursor: 'pointer'
+                    }} onClick={() => toggleHeatmap()}>Nhiệt độ</button>
+                    <button style={{
+                      background: 'rgba(0,0,0,0.03)',
+                      border: '1px solid rgba(0,0,0,0.08)',
+                      borderRadius: '20px', padding: '5px 12px',
+                      fontSize: '10px', color: 'rgba(0,0,0,0.6)', cursor: 'pointer'
+                    }} onClick={() => setIsTryOnGuideOpen(true)}>Hướng dẫn</button>
+                </div>
+            </div>
 
-            </header>
+            {/* ─── Vertical Toolbar (Left) ─── */}
+            <TryOnToolbar
+              showMeasurements={showMeasurements}
+              onOpenAvatar={handleOpenAvatarStudio}
+              onToggleCloset={() => setIsClosetOpen(true)}
+              onToggleMeasurements={() => setShowMeasurements(s => !s)}
+              onTakeScreenshot={handleScreenshot}
+              onOpenSizeCompare={handleOpenSizeCompareRoom}
+              onReset={() => {
+                setCameraView('front');
+                setCameraPos([0, 0.7, 4.5]);
+                setCameraTarget([0, 0.4, 0]);
+                setIsRotating(false);
+              }}
+              onChangeBackground={() => {}}
+              onChangeLighting={() => {
+                 const modes: ('studio'|'warm'|'cool'|'outdoor')[] = ['studio', 'warm', 'cool', 'outdoor'];
+                 const nextIdx = (modes.indexOf(lightingMode) + 1) % modes.length;
+                 setLightingMode(modes[nextIdx]);
+              }}
+            />
 
-            {/* ─── Workspace ─── */}
-            <div className="vto-workspace">
+            {/* ─── Workspace Canvas ─── */}
                 {/* ─── Virtual Personal Closet Drawer (Left Sidebar) ─── */}
                 <VirtualPersonalClosetDrawer
                     viewedProduct={activeItem}
@@ -1514,7 +1529,7 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                 />
 
                 {/* 3D Preview – renders ALL garments layered by category */}
-                <div ref={(node) => setCanvasEventSource(node || undefined)} className="vto-canvas-area">
+                <div ref={(node) => setCanvasEventSource(node || undefined)} className={`canvas-studio-wrap light-${lightingMode}`}>
                     <Canvas
                         ref={canvasRef}
                         eventSource={canvasEventSource}
@@ -1725,192 +1740,125 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                     />
                 </div>
 
-                {/* ─── Sidebar ─── */}
-                <aside className={`vto-sidebar ${hasSidebarScrollFade ? 'has-scroll-fade' : ''}`} data-testid="product-panel">
-                    <div className="vto-sidebar__scroll" ref={sidebarScrollRef}>
-                        {/* Multi-item list (outfit mode) */}
-                        {isMultiProduct && (
-                            <div className="vto-sidebar-card">
-                                <label className="vto-section-label">Sản phẩm trong outfit</label>
-                                <div className="vto-outfit-items__list">
-                                    {items.map((it, idx) => (
+                {/* ─── Sidebar (Right Panel) ─── */}
+                <aside className="vto-aside panel-scroll" style={{ background: '#FFFFFF', borderLeft: '1px solid rgba(201,150,63,0.15)', display: 'flex', flexDirection: 'column' }}>
+                    {/* Header cố định */}
+                    <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
+                        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                            <img src={rightSidebarProduct.img || rightSidebarProduct.image} alt={rightSidebarProduct.name} style={{ width: '60px', height: '60px', borderRadius: '8px', objectFit: 'cover', border: '1px solid rgba(201,150,63,0.3)' }} />
+                            <div>
+                                <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#2C1F0E', margin: '0 0 4px 0' }}>{rightSidebarProduct.name}</h2>
+                                <p style={{ fontSize: '14px', color: '#C9963F', fontWeight: 500, margin: 0 }}>{Number(rightSidebarProduct.price)?.toLocaleString()} đ</p>
+                            </div>
+                        </div>
+                        {/* Tabs */}
+                        <div style={{ display: 'flex', gap: '20px', marginTop: '20px', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
+                            {(['size', 'fit', 'tools'] as const).map(t => (
+                                <button
+                                  key={t}
+                                  onClick={() => setActiveTab(t)}
+                                  style={{
+                                      background: 'none', border: 'none',
+                                      padding: '8px 0', fontSize: '12px',
+                                      fontWeight: 600, cursor: 'pointer',
+                                      color: activeTab === t ? '#C9963F' : 'rgba(0,0,0,0.4)',
+                                      borderBottom: activeTab === t ? '2px solid #C9963F' : '2px solid transparent'
+                                  }}
+                                >
+                                    {t === 'size' ? 'MÀU & SIZE' : t === 'fit' ? 'ĐỘ VỪA VẶN' : 'CÔNG CỤ'}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Nội dung Tab cuộn được */}
+                    <div className="panel-scroll" style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
+                        {activeTab === 'size' && (
+                            <div>
+                                <h4 style={{ fontSize: '12px', color: 'rgba(0,0,0,0.5)', marginBottom: '12px', textTransform: 'uppercase' }}>Màu sắc</h4>
+                                <ColorSelector
+                                    colors={colorOptions}
+                                    selectedColor={itemColors[activeItemKey] || ''}
+                                    onSelectColor={handleItemColorChange}
+                                />
+                                <h4 style={{ fontSize: '12px', color: 'rgba(0,0,0,0.5)', marginTop: '24px', marginBottom: '12px', textTransform: 'uppercase' }}>Kích cỡ</h4>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+                                    {availableSizes.map(sz => (
                                         <button
-                                            key={String(it.id)}
-                                            className={`vto-outfit-item ${idx === activeItemIdx ? 'active' : ''}`}
-                                            onClick={() => setActiveItemIdx(idx)}
+                                            key={sz}
+                                            onClick={() => handleItemSizeChange(sz)}
+                                            style={{
+                                                padding: '10px',
+                                                borderRadius: '6px',
+                                                background: selectedSize === sz ? 'rgba(201,150,63,0.1)' : '#F9F9F9',
+                                                border: selectedSize === sz ? '1px solid #C9963F' : '1px solid rgba(0,0,0,0.08)',
+                                                color: selectedSize === sz ? '#C9963F' : '#2C1F0E',
+                                                cursor: 'pointer',
+                                                fontWeight: 500
+                                            }}
                                         >
-                                            <span className="vto-outfit-item__active-dot">
-                                                <svg width="10" height="10" viewBox="0 0 24 24" fill="#fff" stroke="none"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" /></svg>
-                                            </span>
-                                            <img
-                                                className="vto-outfit-item__img"
-                                                src={it.img || it.image || ''}
-                                                alt={it.name}
-                                            />
-                                            <div className="vto-outfit-item__info">
-                                                <span className="vto-outfit-item__name">{it.name}</span>
-                                                {it.category && (
-                                                    <span className="vto-outfit-item__cat">{it.category}</span>
-                                                )}
-                                            </div>
-                                            {resolveModel3D(it)?.enable && (
-                                                <span className="vto-outfit-item__3d">3D</span>
-                                            )}
+                                            {sz}
                                         </button>
                                     ))}
                                 </div>
                             </div>
                         )}
 
-                        {/* Active product info */}
-                        <div className="vto-product-card">
-                            <div className="vto-product-card__image">
-                                <img src={rightSidebarProduct.img || rightSidebarProduct.image} alt={rightSidebarProduct.name} />
+                        {activeTab === 'fit' && (
+                            <div>
+                                <SizeRecommendation
+                                    profile={currentBodyData}
+                                    availableSizes={availableSizes}
+                                    selectedSize={itemSizes[activeItemKey] || null}
+                                    onSelectSize={handleItemSizeChange}
+                                    garmentSizeSpecs={activeGarmentSizeSpecs}
+                                    garmentType={activeGarmentType}
+                                />
+                                <button
+                                    onClick={handleOpenSizeCompareRoom}
+                                    disabled={!canOpenSizeCompareRoom}
+                                    style={{
+                                        width: '100%', padding: '12px', marginTop: '16px',
+                                        background: '#F9F9F9', border: '1px solid rgba(0,0,0,0.08)',
+                                        color: '#2C1F0E', borderRadius: '6px', cursor: 'pointer', fontWeight: 500
+                                    }}
+                                >
+                                    So sánh 2 size
+                                </button>
                             </div>
-                            <div className="vto-product-card__info">
-                                <span className="vto-badge">
-                                    {isMultiProduct ? `Sản phẩm ${activeItemIdx + 1}/${items.length}` : 'Phòng thử đồ'}
-                                </span>
-                                <h2 className="vto-product-card__name">{rightSidebarProduct.name}</h2>
-                                <p className="vto-product-card__price">{Number(rightSidebarProduct.price)?.toLocaleString()} đ</p>
-                            </div>
-                        </div>
-
-                        {/* Color — Accordion */}
-                        <Accordion
-                            title="Màu sắc"
-                            icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10" /><path d="M12 2a7 7 0 0 0 0 14 1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a5 5 0 0 0 5-5C20 4.58 16.42 2 12 2z" /></svg>}
-                            defaultOpen={true}
-                            onLayoutChange={updateSidebarScrollFade}
-                        >
-                            <ColorSelector
-                                colors={colorOptions}
-                                selectedColor={itemColors[activeItemKey] || ''}
-                                onSelectColor={handleItemColorChange}
-                            />
-                        </Accordion>
-
-                        {/* Size Recommendation — Accordion */}
-                        <Accordion
-                            title="Kích cỡ & AI gợi ý"
-                            icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>}
-                            defaultOpen={true}
-                            onLayoutChange={updateSidebarScrollFade}
-                        >
-                            <SizeRecommendation
-                                profile={currentBodyData}
-                                availableSizes={availableSizes}
-                                selectedSize={itemSizes[activeItemKey] || null}
-                                onSelectSize={handleItemSizeChange}
-                                garmentSizeSpecs={activeGarmentSizeSpecs}
-                                garmentType={activeGarmentType}
-                            />
-
-                            <p className="vto-option__note">
-                                AI đang chấm theo vùng: {activeFitScopeLabel}. Vải mô phỏng: {activeFabricKind}.
-                            </p>
-                        </Accordion>
-
-                        {!isActiveItemReadyToWear && (
-                            <p className="vto-option__note">
-                                Chọn cả màu sắc và kích cỡ để hiện trang phục lên avatar.
-                            </p>
                         )}
 
-                        {/* Quick actions — Accordion */}
-                        <Accordion
-                            title="Công cụ nhanh"
-                            icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /></svg>}
-                            onLayoutChange={updateSidebarScrollFade}
-                        >
-                            <div className="vto-actions">
-                                <button className="vto-action-btn" onClick={handleScreenshot}>
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
-                                    <span>Chụp ảnh</span>
+                        {activeTab === 'tools' && (
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                <button className="tool-btn-item" onClick={handleScreenshot} style={{ padding: '16px', background: '#F9F9F9', border: '1px solid rgba(0,0,0,0.08)', borderRadius: '8px', color: '#2C1F0E', cursor: 'pointer', fontWeight: 500 }}>
+                                    📸 Chụp ảnh
                                 </button>
-                                <button className="vto-action-btn" onClick={() => handleSaveOutfit('Outfit nhanh')}>
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /></svg>
-                                    <span>Lưu outfit</span>
+                                <button className="tool-btn-item" onClick={() => handleSaveOutfit('Outfit')} style={{ padding: '16px', background: '#F9F9F9', border: '1px solid rgba(0,0,0,0.08)', borderRadius: '8px', color: '#2C1F0E', cursor: 'pointer', fontWeight: 500 }}>
+                                    💾 Lưu Outfit
                                 </button>
-                                <button className={`vto-action-btn ${isRotating ? 'active' : ''}`} onClick={() => setIsRotating(r => !r)}>
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                                        <polyline points="23 4 23 10 17 10" />
-                                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-                                    </svg>
-                                    <span>{isRotating ? 'Dừng xoay' : 'Tự xoay'}</span>
+                                <button className="tool-btn-item" onClick={() => setIsRotating(r => !r)} style={{ padding: '16px', background: isRotating ? 'rgba(201,150,63,0.1)' : '#F9F9F9', border: isRotating ? '1px solid #C9963F' : '1px solid rgba(0,0,0,0.08)', borderRadius: '8px', color: isRotating ? '#C9963F' : '#2C1F0E', cursor: 'pointer', fontWeight: 500 }}>
+                                    🔄 Xoay 360
                                 </button>
                             </div>
-
-                            <button
-                                type="button"
-                                className="vto-size-rec__compare-toggle vto-size-room__open-btn"
-                                onClick={handleOpenSizeCompareRoom}
-                                disabled={!canOpenSizeCompareRoom}
-                            >
-                                <span className="vto-size-rec__compare-toggle-main">
-                                    <svg
-                                        className="vto-size-rec__compare-toggle-leading-icon"
-                                        width="18"
-                                        height="18"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="1.8"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        aria-hidden="true"
-                                    >
-                                        <rect x="2.5" y="4" width="8" height="14" rx="1.8" />
-                                        <rect x="13.5" y="6" width="8" height="14" rx="1.8" />
-                                        <path d="M10.5 11h3" />
-                                        <path d="M11.8 9.8 13 11l-1.2 1.2" />
-                                    </svg>
-                                    <span className="vto-size-rec__compare-toggle-text">So sánh size trên 2 màn hình</span>
-                                </span>
-                                <svg
-                                    className="vto-size-rec__compare-toggle-arrow"
-                                    width="16"
-                                    height="16"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    aria-hidden="true"
-                                >
-                                    <polyline points="9 18 15 12 9 6" />
-                                </svg>
-                            </button>
-                        </Accordion>
-
+                        )}
                     </div>
 
-                    {/* Footer CTA */}
-                    <div className="vto-cta">
+                    {/* Footer CTA cố định */}
+                    <div style={{ padding: '24px', borderTop: '1px solid rgba(0,0,0,0.05)', display: 'flex', gap: '12px' }}>
                         <button
-                            className="vto-cta__btn vto-cta__btn--outline"
                             onClick={() => onAddToCart(activeItem, activeSelectedSize || undefined)}
+                            style={{ flex: 1, padding: '14px', background: 'transparent', border: '1px solid #C9963F', borderRadius: '30px', color: '#C9963F', fontWeight: 600, cursor: 'pointer' }}
                         >
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6" /></svg>
-                            <span>Giỏ hàng</span>
+                            GIỎ HÀNG
                         </button>
                         <button
-                            className="vto-cta__btn vto-cta__btn--primary"
                             onClick={() => onBuyNow(activeItem, activeSelectedSize || undefined)}
+                            style={{ flex: 1, padding: '14px', background: '#C9963F', border: 'none', borderRadius: '30px', color: '#FFFFFF', fontWeight: 600, cursor: 'pointer' }}
                         >
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6" /><polyline points="12 3 12 15" /><polyline points="8 11 12 15 16 11" /></svg>
-                            <span>Mua ngay</span>
-                        </button>
-                        <button
-                            className={`vto-cta__btn vto-cta__btn--wishlist ${isWishlisted ? 'liked' : ''}`}
-                            onClick={() => { setIsWishlisted(w => !w); showToast(isWishlisted ? 'Đã bỏ yêu thích' : 'Đã thêm vào yêu thích ❤️'); }}
-                            aria-label="Yêu thích"
-                        >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill={isWishlisted ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>
+                            MUA NGAY
                         </button>
                     </div>
                 </aside>
-            </div>
 
             {isTryOnGuideOpen && (
                 <div
@@ -1960,28 +1908,34 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                     className="vto-size-room__backdrop"
                     role="presentation"
                     onClick={handleCloseSizeCompareRoom}
+                    style={{ background: 'rgba(15,11,7,0.4)', backdropFilter: 'blur(8px)' }}
                 >
                     <div
-                        className="vto-size-room"
+                        className="vto-size-room vto-size-room--premium"
                         role="dialog"
                         aria-modal="true"
                         aria-labelledby="vto-size-room-title"
                         onClick={(event) => event.stopPropagation()}
+                        style={{ background: '#FFFFFF', border: '1px solid rgba(201,150,63,0.2)', boxShadow: '0 24px 60px rgba(0,0,0,0.15)', color: '#2C1F0E' }}
                     >
-                        <header className="vto-size-room__header">
+                        <header className="vto-size-room__header" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
                             <div className="vto-size-room__header-left">
                                 <div className="vto-size-room__header-top">
                                     <span className="vto-size-room__header-icon" aria-hidden="true">📏</span>
-                                    <span className="vto-size-room__header-feature-badge">Real-time comparison</span>
+                                    <span className="vto-size-room__header-step">Công cụ tính năng cao cấp</span>
                                 </div>
-                                <h3 id="vto-size-room-title" className="compare-title">Phòng so sánh size</h3>
-                                <p className="compare-subtitle">So sánh trực tiếp 2 size trên cùng avatar để thấy độ khác nhau khi mặc.</p>
+                                <div className="compare-title-wrapper" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px' }}>
+                                    <h3 id="vto-size-room-title" className="compare-title" style={{ color: '#2C1F0E', margin: 0, fontSize: '18px' }}>So sánh Size - Thử ngay trên người mẫu</h3>
+                                    <span className="ar-ready-badge" style={{ background: 'linear-gradient(135deg, #C9963F 0%, #E8DCC8 100%)', color: '#fff', padding: '4px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', boxShadow: '0 4px 10px rgba(201,150,63,0.3)' }}>Real-time 3D</span>
+                                </div>
+                                <p className="compare-subtitle" style={{ color: 'rgba(0,0,0,0.5)', marginTop: '6px' }}>Quan sát trực quan độ vừa vặn trên Avatar 3D tỷ lệ thực của bạn.</p>
                             </div>
                             <button
                                 type="button"
                                 className="vto-size-room__close"
                                 onClick={handleCloseSizeCompareRoom}
                                 aria-label="Đóng phòng so sánh size"
+                                style={{ color: '#2C1F0E' }}
                             >
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                                     <line x1="18" y1="6" x2="6" y2="18" />
@@ -1990,7 +1944,16 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                             </button>
                         </header>
 
-                        <div className="vto-size-room__screens">
+                        <div className="vto-size-room__toolbar">
+                            <div className="vto-toolbar-group">
+                                <span className="vto-toolbar-label">Tư thế:</span>
+                                <button className={`vto-toolbar-btn ${comparePose === 'Idle' ? 'active' : ''}`} onClick={() => setComparePose('Idle')}>Đứng</button>
+                                <button className={`vto-toolbar-btn ${comparePose === 'Walk' ? 'active' : ''}`} onClick={() => setComparePose('Walk')}>Đi bộ</button>
+                                <button className={`vto-toolbar-btn ${comparePose === 'Pose' ? 'active' : ''}`} onClick={() => setComparePose('Pose')}>Tạo dáng</button>
+                            </div>
+                        </div>
+
+                        <div className="vto-size-room__screens" style={{ background: '#FDFBF7' }}>
                             <SizeCompareViewport
                                 panelLabel="Màn hình trái"
                                 productName={activeItem.name}
@@ -2004,9 +1967,10 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                                 fitScore={compareLeftResult.score}
                                 fitZones={compareLeftResult.zones}
                                 heatmapEnabled={false}
+                                pose={comparePose}
                             />
 
-                            <div className="vto-size-room__connector" aria-hidden="true">
+                            <div className="vto-size-room__connector" aria-hidden="true" style={{ background: 'rgba(201,150,63,0.1)', color: '#C9963F' }}>
                                 <span className="compare-arrow">⇄</span>
                             </div>
 
@@ -2023,6 +1987,7 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                                 fitScore={compareRightResult.score}
                                 fitZones={compareRightResult.zones}
                                 heatmapEnabled={false}
+                                pose={comparePose}
                             />
                         </div>
 
@@ -2031,35 +1996,59 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
 
                             <div className="vto-size-rec__compare-panel">
                                 <div className="vto-size-rec__compare-scores">
-                                    <span>{sizeComparePair.left}: <strong>{compareLeftResult.score}%</strong></span>
-                                    <span>{sizeComparePair.right}: <strong>{compareRightResult.score}%</strong></span>
-                                    <span className={`vto-size-rec__compare-diff ${sizeCompareScoreDiff > 0 ? 'positive' : sizeCompareScoreDiff < 0 ? 'negative' : ''}`}>
+                                    <div style={{ flex: 1 }}>
+                                        <span style={{ display: 'block', fontSize: '11px', color: 'rgba(0,0,0,0.5)', marginBottom: '4px' }}>Size {sizeComparePair.left}</span>
+                                        <div className="vto-fit-progress-wrapper">
+                                            <div className="vto-fit-progress-bar">
+                                                <div className="vto-fit-progress-fill" style={{ width: `${compareLeftResult.score}%`, background: compareLeftResult.score > 80 ? '#22c55e' : compareLeftResult.score > 60 ? '#eab308' : '#ef4444' }}></div>
+                                            </div>
+                                            <strong style={{ fontSize: '16px' }}>{compareLeftResult.score}%</strong>
+                                        </div>
+                                    </div>
+                                    <div style={{ flex: 1, textAlign: 'right' }}>
+                                        <span style={{ display: 'block', fontSize: '11px', color: 'rgba(0,0,0,0.5)', marginBottom: '4px' }}>Size {sizeComparePair.right}</span>
+                                        <div className="vto-fit-progress-wrapper" style={{ justifyContent: 'flex-end' }}>
+                                            <strong style={{ fontSize: '16px' }}>{compareRightResult.score}%</strong>
+                                            <div className="vto-fit-progress-bar vto-fit-progress-bar--right">
+                                                <div className="vto-fit-progress-fill" style={{ width: `${compareRightResult.score}%`, background: compareRightResult.score > 80 ? '#22c55e' : compareRightResult.score > 60 ? '#eab308' : '#ef4444' }}></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="vto-size-rec__compare-diff-row" style={{ textAlign: 'center', marginBottom: '16px' }}>
+                                    <span className={`vto-size-rec__compare-diff ${sizeCompareScoreDiff > 0 ? 'positive' : sizeCompareScoreDiff < 0 ? 'negative' : ''}`} style={{ background: sizeCompareScoreDiff > 0 ? 'rgba(34, 197, 94, 0.1)' : sizeCompareScoreDiff < 0 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(0,0,0,0.05)', padding: '4px 12px', borderRadius: '12px', display: 'inline-block' }}>
                                         Chênh lệch: {sizeCompareScoreDiff > 0 ? '+' : ''}{sizeCompareScoreDiff}%
                                     </span>
                                 </div>
 
-                                <div className="vto-size-rec__compare-rows">
-                                    <div className="vto-size-rec__compare-columns" aria-hidden="true">
-                                        <span className="vto-size-rec__compare-col vto-size-rec__compare-col--zone">Vùng đo</span>
-                                        <span className="vto-size-rec__compare-col">{sizeComparePair.left}</span>
-                                        <span className="vto-size-rec__compare-col">{sizeComparePair.right}</span>
-                                    </div>
-
+                                <div className="vto-size-rec__compare-cards-container">
                                     {sizeCompareRows.map((row) => {
                                         const leftFit = FIT_LABELS[row.left.fit];
                                         const rightFit = FIT_LABELS[row.right.fit];
 
                                         return (
-                                            <div key={row.label} className="vto-size-rec__compare-row">
-                                                <span className="vto-size-rec__compare-zone">{row.label}</span>
-                                                <span className={`vto-size-rec__compare-cell ${row.winner === 'left' ? 'winner' : ''}`}>
-                                                    <em style={{ color: leftFit.color }}>{leftFit.text}</em>
-                                                    <small>{formatDeltaCm(row.left.deltaRaw)}</small>
-                                                </span>
-                                                <span className={`vto-size-rec__compare-cell ${row.winner === 'right' ? 'winner' : ''}`}>
-                                                    <em style={{ color: rightFit.color }}>{rightFit.text}</em>
-                                                    <small>{formatDeltaCm(row.right.deltaRaw)}</small>
-                                                </span>
+                                            <div key={row.label} className="vto-zone-card">
+                                                <div className="vto-zone-card__header">
+                                                    <span className="vto-zone-card__icon">{getZoneIcon(row.label)}</span>
+                                                    <span className="vto-zone-card__title">{row.label}</span>
+                                                </div>
+                                                <div className="vto-zone-card__body">
+                                                    <div className={`vto-zone-card__side ${row.winner === 'left' ? 'winner' : ''}`}>
+                                                        <span className="vto-zone-card__size-label">Size {sizeComparePair.left}</span>
+                                                        <div className="vto-zone-card__fit-status" style={{ color: leftFit.color, background: `${leftFit.color}15` }}>
+                                                            <em>{leftFit.text}</em>
+                                                            <small>{formatDeltaCm(row.left.deltaRaw)}</small>
+                                                        </div>
+                                                    </div>
+                                                    <div className="vto-zone-card__divider"></div>
+                                                    <div className={`vto-zone-card__side ${row.winner === 'right' ? 'winner' : ''}`}>
+                                                        <span className="vto-zone-card__size-label">Size {sizeComparePair.right}</span>
+                                                        <div className="vto-zone-card__fit-status" style={{ color: rightFit.color, background: `${rightFit.color}15` }}>
+                                                            <em>{rightFit.text}</em>
+                                                            <small>{formatDeltaCm(row.right.deltaRaw)}</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         );
                                     })}
