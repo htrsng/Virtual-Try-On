@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getCities, getDistricts, getWards } from '../data/vietnamAddress';
+import { getManagedVouchers } from '../data/voucherData';
 import '../dashboard-styles.css';
 
 const PRIMARY_COLOR = '#c8a867';
@@ -132,6 +133,9 @@ function UserProfilePage({ showToast }) {
     const [cities] = useState(getCities());
     const [districts, setDistricts] = useState([]);
     const [wards, setWards] = useState([]);
+    
+    const [vouchers, setVouchers] = useState([]);
+    const [usedCouponCodes, setUsedCouponCodes] = useState([]);
 
     useEffect(() => {
         if (city) {
@@ -173,6 +177,18 @@ function UserProfilePage({ showToast }) {
             setCity(user.city || '');
             setDistrict(user.district || '');
             setWard(user.ward || '');
+            
+            // Load vouchers and user usages
+            setVouchers(getManagedVouchers());
+            const userId = user._id || user.id;
+            if (userId) {
+                fetch(`/api/users/${userId}/used-coupons`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (Array.isArray(data)) setUsedCouponCodes(data.map(c => c.couponCode));
+                    })
+                    .catch(console.error);
+            }
         }
     }, [user, isAuthenticated, navigate, t, showToast]);
 
@@ -374,13 +390,49 @@ function UserProfilePage({ showToast }) {
 
         if (activeSection === 'vouchers') {
             return (
-                <SectionShell title="Voucher" description="Lưu và sử dụng ưu đãi của bạn">
-                    <EmptySection
-                        icon="🎟️"
-                        title="Chưa có voucher"
-                        description="Khám phá voucher mới để tối ưu giá trị đơn hàng của bạn."
-                        cta={<button type="button" className="transition-all duration-200" style={{ border: 'none', background: PRIMARY_COLOR, color: '#fff', borderRadius: 8, padding: '10px 16px', cursor: 'pointer', fontWeight: 600 }}>Khám phá voucher</button>}
-                    />
+                <SectionShell title="Voucher của tôi" description="Danh sách mã giảm giá dành cho bạn">
+                    <div style={{ display: 'grid', gap: 16 }}>
+                        {vouchers.map(v => {
+                            const isUsed = usedCouponCodes.includes(v.code);
+                            const isExpired = new Date(v.endDate) < new Date();
+                            const isAvailable = !isUsed && !isExpired && v.status === 'active';
+                            
+                            return (
+                                <div key={v.code} style={{ border: `1px solid ${isAvailable ? PRIMARY_COLOR : '#ece7df'}`, borderRadius: 12, padding: 16, display: 'flex', gap: 16, background: isUsed || isExpired ? '#f9f8f6' : '#fff', opacity: isUsed || isExpired ? 0.7 : 1 }}>
+                                    <div style={{ width: 80, height: 80, background: isAvailable ? '#fdf8ec' : '#f1ede7', color: isAvailable ? PRIMARY_COLOR : '#8f867d', borderRadius: 8, display: 'grid', placeItems: 'center', fontSize: 32 }}>
+                                        {v.type === 'shipping' ? '🚚' : '🎟️'}
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <h4 style={{ margin: '0 0 4px', fontSize: 16, color: '#1f1a17' }}>{v.name}</h4>
+                                        <div style={{ fontSize: 13, color: '#7f776f', marginBottom: 8 }}>{v.description || `Giảm ${v.type === 'percentage' ? v.value + '%' : new Intl.NumberFormat('vi-VN', {style: 'currency', currency: 'VND'}).format(v.value)} (Đơn tối thiểu ${new Intl.NumberFormat('vi-VN', {style: 'currency', currency: 'VND'}).format(v.minAmount)})`}</div>
+                                        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                                            <span style={{ fontSize: 12, fontWeight: 700, padding: '4px 8px', background: '#f3efe7', color: '#5e554d', borderRadius: 4, letterSpacing: 1 }}>{v.code}</span>
+                                            <span style={{ fontSize: 12, color: isExpired ? '#d9534f' : '#8f867d' }}>HSD: {v.endDate}</span>
+                                        </div>
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-end', minWidth: 100 }}>
+                                        {isUsed ? (
+                                            <span style={{ color: '#8f867d', fontWeight: 600, fontSize: 13 }}>Đã sử dụng</span>
+                                        ) : isExpired ? (
+                                            <span style={{ color: '#d9534f', fontWeight: 600, fontSize: 13 }}>Đã hết hạn</span>
+                                        ) : !isAvailable ? (
+                                            <span style={{ color: '#8f867d', fontWeight: 600, fontSize: 13 }}>Tạm dừng</span>
+                                        ) : (
+                                            <button style={{ background: PRIMARY_COLOR, color: '#fff', border: 'none', borderRadius: 20, padding: '8px 16px', fontWeight: 600, cursor: 'pointer', fontSize: 13 }} onClick={() => { navigator.clipboard.writeText(v.code); showToast('Đã sao chép mã', 'success'); }}>Sao chép</button>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                        {vouchers.length === 0 && (
+                            <EmptySection
+                                icon="🎟️"
+                                title="Chưa có voucher"
+                                description="Hiện tại chưa có mã giảm giá nào."
+                                cta={<button type="button" onClick={() => navigate('/products')} className="transition-all duration-200" style={{ border: 'none', background: PRIMARY_COLOR, color: '#fff', borderRadius: 8, padding: '10px 16px', cursor: 'pointer', fontWeight: 600 }}>Mua sắm ngay</button>}
+                            />
+                        )}
+                    </div>
                 </SectionShell>
             );
         }

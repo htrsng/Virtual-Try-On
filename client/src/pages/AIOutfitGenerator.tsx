@@ -265,46 +265,104 @@ export default function AIOutfitGenerator() {
         background: 'rgba(15,11,7,0.96)',
         borderBottom: '1px solid var(--gold-divider)',
         backdropFilter: 'blur(12px)',
-        padding: '0 20px',
-        height: '52px',
+        padding: '0 24px',
+        height: '60px',
         display: 'flex',
         alignItems: 'center',
-        gap: '8px',
+        justifyContent: 'space-between',
         position: 'sticky',
         top: 0,
         zIndex: 100,
         flexShrink: 0,
       }}>
-        <button
-          onClick={() => navigate(-1)}
-          style={{
-            background: 'transparent',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: '20px',
-            color: 'var(--text-secondary)',
-            padding: '6px 14px',
-            fontSize: '12px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            cursor: 'pointer',
-          }}
-        >
-          <span>←</span>
-          <span>Quay lại</span>
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <button
+            onClick={() => navigate(-1)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--text-secondary)',
+              padding: '0',
+              fontSize: '13px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              cursor: 'pointer',
+            }}
+          >
+            <span>←</span>
+          </button>
+          
+          <div style={{ width: '1px', height: '20px', background: 'var(--gold-divider)' }} />
+          
+          <div style={{ 
+            fontSize: '15px', 
+            color: 'var(--gold-primary)', 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '8px',
+            fontWeight: '700',
+            letterSpacing: '0.02em'
+          }}>
+            ✨ VFit Stylist
+          </div>
+        </div>
 
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            background: 'rgba(255,255,255,0.06)',
-            border: '1px solid rgba(255,255,255,0.12)',
-            borderRadius: '20px',
+            background: 'var(--surface-subtle)',
+            border: '1px solid var(--gold-border)',
+            borderRadius: '100px',
+            padding: '4px 6px',
+            gap: '4px',
+          }}>
+            <button
+              onClick={() => setActiveTab('describe')}
+              style={{
+                background: activeTab === 'describe' ? 'var(--gold-primary)' : 'transparent',
+                border: 'none',
+                borderRadius: '100px',
+                color: activeTab === 'describe' ? '#0F0B07' : 'var(--text-secondary)',
+                padding: '6px 16px',
+                fontSize: '12px',
+                fontWeight: activeTab === 'describe' ? '600' : '500',
+                transition: 'all 0.2s ease',
+                cursor: 'pointer',
+              }}
+            >
+              Gợi ý theo mô tả
+            </button>
+            <button
+              onClick={() => setActiveTab('occasion')}
+              style={{
+                background: activeTab === 'occasion' ? 'var(--gold-primary)' : 'transparent',
+                border: 'none',
+                borderRadius: '100px',
+                color: activeTab === 'occasion' ? '#0F0B07' : 'var(--text-secondary)',
+                padding: '6px 16px',
+                fontSize: '12px',
+                fontWeight: activeTab === 'occasion' ? '600' : '500',
+                transition: 'all 0.2s ease',
+                cursor: 'pointer',
+              }}
+            >
+              Chọn theo dịp
+            </button>
+          </div>
+
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            background: 'var(--surface-subtle)',
+            border: '1px solid var(--gold-border)',
+            borderRadius: '100px',
             padding: '4px 14px',
             gap: '8px',
+            height: '34px',
           }}>
-            <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)', fontWeight: '600', letterSpacing: '0.05em' }}>
+            <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: '600', letterSpacing: '0.05em' }}>
               AVATAR
             </span>
             <select
@@ -316,7 +374,7 @@ export default function AIOutfitGenerator() {
                 border: 'none',
                 color: 'var(--text-primary)',
                 fontSize: '12px',
-                fontWeight: '500',
+                fontWeight: '600',
                 outline: 'none',
                 cursor: 'pointer',
                 appearance: 'none',
@@ -330,7 +388,7 @@ export default function AIOutfitGenerator() {
                 </option>
               ))}
             </select>
-            <div style={{ width: '1px', height: '14px', background: 'rgba(255,255,255,0.15)' }} />
+            <div style={{ width: '1px', height: '14px', background: 'var(--gold-divider)' }} />
             <button
               type="button"
               onClick={() => navigate('/avatar-studio', { state: { returnTo: '/ai-outfit' } })}
@@ -350,52 +408,6 @@ export default function AIOutfitGenerator() {
             >
               +
             </button>
-          </div>
-          
-          <button
-            onClick={() => setActiveTab('describe')}
-            style={{
-              background: activeTab === 'describe' ? 'var(--gold-primary)' : 'transparent',
-              border: activeTab === 'describe' ? '1px solid var(--gold-primary)' : '1px solid rgba(255,255,255,0.08)',
-              borderRadius: '20px',
-              color: activeTab === 'describe' ? '#0F0B07' : 'rgba(255,255,255,0.45)',
-              padding: '6px 16px',
-              fontSize: '12px',
-              fontWeight: activeTab === 'describe' ? '600' : '400',
-              transition: 'all 0.2s ease',
-              cursor: 'pointer',
-            }}
-          >
-            Gợi ý theo mô tả
-          </button>
-
-          <button
-            onClick={() => setActiveTab('occasion')}
-            style={{
-              background: activeTab === 'occasion' ? 'var(--gold-primary)' : 'transparent',
-              border: activeTab === 'occasion' ? '1px solid var(--gold-primary)' : '1px solid rgba(255,255,255,0.08)',
-              borderRadius: '20px',
-              color: activeTab === 'occasion' ? '#0F0B07' : 'rgba(255,255,255,0.45)',
-              padding: '6px 16px',
-              fontSize: '12px',
-              fontWeight: activeTab === 'occasion' ? '600' : '400',
-              transition: 'all 0.2s ease',
-              cursor: 'pointer',
-            }}
-          >
-            Chọn theo dịp
-          </button>
-          
-          <div style={{ 
-            padding: '6px 16px', 
-            fontSize: '12px', 
-            color: 'var(--gold-primary)', 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '6px',
-            fontWeight: '600'
-          }}>
-            ✨ AI Phối Đồ
           </div>
         </div>
       </header>
@@ -435,10 +447,62 @@ export default function AIOutfitGenerator() {
         </div>
       )}
 
+      {/* Inspiration Strip */}
+      <div style={{
+        background: 'var(--surface-elevated)',
+        borderBottom: '1px solid var(--gold-divider)',
+        padding: '12px 24px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '16px',
+        flexShrink: 0,
+        overflowX: 'auto',
+        scrollbarWidth: 'none',
+      }}>
+        <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-secondary)', letterSpacing: '0.04em', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ color: '#ef4444' }}>🔥</span> TRENDING TODAY
+        </div>
+        
+        <div style={{ width: '1px', height: '14px', background: 'var(--gold-divider)', flexShrink: 0 }} />
+        
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {['Old Money', 'Korean Chic', 'Quiet Luxury', 'Summer Vibes', 'Minimalist'].map(tag => (
+            <button
+              key={tag}
+              onClick={() => {
+                setActiveTab('describe');
+                setFilter(prev => ({ ...prev, description: prev.description ? `${prev.description}, ${tag}` : tag }));
+              }}
+              style={{
+                background: 'linear-gradient(135deg, rgba(212,169,66,0.08) 0%, rgba(242,216,120,0.02) 100%)',
+                border: '1px solid rgba(212,169,66,0.2)',
+                borderRadius: '8px',
+                padding: '6px 14px',
+                fontSize: '12px',
+                color: 'var(--text-primary)',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.borderColor = 'var(--gold-primary)';
+                e.currentTarget.style.background = 'var(--gold-light)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.borderColor = 'rgba(212,169,66,0.2)';
+                e.currentTarget.style.background = 'linear-gradient(135deg, rgba(212,169,66,0.08) 0%, rgba(242,216,120,0.02) 100%)';
+              }}
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div style={{
         display: 'grid',
-        gridTemplateColumns: '260px 1fr 420px',
-        height: 'calc(100vh - 52px)',
+        gridTemplateColumns: '300px 1fr 480px',
+        height: 'calc(100vh - 60px - 53px)', /* 60px header + 53px strip */
         background: 'var(--bg-primary)',
         overflow: 'hidden',
       }}>

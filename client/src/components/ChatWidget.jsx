@@ -164,12 +164,12 @@ function ChatWidget() {
                     width: '60px',
                     height: '60px',
                     borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #ee4d2d, #ff6b35)',
+                    background: 'linear-gradient(135deg, #C9963F, #D4A942)',
                     color: 'white',
                     border: 'none',
                     fontSize: '28px',
                     cursor: 'pointer',
-                    boxShadow: '0 4px 20px rgba(238, 77, 45, 0.4)',
+                    boxShadow: '0 4px 20px rgba(201, 150, 63, 0.4)',
                     zIndex: 9999,
                     display: 'flex',
                     alignItems: 'center',
@@ -203,7 +203,7 @@ function ChatWidget() {
                 }}>
                     {/* Header */}
                     <div style={{
-                        background: 'linear-gradient(135deg, #ee4d2d, #ff6b35)',
+                        background: 'linear-gradient(135deg, #C9963F, #D4A942)',
                         color: 'white',
                         padding: '16px 20px',
                         display: 'flex',
@@ -251,7 +251,7 @@ function ChatWidget() {
                                         ? '16px 16px 4px 16px'
                                         : '16px 16px 16px 4px',
                                     background: msg.sender === 'user'
-                                        ? 'linear-gradient(135deg, #ee4d2d, #ff6b35)'
+                                        ? 'linear-gradient(135deg, #C9963F, #D4A942)'
                                         : msg.sender === 'admin'
                                             ? 'linear-gradient(135deg, #6366f1, #818cf8)'
                                             : 'white',
@@ -306,15 +306,15 @@ function ChatWidget() {
                                 style={{
                                     padding: '6px 12px',
                                     borderRadius: '20px',
-                                    border: '1px solid #ee4d2d',
+                                    border: '1px solid #C9963F',
                                     background: 'white',
-                                    color: '#ee4d2d',
+                                    color: '#C9963F',
                                     fontSize: '12px',
                                     cursor: 'pointer',
                                     whiteSpace: 'nowrap',
                                     transition: 'all 0.2s',
                                 }}
-                                onMouseEnter={e => { e.target.style.background = '#fff5f2'; }}
+                                onMouseEnter={e => { e.target.style.background = 'rgba(201, 150, 63, 0.05)'; }}
                                 onMouseLeave={e => { e.target.style.background = 'white'; }}
                             >{qr}</button>
                         ))}
@@ -343,7 +343,7 @@ function ChatWidget() {
                                 outline: 'none',
                                 transition: 'border-color 0.2s',
                             }}
-                            onFocus={e => e.target.style.borderColor = '#ee4d2d'}
+                            onFocus={e => e.target.style.borderColor = '#C9963F'}
                             onBlur={e => e.target.style.borderColor = '#ddd'}
                         />
                         <button
@@ -353,7 +353,7 @@ function ChatWidget() {
                                 width: '42px',
                                 height: '42px',
                                 borderRadius: '50%',
-                                background: inputMessage.trim() ? 'linear-gradient(135deg, #ee4d2d, #ff6b35)' : '#ddd',
+                                background: inputMessage.trim() ? 'linear-gradient(135deg, #C9963F, #D4A942)' : '#ddd',
                                 color: 'white',
                                 border: 'none',
                                 fontSize: '18px',

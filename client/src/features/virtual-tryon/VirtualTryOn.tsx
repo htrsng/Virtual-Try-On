@@ -13,7 +13,7 @@ import { ColorSelector } from './components/ProductOptions';
 import VirtualPersonalClosetDrawer, { type ClosetItem } from './components/VirtualPersonalClosetDrawer';
 import OutfitPanel from './components/OutfitPanel';
 import TryOnToolbar from './components/TryOnToolbar';
-import AIOutfitChat from '../../components/AIOutfitChat';
+
 import './VirtualTryOn.css';
 import * as THREE from 'three';
 
@@ -382,22 +382,7 @@ function SizeCompareViewport({
                         ))}
                     </div>
                 </div>
-
-                <div className="vto-size-room__quick-switch" role="group" aria-label={`Chuyển size nhanh - ${panelLabel}`}>
-                    {quickSizeItems.map((size) => (
-                        <button
-                            key={`${panelLabel}-quick-${size.label}`}
-                            type="button"
-                            className={`vto-size-room__quick-size ${size.value === selectedSize ? 'active' : ''}`}
-                            onClick={() => onSelectSize(size.value)}
-                            disabled={size.disabled}
-                        >
-                            {size.label}
-                        </button>
-                    ))}
-                </div>
             </div>
-
             <div className="vto-size-room__canvas-wrap">
                 <Canvas className="vto-size-room__canvas" camera={{ position: [0, 0.78, 3.9], fov: 28 }} dpr={[1, 1.5]} shadows>
                     <ambientLight intensity={0.42} />
@@ -652,13 +637,16 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
     const [itemSizes, setItemSizes] = useState<Record<string, string>>({});
     const [itemColors, setItemColors] = useState<Record<string, string>>({});
 
-    // Initialise per-item selection state without preselecting defaults.
+    // Initialise per-item selection state with defaults if available.
     useEffect(() => {
         setItemSizes((prev) => {
             const next: Record<string, string> = {};
             items.forEach((it) => {
                 const key = String(it.id);
-                next[key] = prev[key] || '';
+                const model3D = resolveModel3D(it);
+                const configSizes = model3D?.sizes ? Object.keys(model3D.sizes) : [];
+                const defaultSize = (it.size as string) || (configSizes.length > 0 ? configSizes[0] : 'M');
+                next[key] = prev[key] || defaultSize;
             });
             return next;
         });
@@ -667,7 +655,17 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
             const next: Record<string, string> = {};
             items.forEach((it) => {
                 const key = String(it.id);
-                next[key] = prev[key] || '';
+                const model3D = resolveModel3D(it);
+                let defaultColor = (it.color as string) || (it.purchasedColor as string) || '';
+                if (!defaultColor && model3D?.sizes) {
+                    const firstSizeConfig = Object.values(model3D.sizes)[0];
+                    if (firstSizeConfig && firstSizeConfig.colors) {
+                        defaultColor = Object.keys(firstSizeConfig.colors)[0] || '';
+                    } else if (model3D.colors) {
+                        defaultColor = Object.keys(model3D.colors)[0] || '';
+                    }
+                }
+                next[key] = prev[key] || defaultColor;
             });
             return next;
         });
@@ -862,8 +860,15 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
             return [
                 { name: 'Trắng', hex: '#f5f5f5' },
                 { name: 'Đen', hex: '#222222' },
+                { name: 'Xám', hex: '#9CA3AF' },
                 { name: 'Xanh Navy', hex: '#1f2a44' },
-                { name: 'Be', hex: '#d4c3a3' }
+                { name: 'Xanh Dương', hex: '#3B82F6' },
+                { name: 'Xanh Lá', hex: '#10B981' },
+                { name: 'Be', hex: '#d4c3a3' },
+                { name: 'Nâu', hex: '#78350F' },
+                { name: 'Đỏ', hex: '#B91C1C' },
+                { name: 'Hồng', hex: '#F472B6' },
+                { name: 'Vàng', hex: '#FBBF24' }
             ];
         }
         return colors;
@@ -1098,6 +1103,10 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
             },
         });
     }, [navigate, location.state]);
+
+    const handleClose = useCallback(() => {
+        navigate(-1);
+    }, [navigate]);
 
     const handleBackToHome = useCallback(() => {
         navigate('/');
@@ -1641,23 +1650,7 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                         />
                     </Canvas>
 
-                    {/* AI Outfit Chat */}
-                    <AIOutfitChat
-                        closetItems={Object.values(layeredGarments).filter((item): item is SilentWearItem => Boolean(item?.itemId))}
-                        avatarData={currentBodyData}
-                        token={localStorage.getItem('token') || ''}
-                        onWearOutfit={(items) => {
-                            items.forEach(item => {
-                                const wornItem = Object.values(layeredGarments).find(c => c?.itemId === item.itemId);
-                                if (wornItem) {
-                                    applySilentWear(wornItem);
-                                }
-                            });
-                        }}
-                        onAddToCart={(productId) => {
-                            navigate(`/product/${productId}`);
-                        }}
-                    />
+
 
                     {/* Camera controls overlay */}
                     <div className="vto-canvas-overlay vto-canvas-overlay--bottom-left">
@@ -1744,6 +1737,31 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                 <aside className="vto-aside panel-scroll" style={{ background: '#FFFFFF', borderLeft: '1px solid rgba(201,150,63,0.15)', display: 'flex', flexDirection: 'column' }}>
                     {/* Header cố định */}
                     <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
+                        {isMultiProduct && (
+                            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', overflowX: 'auto' }}>
+                                {items.map((it, idx) => (
+                                    <button
+                                        key={it.id}
+                                        onClick={() => {
+                                            setActiveItemIdx(idx);
+                                            setSelectedSidebarProduct(null);
+                                        }}
+                                        style={{
+                                            display: 'flex', alignItems: 'center', gap: '8px',
+                                            padding: '6px 12px', borderRadius: '8px',
+                                            border: activeItemIdx === idx ? '1px solid #C9963F' : '1px solid #E5E7EB',
+                                            background: activeItemIdx === idx ? 'rgba(201,150,63,0.08)' : '#FFF',
+                                            cursor: 'pointer', whiteSpace: 'nowrap'
+                                        }}
+                                    >
+                                        <img src={it.img || it.image} style={{ width: 24, height: 24, borderRadius: 4, objectFit: 'cover' }} />
+                                        <span style={{ fontSize: 12, fontWeight: activeItemIdx === idx ? 600 : 500, color: activeItemIdx === idx ? '#C9963F' : '#4B5563' }}>
+                                            {it.category || 'Sản phẩm ' + (idx + 1)}
+                                        </span>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                             <img src={rightSidebarProduct.img || rightSidebarProduct.image} alt={rightSidebarProduct.name} style={{ width: '60px', height: '60px', borderRadius: '8px', objectFit: 'cover', border: '1px solid rgba(201,150,63,0.3)' }} />
                             <div>
@@ -1944,14 +1962,7 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                             </button>
                         </header>
 
-                        <div className="vto-size-room__toolbar">
-                            <div className="vto-toolbar-group">
-                                <span className="vto-toolbar-label">Tư thế:</span>
-                                <button className={`vto-toolbar-btn ${comparePose === 'Idle' ? 'active' : ''}`} onClick={() => setComparePose('Idle')}>Đứng</button>
-                                <button className={`vto-toolbar-btn ${comparePose === 'Walk' ? 'active' : ''}`} onClick={() => setComparePose('Walk')}>Đi bộ</button>
-                                <button className={`vto-toolbar-btn ${comparePose === 'Pose' ? 'active' : ''}`} onClick={() => setComparePose('Pose')}>Tạo dáng</button>
-                            </div>
-                        </div>
+                        {/* Pose toolbar removed as per user request */}
 
                         <div className="vto-size-room__screens" style={{ background: '#FDFBF7' }}>
                             <SizeCompareViewport
@@ -2021,37 +2032,50 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                                     </span>
                                 </div>
 
-                                <div className="vto-size-rec__compare-cards-container">
-                                    {sizeCompareRows.map((row) => {
-                                        const leftFit = FIT_LABELS[row.left.fit];
-                                        const rightFit = FIT_LABELS[row.right.fit];
+                                <div className="vto-size-rec__compare-cards-container" style={{ display: 'flex', gap: '20px' }}>
+                                    {/* Left Size Panel */}
+                                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        <h4 style={{ margin: '0 0 4px 0', fontSize: '12px', color: 'rgba(0,0,0,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                            Chi tiết Size {sizeComparePair.left}
+                                        </h4>
+                                        {sizeCompareRows.map((row) => {
+                                            const fit = FIT_LABELS[row.left.fit];
+                                            return (
+                                                <div key={`left-${row.label}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', background: row.winner === 'left' ? 'rgba(34, 197, 94, 0.05)' : '#fff', borderRadius: '10px', border: row.winner === 'left' ? '1.5px solid rgba(34, 197, 94, 0.3)' : '1px solid rgba(0,0,0,0.06)' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                        <span style={{ fontSize: '16px' }}>{getZoneIcon(row.label)}</span>
+                                                        <span style={{ fontSize: '13px', fontWeight: '500', color: '#2C1F0E' }}>{row.label}</span>
+                                                    </div>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', color: fit.color }}>
+                                                        <span style={{ fontWeight: '700', fontSize: '12px' }}>{fit.text}</span>
+                                                        <span style={{ fontSize: '11px', opacity: 0.8 }}>{formatDeltaCm(row.left.deltaRaw)}</span>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
 
-                                        return (
-                                            <div key={row.label} className="vto-zone-card">
-                                                <div className="vto-zone-card__header">
-                                                    <span className="vto-zone-card__icon">{getZoneIcon(row.label)}</span>
-                                                    <span className="vto-zone-card__title">{row.label}</span>
-                                                </div>
-                                                <div className="vto-zone-card__body">
-                                                    <div className={`vto-zone-card__side ${row.winner === 'left' ? 'winner' : ''}`}>
-                                                        <span className="vto-zone-card__size-label">Size {sizeComparePair.left}</span>
-                                                        <div className="vto-zone-card__fit-status" style={{ color: leftFit.color, background: `${leftFit.color}15` }}>
-                                                            <em>{leftFit.text}</em>
-                                                            <small>{formatDeltaCm(row.left.deltaRaw)}</small>
-                                                        </div>
+                                    {/* Right Size Panel */}
+                                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        <h4 style={{ margin: '0 0 4px 0', fontSize: '12px', color: 'rgba(0,0,0,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'right' }}>
+                                            Chi tiết Size {sizeComparePair.right}
+                                        </h4>
+                                        {sizeCompareRows.map((row) => {
+                                            const fit = FIT_LABELS[row.right.fit];
+                                            return (
+                                                <div key={`right-${row.label}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', background: row.winner === 'right' ? 'rgba(34, 197, 94, 0.05)' : '#fff', borderRadius: '10px', border: row.winner === 'right' ? '1.5px solid rgba(34, 197, 94, 0.3)' : '1px solid rgba(0,0,0,0.06)' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                        <span style={{ fontSize: '16px' }}>{getZoneIcon(row.label)}</span>
+                                                        <span style={{ fontSize: '13px', fontWeight: '500', color: '#2C1F0E' }}>{row.label}</span>
                                                     </div>
-                                                    <div className="vto-zone-card__divider"></div>
-                                                    <div className={`vto-zone-card__side ${row.winner === 'right' ? 'winner' : ''}`}>
-                                                        <span className="vto-zone-card__size-label">Size {sizeComparePair.right}</span>
-                                                        <div className="vto-zone-card__fit-status" style={{ color: rightFit.color, background: `${rightFit.color}15` }}>
-                                                            <em>{rightFit.text}</em>
-                                                            <small>{formatDeltaCm(row.right.deltaRaw)}</small>
-                                                        </div>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', color: fit.color }}>
+                                                        <span style={{ fontWeight: '700', fontSize: '12px' }}>{fit.text}</span>
+                                                        <span style={{ fontSize: '11px', opacity: 0.8 }}>{formatDeltaCm(row.right.deltaRaw)}</span>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        );
-                                    })}
+                                            );
+                                        })}
+                                    </div>
                                 </div>
                             </div>
                         </div>

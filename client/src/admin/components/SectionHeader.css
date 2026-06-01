@@ -1,27 +1,61 @@
+/* ======================================================
+   SectionHeader — Upgraded Premium Page Title
+   ====================================================== */
+@import '../styles/admin-tokens.css';
+
 .sh {
     display: flex;
-    align-items: flex-end;
+    align-items: flex-start;
     justify-content: space-between;
     gap: var(--sp-5);
     margin-bottom: var(--sp-8);
     padding-bottom: var(--sp-6);
-    border-bottom: 1px solid var(--a-border-light);
+    border-bottom: 2px solid transparent;
+    background-image:
+        linear-gradient(var(--a-bg, #f0f2f8), var(--a-bg, #f0f2f8)),
+        var(--a-primary-gradient);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    border-bottom-width: 2px;
+    border-bottom-style: solid;
+    position: relative;
+}
+
+.sh::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 56px;
+    height: 3px;
+    background: var(--a-primary-gradient);
+    border-radius: var(--r-full);
+}
+
+.sh__left {
+    flex: 1;
 }
 
 .sh__title {
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 800;
     color: var(--a-text-heading);
     margin: 0;
-    line-height: 1.2;
+    line-height: 1.15;
     letter-spacing: -.03em;
+    background: linear-gradient(135deg, var(--a-text-heading), var(--a-text-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: inline-block;
 }
 
 .sh__subtitle {
-    font-size: 15px;
+    font-size: 14px;
     color: var(--a-text-secondary);
     margin: var(--sp-2) 0 0;
     font-weight: 400;
+    line-height: 1.5;
 }
 
 .sh__right {
@@ -29,6 +63,7 @@
     align-items: center;
     gap: var(--sp-3);
     flex-shrink: 0;
+    padding-top: var(--sp-1);
 }
 
 @media (max-width: 640px) {
@@ -38,6 +73,6 @@
     }
 
     .sh__title {
-        font-size: 22px;
+        font-size: 20px;
     }
 }

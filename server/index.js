@@ -21,6 +21,7 @@ const {
   VirtualClosetModel,
   SavedOutfitModel,
   AILog,
+  TryonSessionModel,
   normalizeProductInventory,
 } = require("./models");
 const {
@@ -569,6 +570,69 @@ app.put("/api/users/:id", async (req, res) => {
       { new: true },
     ).select("-password");
     res.json(updatedUser);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 4. Lấy chi tiết user
+app.get("/api/users/:id", async (req, res) => {
+  try {
+    const user = await UserModel.findById(req.params.id).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 5. Lấy đơn hàng của user (admin)
+app.get("/api/users/:id/orders", async (req, res) => {
+  try {
+    const orders = await OrderModel.find({ userId: req.params.id }).sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 6. Lấy voucher đã dùng của user
+app.get("/api/users/:id/used-coupons", async (req, res) => {
+  try {
+    const usedCoupons = await UsedCouponModel.find({ userId: req.params.id }).sort({ usedAt: -1 });
+    res.json(usedCoupons);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 7. Lấy thống kê của user
+app.get("/api/users/:id/stats", async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const orders = await OrderModel.find({ userId });
+    
+    const totalOrders = orders.length;
+    const totalSpent = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+    const usedCouponsCount = await UsedCouponModel.countDocuments({ userId });
+
+    res.json({
+      totalOrders,
+      totalSpent,
+      usedCoupons: usedCouponsCount
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 8. Lấy danh sách user đã dùng coupon
+app.get("/api/coupons/:code/users", async (req, res) => {
+  try {
+    const usages = await UsedCouponModel.find({ couponCode: req.params.code })
+      .populate('userId', 'email fullName role')
+      .sort({ usedAt: -1 });
+    res.json(usages);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -1134,6 +1198,42 @@ app.delete("/api/saved-outfits/:id", authenticateToken, requireDbReady, async (r
   }
 });
 
+// --- VIRTUAL TRY-ON SESSIONS ---
+app.post("/api/tryon/session", async (req, res) => {
+  try {
+    const { items } = req.body;
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ success: false, error: "Missing or invalid items" });
+    }
+    
+    // Create new temporary session
+    const session = await TryonSessionModel.create({ items });
+    
+    res.status(201).json({ 
+      success: true, 
+      session_id: session._id,
+      session_url: `/virtual-try-on?session_id=${session._id}` 
+    });
+  } catch (error) {
+    console.error("[tryon-session POST]", error);
+    res.status(500).json({ success: false, error: "Failed to create try-on session" });
+  }
+});
+
+app.get("/api/tryon/session/:id", async (req, res) => {
+  try {
+    const session = await TryonSessionModel.findById(req.params.id);
+    if (!session) {
+      return res.status(404).json({ success: false, error: "Session not found or expired" });
+    }
+    res.json({ success: true, session });
+  } catch (error) {
+    console.error("[tryon-session GET]", error);
+    res.status(500).json({ success: false, error: "Failed to get try-on session" });
+  }
+});
+
+// --- ADMIN STATS ---
 app.get("/api/admin/ai-stats", authenticateToken, requireAdmin, requireDbReady, async (req, res) => {
   try {
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);

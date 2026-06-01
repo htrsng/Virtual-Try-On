@@ -25,6 +25,8 @@ const AdminLayout = lazy(() => import('./admin/layout/AdminLayout'));
 // @ts-ignore
 const AdminDashboard = lazy(() => import('./admin/pages/AdminDashboard'));
 // @ts-ignore
+const AdminUserDetail = lazy(() => import('./admin/pages/AdminUserDetail'));
+// @ts-ignore
 const AIManagerPage = lazy(() => import('./admin/pages/AIManagerPage'));
 const AdminOrders = lazy(() => import('./pages/AdminOrders'));
 const AdminProducts = lazy(() => import('./pages/AdminProducts'));
@@ -41,6 +43,7 @@ const PolicyPage = lazy(() => import('./pages/PolicyPage'));
 const BannerContentPage = lazy(() => import('./pages/BannerContentPage'));
 const WishlistPage = lazy(() => import('./pages/WishlistPage'));
 const ComparePage = lazy(() => import('./pages/ComparePage'));
+const SizeComparisonRoom = lazy(() => import('./pages/SizeComparisonRoom'));
 const ChatWidget = lazy(() => import('./components/ChatWidget'));
 
 // --- 2. IMPORT TÍNH NĂNG 3D (MỚI) ---
@@ -482,31 +485,80 @@ function App() {
     return productName.includes(keyword);
   });
 
-  // Wrapper component để lấy product từ location.state
-  const VirtualTryOnWrapper = ({ defaultProduct, onAddToCart, onBuyNow, showToast }: {
+  // Wrapper component để lấy product từ location.state HOẶC url params
+  const VirtualTryOnWrapper = ({ defaultProduct, allProducts, onAddToCart, onBuyNow, showToast }: {
     defaultProduct: ProductRecord;
+    allProducts: ProductRecord[];
     onAddToCart: (product: ProductRecord, size?: string) => void;
     onBuyNow: (product: ProductRecord, size?: string) => void;
     showToast: (message: string, type?: string) => void;
   }) => {
     const location = useLocation();
     const navigate = useNavigate();
+    const [isLoadingSession, setIsLoadingSession] = useState(false);
+    const [sessionItems, setSessionItems] = useState<ProductRecord[] | null>(null);
+
+    useEffect(() => {
+      const searchParams = new URLSearchParams(location.search);
+      const sessionId = searchParams.get('session_id');
+      const productId = searchParams.get('product_id');
+      const sizeParam = searchParams.get('size');
+
+      // Nếu chưa có products, khoan xử lý URL (đợi load xong)
+      if (allProducts.length === 0) return;
+
+      if (sessionId && !sessionItems) {
+        setIsLoadingSession(true);
+        fetch(`${API_URL}/api/tryon/session/${sessionId}`)
+          .then(res => res.json())
+          .then(data => {
+             if (data.success && data.session && data.session.items) {
+                const fetchedItems = data.session.items.map((item: any) => {
+                   const found = allProducts.find(p => String(p.id) === String(item.productId) || String((p as any)._id) === String(item.productId));
+                   if (found) {
+                      return { ...found, size: item.size || sizeParam || 'M', tryon_ready: true };
+                   }
+                   return null;
+                }).filter(Boolean);
+                
+                if (fetchedItems.length > 0) {
+                   setSessionItems(fetchedItems);
+                }
+             }
+          })
+          .catch(err => {
+             console.error("Lỗi fetch session:", err);
+             showToast("Lỗi khi tải phiên thử đồ", "error");
+          })
+          .finally(() => setIsLoadingSession(false));
+      } else if (productId && !sessionItems) {
+         const found = allProducts.find(p => String(p.id) === String(productId) || String((p as any)._id) === String(productId));
+         if (found) {
+            setSessionItems([{ ...found, size: sizeParam || 'M', tryon_ready: true } as any]);
+         }
+      }
+    }, [location.search, allProducts, sessionItems, showToast]);
+
     const locState = location.state as {
       product?: ProductRecord;
       selectedItems?: ProductRecord[];
     } | null;
 
-    // Resolve outfit items: selectedItems array → outfitItems
-    const selectedItems = locState?.selectedItems;
+    // Resolve outfit items: sessionItems ưu tiên cao nhất, sau đó đến locState
+    const selectedItems = sessionItems || locState?.selectedItems;
     const singleProduct = locState?.product;
 
-    // Redirect to cart if selectedItems is explicitly empty
+    // Redirect to cart if explicitly empty from locState (và không có session)
     useEffect(() => {
-      if (selectedItems && selectedItems.length === 0) {
+      if (!sessionItems && selectedItems && selectedItems.length === 0) {
         showToast('Chưa chọn sản phẩm nào — quay lại giỏ hàng', 'warning');
         navigate('/cart', { replace: true });
       }
-    }, [selectedItems, navigate, showToast]);
+    }, [selectedItems, sessionItems, navigate, showToast]);
+
+    if (isLoadingSession) {
+      return <PageLoader />;
+    }
 
     // Determine the primary product for the component
     const product = (selectedItems && selectedItems.length > 0)
@@ -533,7 +585,7 @@ function App() {
 
   const AppShell = () => {
     const location = useLocation();
-    const isTryOnPage = location.pathname === '/try-on' || location.pathname === '/avatar-studio' || location.pathname === '/ai-outfit';
+    const isTryOnPage = location.pathname === '/try-on' || location.pathname === '/avatar-studio' || location.pathname === '/ai-outfit' || location.pathname === '/size-compare';
     const isAdminRoute = location.pathname.startsWith('/admin');
 
     return (
@@ -597,6 +649,10 @@ function App() {
                         initialTab="users"
                       />
                     }
+                  />
+                  <Route
+                    path="users/:id"
+                    element={<AdminUserDetail />}
                   />
                   <Route
                     path="banners"
@@ -712,6 +768,9 @@ function App() {
             {/* TRANG SO SÁNH */}
             <Route path="/compare" element={<ComparePage onAddToCart={handleAddToCart} showToast={showToast} />} />
 
+            {/* PHÒNG SO SÁNH SIZE — Size Comparison Room */}
+            <Route path="/size-compare" element={<SizeComparisonRoom onAddToCart={(size) => { showToast(`Đã chọn ${size}!`, 'success'); }} />} />
+
             {/* TRANG GIỎ HÀNG MỚI (LUXURY CART) */}
             <Route path="/cart" element={<CartPage cartItems={cartItems} onRemove={handleRemoveFromCart} onUpdateQuantity={handleUpdateQuantity} onAddToCart={handleAddToCart} showToast={showToast} suggestionProducts={suggestionProducts} />} />
 
@@ -734,6 +793,7 @@ function App() {
             <Route path="/try-on" element={
               <VirtualTryOnWrapper
                 defaultProduct={suggestionProducts[0]}
+                allProducts={allProducts}
                 onAddToCart={handleAddToCart}
                 onBuyNow={handleBuyNow}
                 showToast={showToast}

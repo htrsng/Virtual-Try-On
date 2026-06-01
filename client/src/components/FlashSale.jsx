@@ -44,9 +44,9 @@ function FlashSale({ products = [] }) {
         <div
             className="flash-sale-section"
             style={{
-                background: 'linear-gradient(180deg, #1C1409 0%, #2C1F0E 8%, #2C1F0E 92%, #1C1409 100%)',
-                borderTop: '1px solid var(--border-dark)',
-                borderBottom: '1px solid var(--border-dark)',
+                background: 'linear-gradient(180deg, #fdfbf7 0%, #f7f3e8 100%)',
+                borderTop: '1px solid var(--gold-border)',
+                borderBottom: '1px solid var(--gold-border)',
                 borderRadius: '0',
                 margin: '0',
                 padding: '40px 0',
@@ -59,42 +59,42 @@ function FlashSale({ products = [] }) {
                 @media (max-width: 768px) {
                     .flash-sale-section { padding: 20px 16px !important; }
                 }
-                .dark-flash-card {
-                    background: var(--surface-dark-card) !important;
-                    border: 0.5px solid var(--border-dark) !important;
+                .light-flash-card {
+                    background: var(--surface-card) !important;
+                    border: 1px solid var(--gold-border) !important;
                     border-radius: 12px !important;
                     overflow: hidden !important;
                     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
-                    box-shadow: none !important;
+                    box-shadow: var(--card-shadow) !important;
                 }
-                .dark-flash-card:hover {
+                .light-flash-card:hover {
                     transform: translateY(-3px) scale(1.01) !important;
-                    border-color: rgba(201,150,63,0.4) !important;
-                    box-shadow: 0 8px 24px rgba(139,105,20,0.1) !important;
-                    background: rgba(201,150,63,0.04) !important;
+                    border-color: rgba(201,150,63,0.5) !important;
+                    box-shadow: 0 12px 24px rgba(201,150,63,0.12) !important;
                 }
-                .dark-flash-timer-box {
-                    background: rgba(255,255,255,0.08) !important;
-                    border: 0.5px solid rgba(255,255,255,0.2) !important;
-                    color: #FFFFFF !important;
+                .light-flash-timer-box {
+                    background: var(--surface-card) !important;
+                    border: 1px solid var(--gold-border) !important;
+                    color: var(--text-primary) !important;
+                    box-shadow: 0 4px 10px rgba(0,0,0,0.03) !important;
                 }
-                .dark-flash-timer-box .timer-value {
-                    color: #FFFFFF !important;
+                .light-flash-timer-box .timer-value {
+                    color: var(--text-primary) !important;
                 }
-                .dark-flash-timer-box .timer-unit {
-                    color: rgba(255,255,255,0.8) !important;
+                .light-flash-timer-box .timer-unit {
+                    color: var(--text-secondary) !important;
                 }
-                .dark-flash-title {
-                    color: #D4AF37 !important;
+                .light-flash-title {
+                    color: var(--text-primary) !important;
                 }
-                .dark-flash-price {
+                .light-flash-price {
                     color: var(--gold-primary) !important;
                 }
-                .dark-flash-name {
-                    color: var(--text-dark-primary) !important;
+                .light-flash-name {
+                    color: var(--text-primary) !important;
                 }
-                .dark-flash-original {
-                    color: rgba(232, 220, 200, 0.4) !important;
+                .light-flash-original {
+                    color: var(--text-secondary) !important;
                 }
                 `}
             </style>
@@ -122,12 +122,13 @@ function FlashSale({ products = [] }) {
                             <FiZap className="flash-icon" />
                         </motion.div>
                         <h2
-                            className="gradient-text dark-flash-title"
+                            className="gradient-text light-flash-title"
                             style={{
                                 fontFamily: 'inherit',
                                 letterSpacing: '0.08em',
                                 fontSize: '20px',
-                                fontWeight: '700'
+                                fontWeight: '700',
+                                color: 'var(--text-primary)'
                             }}
                         >
                             ⚡ FLASH SALE
@@ -135,10 +136,10 @@ function FlashSale({ products = [] }) {
                     </div>
 
                     <div className="countdown-timer" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span className="timer-label" style={{ color: 'var(--text-dark-primary)' }}>{t('ends_in')}</span>
+                        <span className="timer-label" style={{ color: 'var(--text-secondary)' }}>{t('ends_in')}</span>
                         <div className="timer-display">
                             <motion.div
-                                className="timer-box dark-flash-timer-box"
+                                className="timer-box light-flash-timer-box"
                                 animate={{ scale: [1, 1.05, 1] }}
                                 transition={{ duration: 1, repeat: Infinity }}
                                 style={{
@@ -153,9 +154,9 @@ function FlashSale({ products = [] }) {
                                 <span className="timer-value">{formatTime(timeLeft.hours)}</span>
                                 <span className="timer-unit">h</span>
                             </motion.div>
-                            <span className="timer-separator" style={{ color: '#FFFFFF' }}>:</span>
+                            <span className="timer-separator" style={{ color: 'var(--text-secondary)' }}>:</span>
                             <motion.div
-                                className="timer-box dark-flash-timer-box"
+                                className="timer-box light-flash-timer-box"
                                 animate={{ scale: [1, 1.05, 1] }}
                                 transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}
                                 style={{
@@ -170,9 +171,9 @@ function FlashSale({ products = [] }) {
                                 <span className="timer-value">{formatTime(timeLeft.minutes)}</span>
                                 <span className="timer-unit">m</span>
                             </motion.div>
-                            <span className="timer-separator" style={{ color: '#FFFFFF' }}>:</span>
+                            <span className="timer-separator" style={{ color: 'var(--text-secondary)' }}>:</span>
                             <motion.div
-                                className="timer-box dark-flash-timer-box"
+                                className="timer-box light-flash-timer-box"
                                 animate={{ scale: [1, 1.05, 1] }}
                                 transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
                                 style={{
@@ -216,7 +217,7 @@ function FlashSale({ products = [] }) {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                                className="flash-sale-card dark-flash-card"
+                                className="flash-sale-card light-flash-card"
                                 style={{}}
                             >
                                 <Link to={`/product/${product.id}`}>
@@ -254,8 +255,8 @@ function FlashSale({ products = [] }) {
 
                                     <div className="flash-product-info">
                                         <div className="price-section">
-                                            <span className="flash-price dark-flash-price">{typeof product.price === 'number' ? product.price.toLocaleString('vi-VN') : product.price} <u>đ</u></span>
-                                            <span className="original-price dark-flash-original">{typeof product.originalPrice === 'number' ? product.originalPrice.toLocaleString('vi-VN') : product.originalPrice}đ</span>
+                                            <span className="flash-price light-flash-price">{typeof product.price === 'number' ? product.price.toLocaleString('vi-VN') : product.price} <u>đ</u></span>
+                                            <span className="original-price light-flash-original">{typeof product.originalPrice === 'number' ? product.originalPrice.toLocaleString('vi-VN') : product.originalPrice}đ</span>
                                         </div>
 
                                         <div className="stock-progress">

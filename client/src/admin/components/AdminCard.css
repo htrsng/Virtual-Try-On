@@ -1,13 +1,33 @@
+/* ======================================================
+   AdminCard — Premium Content Card
+   ====================================================== */
+@import '../styles/admin-tokens.css';
+
 .acard {
     background: var(--a-surface);
     border: 1px solid var(--a-border);
     border-radius: var(--r-xl);
     box-shadow: var(--a-shadow-card);
-    transition: all var(--t-base);
+    transition: box-shadow var(--t-base), transform var(--t-base), border-color var(--t-base);
+    overflow: hidden;
+    position: relative;
+}
+
+.acard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(200,149,108,.15), transparent);
+    pointer-events: none;
 }
 
 .acard:hover {
     box-shadow: var(--a-shadow-card-hover);
+    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--a-border) 75%, var(--a-primary) 25%);
 }
 
 .acard--no-pad .acard__body {
@@ -19,22 +39,36 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--sp-5);
-    padding: var(--sp-6) var(--sp-7);
+    padding: var(--sp-5) var(--sp-7);
     border-bottom: 1px solid var(--a-border-light);
+    background: color-mix(in srgb, var(--a-surface) 97%, var(--a-primary-light) 3%);
 }
 
 .acard__title {
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 700;
     color: var(--a-text-heading);
     margin: 0;
     letter-spacing: -.01em;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+}
+
+.acard__title::before {
+    content: '';
+    width: 4px;
+    height: 18px;
+    background: var(--a-primary-gradient);
+    border-radius: var(--r-full);
+    flex-shrink: 0;
 }
 
 .acard__subtitle {
     font-size: 13px;
     color: var(--a-text-tertiary);
     margin: 3px 0 0;
+    padding-left: calc(4px + var(--sp-3));
 }
 
 .acard__action {

@@ -1,23 +1,34 @@
 /* ======================================================
-   DataTable — compact professional table
+   DataTable — Premium Admin Data Table
    ====================================================== */
+@import '../styles/admin-tokens.css';
 
 .dtable {
     width: 100%;
 }
 
-/* Toolbar */
+/* ── Toolbar ── */
 .dtable__toolbar {
     display: flex;
     align-items: center;
     gap: var(--sp-4);
-    padding: var(--sp-5) var(--sp-6);
+    padding: var(--sp-4) var(--sp-6);
     border-bottom: 1px solid var(--a-border-light);
     flex-wrap: wrap;
-    background: color-mix(in srgb, var(--a-surface) 92%, var(--a-primary-light) 8%);
+    background: color-mix(in srgb, var(--a-surface) 95%, var(--a-primary-light) 5%);
+    position: relative;
+}
+.dtable__toolbar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(200,149,108,.12), transparent);
 }
 
-/* Search */
+/* ── Search ── */
 .dtable__search {
     position: relative;
     flex: 1;
@@ -31,18 +42,23 @@
     transform: translateY(-50%);
     color: var(--a-text-tertiary);
     pointer-events: none;
+    transition: color var(--t-fast);
+}
+
+.dtable__search:focus-within .dtable__search-icon {
+    color: var(--a-primary);
 }
 
 .dtable__search-input {
     width: 100%;
     padding: var(--sp-2-5) var(--sp-4) var(--sp-2-5) 38px;
     border: 1px solid var(--a-border);
-    border-radius: var(--r-md);
+    border-radius: var(--r-lg);
     font-size: 14px;
     color: var(--a-text);
     background: var(--a-surface);
     font-family: var(--admin-font);
-    min-height: 42px;
+    min-height: 40px;
     transition: border-color var(--t-fast), box-shadow var(--t-fast), background-color var(--t-fast);
 }
 
@@ -50,14 +66,14 @@
     outline: none;
     border-color: var(--a-primary);
     box-shadow: 0 0 0 3px var(--a-primary-ring);
-    background: color-mix(in srgb, var(--a-surface) 95%, var(--a-primary-light) 5%);
+    background: var(--a-surface);
 }
 
 .dtable__search-input::placeholder {
     color: var(--a-text-tertiary);
 }
 
-/* Bulk actions */
+/* ── Bulk actions ── */
 .dtable__bulk {
     display: flex;
     align-items: center;
@@ -67,11 +83,12 @@
 
 .dtable__bulk-count {
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 600;
     color: var(--a-primary);
     background: var(--a-primary-light);
     padding: var(--sp-1) var(--sp-3);
     border-radius: var(--r-full);
+    border: 1px solid var(--a-primary-ring);
 }
 
 .dtable__bulk-dropdown {
@@ -82,66 +99,62 @@
     display: flex;
     align-items: center;
     gap: var(--sp-2);
-    padding: var(--sp-2) var(--sp-3);
+    padding: var(--sp-2) var(--sp-3-5);
     border: 1px solid var(--a-border);
     border-radius: var(--r-md);
     background: var(--a-surface);
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 600;
     color: var(--a-text);
     cursor: pointer;
-    transition: border-color var(--t-fast), box-shadow var(--t-fast), transform var(--t-fast);
+    transition: all var(--t-fast);
     font-family: var(--admin-font);
 }
 
 .dtable__bulk-btn:hover {
     border-color: var(--a-primary);
+    color: var(--a-primary);
+    background: var(--a-primary-light);
     transform: translateY(-1px);
     box-shadow: var(--a-shadow-sm);
 }
 
 .dtable__bulk-menu {
     position: absolute;
-    top: calc(100% + 4px);
+    top: calc(100% + 6px);
     right: 0;
-    min-width: 160px;
+    min-width: 168px;
     background: var(--a-surface);
     border: 1px solid var(--a-border);
-    border-radius: var(--r-sm);
-    box-shadow: var(--a-shadow-md);
+    border-radius: var(--r-md);
+    box-shadow: var(--a-shadow-lg);
     z-index: 20;
     padding: var(--sp-1) 0;
     animation: dtMenuIn var(--t-fast);
 }
 
 @keyframes dtMenuIn {
-    from {
-        opacity: 0;
-        transform: translateY(-4px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(-6px) scale(.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .dtable__bulk-action {
     display: block;
     width: 100%;
-    padding: var(--sp-2) var(--sp-4);
+    padding: var(--sp-2-5) var(--sp-4);
     background: none;
     border: none;
     text-align: left;
     font-size: 13px;
     color: var(--a-text);
     cursor: pointer;
-    transition: background var(--t-fast);
+    transition: background var(--t-fast), padding-left var(--t-fast);
     font-family: var(--admin-font);
 }
 
 .dtable__bulk-action:hover {
     background: var(--a-surface-alt);
+    padding-left: 20px;
 }
 
 .dtable__bulk-action--danger {
@@ -152,7 +165,7 @@
     background: var(--a-danger-light);
 }
 
-/* Table */
+/* ── Table ── */
 .dtable__wrap {
     overflow-x: auto;
 }
@@ -163,22 +176,22 @@
 }
 
 .dtable__th {
-    padding: var(--sp-3-5) var(--sp-5);
-    font-size: 12px;
+    padding: var(--sp-3) var(--sp-5);
+    font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: .06em;
+    letter-spacing: .08em;
     color: var(--a-text-tertiary);
-    background: var(--a-surface-alt);
-    border-bottom: 1px solid var(--a-border);
+    background: color-mix(in srgb, var(--a-surface-alt) 95%, var(--a-primary-light) 5%);
+    border-bottom: 2px solid var(--a-border);
     white-space: nowrap;
     position: sticky;
     top: 0;
-    backdrop-filter: blur(8px);
+    z-index: 2;
 }
 
 .dtable__th--check {
-    width: 40px;
+    width: 44px;
     text-align: center;
 }
 
@@ -191,11 +204,12 @@
 }
 
 .dtable__tr:hover {
-    background: color-mix(in srgb, var(--a-surface-alt) 92%, var(--a-primary-light) 8%);
+    background: color-mix(in srgb, var(--a-surface-alt) 90%, var(--a-primary-light) 10%);
 }
 
 .dtable__tr--selected {
     background: var(--a-primary-light) !important;
+    box-shadow: inset 3px 0 0 var(--a-primary);
 }
 
 .dtable__td {
@@ -208,15 +222,16 @@
 }
 
 .dtable__td--check {
-    width: 40px;
+    width: 44px;
     text-align: center;
 }
 
 .dtable__checkbox {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     accent-color: var(--a-primary);
     cursor: pointer;
+    border-radius: 4px;
 }
 
 .dtable__checkbox:focus-visible {
@@ -224,20 +239,25 @@
     outline-offset: 2px;
 }
 
-/* Empty state */
+/* ── Empty state ── */
 .dtable__empty {
     padding: var(--sp-14) var(--sp-5);
     text-align: center;
     color: var(--a-text-tertiary);
-    font-size: 15px;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-3);
 }
 
-/* Skeleton */
+/* ── Skeleton loading ── */
 .dtable__skeleton {
     height: 14px;
-    background: var(--a-border-light);
+    background: linear-gradient(90deg, var(--a-border-light) 25%, var(--a-border) 50%, var(--a-border-light) 75%);
+    background-size: 200% 100%;
     border-radius: var(--r-sm);
-    animation: dtSkelPulse 1.2s infinite ease-in-out;
+    animation: dtSkelShimmer 1.4s infinite;
 }
 
 .dtable__skeleton--check {
@@ -247,29 +267,23 @@
     margin: 0 auto;
 }
 
-@keyframes dtSkelPulse {
-
-    0%,
-    100% {
-        opacity: .5;
-    }
-
-    50% {
-        opacity: 1;
-    }
+@keyframes dtSkelShimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }
 
-/* Pagination */
+/* ── Pagination ── */
 .dtable__pagination {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: var(--sp-4) var(--sp-6);
     border-top: 1px solid var(--a-border-light);
+    background: color-mix(in srgb, var(--a-surface) 96%, var(--a-primary-light) 4%);
 }
 
 .dtable__page-info {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--a-text-secondary);
     font-weight: 500;
 }
@@ -281,36 +295,37 @@
 }
 
 .dtable__page-btn {
-    min-width: 36px;
-    height: 36px;
+    min-width: 34px;
+    height: 34px;
     display: grid;
     place-items: center;
     border: 1px solid var(--a-border);
     border-radius: var(--r-md);
     background: var(--a-surface);
     color: var(--a-text-secondary);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    transition: border-color var(--t-fast), color var(--t-fast), transform var(--t-fast), box-shadow var(--t-fast);
+    transition: all var(--t-fast);
     font-family: var(--admin-font);
 }
 
 .dtable__page-btn:hover:not(:disabled) {
     border-color: var(--a-primary);
     color: var(--a-primary);
+    background: var(--a-primary-light);
     transform: translateY(-1px);
-    box-shadow: var(--a-shadow-sm);
 }
 
 .dtable__page-btn--active {
-    background: var(--a-primary);
+    background: var(--a-primary-gradient);
     color: #fff !important;
     border-color: var(--a-primary) !important;
+    box-shadow: 0 2px 8px rgba(200,149,108,.3);
 }
 
 .dtable__page-btn:disabled {
-    opacity: .4;
+    opacity: .35;
     cursor: not-allowed;
 }
 

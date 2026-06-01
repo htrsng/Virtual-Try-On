@@ -81,28 +81,34 @@ export default function ResultPanel({
       `}</style>
 
       <div style={{
-        padding: '20px 20px 14px',
+        padding: '12px 16px',
         borderBottom: '1px solid var(--gold-divider)',
-        flexShrink: 0
+        flexShrink: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <div>
-            <div style={{
-              fontSize: '9px',
-              letterSpacing: '0.12em',
-              color: 'var(--gold-primary)',
-              opacity: 0.7,
-              marginBottom: '4px'
-            }}>
-              ✦ GEMINI AI STYLIST
-            </div>
-            <h2 style={{ fontSize: '18px', fontWeight: '600', color: 'var(--text-primary)', margin: 0 }}>
-              Gợi ý AI
-            </h2>
-            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }}>
-              Outfit được tạo riêng cho bạn
-            </div>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+             <span style={{ fontSize: '16px' }}>✨</span>
+             <h2 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.01em' }}>
+                Stylist AI của bạn
+             </h2>
           </div>
+          <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }}>
+            Outfit được tạo riêng cho bạn
+          </div>
+        </div>
+        <div style={{
+            fontSize: '9px',
+            letterSpacing: '0.08em',
+            color: 'var(--gold-primary)',
+            fontWeight: '700',
+            background: 'var(--gold-light)',
+            padding: '4px 8px',
+            borderRadius: '12px'
+        }}>
+            VFIT STYLIST
         </div>
       </div>
 
@@ -146,31 +152,58 @@ export default function ResultPanel({
         </div>
       ) : (
         <>
-          <div style={{
-            margin: '14px 16px 10px',
-            background: 'var(--surface-subtle)',
-            border: '1px solid var(--gold-border)',
-            borderRadius: '12px',
-            padding: '12px 16px',
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '8px',
-            flexShrink: 0
-          }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '16px', fontWeight: '700', color: 'var(--gold-primary)' }}>{outfits.length}</div>
-              <div style={{ fontSize: '9px', color: 'var(--text-secondary)', marginTop: '2px', letterSpacing: '0.06em' }}>BỘ OUTFIT</div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '16px', fontWeight: '700', color: 'var(--gold-primary)' }}>{inClosetCount}</div>
-              <div style={{ fontSize: '9px', color: 'var(--text-secondary)', marginTop: '2px', letterSpacing: '0.06em' }}>TỦ ĐỒ ✓</div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '16px', fontWeight: '700', color: 'var(--gold-primary)' }}>
-                {lowestCost !== Infinity ? `${(lowestCost / 1000)}k` : '0đ'}
+          {/* Top Panel - Combined Insights and Stats */}
+          <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '8px', flexShrink: 0 }}>
+              {/* AI Insights */}
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(212,169,66,0.12) 0%, rgba(242,216,120,0.04) 100%)',
+                border: '1px solid rgba(212,169,66,0.3)',
+                borderRadius: '10px',
+                padding: '10px 12px',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '8px'
+              }}>
+                <span style={{ fontSize: '14px' }}>✨</span>
+                <div>
+                    <div style={{ fontSize: '11px', fontWeight: '700', color: 'var(--gold-primary)', marginBottom: '2px' }}>AI nhận thấy</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                        Bạn thích <strong style={{ color: 'var(--text-primary)' }}>Casual</strong> & <strong style={{ color: 'var(--text-primary)' }}>Tone sáng</strong>.
+                        Gợi ý: <strong style={{ color: 'var(--gold-primary)' }}>Casual Everyday</strong>
+                    </div>
+                </div>
               </div>
-              <div style={{ fontSize: '9px', color: 'var(--text-secondary)', marginTop: '2px', letterSpacing: '0.06em' }}>TỪ</div>
-            </div>
+
+              {/* Stats Bar */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                background: 'var(--surface-subtle)',
+                border: '1px solid var(--gold-border)',
+                borderRadius: '10px',
+                padding: '8px 12px',
+                alignItems: 'center'
+              }}>
+                  <div style={{ display: 'flex', gap: '14px' }}>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                        <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-primary)' }}>{outfits.length}</span>
+                        <span style={{ fontSize: '9px', color: 'var(--text-secondary)' }}>OUTFIT</span>
+                    </div>
+                    <div style={{ width: '1px', background: 'var(--gold-divider)', height: '12px', alignSelf: 'center' }} />
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                        <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-primary)' }}>{inClosetCount}</span>
+                        <span style={{ fontSize: '9px', color: 'var(--text-secondary)' }}>TỦ ĐỒ</span>
+                    </div>
+                    <div style={{ width: '1px', background: 'var(--gold-divider)', height: '12px', alignSelf: 'center' }} />
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                        <span style={{ fontSize: '9px', color: 'var(--text-secondary)' }}>TỪ</span>
+                        <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-primary)' }}>{lowestCost !== Infinity ? `${(lowestCost / 1000)}k` : '0đ'}</span>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '10px', color: '#10b981', fontWeight: '500' }}>
+                     👍 94% phù hợp
+                  </div>
+              </div>
           </div>
 
           <div style={listStyle} className="suggestions-scroll">

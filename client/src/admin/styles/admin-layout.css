@@ -869,3 +869,197 @@
     outline: 3px solid var(--a-primary-ring);
     outline-offset: 2px;
 }
+
+/* ══════════════════════════════════════
+   PREMIUM VISUAL UPGRADE LAYER v2
+   ══════════════════════════════════════ */
+
+/* ── Sidebar: glowing brand strip at top ── */
+.adm-sidebar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--a-primary-gradient);
+    z-index: 1;
+    opacity: 0.9;
+}
+
+/* ── Sidebar: subtle inner glow ── */
+.adm-sidebar {
+    box-shadow: 4px 0 32px rgba(0,0,0,0.18), var(--a-sidebar-glow);
+}
+
+/* ── Brand: pulse ring on hover ── */
+.adm-sidebar__brand-icon {
+    transition: transform var(--t-base), box-shadow var(--t-base);
+}
+.adm-sidebar__brand:hover .adm-sidebar__brand-icon {
+    transform: scale(1.06);
+    box-shadow: 0 8px 20px rgba(200, 149, 108, .4);
+}
+
+/* ── Active menu item: stronger left accent ── */
+.adm-menu-item--active {
+    background: linear-gradient(90deg, rgba(200,149,108,.18) 0%, rgba(200,149,108,.04) 100%);
+    border-left-color: var(--a-primary);
+    box-shadow: inset 0 0 0 1px rgba(200, 149, 108, .15);
+}
+
+/* ── Menu items: slide indicator dot ── */
+.adm-menu-item--active .adm-menu-item__icon {
+    color: var(--a-sidebar-active-text);
+    filter: drop-shadow(0 0 4px rgba(212,166,126,.35));
+}
+
+/* ── Group label: decorative line ── */
+.adm-menu-group__label {
+    position: relative;
+}
+.adm-menu-group__label::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 24px;
+    right: 20px;
+    height: 1px;
+    background: var(--a-sidebar-border);
+    opacity: 0.5;
+}
+
+/* ── Topbar: glass effect ── */
+.adm-topbar {
+    background: color-mix(in srgb, var(--a-surface) 92%, var(--a-primary-light) 8%);
+    border-bottom: 1px solid color-mix(in srgb, var(--a-border) 85%, var(--a-primary) 15%);
+    backdrop-filter: blur(16px) saturate(1.4);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+}
+
+/* ── Search bar: glowing focus ── */
+.adm-topbar__search-input:focus {
+    background: var(--a-surface);
+    box-shadow: 0 0 0 3px var(--a-primary-ring), 0 2px 12px rgba(200,149,108,.1);
+}
+
+/* ── Action buttons: more distinct ── */
+.adm-topbar__btn:hover {
+    background: var(--a-primary-light);
+    color: var(--a-primary);
+    border-color: var(--a-primary-ring);
+}
+
+.adm-topbar__theme:hover {
+    background: var(--a-primary-light);
+    color: var(--a-primary);
+    border-color: var(--a-primary);
+    box-shadow: 0 0 0 3px var(--a-primary-ring);
+}
+
+/* ── Profile button: premium look ── */
+.adm-topbar__profile:hover {
+    background: var(--a-primary-light);
+    border-color: var(--a-primary-ring);
+}
+.adm-topbar__profile-avatar {
+    box-shadow: 0 2px 8px rgba(200,149,108,.3), 0 0 0 2px rgba(200,149,108,.15);
+}
+
+/* ── Content area: subtle top gradient ── */
+.adm-content {
+    background: var(--a-bg);
+    min-height: calc(100vh - var(--topbar-h));
+}
+
+/* ── Page fade-in ── */
+.adm-content > * {
+    animation: admPageIn 0.25s ease;
+}
+@keyframes admPageIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Cards in content: hover lift ── */
+.acard {
+    transition: box-shadow var(--t-base), transform var(--t-base), border-color var(--t-base);
+}
+.acard:hover {
+    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--a-border) 80%, var(--a-primary) 20%);
+}
+
+/* ── Stat cards: accent glow on hover ── */
+.scard:hover .scard__icon-wrap {
+    transform: scale(1.08);
+    transition: transform var(--t-spring);
+}
+.scard__icon-wrap {
+    transition: transform var(--t-base);
+}
+
+/* ── Notification badge: improved animation ── */
+.adm-notif-badge {
+    animation: admBadgeBounce 2.5s ease infinite;
+}
+@keyframes admBadgeBounce {
+    0%, 80%, 100% { transform: scale(1); }
+    40% { transform: scale(1.15); }
+}
+
+/* ── Notification dropdown: premium card ── */
+.adm-notif-dropdown {
+    box-shadow:
+        0 4px 6px rgba(0,0,0,.05),
+        0 12px 36px rgba(0,0,0,.12),
+        0 0 0 1px rgba(200,149,108,.1);
+    border-color: color-mix(in srgb, var(--a-border) 80%, var(--a-primary) 20%);
+}
+
+/* ── User card in sidebar: separator line ── */
+.adm-sidebar__user {
+    background: linear-gradient(135deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+}
+
+/* ── Logout button: smooth danger highlight ── */
+.adm-sidebar__logout {
+    border-radius: var(--r-md);
+}
+
+/* ── Mobile overlay: smoother ── */
+.adm-overlay--visible {
+    background: rgba(0,0,0,.45);
+    backdrop-filter: blur(4px);
+}
+
+/* ── Scrollbar: thin gold accents ── */
+.adm-sidebar__nav::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(200,149,108,.3), rgba(200,149,108,.15));
+}
+.adm-sidebar__nav::-webkit-scrollbar-thumb:hover {
+    background: rgba(200,149,108,.5);
+}
+
+/* ── Admin table rows: zebra with tint ── */
+.adm-page__table tbody tr:nth-child(even) {
+    background: color-mix(in srgb, var(--a-surface) 97%, var(--a-primary-light) 3%);
+}
+.adm-page__table tbody tr:hover {
+    background: color-mix(in srgb, var(--a-surface-alt) 90%, var(--a-primary-light) 10%);
+}
+
+/* ── SectionHeader: bottom border gradient ── */
+.section-header {
+    position: relative;
+}
+.section-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: var(--a-primary-gradient);
+    border-radius: var(--r-full);
+}

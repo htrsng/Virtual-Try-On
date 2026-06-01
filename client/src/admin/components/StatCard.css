@@ -1,3 +1,8 @@
+/* ======================================================
+   StatCard — Premium Metric Card
+   ====================================================== */
+@import '../styles/admin-tokens.css';
+
 .scard {
     display: flex;
     align-items: flex-start;
@@ -12,51 +17,55 @@
     overflow: hidden;
 }
 
-.scard::after {
+/* Gradient top accent bar */
+.scard::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     height: 3px;
+    transition: opacity var(--t-base), height var(--t-base);
     opacity: 0;
-    transition: opacity var(--t-fast);
+}
+
+/* Subtle shimmer overlay */
+.scard::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.04), transparent);
+    transition: left 0.6s ease;
+    pointer-events: none;
+}
+
+.scard:hover::after {
+    left: 150%;
 }
 
 .scard:hover {
     box-shadow: var(--a-shadow-card-hover);
-    transform: translateY(-2px);
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--a-border) 70%, var(--a-primary) 30%);
 }
 
-.scard:hover::after {
+.scard:hover::before {
     opacity: 1;
+    height: 4px;
 }
 
-.scard--primary::after {
-    background: var(--a-primary-gradient);
-}
+/* ── Per-color accent bars ── */
+.scard--primary::before  { background: var(--a-primary-gradient); }
+.scard--success::before  { background: linear-gradient(90deg, #16a34a, #22c55e); }
+.scard--warning::before  { background: linear-gradient(90deg, #ea8b0e, #fbbf24); }
+.scard--danger::before   { background: linear-gradient(90deg, #dc2626, #ef4444); }
+.scard--info::before     { background: linear-gradient(90deg, #2563eb, #60a5fa); }
+.scard--purple::before   { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
 
-.scard--success::after {
-    background: linear-gradient(90deg, #16a34a, #22c55e);
-}
-
-.scard--warning::after {
-    background: linear-gradient(90deg, #ea8b0e, #fbbf24);
-}
-
-.scard--danger::after {
-    background: linear-gradient(90deg, #dc2626, #ef4444);
-}
-
-.scard--info::after {
-    background: linear-gradient(90deg, #2563eb, #60a5fa);
-}
-
-.scard--purple::after {
-    background: linear-gradient(90deg, #7c3aed, #a78bfa);
-}
-
-/* Icon */
+/* ── Icon wrap ── */
 .scard__icon-wrap {
     width: 52px;
     height: 52px;
@@ -65,77 +74,75 @@
     place-items: center;
     flex-shrink: 0;
     font-size: 22px;
+    transition: transform var(--t-base), box-shadow var(--t-base);
 }
 
-.scard--primary .scard__icon-wrap {
-    background: var(--a-primary-light);
-    color: var(--a-primary);
+.scard:hover .scard__icon-wrap {
+    transform: scale(1.1) rotate(-4deg);
 }
 
-.scard--success .scard__icon-wrap {
-    background: var(--a-success-light);
-    color: var(--a-success);
-}
+.scard--primary .scard__icon-wrap { background: var(--a-primary-light);  color: var(--a-primary); }
+.scard--success .scard__icon-wrap { background: var(--a-success-light);  color: var(--a-success); }
+.scard--warning .scard__icon-wrap { background: var(--a-warning-light);  color: var(--a-warning); }
+.scard--danger  .scard__icon-wrap { background: var(--a-danger-light);   color: var(--a-danger); }
+.scard--info    .scard__icon-wrap { background: var(--a-info-light);     color: var(--a-info); }
+.scard--purple  .scard__icon-wrap { background: var(--a-purple-light);   color: var(--a-purple); }
 
-.scard--warning .scard__icon-wrap {
-    background: var(--a-warning-light);
-    color: var(--a-warning);
-}
+.scard:hover .scard--primary .scard__icon-wrap { box-shadow: 0 4px 14px rgba(200,149,108,.25); }
+.scard:hover .scard--success .scard__icon-wrap { box-shadow: 0 4px 14px rgba(22,163,74,.25); }
+.scard:hover .scard--warning .scard__icon-wrap { box-shadow: 0 4px 14px rgba(234,139,14,.25); }
 
-.scard--danger .scard__icon-wrap {
-    background: var(--a-danger-light);
-    color: var(--a-danger);
-}
-
-.scard--info .scard__icon-wrap {
-    background: var(--a-info-light);
-    color: var(--a-info);
-}
-
-.scard--purple .scard__icon-wrap {
-    background: var(--a-purple-light);
-    color: var(--a-purple);
-}
-
-/* Body */
+/* ── Body ── */
 .scard__body {
     flex: 1;
     min-width: 0;
 }
 
 .scard__label {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     color: var(--a-text-secondary);
     margin-bottom: var(--sp-1-5);
     letter-spacing: .01em;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: .08em;
+    font-weight: 600;
 }
 
 .scard__value {
-    font-size: 26px;
+    font-size: 28px;
     font-weight: 800;
-    color: var(--a-text);
-    line-height: 1.15;
-    margin-bottom: var(--sp-2-5);
-    letter-spacing: -.02em;
+    color: var(--a-text-heading);
+    line-height: 1.1;
+    margin-bottom: var(--sp-2);
+    letter-spacing: -.03em;
 }
 
-/* Trend */
+/* ── Trend ── */
 .scard__trend {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: var(--sp-1);
-    font-size: 13px;
-    font-weight: 500;
+    font-size: 12px;
+    font-weight: 600;
     color: var(--a-text-tertiary);
+    background: var(--a-surface-alt);
+    padding: 3px 8px;
+    border-radius: var(--r-full);
+    border: 1px solid var(--a-border-light);
 }
 
 .scard__trend--up {
     color: var(--a-success);
+    background: var(--a-success-light);
+    border-color: var(--a-success-medium);
 }
 
 .scard__trend--down {
     color: var(--a-danger);
+    background: var(--a-danger-light);
+    border-color: var(--a-danger-medium);
 }
 
 .scard__trend-text {
@@ -143,14 +150,14 @@
     margin-left: var(--sp-1);
 }
 
-/* Responsive */
+/* ── Responsive ── */
 @media (max-width: 640px) {
     .scard {
         padding: var(--sp-4);
     }
 
     .scard__value {
-        font-size: 18px;
+        font-size: 20px;
     }
 
     .scard__icon-wrap {

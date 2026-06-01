@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { OutfitResult, OutfitItem } from '../../types/outfit';
 
 interface OutfitCardProps {
@@ -19,6 +20,8 @@ export default function OutfitCard({
     isLocalFallback = false,
 }: OutfitCardProps) {
     const [expanded, setExpanded] = useState(isSelected);
+    const [isLoadingSession, setIsLoadingSession] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         setExpanded(isSelected);
@@ -117,8 +120,8 @@ export default function OutfitCard({
                             const pImage = p.image || p.thumbnail || p.img || p.imageUrl || p.images?.[0];
                             return (
                                 <div key={i} style={{
-                                    width: '32px',
-                                    height: '40px',
+                                    width: '36px',
+                                    height: '44px',
                                     borderRadius: '6px',
                                     overflow: 'hidden',
                                     background: 'var(--gold-light)',
@@ -137,7 +140,7 @@ export default function OutfitCard({
                         })}
                         {items.length > 3 && (
                             <div style={{
-                                width: '32px', height: '40px',
+                                width: '36px', height: '44px',
                                 borderRadius: '6px',
                                 background: 'var(--gold-light)',
                                 border: '1px solid var(--gold-border)',
@@ -158,20 +161,22 @@ export default function OutfitCard({
             </div>
 
             <div style={{ margin: '0 14px 10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ fontSize: '9px', color: 'var(--text-secondary)', letterSpacing: '0.06em', minWidth: '28px' }}>ĐỘ PHÙ HỢP</div>
-                <div style={{ flex: 1, height: '3px', background: 'var(--gold-light)', borderRadius: '2px', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ fontSize: '10px', color: 'var(--text-secondary)', letterSpacing: '0.06em', minWidth: '28px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span style={{ color: 'var(--gold-primary)' }}>⭐</span> ĐỘ PHÙ HỢP
+                </div>
+                <div style={{ flex: 1, height: '6px', background: 'var(--gold-light)', borderRadius: '3px', position: 'relative', overflow: 'hidden' }}>
                     <div style={{
                         position: 'absolute',
                         left: 0,
                         top: 0,
-                        height: '3px',
-                        borderRadius: '2px',
+                        height: '6px',
+                        borderRadius: '3px',
                         background: scoreFill,
                         width: `${score}%`,
                         transition: 'width 0.6s ease 0.1s'
                     }} />
                 </div>
-                <div style={{ fontSize: '9px', fontWeight: '700', color: scoreColor }}>{score}%</div>
+                <div style={{ fontSize: '11px', fontWeight: '700', color: scoreColor }}>{score}%</div>
             </div>
 
             <div style={{ padding: '0 14px 10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -201,8 +206,8 @@ export default function OutfitCard({
                         >
                             {/* THUMBNAIL */}
                             <div style={{
-                                width: '52px',
-                                height: '64px',
+                                width: '56px',
+                                height: '68px',
                                 flexShrink: 0,
                                 borderRadius: '8px',
                                 overflow: 'hidden',
@@ -310,81 +315,163 @@ export default function OutfitCard({
                                             : item.price}
                                     </span>
                                 )}
-                                <button
-                                    onClick={e => {
-                                        e.stopPropagation();
-                                        const productId = (item as any)._id || item.id || (item as any).productId;
-                                        if (productId) {
-                                            window.open(`/product/${productId}`, '_blank');
-                                        }
-                                    }}
-                                    style={{
-                                        background: 'transparent',
-                                        border: '1px solid var(--gold-border)',
-                                        borderRadius: '6px',
-                                        padding: '3px 8px',
-                                        fontSize: '9px',
-                                        color: 'var(--gold-primary)',
-                                        cursor: 'pointer',
-                                        whiteSpace: 'nowrap',
-                                        transition: 'all 0.15s',
-                                    }}
-                                    onMouseEnter={e => {
-                                        e.currentTarget.style.background = 'var(--gold-primary)';
-                                        e.currentTarget.style.color = '#0F0B07';
-                                    }}
-                                    onMouseLeave={e => {
-                                        e.currentTarget.style.background = 'transparent';
-                                        e.currentTarget.style.color = 'var(--gold-primary)';
-                                    }}
-                                >
-                                    Xem →
-                                </button>
+                                <div style={{ display: 'flex', gap: '4px' }}>
+                                        <button
+                                            onClick={e => {
+                                                e.stopPropagation();
+                                                const productId = (item as any)._id || item.id || (item as any).productId;
+                                                const size = item.suggestedSize || (item as any).size || (item as any).recommendedSize || 'M';
+                                                if (productId) {
+                                                    navigate(`/try-on?product_id=${productId}&size=${size}`);
+                                                }
+                                            }}
+                                            style={{
+                                                background: 'var(--gold-primary)',
+                                                border: '1px solid var(--gold-primary)',
+                                                borderRadius: '6px',
+                                                padding: '3px 8px',
+                                                fontSize: '9px',
+                                                fontWeight: '600',
+                                                color: '#0F0B07',
+                                                cursor: 'pointer',
+                                                whiteSpace: 'nowrap',
+                                                transition: 'all 0.15s',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '4px'
+                                            }}
+                                            onMouseEnter={e => {
+                                                e.currentTarget.style.opacity = '0.9';
+                                            }}
+                                            onMouseLeave={e => {
+                                                e.currentTarget.style.opacity = '1';
+                                            }}
+                                        >
+                                            <span>✨</span> Thử ngay
+                                        </button>
+                                    <button
+                                        onClick={e => {
+                                            e.stopPropagation();
+                                            const productId = (item as any)._id || item.id || (item as any).productId;
+                                            if (productId) {
+                                                window.open(`/product/${productId}`, '_blank');
+                                            }
+                                        }}
+                                        style={{
+                                            background: 'transparent',
+                                            border: '1px solid var(--gold-border)',
+                                            borderRadius: '6px',
+                                            padding: '3px 8px',
+                                            fontSize: '9px',
+                                            color: 'var(--gold-primary)',
+                                            cursor: 'pointer',
+                                            whiteSpace: 'nowrap',
+                                            transition: 'all 0.15s',
+                                        }}
+                                        onMouseEnter={e => {
+                                            e.currentTarget.style.background = 'var(--gold-primary)';
+                                            e.currentTarget.style.color = '#0F0B07';
+                                        }}
+                                        onMouseLeave={e => {
+                                            e.currentTarget.style.background = 'transparent';
+                                            e.currentTarget.style.color = 'var(--gold-primary)';
+                                        }}
+                                    >
+                                        Xem →
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     )
                 })}
             </div>
 
-            {outfit.aiReason && (
-                <div style={{ borderTop: '1px solid var(--gold-divider)' }}>
-                    <div
-                        style={{
-                            padding: '8px 14px',
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            cursor: 'pointer'
-                        }}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setExpanded(!expanded);
-                        }}
-                    >
-                        <div style={{ fontSize: '10px', color: 'var(--text-secondary)', letterSpacing: '0.04em' }}>
-                            ✦ LÝ DO AI CHỌN
-                        </div>
-                        <div style={{
-                            fontSize: '10px',
-                            color: 'var(--text-secondary)',
-                            transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                            transition: 'transform 0.2s ease'
-                        }}>
-                            ▼
+            {isSelected && (
+                <div style={{ borderTop: '1px solid var(--gold-divider)', padding: '12px 14px' }}>
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                        <div style={{ fontSize: '16px' }}>✨</div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-primary)', lineHeight: 1.5, fontStyle: 'italic', opacity: 0.9 }}>
+                            "Với phong cách Casual và ngân sách 2 triệu, tôi đề xuất outfit này vì sự thoải mái và phù hợp hoàn hảo."
                         </div>
                     </div>
-                    <div className={`ai-reason-content ${expanded ? 'expanded' : ''}`}>
-                        <div style={{
-                            padding: '0 14px 12px',
-                            fontSize: '11px',
-                            color: 'var(--text-secondary)',
-                            lineHeight: '1.6',
-                            background: 'var(--surface-subtle)',
-                            borderRadius: '0 0 8px 8px'
-                        }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ color: 'var(--gold-primary)' }}>✓</span> Hợp dáng người
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ color: 'var(--gold-primary)' }}>✓</span> Hợp ngân sách
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ color: 'var(--gold-primary)' }}>✓</span> Đúng phong cách
+                        </div>
+                    </div>
+                    {outfit.aiReason && (
+                        <div style={{ marginTop: '10px', fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.5, opacity: 0.8, paddingTop: '10px', borderTop: '1px dashed var(--gold-border)' }}>
                             {outfit.aiReason}
                         </div>
-                    </div>
+                    )}
+                </div>
+            )}
+            
+            {/* Try Entire Outfit Banner */}
+            {isSelected && outfit.items?.length > 0 && (
+                <div style={{ padding: '0 14px 14px' }}>
+                    <button
+                        onClick={async (e) => {
+                            e.stopPropagation();
+                            try {
+                                setIsLoadingSession(true);
+                                const token = localStorage.getItem("token");
+                                const itemsPayload = outfit.items.map((i: any) => ({
+                                    productId: i._id || i.id || i.productId,
+                                    size: i.suggestedSize || i.size || i.recommendedSize || 'M'
+                                }));
+                                
+                                const res = await fetch("http://localhost:5000/api/tryon/session", {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                        "Authorization": `Bearer ${token}`
+                                    },
+                                    body: JSON.stringify({ items: itemsPayload })
+                                });
+                                const data = await res.json();
+                                if (data.success && data.session_url) {
+                                    // analytics.track('tryon_from_stylist', { outfit_id: outfit.id, source: 'ai_stylist' })
+                                    navigate(data.session_url.replace('/virtual-try-on', '/try-on'));
+                                }
+                            } catch (err) {
+                                console.error("Tryon session error", err);
+                            } finally {
+                                setIsLoadingSession(false);
+                            }
+                        }}
+                        disabled={isLoadingSession}
+                        style={{
+                            width: '100%',
+                            background: 'linear-gradient(135deg, var(--gold-primary) 0%, #B8860B 100%)',
+                            color: '#0F0B07',
+                            border: 'none',
+                            borderRadius: '8px',
+                            padding: '10px',
+                            fontSize: '13px',
+                            fontWeight: '700',
+                            cursor: isLoadingSession ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                            transition: 'all 0.2s ease',
+                            opacity: isLoadingSession ? 0.7 : 1,
+                            boxShadow: '0 4px 12px rgba(212,169,66,0.3)'
+                        }}
+                    >
+                        {isLoadingSession ? 'Đang tạo phòng thử...' : (
+                            <>
+                                <span style={{ fontSize: '16px' }}>👕</span> Thử cả bộ Outfit này
+                            </>
+                        )}
+                    </button>
                 </div>
             )}
         </div>

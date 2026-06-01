@@ -600,11 +600,16 @@ function AdminPage({
                                                         </button>
                                                     </>
                                                 ) : (
-                                                    item.email !== 'admin' && (
-                                                        <button className="adm-page__act-btn adm-page__act-btn--delete" onClick={() => handleDelete(users, setUsers, item.id)}>
-                                                            <FiTrash2 size={14} /> Xóa
+                                                    <>
+                                                        <button className="adm-page__act-btn adm-page__act-btn--edit" onClick={() => navigate(`/admin/users/${item._id}`)} style={{ background: 'var(--a-surface-alt)', color: 'var(--a-text)' }}>
+                                                            <FiUser size={14} /> Xem chi tiết
                                                         </button>
-                                                    )
+                                                        {item.email !== 'admin' && (
+                                                            <button className="adm-page__act-btn adm-page__act-btn--delete" onClick={() => handleDelete(users, setUsers, item.id)}>
+                                                                <FiTrash2 size={14} /> Xóa
+                                                            </button>
+                                                        )}
+                                                    </>
                                                 )}
 
                                                 {activeTab === 'users' && item.email !== 'admin' && (

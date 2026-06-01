@@ -1,0 +1,175 @@
+/* ======================================================
+   AdminUserDetail — Premium User Profile
+   ====================================================== */
+@import '../styles/admin-tokens.css';
+
+.user-detail-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-6);
+    animation: admPageIn 0.3s ease;
+}
+
+/* ── Profile Header Card ── */
+.user-profile-header {
+    background: var(--a-surface);
+    border-radius: var(--r-xl);
+    padding: var(--sp-7);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-6);
+    box-shadow: var(--a-shadow-card);
+    border: 1px solid var(--a-border);
+    position: relative;
+    overflow: hidden;
+}
+
+.user-profile-header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: var(--a-primary-gradient);
+}
+
+.user-avatar-lg {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--r-full);
+    background: var(--a-surface-alt);
+    display: grid;
+    place-items: center;
+    font-size: 32px;
+    color: var(--a-text-tertiary);
+    border: 2px solid var(--a-border-light);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.user-avatar-lg.admin {
+    background: var(--a-primary-light);
+    color: var(--a-primary);
+    border-color: var(--a-primary-ring);
+}
+
+.user-info-main {
+    flex: 1;
+}
+
+.user-name {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--a-text-heading);
+    margin: 0 0 var(--sp-2);
+    letter-spacing: -.02em;
+}
+
+.user-email {
+    font-size: 15px;
+    color: var(--a-text-secondary);
+    margin: 0 0 var(--sp-3);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+}
+
+.user-meta-tags {
+    display: flex;
+    gap: var(--sp-3);
+    align-items: center;
+}
+
+.user-meta-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--a-text-tertiary);
+    background: var(--a-surface-alt);
+    padding: 4px 12px;
+    border-radius: var(--r-full);
+    border: 1px solid var(--a-border-light);
+}
+
+/* ── Stats Grid ── */
+.user-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--sp-5);
+}
+
+/* ── Tabs ── */
+.user-tabs {
+    display: flex;
+    gap: var(--sp-6);
+    border-bottom: 1px solid var(--a-border-light);
+    margin-bottom: var(--sp-5);
+}
+
+.user-tab-btn {
+    padding: var(--sp-3) 0;
+    background: none;
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--a-text-secondary);
+    cursor: pointer;
+    position: relative;
+    transition: color var(--t-fast);
+}
+
+.user-tab-btn:hover {
+    color: var(--a-text-heading);
+}
+
+.user-tab-btn.active {
+    color: var(--a-primary);
+}
+
+.user-tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--a-primary);
+    border-radius: 3px 3px 0 0;
+}
+
+/* ── Empty State ── */
+.user-empty-state {
+    padding: var(--sp-12) var(--sp-6);
+    text-align: center;
+    color: var(--a-text-tertiary);
+    background: var(--a-surface);
+    border-radius: var(--r-xl);
+    border: 1px dashed var(--a-border);
+}
+
+.user-empty-icon {
+    font-size: 48px;
+    margin-bottom: var(--sp-4);
+    opacity: 0.5;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .user-profile-header {
+        flex-direction: column;
+        text-align: center;
+        padding: var(--sp-5);
+    }
+    
+    .user-email {
+        justify-content: center;
+    }
+    
+    .user-meta-tags {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .user-stats-grid {
+        grid-template-columns: 1fr;
+    }
+}

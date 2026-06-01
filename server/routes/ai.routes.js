@@ -164,6 +164,7 @@ function createAiRouter(deps) {
                         aiStylist.formFit
                         aiStylist.material
                         aiStylist.description
+                        model3D
                     `)
                     .limit(120)
                     .lean(), 6000, "product lookup");
@@ -179,6 +180,7 @@ function createAiRouter(deps) {
                         aiStylist.colorTone
                         aiStylist.formFit
                         aiStylist.material
+                        model3D
                     `)
                     .limit(120)
                     .lean(), 6000, "product fallback lookup");
@@ -592,7 +594,7 @@ OUTPUT FORMAT (JSON thuần, không markdown, không giải thích):
                     if (!dbProduct && mongoose.Types.ObjectId.isValid(productId)) {
                         try {
                             dbProduct = await ProductModel.findById(productId)
-                                .select("name price imageUrl category")
+                                .select("name price imageUrl category model3D")
                                 .lean();
                         } catch (_) {}
                     }
@@ -630,6 +632,9 @@ OUTPUT FORMAT (JSON thuần, không markdown, không giải thích):
                         item.suggestedSize = size;
                         item.sizeReason = item.sizeReason || buildSizeReason(slot, size);
                         item.owned = ownedIdSet.has(productId);
+                        
+                        // Check if 3D model exists for try-on
+                        item.tryon_ready = !!(dbProduct.model3D && dbProduct.model3D.url);
 
                         validItems.push(item);
                     }

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { SendHorizontal } from 'lucide-react'
+import { SendHorizontal, ChevronUp, ChevronDown } from 'lucide-react'
 import type { ChatMessage } from '../../types/outfit'
 
 interface ChatBoxProps {
@@ -19,16 +19,20 @@ const DEFAULT_SUGGESTIONS = [
 
 export default function ChatBox({ messages, onSend, isLoading, activeTab }: ChatBoxProps) {
   const [input, setInput] = useState('')
+  const [isExpanded, setIsExpanded] = useState(false)
   const lastAssistantMsg = [...messages].reverse().find(m => m.role === 'assistant')
   const suggestions = lastAssistantMsg?.suggestions || DEFAULT_SUGGESTIONS
+  
   const boxStyle: React.CSSProperties = {
     borderTop: '1px solid rgba(226,232,240,0.8)',
     background: 'rgba(255,255,255,0.78)',
     backdropFilter: 'blur(14px)',
-    padding: '12px 14px 14px',
+    padding: isExpanded ? '12px 14px 14px' : '10px 14px',
     display: 'flex',
     flexDirection: 'column',
     gap: 8,
+    cursor: isExpanded ? 'default' : 'pointer',
+    transition: 'all 0.2s ease',
   }
 
   const handleSend = () => {
@@ -48,76 +52,102 @@ export default function ChatBox({ messages, onSend, isLoading, activeTab }: Chat
   }
 
   return (
-    <div style={boxStyle}>
-      <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: 0.8, textTransform: 'uppercase', color: '#64748b', margin: 0 }}>Refine with AI</p>
+    <div style={boxStyle} onClick={() => !isExpanded && setIsExpanded(true)}>
+      <div 
+        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
+        onClick={(e) => {
+          if (isExpanded) {
+            e.stopPropagation();
+            setIsExpanded(false);
+          }
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          {!isExpanded && <span style={{ fontSize: 14 }}>✨</span>}
+          <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: 0.8, textTransform: 'uppercase', color: isExpanded ? '#64748b' : 'var(--gold-primary)', margin: 0 }}>
+            Refine with AI
+          </p>
+        </div>
+        {isExpanded ? <ChevronDown size={16} color="#64748b" /> : <ChevronUp size={16} color="var(--gold-primary)" />}
+      </div>
 
-      {/* Last assistant message */}
-      {lastAssistantMsg && (
-        <div style={{ background: 'rgba(255,255,255,0.95)', border: '1px solid rgba(226,232,240,0.95)', borderRadius: 14, padding: 10, fontSize: 12, lineHeight: 1.55 }}>
-          <p style={{ color: '#0f172a', fontWeight: 700, margin: '0 0 4px' }}>AI Stylist</p>
-          <p style={{ color: '#475569', margin: 0 }}>{lastAssistantMsg.content}</p>
+      {!isExpanded && (
+        <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>
+          Bạn có gợi ý gì thêm không? Nhấn để chat...
         </div>
       )}
 
-      {/* Quick suggestions */}
-      {suggestions.length > 0 && (
-        <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 2 }}>
-          {suggestions.map((suggestion, i) => (
-            <button
-              key={i}
-              onClick={() => handleSendSuggestion(suggestion)}
+      {isExpanded && (
+        <>
+          {/* Last assistant message */}
+          {lastAssistantMsg && (
+            <div style={{ background: 'rgba(255,255,255,0.95)', border: '1px solid rgba(226,232,240,0.95)', borderRadius: 14, padding: 10, fontSize: 12, lineHeight: 1.55 }}>
+              <p style={{ color: '#0f172a', fontWeight: 700, margin: '0 0 4px' }}>AI Stylist</p>
+              <p style={{ color: '#475569', margin: 0 }}>{lastAssistantMsg.content}</p>
+            </div>
+          )}
+
+          {/* Quick suggestions */}
+          {suggestions.length > 0 && (
+            <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 2 }}>
+              {suggestions.map((suggestion, i) => (
+                <button
+                  key={i}
+                  onClick={() => handleSendSuggestion(suggestion)}
+                  style={{
+                    fontSize: 12,
+                    padding: '6px 10px',
+                    borderRadius: 999,
+                    background: '#fff',
+                    border: '1px solid #e2e8f0',
+                    color: '#475569',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Input */}
+          <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+              placeholder={placeholders[activeTab]}
+              disabled={isLoading}
               style={{
+                flex: 1,
                 fontSize: 12,
-                padding: '6px 10px',
-                borderRadius: 999,
-                background: '#fff',
-                border: '1px solid #e2e8f0',
-                color: '#475569',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
+                border: '1px solid #cbd5e1',
+                borderRadius: 12,
+                padding: '9px 12px',
+                outline: 'none',
+                background: isLoading ? '#f8fafc' : '#fff',
+              }}
+            />
+            <button
+              onClick={handleSend}
+              disabled={!input.trim() || isLoading}
+              style={{
+                width: 40,
+                height: 38,
+                borderRadius: 12,
+                border: 'none',
+                background: !input.trim() || isLoading ? '#cbd5e1' : '#10b981',
+                color: '#fff',
+                cursor: !input.trim() || isLoading ? 'not-allowed' : 'pointer',
               }}
             >
-              {suggestion}
+              <SendHorizontal size={14} />
             </button>
-          ))}
-        </div>
+          </div>
+        </>
       )}
-
-      {/* Input */}
-      <div style={{ display: 'flex', gap: 8 }}>
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-          placeholder={placeholders[activeTab]}
-          disabled={isLoading}
-          style={{
-            flex: 1,
-            fontSize: 12,
-            border: '1px solid #cbd5e1',
-            borderRadius: 12,
-            padding: '9px 12px',
-            outline: 'none',
-            background: isLoading ? '#f8fafc' : '#fff',
-          }}
-        />
-        <button
-          onClick={handleSend}
-          disabled={!input.trim() || isLoading}
-          style={{
-            width: 40,
-            height: 38,
-            borderRadius: 12,
-            border: 'none',
-            background: !input.trim() || isLoading ? '#cbd5e1' : '#10b981',
-            color: '#fff',
-            cursor: !input.trim() || isLoading ? 'not-allowed' : 'pointer',
-          }}
-        >
-          <SendHorizontal size={14} />
-        </button>
-      </div>
     </div>
   )
 }

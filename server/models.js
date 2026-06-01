@@ -343,6 +343,17 @@ SavedOutfitSchema.index({ userId: 1, createdAt: -1 });
 const SavedOutfitModel = mongoose.models.SavedOutfit
   || mongoose.model("SavedOutfit", SavedOutfitSchema, "saved_outfits");
 
+const TryonSessionSchema = new mongoose.Schema({
+  items: [
+    {
+      productId: { type: mongoose.Schema.Types.Mixed, required: true },
+      size: { type: String, default: "M" }
+    }
+  ],
+  createdAt: { type: Date, default: Date.now, expires: 86400 } // Auto-expire after 24 hours
+});
+const TryonSessionModel = mongoose.model("tryon_sessions", TryonSessionSchema);
+
 const AILogSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
   userPrompt: { type: String, default: "" },
@@ -367,5 +378,6 @@ module.exports = {
   VirtualClosetModel,
   SavedOutfitModel,
   AILog,
+  TryonSessionModel,
   normalizeProductInventory,
 };

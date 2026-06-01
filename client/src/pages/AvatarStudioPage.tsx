@@ -428,9 +428,9 @@ export default function AvatarStudioPage() {
                     <div style={{
                         display: 'grid',
                         gridTemplateColumns: '1fr 1fr',
-                        gap: '12px',
-                        marginBottom: '16px',
-                        marginTop: '16px',
+                        gap: '10px',
+                        marginBottom: '14px',
+                        marginTop: '12px',
                         padding: '0 16px'
                     }}>
                         {/* Option A — Ảnh chụp */}
@@ -441,31 +441,23 @@ export default function AvatarStudioPage() {
                                 border: setupMethod === 'photo'
                                     ? '1.5px solid var(--gold-primary)'
                                     : '1px solid var(--gold-border)',
-                                borderRadius: '14px',
-                                padding: '18px 14px',
+                                borderRadius: '12px',
+                                padding: '10px 12px',
                                 cursor: 'pointer',
                                 textAlign: 'left',
                                 transition: 'all 0.2s ease',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '4px'
                             }}
                         >
-                            <div style={{ fontSize: '24px', marginBottom: '8px' }}>📸</div>
-                            <div style={{
-                                fontSize: '13px', fontWeight: '600',
-                                color: 'var(--text-primary)', marginBottom: '4px',
-                            }}>
-                                Chụp ảnh
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ fontSize: '16px' }}>📸</span>
+                                <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)' }}>Chụp ảnh</span>
                             </div>
-                            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
-                                AI tự đo từ 2 ảnh của bạn
+                            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.2' }}>
+                                AI tự đo từ 2 ảnh
                             </div>
-                            {setupMethod === 'photo' && (
-                                <div style={{
-                                    marginTop: '8px', fontSize: '10px',
-                                    color: 'var(--gold-primary)', fontWeight: '500',
-                                }}>
-                                    ✦ Nhanh hơn • Chính xác hơn
-                                </div>
-                            )}
                         </button>
 
                         {/* Option B — Nhập tay */}
@@ -476,22 +468,22 @@ export default function AvatarStudioPage() {
                                 border: setupMethod === 'manual'
                                     ? '1.5px solid var(--gold-primary)'
                                     : '1px solid var(--gold-border)',
-                                borderRadius: '14px',
-                                padding: '18px 14px',
+                                borderRadius: '12px',
+                                padding: '10px 12px',
                                 cursor: 'pointer',
                                 textAlign: 'left',
                                 transition: 'all 0.2s ease',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '4px'
                             }}
                         >
-                            <div style={{ fontSize: '24px', marginBottom: '8px' }}>📏</div>
-                            <div style={{
-                                fontSize: '13px', fontWeight: '600',
-                                color: 'var(--text-primary)', marginBottom: '4px',
-                            }}>
-                                Nhập số đo
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ fontSize: '16px' }}>📏</span>
+                                <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)' }}>Nhập số đo</span>
                             </div>
-                            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
-                                Tự nhập chiều cao, cân nặng...
+                            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.2' }}>
+                                Nhập chiều cao, cân nặng...
                             </div>
                         </button>
                     </div>

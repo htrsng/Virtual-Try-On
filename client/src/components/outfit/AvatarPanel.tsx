@@ -20,10 +20,10 @@ interface AvatarPanelProps {
 }
 
 const CAMERA_PRESETS: Record<ViewAngle, { position: [number, number, number], target: [number, number, number] }> = {
-  front: { position: [0, 0.7, 4.5], target: [0, 0.4, 0] },
-  back: { position: [0, 0.7, -4.5], target: [0, 0.4, 0] },
-  left: { position: [-4.2, 0.7, 0], target: [0, 0.4, 0] },
-  right: { position: [4.2, 0.7, 0], target: [0, 0.4, 0] },
+  front: { position: [0, 0.6, 2.8], target: [0, 0.4, 0] },
+  back: { position: [0, 0.6, -2.8], target: [0, 0.4, 0] },
+  left: { position: [-2.8, 0.6, 0], target: [0, 0.4, 0] },
+  right: { position: [2.8, 0.6, 0], target: [0, 0.4, 0] },
 }
 
 function LoadingScreen() {
@@ -78,6 +78,7 @@ function AvatarPanel({
   const [isWebglContextLost, setIsWebglContextLost] = useState(false)
   const [lossCount, setLossCount] = useState(0)
   const [fallbackMode, setFallbackMode] = useState(false)
+  const [bgTheme, setBgTheme] = useState<'warm' | 'light' | 'dark'>('warm')
   const controlsRef = useRef<OrbitControlsImpl | null>(null)
   const canvasAreaRef = useRef<HTMLDivElement | null>(null)
   const canvasElementRef = useRef<HTMLCanvasElement | null>(null)
@@ -184,10 +185,25 @@ function AvatarPanel({
         .ap-grid-overlay {
           position: absolute;
           inset: 0;
-          background-image: radial-gradient(circle, rgba(201,150,63,0.04) 1px, transparent 1px);
-          background-size: 32px 32px;
           pointer-events: none;
           z-index: 0;
+          transition: background 0.4s ease;
+        }
+        .ap-grid-overlay.theme-warm {
+          background:
+            radial-gradient(ellipse at 50% 45%, rgba(212,168,92,0.10), transparent 65%),
+            radial-gradient(ellipse at 50% 95%, rgba(30,24,18,0.06), transparent 40%),
+            linear-gradient(180deg, #faf8f4 0%, #f5f1ea 60%, #efe9df 100%);
+        }
+        .ap-grid-overlay.theme-light {
+          background:
+            radial-gradient(ellipse at 50% 45%, rgba(212,168,92,0.05), transparent 65%),
+            linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+        }
+        .ap-grid-overlay.theme-dark {
+          background:
+            radial-gradient(ellipse at 50% 45%, rgba(212,168,92,0.12), transparent 65%),
+            linear-gradient(180deg, #2a241e 0%, #1a1612 100%);
         }
         @keyframes avatarPulse {
           0%, 100% { opacity: 0.4; transform: scale(1); }
@@ -259,74 +275,14 @@ function AvatarPanel({
         </div>
       )}
 
-      {/* Grid Pattern Overlay */}
-      <div className="ap-grid-overlay" />
+      {/* Background Pattern Overlay */}
+      <div className={`ap-grid-overlay theme-${bgTheme}`} />
 
       <div
         ref={canvasAreaRef}
         style={{ position: 'relative', width: '100%', height: '100%', minHeight: 420, flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
       >
-        {/* Outfit Navigation Tabs */}
-        <div style={{
-          display: 'flex',
-          gap: 6,
-          padding: '10px 14px',
-          borderBottom: '0.5px solid #e5e7eb',
-          overflowX: 'auto',
-          backgroundColor: '#fff',
-          flexShrink: 0,
-        }}>
-          {outfits && outfits.length > 0 ? (
-            outfits.map((outfit, i) => (
-              <button
-                key={outfit.id || i}
-                onClick={() => onSelectOutfit(i)}
-                style={{
-                  fontSize: 11,
-                  padding: '4px 12px',
-                  borderRadius: 20,
-                  border: '0.5px solid',
-                  cursor: 'pointer',
-                  background: activeOutfitIndex === i ? '#1a1a1a' : 'transparent',
-                  color: activeOutfitIndex === i ? '#fff' : '#6b7280',
-                  borderColor: activeOutfitIndex === i ? '#1a1a1a' : '#e5e7eb',
-                  whiteSpace: 'nowrap',
-                  transition: 'all 0.2s ease',
-                }}
-                onMouseEnter={(e) => {
-                  if (activeOutfitIndex !== i) {
-                    e.currentTarget.style.borderColor = '#d1d5db'
-                    e.currentTarget.style.color = '#4b5563'
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (activeOutfitIndex !== i) {
-                    e.currentTarget.style.borderColor = '#e5e7eb'
-                    e.currentTarget.style.color = '#6b7280'
-                  }
-                }}
-              >
-                Outfit {i + 1}
-              </button>
-            ))
-          ) : (
-            <button
-              disabled
-              style={{
-                fontSize: 11,
-                padding: '4px 12px',
-                borderRadius: 20,
-                border: '0.5px solid #e5e7eb',
-                background: 'transparent',
-                color: '#d1d5db',
-                whiteSpace: 'nowrap',
-                cursor: 'not-allowed',
-              }}
-            >
-              Outfit 1
-            </button>
-          )}
-        </div>
+
 
         {/* Canvas Container */}
         <div style={{ flex: 1, position: 'relative', width: '100%', overflow: 'hidden' }}>
@@ -364,6 +320,7 @@ function AvatarPanel({
               layeredGarments={layeredGarments}
               showEnvironment={!fallbackMode}
               showContactShadows={!fallbackMode}
+              showGrid={true}
             />
 
             <OrbitControls
@@ -397,9 +354,9 @@ function AvatarPanel({
               padding: '8px 12px',
               borderRadius: 10,
               border: '1px solid',
-              borderColor: viewAngle === angle ? '#10b981' : '#dbe2ea',
-              background: viewAngle === angle ? '#10b981' : '#fff',
-              color: viewAngle === angle ? '#fff' : '#475569',
+              borderColor: viewAngle === angle ? 'var(--gold-primary)' : 'rgba(212,169,66,0.3)',
+              background: viewAngle === angle ? 'var(--gold-primary)' : 'rgba(255,255,255,0.8)',
+              color: viewAngle === angle ? '#0F0B07' : 'var(--text-secondary)',
               cursor: 'pointer',
             }}
           >
@@ -408,6 +365,28 @@ function AvatarPanel({
             {angle === 'left' && 'Side'}
           </button>
         ))}
+      </div>
+
+      {/* Background Theme Controls */}
+      <div style={{
+        position: 'absolute',
+        left: 16,
+        bottom: 16,
+        zIndex: 2,
+        display: 'flex',
+        gap: 10,
+        padding: '10px 14px',
+        borderRadius: 16,
+        border: '1px solid rgba(226,232,240,0.95)',
+        background: 'rgba(255,255,255,0.9)',
+        backdropFilter: 'blur(14px)',
+        boxShadow: '0 6px 18px rgba(15,23,42,0.08)',
+        alignItems: 'center',
+      }}>
+        <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '0.04em', paddingRight: '4px' }}>NỀN</div>
+        <button onClick={() => setBgTheme('light')} title="Sáng" style={{ width: 18, height: 18, borderRadius: '50%', background: '#ffffff', border: bgTheme === 'light' ? '2px solid var(--gold-primary)' : '1px solid #dbe2ea', cursor: 'pointer', outline: bgTheme === 'light' ? '2px solid rgba(212,169,66,0.2)' : 'none' }} />
+        <button onClick={() => setBgTheme('warm')} title="Ấm" style={{ width: 18, height: 18, borderRadius: '50%', background: '#f5f1ea', border: bgTheme === 'warm' ? '2px solid var(--gold-primary)' : '1px solid #dbe2ea', cursor: 'pointer', outline: bgTheme === 'warm' ? '2px solid rgba(212,169,66,0.2)' : 'none' }} />
+        <button onClick={() => setBgTheme('dark')} title="Tối" style={{ width: 18, height: 18, borderRadius: '50%', background: '#2a241e', border: bgTheme === 'dark' ? '2px solid var(--gold-primary)' : '1px solid #dbe2ea', cursor: 'pointer', outline: bgTheme === 'dark' ? '2px solid rgba(212,169,66,0.2)' : 'none' }} />
       </div>
     </div>
   )

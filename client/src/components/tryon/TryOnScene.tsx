@@ -19,19 +19,21 @@ export default function TryOnScene({
     layeredGarments,
     showEnvironment = true,
     showContactShadows = true,
+    showGrid = true,
 }: {
     body: Profile | null | undefined
     onSceneReady?: (g: THREE.Group | null) => void
     layeredGarments?: Record<string, any>
     showEnvironment?: boolean
     showContactShadows?: boolean
+    showGrid?: boolean
 }) {
     return (
         <>
             {showEnvironment && <Environment preset="city" />}
 
             <group position={[0, -1.08, 0]}>
-                <Grid position={[0, 0, 0]} args={[10, 10]} cellColor="#f3efe9" sectionColor="#ede9e2" fadeDistance={40} />
+                {showGrid && <Grid position={[0, 0, 0]} args={[10, 10]} cellColor="#f3efe9" sectionColor="#ede9e2" fadeDistance={40} />}
 
                 <Suspense fallback={<LoaderFallback />}>
                     <Avatar body={body} pose={'Idle'} skinColor="#F2C9AC" onSceneReady={onSceneReady} />

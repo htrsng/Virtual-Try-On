@@ -810,8 +810,8 @@
 .vto-sidebar {
     flex: 1;
     --vto-sidebar-fade-offset: 92px;
-    max-width: 432px;
-    min-width: 360px;
+    max-width: 560px;
+    min-width: 460px;
     min-height: 0;
     height: 100%;
     position: relative;
@@ -2543,9 +2543,11 @@
 }
 
 .vto-size-room__field span {
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--text-tertiary);
+    font-size: 11px;
+    font-weight: 600;
+    color: #7f6b52;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .vto-size-room__field select {
@@ -2563,6 +2565,49 @@
     outline: none;
     border-color: rgba(var(--accent-rgb), 0.45);
     box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.14);
+}
+
+.vto-premium-pill-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 2px;
+}
+
+.vto-premium-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    height: 34px;
+    padding: 0 14px;
+    background: #fffdf8;
+    color: #7f6b52;
+    border: 1.5px solid #e5d8c5;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 4px rgba(201, 150, 63, 0.03);
+}
+
+.vto-premium-pill:hover {
+    background: #fdfaf3;
+    border-color: #d9c2a3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(201, 150, 63, 0.08);
+}
+
+.vto-premium-pill.active {
+    background: linear-gradient(135deg, #f3e7d0 0%, #eaddbc 100%);
+    color: #8a6a2b;
+    border-color: #c9963f;
+    box-shadow: 0 3px 6px rgba(201, 150, 63, 0.15);
+}
+
+.vto-premium-pill.active svg {
+    color: #8a6a2b;
 }
 
 .vto-size-room__quick-switch {

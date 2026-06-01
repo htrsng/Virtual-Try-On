@@ -106,15 +106,8 @@ export const MODEL_INJECTION = {
         }
     },
 
-    // Sản phẩm ID 8 — Quần
     "8": {
         enable: true,
-
-        colors: [
-            { name: 'Denim Raw Indigo', hex: '#1f2a44', fabric: { preset: 'denim-raw' } },
-            { name: 'Denim Stone Washed', hex: '#6f8fb5', fabric: { preset: 'denim-stone-washed' } },
-            { name: 'Denim Black Fade', hex: '#30343b', fabric: { preset: 'denim-black-fade' } }
-        ],
 
         softness: {
             roughness: 1.0,
@@ -197,15 +190,8 @@ export const MODEL_INJECTION = {
         }
     },
 
-    // Sản phẩm ID 16 — Váy
     "16": {
         enable: true,
-
-        colors: [
-            { name: 'Beige', hex: '#E8DCC8', fabric: { preset: 'silk' } },
-            { name: 'Đen', hex: '#1A1A1A', fabric: { preset: 'silk' } },
-            { name: 'Trắng', hex: '#FFFFFF', fabric: { preset: 'silk' } }
-        ],
 
         softness: {
             roughness: 0.75,
@@ -225,6 +211,7 @@ export const MODEL_INJECTION = {
                     chest: 84,
                     waist: 66,
                     hips: 90,
+                    shoulder: 36,
                     garmentLength: 85,
                     stretchWarp: 0.04,
                     stretchWeft: 0.06,
@@ -234,6 +221,7 @@ export const MODEL_INJECTION = {
                     chest: 88,
                     waist: 70,
                     hips: 94,
+                    shoulder: 38,
                     garmentLength: 87,
                     stretchWarp: 0.04,
                     stretchWeft: 0.06,
@@ -243,6 +231,7 @@ export const MODEL_INJECTION = {
                     chest: 92,
                     waist: 74,
                     hips: 98,
+                    shoulder: 40,
                     garmentLength: 89,
                     stretchWarp: 0.04,
                     stretchWeft: 0.06,
@@ -312,6 +301,7 @@ export const MODEL_INJECTION = {
                     chest: 84,
                     waist: 66,
                     hips: 90,
+                    shoulder: 36,
                     garmentLength: 85,
                     stretchWarp: 0.04,
                     stretchWeft: 0.06,
@@ -321,6 +311,7 @@ export const MODEL_INJECTION = {
                     chest: 88,
                     waist: 70,
                     hips: 94,
+                    shoulder: 38,
                     garmentLength: 87,
                     stretchWarp: 0.04,
                     stretchWeft: 0.06,
@@ -330,6 +321,7 @@ export const MODEL_INJECTION = {
                     chest: 92,
                     waist: 74,
                     hips: 98,
+                    shoulder: 40,
                     garmentLength: 89,
                     stretchWarp: 0.04,
                     stretchWeft: 0.06,
@@ -391,9 +383,9 @@ export const MODEL_INJECTION = {
         measurementProfile: {
             garmentType: 'top',
             sizeSpecs: {
-                S: { chest: 84, waist: 64, garmentLength: 35, fitIntent: 'tight' },
-                M: { chest: 88, waist: 68, garmentLength: 37, fitIntent: 'tight' },
-                L: { chest: 92, waist: 72, garmentLength: 39, fitIntent: 'tight' }
+                S: { chest: 84, waist: 64, hips: 80, shoulder: 36, sleeveLength: 15, garmentLength: 35, fitIntent: 'tight' },
+                M: { chest: 88, waist: 68, hips: 84, shoulder: 38, sleeveLength: 16, garmentLength: 37, fitIntent: 'tight' },
+                L: { chest: 92, waist: 72, hips: 88, shoulder: 40, sleeveLength: 17, garmentLength: 39, fitIntent: 'tight' }
             }
         },
         sizes: {
@@ -415,9 +407,9 @@ export const MODEL_INJECTION = {
         measurementProfile: {
             garmentType: 'dress',
             sizeSpecs: {
-                S: { chest: 84, waist: 66, hips: 90, garmentLength: 105, fitIntent: 'regular' },
-                M: { chest: 88, waist: 70, hips: 94, garmentLength: 107, fitIntent: 'regular' },
-                L: { chest: 92, waist: 74, hips: 98, garmentLength: 109, fitIntent: 'regular' }
+                S: { chest: 84, waist: 66, hips: 90, shoulder: 36, garmentLength: 105, fitIntent: 'regular' },
+                M: { chest: 88, waist: 70, hips: 94, shoulder: 38, garmentLength: 107, fitIntent: 'regular' },
+                L: { chest: 92, waist: 74, hips: 98, shoulder: 40, garmentLength: 109, fitIntent: 'regular' }
             }
         },
         sizes: {
@@ -439,9 +431,9 @@ export const MODEL_INJECTION = {
         measurementProfile: {
             garmentType: 'bottom',
             sizeSpecs: {
-                S: { waist: 64, hips: 90, garmentLength: 42, fitIntent: 'regular' },
-                M: { waist: 68, hips: 94, garmentLength: 43, fitIntent: 'regular' },
-                L: { waist: 72, hips: 98, garmentLength: 44, fitIntent: 'regular' }
+                S: { waist: 64, hips: 90, thigh: 52, legOpening: 50, garmentLength: 42, fitIntent: 'regular' },
+                M: { waist: 68, hips: 94, thigh: 56, legOpening: 54, garmentLength: 43, fitIntent: 'regular' },
+                L: { waist: 72, hips: 98, thigh: 60, legOpening: 58, garmentLength: 44, fitIntent: 'regular' }
             }
         },
         sizes: {

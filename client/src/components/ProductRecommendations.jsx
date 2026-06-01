@@ -131,7 +131,7 @@ function ProductRecommendations({ currentProductId, category, onBuy, title = "C√
                                 <span style={{
                                     position: 'absolute',
                                     top: '8px', left: '8px',
-                                    background: 'rgba(238, 77, 45, 0.9)',
+                                    background: 'rgba(201, 150, 63, 0.9)',
                                     color: 'white',
                                     padding: '2px 8px',
                                     borderRadius: '4px',
@@ -146,7 +146,7 @@ function ProductRecommendations({ currentProductId, category, onBuy, title = "C√
                                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                             }}>{product.name}</div>
                             <div style={{
-                                fontSize: '15px', fontWeight: 700, color: '#ee4d2d', marginTop: '6px',
+                                fontSize: '15px', fontWeight: 700, color: '#C9963F', marginTop: '6px',
                             }}>{formatPrice(product.price)}</div>
                             {onBuy && (
                                 <button
@@ -156,18 +156,18 @@ function ProductRecommendations({ currentProductId, category, onBuy, title = "C√
                                     }}
                                     style={{
                                         width: '100%', marginTop: '8px',
-                                        padding: '6px', border: '1px solid #ee4d2d',
+                                        padding: '6px', border: '1px solid #C9963F',
                                         borderRadius: '6px', background: 'white',
-                                        color: '#ee4d2d', fontSize: '12px', fontWeight: 600,
+                                        color: '#C9963F', fontSize: '12px', fontWeight: 600,
                                         cursor: 'pointer', transition: 'all 0.2s',
                                     }}
                                     onMouseEnter={e => {
-                                        e.target.style.background = '#ee4d2d';
+                                        e.target.style.background = '#C9963F';
                                         e.target.style.color = 'white';
                                     }}
                                     onMouseLeave={e => {
                                         e.target.style.background = 'white';
-                                        e.target.style.color = '#ee4d2d';
+                                        e.target.style.color = '#C9963F';
                                     }}
                                 >üõí Th√™m v√†o gi·ªè</button>
                             )}
