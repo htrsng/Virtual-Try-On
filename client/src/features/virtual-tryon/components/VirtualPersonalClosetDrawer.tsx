@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import './VirtualPersonalClosetDrawer.css';
 import VirtualClosetItem from './VirtualClosetItem';
+import { MODEL_INJECTION } from '../../../data/ThreeDConfig';
 
 type ClosetSlotCategory = 'tops' | 'bottoms' | 'outerwear' | 'dresses';
 
@@ -106,7 +107,7 @@ type ProductCatalogItem = {
     };
 };
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 const ABSOLUTE_URL_PATTERN = /^(data:|blob:|https?:\/\/)/i;
 
@@ -290,13 +291,47 @@ function mapApiClosetItems(rawItems: ClosetApiItem[], products: ProductCatalogIt
             return;
         }
 
+        const sourceModelId = String(item.productId || '').trim();
+        // @ts-ignore - indexing MODEL_INJECTION with string
+        const fullConfig = MODEL_INJECTION[sourceModelId] || productModel3D;
+        
+        let finalModel3D = fullConfig || undefined;
+        if (fullConfig && item.glbUrl) {
+            const sizeKey = String(item.size || item.purchasedSize || 'M').trim().toUpperCase();
+            finalModel3D = {
+                ...fullConfig,
+                sizes: {
+                    ...fullConfig.sizes,
+                    [sizeKey]: {
+                        ...(fullConfig.sizes?.[sizeKey] || {}),
+                        url: item.glbUrl,
+                        autoNormalize: fullConfig.sizes?.[sizeKey]?.autoNormalize ?? fullConfig.autoNormalize ?? false
+                    }
+                }
+            };
+        } else if (item.glbUrl) {
+            finalModel3D = {
+                enable: true,
+                autoNormalize: false,
+                sizes: {
+                    [String(item.size || item.purchasedSize || 'M').trim().toUpperCase()]: { url: item.glbUrl, autoNormalize: false }
+                }
+            };
+        }
+
+        const availableColors = mapProductColors(productModel3D);
+        const availableSizes = mapProductSizes(productModel3D);
+        
+        const fallbackSize = availableSizes.length > 0 ? availableSizes[0] : 'M';
+        const fallbackColor = availableColors.length > 0 ? availableColors[0].hex : '';
+
         dedupe.set(id, {
             id,
-            itemId: item.itemId,
-            productId: item.productId,
+            itemId: item.itemId || item._id,
+            productId: Number(item.productId),
             orderId: item.orderId,
-            name,
-            thumbnail: resolveAssetUrl(
+            name: String(item.name || '').trim() || name,
+            img: resolveAssetUrl(
                 String(item.thumbnailUrl || item.imageUrl || item.img || item.image || '').trim(),
             ) || createPlaceholderThumb(name),
             imageUrl: resolveAssetUrl(String(item.imageUrl || item.img || item.image || '').trim()) || undefined,
@@ -304,11 +339,11 @@ function mapApiClosetItems(rawItems: ClosetApiItem[], products: ProductCatalogIt
             category: formatCategoryLabel(item.category || name),
             categoryKey: normalizeCategoryKey(item.category || name),
             slotCategory: inferCategory(item.category || name),
-            purchasedSize: String(item.purchasedSize || item.size || '').trim() || undefined,
-            purchasedColor: String(item.purchasedColor || item.color || '').trim() || undefined,
-            availableColors: mapProductColors(productModel3D),
-            availableSizes: mapProductSizes(productModel3D),
-            model3D: item.model3D || productModel3D || undefined,
+            purchasedSize: String(item.size || item.purchasedSize || '').trim() || fallbackSize,
+            purchasedColor: String(item.color || item.purchasedColor || '').trim() || fallbackColor,
+            availableColors,
+            availableSizes,
+            model3D: finalModel3D,
             wornCount: Number(item.wornCount ?? item.wearCount ?? 0),
             lastWornAt: String(item.lastWornAt || item.lastWorn || '').trim() || undefined,
             purchasedAt: String(item.purchasedAt || item.dateAdded || '').trim() || undefined,

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { FiSend, FiRefreshCw, FiMessageSquare, FiSearch, FiZap, FiPlus, FiEdit2, FiTrash2, FiCheck, FiX } from 'react-icons/fi';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 function AdminChat({ showToast }) {
     const [conversations, setConversations] = useState([]);

@@ -50,13 +50,18 @@ export default function VirtualClosetItem({ item, matchScore, onWear, onViewDeta
 
     const handleWearBtn = (e: React.MouseEvent) => {
         sp(e);
-        if (hasPicker && !open) { setOpen(true); return; }
+        // Immediately wear the purchased item with its specific size and color instead of opening picker
         doWear(e);
     };
 
     const doWear = (e: React.MouseEvent) => {
         sp(e);
-        onWear(item, color || item.purchasedColor || '', size || item.purchasedSize || '');
+        
+        // Fallback for older items that were saved without purchasedSize/purchasedColor
+        const defaultColor = color || item.purchasedColor || item.availableColors?.[0]?.value || item.availableColors?.[0]?.name || '#222222';
+        const defaultSize = size || item.purchasedSize || item.availableSizes?.[0] || 'M';
+
+        onWear(item, defaultColor, defaultSize);
         setOpen(false);
         setWearing(true);
         setTimeout(() => setWearing(false), 2500);

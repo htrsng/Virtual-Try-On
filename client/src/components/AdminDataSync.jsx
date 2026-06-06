@@ -10,7 +10,7 @@ function AdminDataSync() {
     const [showConfirmClear, setShowConfirmClear] = useState(false);
     const [showConfirmReset, setShowConfirmReset] = useState(false);
 
-    const API_BASE = 'http://localhost:3000/api/admin';
+    const API_BASE = '/api/admin';
 
     // Kiểm tra status khi mounting
     useEffect(() => {

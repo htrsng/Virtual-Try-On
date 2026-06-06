@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 function ProductRecommendations({ currentProductId, category, onBuy, title = "Có thể bạn sẽ thích" }) {
     const [products, setProducts] = useState([]);

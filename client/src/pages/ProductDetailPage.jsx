@@ -120,7 +120,7 @@ function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, onBu
         if (finalProduct) {
             const token = localStorage.getItem('token');
             if (token) {
-                axios.post('http://localhost:3000/api/view-history', {
+                axios.post('/api/view-history', {
                     productId: String(finalProduct.id),
                     category: finalProduct.category || 'Khác',
                 }, {

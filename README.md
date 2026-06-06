@@ -316,7 +316,7 @@ npm install
 node index.js
 ```
 
-Server khởi động tại `http://localhost:3000`
+Server khởi động tại `http://localhost:5000`
 
 **3. Khởi chạy Frontend**
 
@@ -329,20 +329,20 @@ npm run dev
 
 Ứng dụng mở tại `http://localhost:5173`
 
-Mặc định frontend gọi API tại `http://localhost:3000` (qua `VITE_API_URL` hoặc fallback hardcoded ở một số module).
+Mặc định frontend gọi API tại `http://localhost:5000` (qua `VITE_API_URL` hoặc fallback hardcoded ở một số module).
 
 ### Biến môi trường (khuyến nghị)
 
 **Client (`client/.env`)**
 
 ```bash
-VITE_API_URL=http://localhost:3000
+VITE_API_URL=http://localhost:5000
 ```
 
 **Server (`server/.env`)**
 
 ```bash
-PORT=3000
+PORT=5000
 MONGODB_URI=<your_mongodb_connection_string>
 JWT_SECRET=<your_jwt_secret>
 EMAIL_USER=<your_email>

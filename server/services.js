@@ -270,23 +270,38 @@ const syncOrderItemsToCloset = async (userId, orderId, products) => {
       const purchasedColor = String(product.color || product.selectedColor || product.variant?.color || "").trim();
       const purchasedSize = String(product.size || product.selectedSize || product.variant?.size || "").trim();
 
+      const sizeKey = purchasedSize.toUpperCase();
+      const glbUrl = product.model3D?.sizes?.[sizeKey]?.url || undefined;
+
+      let colorLabel = undefined;
+      if (purchasedColor && product.model3D?.colors) {
+        const foundColor = product.model3D.colors.find(c =>
+          c.hex === purchasedColor || c.value === purchasedColor || c.name === purchasedColor
+        );
+        if (foundColor) colorLabel = foundColor.name;
+      }
+      if (!colorLabel) colorLabel = product.variant?.color?.name || undefined;
+
       const existingIndex = closet.items.findIndex((item) => item.itemId === itemId);
       if (existingIndex >= 0) {
         console.log(`⏭️ Item ${itemId} already exists in closet, skipping...`);
         continue;
       }
 
+      const variantId = `var_${sizeKey}_${colorLabel || purchasedColor}`.replace(/\s+/g, '_');
       const preservedCategory = String(product.category || "").trim() || inferProductCategory(product.name);
 
       itemsToAdd.push({
         itemId,
         orderId,
         productId: product.productId || product._id,
+        variantId,
         name: product.name,
         category: preservedCategory,
-        purchasedColor: purchasedColor || undefined,
-        purchasedSize: purchasedSize || undefined,
-        model3D: product.model3D || undefined,
+        size: purchasedSize || undefined,
+        color: purchasedColor || undefined,
+        colorLabel: colorLabel || undefined,
+        glbUrl: glbUrl || undefined,
         price: product.price,
         img: product.thumbnailUrl || product.imageUrl || product.img || product.image,
         imageUrl: product.imageUrl || product.thumbnailUrl || product.img || product.image,
@@ -300,7 +315,6 @@ const syncOrderItemsToCloset = async (userId, orderId, products) => {
           metallicFactor: 0,
           aoIntensity: 1,
         },
-        model3D: { enabled: true, scale: 1 },
       });
     }
 

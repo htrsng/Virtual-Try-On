@@ -67,7 +67,7 @@ type LocalColorOption = {
 type RecommendationResult = ReturnType<typeof recommendSizes>[number];
 type RecommendationZone = RecommendationResult['zones'][number];
 type RecommendationFitLevel = RecommendationZone['fit'];
-const RAW_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const RAW_API_URL = import.meta.env.VITE_API_URL || '';
 const API_URL = RAW_API_URL.startsWith(':') ? `http://localhost${RAW_API_URL}` : RAW_API_URL;
 
 /* ─── Accordion ─── */

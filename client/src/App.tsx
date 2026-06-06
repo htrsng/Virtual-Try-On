@@ -63,7 +63,49 @@ import { LanguageProvider } from './contexts/LanguageContext';
 import { initTopSearch, fallbackSuggestions, initCategories, initBanners } from './data/initialData';
 import { initFlashSaleProducts } from './data/flashSaleData';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+
+const fetchJson = async <T,>(path: string): Promise<T> => {
+  const requestUrls = API_URL ? [`${API_URL}${path}`, path] : [path];
+  let lastError: unknown = null;
+
+  for (const requestUrl of requestUrls) {
+    try {
+      const response = await fetch(requestUrl);
+      const contentType = response.headers.get('content-type') || '';
+
+      if (!response.ok) {
+        const responseText = await response.text();
+        throw new Error(
+          `Request failed (${response.status}) for ${requestUrl}: ${responseText.slice(0, 180)}`,
+        );
+      }
+
+      if (!contentType.includes('application/json')) {
+        const responseText = await response.text();
+
+        if (requestUrl !== path) {
+          lastError = new Error(
+            `Non-JSON response from ${requestUrl}: ${responseText.slice(0, 180)}`,
+          );
+          continue;
+        }
+
+        throw new Error(
+          `Expected JSON from ${requestUrl} but received ${contentType || 'unknown content type'}: ${responseText.slice(0, 180)}`,
+        );
+      }
+
+      return (await response.json()) as T;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError instanceof Error
+    ? lastError
+    : new Error(`Failed to fetch ${path}`);
+};
 
 // --- LOADING FALLBACK COMPONENT ---
 const PageLoader = () => (
@@ -281,8 +323,7 @@ function App() {
   // --- FETCH API TỪ SERVER ---
   useEffect(() => {
     // --- 1. LẤY SẢN PHẨM TỪ SERVER VÀ GHÉP 3D ---
-    fetch(`${API_URL}/api/products`)
-      .then(res => res.json())
+    fetchJson<unknown[]>('/api/products')
       .then((data: unknown) => {
         if (Array.isArray(data) && data.length > 0) {
           console.log("🔥 DANH SÁCH ID SẢN PHẨM NUMERIC:");
@@ -339,8 +380,7 @@ function App() {
       });
 
     // --- 2. Lấy Người Dùng (THAY THẾ HOÀN TOÀN từ database) ---
-    fetch(`${API_URL}/api/users`)
-      .then(res => res.json())
+    fetchJson<unknown[]>('/api/users')
       .then((data: unknown) => {
         if (Array.isArray(data) && data.length > 0) {
           // Lọc bỏ dữ liệu rỗng/undefined và loại duplicate
@@ -509,33 +549,32 @@ function App() {
 
       if (sessionId && !sessionItems) {
         setIsLoadingSession(true);
-        fetch(`${API_URL}/api/tryon/session/${sessionId}`)
-          .then(res => res.json())
+        fetchJson<{ success?: boolean; session?: { items?: Array<{ productId: string; size?: string }> } }>(`/api/tryon/session/${sessionId}`)
           .then(data => {
-             if (data.success && data.session && data.session.items) {
-                const fetchedItems = data.session.items.map((item: any) => {
-                   const found = allProducts.find(p => String(p.id) === String(item.productId) || String((p as any)._id) === String(item.productId));
-                   if (found) {
-                      return { ...found, size: item.size || sizeParam || 'M', tryon_ready: true };
-                   }
-                   return null;
-                }).filter(Boolean);
-                
-                if (fetchedItems.length > 0) {
-                   setSessionItems(fetchedItems);
+            if (data.success && data.session && data.session.items) {
+              const fetchedItems = data.session.items.map((item: any) => {
+                const found = allProducts.find(p => String(p.id) === String(item.productId) || String((p as any)._id) === String(item.productId));
+                if (found) {
+                  return { ...found, size: item.size || sizeParam || 'M', tryon_ready: true };
                 }
-             }
+                return null;
+              }).filter(Boolean);
+
+              if (fetchedItems.length > 0) {
+                setSessionItems(fetchedItems);
+              }
+            }
           })
           .catch(err => {
-             console.error("Lỗi fetch session:", err);
-             showToast("Lỗi khi tải phiên thử đồ", "error");
+            console.error("Lỗi fetch session:", err);
+            showToast("Lỗi khi tải phiên thử đồ", "error");
           })
           .finally(() => setIsLoadingSession(false));
       } else if (productId && !sessionItems) {
-         const found = allProducts.find(p => String(p.id) === String(productId) || String((p as any)._id) === String(productId));
-         if (found) {
-            setSessionItems([{ ...found, size: sizeParam || 'M', tryon_ready: true } as any]);
-         }
+        const found = allProducts.find(p => String(p.id) === String(productId) || String((p as any)._id) === String(productId));
+        if (found) {
+          setSessionItems([{ ...found, size: sizeParam || 'M', tryon_ready: true } as any]);
+        }
       }
     }, [location.search, allProducts, sessionItems, showToast]);
 

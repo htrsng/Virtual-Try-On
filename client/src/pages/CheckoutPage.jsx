@@ -199,7 +199,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast, suggestionProducts, onAddT
                 const token = localStorage.getItem('token');
                 if (!token) return;
 
-                const response = await fetch('http://localhost:3000/api/used-coupons', {
+                const response = await fetch('/api/used-coupons', {
                     signal: controller.signal,
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -274,7 +274,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast, suggestionProducts, onAddT
         let mounted = true;
         (async () => {
             try {
-                const res = await fetch('http://localhost:3000/api/user/addresses', { headers: { 'Authorization': `Bearer ${token}` } });
+                const res = await fetch('/api/user/addresses', { headers: { 'Authorization': `Bearer ${token}` } });
                 if (!res.ok) return;
                 const data = await res.json();
                 if (!mounted) return;
@@ -386,7 +386,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast, suggestionProducts, onAddT
                         return;
                     }
 
-                    const checkResponse = await fetch('http://localhost:3000/api/check-coupon-used', {
+                    const checkResponse = await fetch('/api/check-coupon-used', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -431,7 +431,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast, suggestionProducts, onAddT
                         return;
                     }
 
-                    const checkUsedResponse = await fetch('http://localhost:3000/api/check-coupon-used', {
+                    const checkUsedResponse = await fetch('/api/check-coupon-used', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -450,7 +450,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast, suggestionProducts, onAddT
                     }
 
                     // Kiểm tra mã newsletter có hợp lệ không
-                    const response = await fetch('http://localhost:3000/api/newsletter/validate-coupon', {
+                    const response = await fetch('/api/newsletter/validate-coupon', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ couponCode: normalizedCode })
@@ -617,7 +617,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast, suggestionProducts, onAddT
             console.log('📦 Dữ liệu đơn hàng:', orderData);
 
             // Gửi đơn hàng lên server với token
-            const response = await axios.post('http://localhost:3000/api/orders', orderData, {
+            const response = await axios.post('/api/orders', orderData, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -628,7 +628,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast, suggestionProducts, onAddT
             // Đánh dấu mã newsletter đã sử dụng
             if (appliedDiscount && appliedDiscount.isNewsletter) {
                 try {
-                    await fetch('http://localhost:3000/api/newsletter/use-coupon', {
+                    await fetch('/api/newsletter/use-coupon', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ couponCode: appliedDiscount.code })
@@ -1107,8 +1107,8 @@ function CheckoutPage({ onCheckoutSuccess, showToast, suggestionProducts, onAddT
 
                         const isEditing = Boolean(editAddress?._id);
                         const endpoint = isEditing
-                            ? `http://localhost:3000/api/user/addresses/${editAddress._id}`
-                            : 'http://localhost:3000/api/user/addresses';
+                            ? `/api/user/addresses/${editAddress._id}`
+                            : '/api/user/addresses';
                         const method = isEditing ? 'PUT' : 'POST';
 
                         const res = await fetch(endpoint, {

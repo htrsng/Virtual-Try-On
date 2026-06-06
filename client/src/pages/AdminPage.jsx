@@ -49,7 +49,7 @@ function AdminPage({
 
     const fetchBannerContents = async () => {
         try {
-            const response = await axios.get('http://localhost:3000/api/banner-contents');
+            const response = await axios.get('/api/banner-contents');
             setBannerContents(response.data);
         } catch (error) {
             console.error('Error fetching banner contents:', error);
@@ -128,7 +128,7 @@ function AdminPage({
                     // Tìm sản phẩm để lấy _id
                     const product = list.find(p => String(p.id) === String(id));
                     if (product && product._id) {
-                        await fetch(`http://localhost:3000/api/products/${product._id}`, { method: 'DELETE' });
+                        await fetch(`/api/products/${product._id}`, { method: 'DELETE' });
                     }
                 } catch (err) {
                     console.error('Lỗi xóa sản phẩm:', err);
@@ -139,7 +139,7 @@ function AdminPage({
                 try {
                     const user = list.find(u => String(u.id) === String(id));
                     if (user && user._id) {
-                        await fetch(`http://localhost:3000/api/users/${user._id}`, { method: 'DELETE' });
+                        await fetch(`/api/users/${user._id}`, { method: 'DELETE' });
                     }
                 } catch (err) {
                     console.error('Lỗi xóa user:', err);
@@ -204,7 +204,7 @@ function AdminPage({
 
             if (isNew) {
                 try {
-                    const res = await fetch('http://localhost:3000/api/products', {
+                    const res = await fetch('/api/products', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(newItemData)
@@ -228,7 +228,7 @@ function AdminPage({
                     return;
                 }
 
-                await fetch(`http://localhost:3000/api/products/${existingProduct._id}`, {
+                await fetch(`/api/products/${existingProduct._id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(newItemData)
@@ -296,7 +296,7 @@ function AdminPage({
 
         // Cập nhật Server nếu là user thật
         if (typeof userId === 'string' && userId.length > 20) {
-            await fetch(`http://localhost:3000/api/users/${userId}`, {
+            await fetch(`/api/users/${userId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ role: newRole })
@@ -686,10 +686,10 @@ function AdminPage({
 
                             try {
                                 if (editingBannerContent._id) {
-                                    await axios.put(`http://localhost:3000/api/banner-contents/${editingBannerContent.bannerId}`, formData);
+                                    await axios.put(`/api/banner-contents/${editingBannerContent.bannerId}`, formData);
                                     showToast('Đã cập nhật nội dung banner!', 'success');
                                 } else {
-                                    await axios.post('http://localhost:3000/api/banner-contents', formData);
+                                    await axios.post('/api/banner-contents', formData);
                                     showToast('Đã thêm nội dung banner mới!', 'success');
                                 }
                                 setEditingBannerContent(null);
@@ -799,7 +799,7 @@ function AdminPage({
                                                 <button className="adm-page__act-btn adm-page__act-btn--delete" onClick={async () => {
                                                     if (window.confirm('Xóa nội dung banner này?')) {
                                                         try {
-                                                            await axios.delete(`http://localhost:3000/api/banner-contents/${banner.bannerId}`);
+                                                            await axios.delete(`/api/banner-contents/${banner.bannerId}`);
                                                             showToast('Đã xóa!', 'success');
                                                             fetchBannerContents();
                                                         } catch (error) {

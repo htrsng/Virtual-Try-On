@@ -3,7 +3,7 @@ import { FiEdit2, FiTrash2, FiPlus, FiSearch, FiFilter, FiEye, FiEyeOff, FiAlert
 import axios from 'axios';
 import '../styles/admin-products.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 const getNumericProductId = (value) => {
     const numericId = Number(value);

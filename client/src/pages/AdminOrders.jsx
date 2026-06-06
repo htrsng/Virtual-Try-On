@@ -3,7 +3,7 @@ import { FiEye, FiSearch, FiDownload, FiX, FiPackage } from 'react-icons/fi';
 import axios from 'axios';
 import '../styles/admin-orders.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 function AdminOrders({ showToast }) {
     const [orders, setOrders] = useState([]);

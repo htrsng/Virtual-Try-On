@@ -10,8 +10,8 @@ export const MODEL_INJECTION = {
         colors: [
             { name: 'Trắng', hex: '#f5f5f5', fabric: { preset: 'cotton-soft' } },
             { name: 'Đen', hex: '#222222', fabric: { preset: 'cotton-heavy' } },
-            { name: 'Xanh Navy', hex: '#1f2a44', fabric: { preset: 'cotton-heavy' } },
-            { name: 'Be', hex: '#d4c3a3', fabric: { preset: 'cotton' } }
+            { name: 'Xám', hex: '#47484c', fabric: { preset: 'cotton-heavy' } },
+            { name: 'Kaki', hex: '#d4c3a3', fabric: { preset: 'cotton' } }
         ],
 
         // Tuning chất liệu vải chung cho mọi size
@@ -399,8 +399,8 @@ export const MODEL_INJECTION = {
     "18": {
         enable: true,
         colors: [
-            { name: 'Hoa Nhí Trắng', hex: '#fdfbf7', fabric: { preset: 'silk' } },
-            { name: 'Hoa Nhí Đỏ', hex: '#a62e38', fabric: { preset: 'silk' } }
+            { name: 'Hoa Nhí Be Nhạt', hex: '#e9ddc7', fabric: { preset: 'silk' } },
+
         ],
         softness: { roughness: 0.75, metalness: 0.0, envMapIntensity: 0.4, skinOffset: 0.004 },
         fabric: { preset: 'silk' },
@@ -419,12 +419,12 @@ export const MODEL_INJECTION = {
         }
     },
 
-    // Sản phẩm ID 12 — Chân Váy
-    "12": {
+    // Sản phẩm ID 19 — Chân Váy
+    "19": {
         enable: true,
         colors: [
             { name: 'Đen', hex: '#111111', fabric: { preset: 'cotton-heavy' } },
-            { name: 'Beige', hex: '#d4c3a3', fabric: { preset: 'cotton-soft' } }
+
         ],
         softness: { roughness: 0.95, metalness: 0.0, envMapIntensity: 0.2, skinOffset: 0.003 },
         fabric: { preset: 'cotton' },
@@ -447,8 +447,8 @@ export const MODEL_INJECTION = {
     "6": {
         enable: true,
         colors: [
-            { name: 'Xanh Đen', hex: '#232f3e', fabric: { preset: 'denim-raw' } },
-            { name: 'Xanh Xám', hex: '#5b6b7a', fabric: { preset: 'denim-stone-washed' } }
+            { name: 'Đen', hex: '#060809', fabric: { preset: 'denim-raw' } },
+
         ],
         softness: { roughness: 1.0, metalness: 0.0, envMapIntensity: 0.1, skinOffset: 0.004 },
         fabric: { preset: 'denim-raw' },

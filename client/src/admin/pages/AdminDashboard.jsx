@@ -27,7 +27,7 @@ import '../styles/admin-tokens.css';
 import './AdminDashboard.css';
 
 /* ===== helpers ===== */
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API = import.meta.env.VITE_API_URL || '';
 
 const fmtVND = (v) =>
     new Intl.NumberFormat('vi-VN', {

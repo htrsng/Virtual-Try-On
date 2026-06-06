@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 const STATUS_CONFIG = {
     'Tất cả':   { color: '#6B7280', bg: '#F3F4F6', icon: '📋' },

@@ -285,6 +285,14 @@ const VirtualClosetSchema = new mongoose.Schema({
       img: { type: String },
       imageUrl: { type: String },
       thumbnailUrl: { type: String },
+      variantId: { type: String },
+      size: { type: String },
+      color: { type: String },
+      colorLabel: { type: String },
+      glbUrl: { type: String },
+      purchasedColor: { type: String }, // Keep for backward compatibility during migration
+      purchasedSize: { type: String },  // Keep for backward compatibility during migration
+      model3D: mongoose.Schema.Types.Mixed, // Relax constraint so we can clear it or keep old format during transition
       material: {
         preset: {
           type: String,
@@ -300,12 +308,6 @@ const VirtualClosetSchema = new mongoose.Schema({
         roughnessBias: { type: Number, default: 0.5 },
         metallicFactor: { type: Number, default: 0 },
         aoIntensity: { type: Number, default: 1 },
-      },
-      model3D: {
-        modelUrl: String,
-        enabled: { type: Boolean, default: false },
-        scale: { type: Number, default: 1 },
-        position: { x: Number, y: Number, z: Number },
       },
       dateAdded: { type: Date, default: Date.now },
       lastWorn: { type: Date },

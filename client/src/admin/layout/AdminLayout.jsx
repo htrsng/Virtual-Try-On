@@ -9,7 +9,7 @@ import {
     FiUser, FiSun, FiMoon, FiDatabase, FiX, FiCheckCircle, FiMessageSquare
 } from 'react-icons/fi';
 import axios from 'axios';
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL || '';
 import '../styles/admin-layout.css';
 
 /* ── Menu definition ── */

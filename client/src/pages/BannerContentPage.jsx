@@ -18,7 +18,7 @@ function BannerContentPage() {
     const fetchBannerContent = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`http://localhost:3000/api/banner-contents/${bannerId}`);
+            const response = await axios.get(`/api/banner-contents/${bannerId}`);
             setBanner(response.data);
             setError('');
         } catch (err) {

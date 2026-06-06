@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
 
     const fetchUserInfo = async () => {
         try {
-            const response = await axios.get('http://localhost:3000/api/auth/me');
+            const response = await axios.get('/api/auth/me');
             setUser(response.data);
         } catch (error) {
             console.error('Lỗi lấy thông tin user:', error);
@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }) => {
             const normalizedEmail = String(email || '').trim().toLowerCase();
             const normalizedPassword = String(password || '');
 
-            const response = await axios.post('http://localhost:3000/api/auth/login', {
+            const response = await axios.post('/api/auth/login', {
                 email: normalizedEmail,
                 password: normalizedPassword
             });
@@ -72,7 +72,7 @@ export const AuthProvider = ({ children }) => {
 
     const register = async (email, password, fullName, phone, address) => {
         try {
-            const response = await axios.post('http://localhost:3000/api/auth/register', {
+            const response = await axios.post('/api/auth/register', {
                 email,
                 password,
                 fullName,
@@ -114,7 +114,7 @@ export const AuthProvider = ({ children }) => {
 
     const updateProfile = async (profileData) => {
         try {
-            const response = await axios.put('http://localhost:3000/api/auth/profile', profileData);
+            const response = await axios.put('/api/auth/profile', profileData);
             setUser(response.data.user);
             return { success: true, message: response.data.message };
         } catch (error) {
