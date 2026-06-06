@@ -13,6 +13,7 @@ import { ColorSelector } from './components/ProductOptions';
 import VirtualPersonalClosetDrawer, { type ClosetItem } from './components/VirtualPersonalClosetDrawer';
 import OutfitPanel from './components/OutfitPanel';
 import TryOnToolbar from './components/TryOnToolbar';
+import SizeComparisonRoom from '../../pages/SizeComparisonRoom';
 
 import './VirtualTryOn.css';
 import * as THREE from 'three';
@@ -31,7 +32,7 @@ type LocalGarmentSizeSpec = {
     fitIntent?: string;
 };
 
-type LocalFabricProfile = {
+export type LocalFabricProfile = {
     preset?:
     | 'cotton'
     | 'denim'
@@ -1921,165 +1922,20 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                 </div>
             )}
 
-            {isSizeCompareRoomOpen && compareLeftResult && compareRightResult && (
-                <div
-                    className="vto-size-room__backdrop"
-                    role="presentation"
-                    onClick={handleCloseSizeCompareRoom}
-                    style={{ background: 'rgba(15,11,7,0.4)', backdropFilter: 'blur(8px)' }}
-                >
-                    <div
-                        className="vto-size-room vto-size-room--premium"
-                        role="dialog"
-                        aria-modal="true"
-                        aria-labelledby="vto-size-room-title"
-                        onClick={(event) => event.stopPropagation()}
-                        style={{ background: '#FFFFFF', border: '1px solid rgba(201,150,63,0.2)', boxShadow: '0 24px 60px rgba(0,0,0,0.15)', color: '#2C1F0E' }}
-                    >
-                        <header className="vto-size-room__header" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-                            <div className="vto-size-room__header-left">
-                                <div className="vto-size-room__header-top">
-                                    <span className="vto-size-room__header-icon" aria-hidden="true">📏</span>
-                                    <span className="vto-size-room__header-step">Công cụ tính năng cao cấp</span>
-                                </div>
-                                <div className="compare-title-wrapper" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px' }}>
-                                    <h3 id="vto-size-room-title" className="compare-title" style={{ color: '#2C1F0E', margin: 0, fontSize: '18px' }}>So sánh Size - Thử ngay trên người mẫu</h3>
-                                    <span className="ar-ready-badge" style={{ background: 'linear-gradient(135deg, #C9963F 0%, #E8DCC8 100%)', color: '#fff', padding: '4px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', boxShadow: '0 4px 10px rgba(201,150,63,0.3)' }}>Real-time 3D</span>
-                                </div>
-                                <p className="compare-subtitle" style={{ color: 'rgba(0,0,0,0.5)', marginTop: '6px' }}>Quan sát trực quan độ vừa vặn trên Avatar 3D tỷ lệ thực của bạn.</p>
-                            </div>
-                            <button
-                                type="button"
-                                className="vto-size-room__close"
-                                onClick={handleCloseSizeCompareRoom}
-                                aria-label="Đóng phòng so sánh size"
-                                style={{ color: '#2C1F0E' }}
-                            >
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                                    <line x1="18" y1="6" x2="6" y2="18" />
-                                    <line x1="6" y1="6" x2="18" y2="18" />
-                                </svg>
-                            </button>
-                        </header>
-
-                        {/* Pose toolbar removed as per user request */}
-
-                        <div className="vto-size-room__screens" style={{ background: '#FDFBF7' }}>
-                            <SizeCompareViewport
-                                panelLabel="Màn hình trái"
-                                productName={activeItem.name}
-                                bodyData={currentBodyData}
-                                modelConfig={activeModel3D}
-                                selectedSize={sizeComparePair.left}
-                                availableSizes={comparableSizes}
-                                onSelectSize={handleSizeCompareLeftChange}
-                                selectedColor={comparePreviewColor}
-                                selectedFabric={comparePreviewFabric}
-                                fitScore={compareLeftResult.score}
-                                fitZones={compareLeftResult.zones}
-                                heatmapEnabled={false}
-                                pose={comparePose}
-                            />
-
-                            <div className="vto-size-room__connector" aria-hidden="true" style={{ background: 'rgba(201,150,63,0.1)', color: '#C9963F' }}>
-                                <span className="compare-arrow">⇄</span>
-                            </div>
-
-                            <SizeCompareViewport
-                                panelLabel="Màn hình phải"
-                                productName={activeItem.name}
-                                bodyData={currentBodyData}
-                                modelConfig={activeModel3D}
-                                selectedSize={sizeComparePair.right}
-                                availableSizes={comparableSizes}
-                                onSelectSize={handleSizeCompareRightChange}
-                                selectedColor={comparePreviewColor}
-                                selectedFabric={comparePreviewFabric}
-                                fitScore={compareRightResult.score}
-                                fitZones={compareRightResult.zones}
-                                heatmapEnabled={false}
-                                pose={comparePose}
-                            />
-                        </div>
-
-                        <div className="vto-size-room__summary">
-                            <p className="vto-size-room__color-note">Chế độ màu áo: <strong>{comparePreviewColorName}</strong></p>
-
-                            <div className="vto-size-rec__compare-panel">
-                                <div className="vto-size-rec__compare-scores">
-                                    <div style={{ flex: 1 }}>
-                                        <span style={{ display: 'block', fontSize: '11px', color: 'rgba(0,0,0,0.5)', marginBottom: '4px' }}>Size {sizeComparePair.left}</span>
-                                        <div className="vto-fit-progress-wrapper">
-                                            <div className="vto-fit-progress-bar">
-                                                <div className="vto-fit-progress-fill" style={{ width: `${compareLeftResult.score}%`, background: compareLeftResult.score > 80 ? '#22c55e' : compareLeftResult.score > 60 ? '#eab308' : '#ef4444' }}></div>
-                                            </div>
-                                            <strong style={{ fontSize: '16px' }}>{compareLeftResult.score}%</strong>
-                                        </div>
-                                    </div>
-                                    <div style={{ flex: 1, textAlign: 'right' }}>
-                                        <span style={{ display: 'block', fontSize: '11px', color: 'rgba(0,0,0,0.5)', marginBottom: '4px' }}>Size {sizeComparePair.right}</span>
-                                        <div className="vto-fit-progress-wrapper" style={{ justifyContent: 'flex-end' }}>
-                                            <strong style={{ fontSize: '16px' }}>{compareRightResult.score}%</strong>
-                                            <div className="vto-fit-progress-bar vto-fit-progress-bar--right">
-                                                <div className="vto-fit-progress-fill" style={{ width: `${compareRightResult.score}%`, background: compareRightResult.score > 80 ? '#22c55e' : compareRightResult.score > 60 ? '#eab308' : '#ef4444' }}></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="vto-size-rec__compare-diff-row" style={{ textAlign: 'center', marginBottom: '16px' }}>
-                                    <span className={`vto-size-rec__compare-diff ${sizeCompareScoreDiff > 0 ? 'positive' : sizeCompareScoreDiff < 0 ? 'negative' : ''}`} style={{ background: sizeCompareScoreDiff > 0 ? 'rgba(34, 197, 94, 0.1)' : sizeCompareScoreDiff < 0 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(0,0,0,0.05)', padding: '4px 12px', borderRadius: '12px', display: 'inline-block' }}>
-                                        Chênh lệch: {sizeCompareScoreDiff > 0 ? '+' : ''}{sizeCompareScoreDiff}%
-                                    </span>
-                                </div>
-
-                                <div className="vto-size-rec__compare-cards-container" style={{ display: 'flex', gap: '20px' }}>
-                                    {/* Left Size Panel */}
-                                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                        <h4 style={{ margin: '0 0 4px 0', fontSize: '12px', color: 'rgba(0,0,0,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                            Chi tiết Size {sizeComparePair.left}
-                                        </h4>
-                                        {sizeCompareRows.map((row) => {
-                                            const fit = FIT_LABELS[row.left.fit];
-                                            return (
-                                                <div key={`left-${row.label}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', background: row.winner === 'left' ? 'rgba(34, 197, 94, 0.05)' : '#fff', borderRadius: '10px', border: row.winner === 'left' ? '1.5px solid rgba(34, 197, 94, 0.3)' : '1px solid rgba(0,0,0,0.06)' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                        <span style={{ fontSize: '16px' }}>{getZoneIcon(row.label)}</span>
-                                                        <span style={{ fontSize: '13px', fontWeight: '500', color: '#2C1F0E' }}>{row.label}</span>
-                                                    </div>
-                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', color: fit.color }}>
-                                                        <span style={{ fontWeight: '700', fontSize: '12px' }}>{fit.text}</span>
-                                                        <span style={{ fontSize: '11px', opacity: 0.8 }}>{formatDeltaCm(row.left.deltaRaw)}</span>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-
-                                    {/* Right Size Panel */}
-                                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                        <h4 style={{ margin: '0 0 4px 0', fontSize: '12px', color: 'rgba(0,0,0,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'right' }}>
-                                            Chi tiết Size {sizeComparePair.right}
-                                        </h4>
-                                        {sizeCompareRows.map((row) => {
-                                            const fit = FIT_LABELS[row.right.fit];
-                                            return (
-                                                <div key={`right-${row.label}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', background: row.winner === 'right' ? 'rgba(34, 197, 94, 0.05)' : '#fff', borderRadius: '10px', border: row.winner === 'right' ? '1.5px solid rgba(34, 197, 94, 0.3)' : '1px solid rgba(0,0,0,0.06)' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                        <span style={{ fontSize: '16px' }}>{getZoneIcon(row.label)}</span>
-                                                        <span style={{ fontSize: '13px', fontWeight: '500', color: '#2C1F0E' }}>{row.label}</span>
-                                                    </div>
-                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', color: fit.color }}>
-                                                        <span style={{ fontWeight: '700', fontSize: '12px' }}>{fit.text}</span>
-                                                        <span style={{ fontSize: '11px', opacity: 0.8 }}>{formatDeltaCm(row.right.deltaRaw)}</span>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            {isSizeCompareRoomOpen && (
+                <div style={{ position: 'fixed', inset: 0, zIndex: 9999 }}>
+                    <SizeComparisonRoom 
+                        product={{ name: activeItem.name, sku: activeItem.sku, sizes: availableSizes as string[], image: activeItem.image || activeItem.img }} 
+                        bodyData={currentBodyData}
+                        modelConfig={activeModel3D}
+                        selectedColor={itemColors[activeItemKey] || ''}
+                        selectedFabric={resolveColorConfig(activeModel3D, itemColors[activeItemKey] || '')?.fabric}
+                        fitRecommendations={recommendSizes(currentBodyData, availableSizes, activeGarmentSizeSpecs, activeGarmentType).reduce((acc: any, r: any) => ({...acc, [r.size]: r}), {})}
+                        garmentSizeSpecs={activeGarmentSizeSpecs}
+                        comparePose={comparePose || 'Idle'}
+                        onClose={handleCloseSizeCompareRoom}
+                        onAddToCart={(size) => { onAddToCart(activeItem, size); handleCloseSizeCompareRoom(); }}
+                    />
                 </div>
             )}
 

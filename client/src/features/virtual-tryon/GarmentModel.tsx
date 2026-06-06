@@ -3,6 +3,7 @@ import { useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
+import { useAnimations } from '@react-three/drei';
 
 import {
     applyGarmentColor,
@@ -124,6 +125,9 @@ type GarmentInstanceProps = {
     avatarScene: THREE.Group | null;
     heatmapEnabled: boolean;
     heatmapZones: GarmentHeatmapZone[];
+    wireframeColor?: string;
+    ghostOpacity?: number;
+    emissiveIntensity?: number;
 };
 
 function GarmentInstance({
@@ -133,6 +137,9 @@ function GarmentInstance({
     avatarScene,
     heatmapEnabled,
     heatmapZones,
+    wireframeColor,
+    ghostOpacity,
+    emissiveIntensity,
 }: GarmentInstanceProps) {
     const gltf = useLoader(GLTFLoader, garment.url) as GLTF;
 
@@ -179,6 +186,22 @@ function GarmentInstance({
             envMapIntensity: garment.softness.envMapIntensity,
             fabricProfile: effectiveFabric,
         });
+
+        if (wireframeColor) {
+            cloned.traverse((child) => {
+                const mesh = child as THREE.Mesh;
+                if (mesh.isMesh) {
+                    mesh.material = new THREE.MeshStandardMaterial({
+                        color: wireframeColor,
+                        wireframe: true,
+                        transparent: true,
+                        opacity: ghostOpacity || 0.6,
+                        emissive: wireframeColor,
+                        emissiveIntensity: emissiveIntensity !== undefined ? emissiveIntensity : 0.3
+                    });
+                }
+            });
+        }
         return cloned;
     }, [
         fabricOverride,
@@ -189,6 +212,18 @@ function GarmentInstance({
         garment.softness.metalness,
         garment.softness.roughness,
     ]);
+
+    const { actions, names } = useAnimations(gltf.animations, garmentScene);
+
+    useEffect(() => {
+        if (names.length > 0) {
+            const actionName = names[0];
+            if (actionName && actions[actionName]) {
+                actions[actionName].reset().fadeIn(0.5).play();
+            }
+            return () => { actions[actionName]?.fadeOut(0.5); };
+        }
+    }, [actions, names]);
 
     useEffect(() => {
         applyGarmentColor(garmentScene, selectedColor);

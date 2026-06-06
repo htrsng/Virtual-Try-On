@@ -759,6 +759,38 @@ const normalizeBoneName = (name: string) =>
         .replace(/mixamorig|armature|skeleton|bone/gi, '')
         .replace(/[^a-z0-9]/g, '');
 
+const BONE_ALIASES: Record<string, string[]> = {
+    hips: ['pelvis', 'ccbasepelvis', 'hip', 'root'],
+    spine: ['spine01', 'spine1', 'abdomen', 'ccbasespine01', 'lowerback'],
+    spine1: ['spine02', 'spine2', 'chest', 'ccbasespine02', 'middleback'],
+    spine2: ['spine03', 'spine3', 'upperchest', 'ccbasespine03', 'upperback'],
+    neck: ['ccbaseneck', 'neck01'],
+    head: ['ccbasehead'],
+    leftshoulder: ['lshoulder', 'claviclel', 'leftcollar', 'ccbaselcollarbone', 'shoulderl'],
+    leftarm: ['larm', 'upperarml', 'bicepl', 'ccbaselupperarm', 'armleft', 'leftupperarm'],
+    leftforearm: ['lforearm', 'lowerarml', 'ccbasellowerarm', 'elbowleft', 'leftlowerarm'],
+    lefthand: ['lhand', 'wristl', 'ccbaselhand', 'handleft'],
+    rightshoulder: ['rshoulder', 'clavicler', 'rightcollar', 'ccbasercollarbone', 'shoulderr'],
+    rightarm: ['rarm', 'upperarmr', 'bicepr', 'ccbaserupperarm', 'armright', 'rightupperarm'],
+    rightforearm: ['rforearm', 'lowerarmr', 'ccbaserlowerarm', 'elbowright', 'rightlowerarm'],
+    righthand: ['rhand', 'wristr', 'ccbaserhand', 'handright'],
+    leftupleg: ['lupleg', 'thighl', 'leftthigh', 'ccbaselthigh', 'uplegleft'],
+    leftleg: ['lleg', 'calfl', 'leftcalf', 'ccbaselcalf', 'legleft', 'leftlowerleg'],
+    leftfoot: ['lfoot', 'footl', 'ccbaselfoot', 'footleft'],
+    rightupleg: ['rupleg', 'thighr', 'rightthigh', 'ccbaserthigh', 'uplegright'],
+    rightleg: ['rleg', 'calfr', 'rightcalf', 'ccbasercalf', 'legright', 'rightlowerleg'],
+    rightfoot: ['rfoot', 'footr', 'ccbaserfoot', 'footright'],
+};
+
+const resolveAlias = (normalizedName: string): string => {
+    for (const [standard, aliases] of Object.entries(BONE_ALIASES)) {
+        if (normalizedName === standard || aliases.includes(normalizedName)) {
+            return standard;
+        }
+    }
+    return normalizedName;
+};
+
 const toMaterialArray = (material: THREE.Material | THREE.Material[]) =>
     Array.isArray(material) ? material : [material];
 
@@ -768,7 +800,7 @@ const buildAvatarBoneLookup = (avatarScene: THREE.Object3D): AvatarBoneLookup =>
     const all: THREE.Bone[] = [];
 
     avatarScene.traverse((child) => {
-        if (!(child instanceof THREE.Bone)) {
+        if (!(child as THREE.Bone).isBone) {
             return;
         }
 
@@ -782,22 +814,34 @@ const buildAvatarBoneLookup = (avatarScene: THREE.Object3D): AvatarBoneLookup =>
 
 const findAvatarBone = (boneName: string, lookup: AvatarBoneLookup): THREE.Bone | null => {
     const exactName = boneName.toLowerCase();
-    const normalizedName = normalizeBoneName(boneName);
+    const rawNormalized = normalizeBoneName(boneName);
+    const normalizedName = resolveAlias(rawNormalized);
 
     const exact = lookup.exact.get(exactName);
     if (exact) {
         return exact;
     }
 
-    const normalized = lookup.normalized.get(normalizedName);
+    const normalized = lookup.normalized.get(rawNormalized) || lookup.normalized.get(normalizedName);
     if (normalized) {
         return normalized;
+    }
+
+    // Try finding by alias for all avatar bones
+    const matchByAlias = lookup.all.find((avatarBone) => {
+        const avatarRaw = normalizeBoneName(avatarBone.name);
+        const avatarAlias = resolveAlias(avatarRaw);
+        return avatarAlias === normalizedName;
+    });
+
+    if (matchByAlias) {
+        return matchByAlias;
     }
 
     return (
         lookup.all.find((avatarBone) => {
             const avatarNormalized = normalizeBoneName(avatarBone.name);
-            return avatarNormalized.endsWith(normalizedName) || normalizedName.endsWith(avatarNormalized);
+            return avatarNormalized.endsWith(rawNormalized) || rawNormalized.endsWith(avatarNormalized);
         }) || null
     );
 };
@@ -823,7 +867,7 @@ export const isAvatarMesh = (mesh: THREE.Mesh): boolean => {
  */
 export const prepareGarmentMaterials = (garmentRoot: THREE.Object3D) => {
     garmentRoot.traverse((child) => {
-        if (!(child instanceof THREE.Mesh)) {
+        if (!(child as THREE.Mesh).isMesh) {
             return;
         }
 
@@ -1199,10 +1243,10 @@ export const bindGarmentToAvatarSkeleton = (
     const staticMeshes: THREE.Mesh[] = [];
 
     garmentRoot.traverse((child) => {
-        if (child instanceof THREE.SkinnedMesh && child.skeleton) {
-            skinnedMeshes.push(child);
-        } else if (child instanceof THREE.Mesh) {
-            staticMeshes.push(child);
+        if ((child as THREE.SkinnedMesh).isSkinnedMesh && (child as THREE.SkinnedMesh).skeleton) {
+            skinnedMeshes.push(child as THREE.SkinnedMesh);
+        } else if ((child as THREE.Mesh).isMesh) {
+            staticMeshes.push(child as THREE.Mesh);
         }
     });
 

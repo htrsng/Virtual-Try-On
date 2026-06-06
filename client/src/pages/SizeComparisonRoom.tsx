@@ -1,5 +1,11 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import html2canvas from 'html2canvas';
 import './SizeComparisonRoom.css';
+import { type Profile } from '../contexts/FittingRoomContext';
+// @ts-ignore
+import { type ProductWithModel } from '../data/ThreeDConfig';
+import { type LocalFabricProfile } from '../features/virtual-tryon/VirtualTryOn';
+import SizeCompare3DCanvas from '../features/virtual-tryon/components/SizeCompare3DCanvas';
 
 /* ═══════════════════════════════════════════════════════════════
    INLINE SVG ICONS
@@ -45,38 +51,12 @@ const IcMore = () => (
     <circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>
   </svg>
 );
-const IcUpload = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
-    <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
-  </svg>
-);
 const IcArrowsH = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
     <path d="M7 16l-4-4 4-4M17 8l4 4-4 4"/><line x1="3" y1="12" x2="21" y2="12"/>
   </svg>
 );
-const IcArrowUp = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="18 15 12 9 6 15"/>
-  </svg>
-);
-const IcArrowDown = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="6 9 12 15 18 9"/>
-  </svg>
-);
-const IcMinus = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round">
-    <line x1="5" y1="12" x2="19" y2="12"/>
-  </svg>
-);
-const IcRuler = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21.3 8.7 8.7 21.3a2 2 0 0 1-2.8 0L2.7 18a2 2 0 0 1 0-2.8L15.3 2.7a2 2 0 0 1 2.8 0l3.2 3.2a2 2 0 0 1 0 2.8z"/>
-    <path d="m7.5 10.5 2 2M10.5 7.5l2 2M13.5 4.5l2 2M4.5 13.5l2 2"/>
-  </svg>
-);
+
 const IcMenu = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round">
     <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
@@ -91,235 +71,43 @@ const IcX = () => (
 /* ═══════════════════════════════════════════════════════════════
    SIZE DATA
    ═══════════════════════════════════════════════════════════════ */
-const SIZES: Record<string, { chest: number; waist: number; sleeve: number; shoulder: number; hip: number }> = {
-  'XS':  { chest: 80,  waist: 64,  sleeve: 56, shoulder: 36, hip: 86  },
-  'S':   { chest: 88,  waist: 72,  sleeve: 57, shoulder: 38, hip: 92  },
-  'M':   { chest: 96,  waist: 80,  sleeve: 58, shoulder: 40, hip: 98  },
-  'L':   { chest: 104, waist: 88,  sleeve: 59, shoulder: 42, hip: 104 },
-  'XL':  { chest: 112, waist: 96,  sleeve: 60, shoulder: 44, hip: 110 },
-  'XXL': { chest: 120, waist: 104, sleeve: 61, shoulder: 46, hip: 116 },
-};
-const SIZE_KEYS = Object.keys(SIZES);
 
-function getDiff(a: string, b: string) {
-  const sa = SIZES[a], sb = SIZES[b];
+
+function getDiff(a: string, b: string, garmentSizeSpecs: Record<string, any> = {}) {
+  const sa = garmentSizeSpecs[a], sb = garmentSizeSpecs[b];
   if (!sa || !sb) return [];
   return [
-    { label: 'Vòng ngực',     delta: sb.chest    - sa.chest    },
-    { label: 'Vòng eo',       delta: sb.waist    - sa.waist    },
-    { label: 'Chiều dài tay', delta: sb.sleeve   - sa.sleeve   },
-    { label: 'Bề rộng vai',   delta: sb.shoulder - sa.shoulder },
-  ];
+    { label: 'Vòng ngực',     delta: (sb.chest || 0) - (sa.chest || 0) },
+    { label: 'Vòng eo',       delta: (sb.waist || 0) - (sa.waist || 0) },
+    { label: 'Vòng mông',     delta: (sb.hips || 0) - (sa.hips || 0) },
+    { label: 'Bề rộng vai',   delta: (sb.shoulder || 0) - (sa.shoulder || 0) },
+  ].filter(x => x.delta !== 0);
 }
 
-function fitLabel(k: string, userChest = 96): string {
-  const s = SIZES[k]; if (!s) return '';
-  const d = s.chest - userChest;
-  if (d < -4) return 'Quá chật';
-  if (d < 0)  return 'Vừa khít';
-  if (d < 6)  return 'Vừa vặn';
-  if (d < 16) return `Rộng hơn ${d}cm`;
-  return 'Khá rộng';
-}
+
 
 /* ═══════════════════════════════════════════════════════════════
    BODY FIGURE SVG — matches screenshot style (coat silhouette)
    ═══════════════════════════════════════════════════════════════ */
-interface FigProps {
-  sizeKey: string;
-  variant: 'a' | 'b';
-  showOutline: boolean;
-  showPoints: boolean;
-  showHeatmap: boolean;
-  opacity?: number;
-}
-
-const BodyFigure: React.FC<FigProps> = ({ sizeKey, variant, showOutline, showPoints, showHeatmap, opacity = 1 }) => {
-  const sz = SIZES[sizeKey] || SIZES['M'];
-
-  // Geometry — normalised to 200-wide viewbox, scaled per chest measurement
-  const cw  = 78 + (sz.chest - 80) * 0.52;   // coat chest width
-  const ww  = 60 + (sz.waist - 64) * 0.48;   // coat waist width
-  const sw  = cw + 18;                         // shoulder span (coat has wide shoulders)
-  const hw  = ww + 18;                         // hip width
-  const sl  = 55 + (sz.sleeve - 56) * 1.2;   // sleeve length
-
-  const col     = variant === 'a' ? '#1A56DB' : '#D97706';
-  const bodyFill = '#C5BDB4';  // warm gray matching screenshot
-  const bodyDark = '#B5ADA4';
-  const coatFill = '#C8C0B7';  // coat slightly lighter
-  const coatDark = '#B8B0A7';
-  const skinFill = '#D4C8BE';
-
-  const gradId  = `grad-body-${variant}`;
-  const heatId  = `heat-${variant}-${sizeKey}`;
-
-  // Chest line y-position (at mid-chest of coat)
-  const chestY   = 148;
-  const shoulderY = 80;
-
-  return (
-    <svg viewBox="0 0 200 400" xmlns="http://www.w3.org/2000/svg"
-      style={{ height: '100%', width: 'auto', opacity, transition: 'opacity .3s' }}>
-      <defs>
-        <linearGradient id={gradId} x1="0.2" y1="0" x2="0.8" y2="1">
-          <stop offset="0%"   stopColor={coatFill}/>
-          <stop offset="100%" stopColor={coatDark}/>
-        </linearGradient>
-        <radialGradient id={heatId} cx="50%" cy="50%" r="50%">
-          <stop offset="0%"   stopColor="#4CAF50" stopOpacity=".7"/>
-          <stop offset="55%"  stopColor="#FFEB3B" stopOpacity=".55"/>
-          <stop offset="100%" stopColor="#F44336" stopOpacity=".3"/>
-        </radialGradient>
-      </defs>
-
-      {/* ── Head ── */}
-      <ellipse cx="100" cy="34" rx="22" ry="26" fill={skinFill} stroke={bodyDark} strokeWidth=".8"/>
-
-      {/* ── Neck ── */}
-      <rect x="93" y="58" width="14" height="16" rx="3" fill={skinFill} stroke={bodyDark} strokeWidth=".6"/>
-
-      {/* ── Coat collar area ── */}
-      <path d={`M 90 72 L ${100-16} 88 L ${100+16} 88 L 110 72 Z`}
-        fill={coatFill} stroke={coatDark} strokeWidth=".8"/>
-
-      {/* ── Left arm (coat sleeve) ── */}
-      <path d={`
-        M ${100 - sw/2 - 2} ${shoulderY}
-        C ${100 - sw/2 - 12} ${shoulderY + 14}
-          ${100 - sw/2 - 14} ${shoulderY + sl*0.5}
-          ${100 - sw/2 - 10} ${shoulderY + sl}
-        L ${100 - sw/2 + 4}  ${shoulderY + sl}
-        C ${100 - sw/2 + 2}  ${shoulderY + sl*0.5}
-          ${100 - sw/2 + 2}  ${shoulderY + 14}
-          ${100 - sw/2 + 8}  ${shoulderY}
-        Z
-      `} fill={`url(#${gradId})`} stroke={coatDark} strokeWidth=".8"/>
-
-      {/* ── Right arm (coat sleeve) ── */}
-      <path d={`
-        M ${100 + sw/2 + 2} ${shoulderY}
-        C ${100 + sw/2 + 12} ${shoulderY + 14}
-          ${100 + sw/2 + 14} ${shoulderY + sl*0.5}
-          ${100 + sw/2 + 10} ${shoulderY + sl}
-        L ${100 + sw/2 - 4}  ${shoulderY + sl}
-        C ${100 + sw/2 - 2}  ${shoulderY + sl*0.5}
-          ${100 + sw/2 - 2}  ${shoulderY + 14}
-          ${100 + sw/2 - 8}  ${shoulderY}
-        Z
-      `} fill={`url(#${gradId})`} stroke={coatDark} strokeWidth=".8"/>
-
-      {/* ── Coat body (torso) ── */}
-      <path d={`
-        M ${100 - sw/2 + 6} ${shoulderY}
-        C ${100 - cw/2 - 2} ${shoulderY + 18}
-          ${100 - ww/2 - 4} 185
-          ${100 - ww/2}     210
-        L ${100 - hw/2 + 4} 260
-        L ${100 + hw/2 - 4} 260
-        L ${100 + ww/2}     210
-        C ${100 + ww/2 + 4} 185
-          ${100 + cw/2 + 2} ${shoulderY + 18}
-          ${100 + sw/2 - 6} ${shoulderY}
-        Z
-      `} fill={`url(#${gradId})`} stroke={coatDark} strokeWidth=".8"/>
-
-      {/* ── Coat centre line (zipper) ── */}
-      <line x1="100" y1={shoulderY + 8} x2="100" y2="255"
-        stroke={coatDark} strokeWidth=".7" strokeDasharray="3 3" opacity=".5"/>
-
-      {/* ── Coat bottom pocket/hem line ── */}
-      <line x1={100 - ww/2 + 2} y1="245" x2={100 + ww/2 - 2} y2="245"
-        stroke={coatDark} strokeWidth=".6" opacity=".4"/>
-
-      {/* ── Legs ── */}
-      <rect x={100 - hw/2 + 6} y="260" width={hw/2 - 10} height="128" rx="8"
-        fill={bodyFill} stroke={bodyDark} strokeWidth=".7"/>
-      <rect x={100 + 4}         y="260" width={hw/2 - 10} height="128" rx="8"
-        fill={bodyFill} stroke={bodyDark} strokeWidth=".7"/>
-
-      {/* ── Feet ── */}
-      <ellipse cx={100 - hw/2 + 6 + (hw/2 - 10)/2} cy="390" rx={hw/4 - 2} ry="5"
-        fill={bodyDark} opacity=".7"/>
-      <ellipse cx={100 + 4 + (hw/2 - 10)/2}         cy="390" rx={hw/4 - 2} ry="5"
-        fill={bodyDark} opacity=".7"/>
-
-      {/* ── HEATMAP ── */}
-      {showHeatmap && (
-        <>
-          <ellipse cx="100" cy={chestY} rx={cw/2 - 4} ry="20" fill={`url(#${heatId})`} opacity=".6"/>
-          <ellipse cx="100" cy="195"    rx={ww/2 - 4} ry="12"
-            fill={sz.waist > 88 ? '#F44336' : sz.waist > 80 ? '#FFEB3B' : '#4CAF50'}
-            opacity=".45"/>
-        </>
-      )}
-
-      {/* ── MEASUREMENT LINE (chest) ── */}
-      {showOutline && (
-        <>
-          {/* Chest measurement line */}
-          <line
-            x1={100 - cw/2 + 4} y1={chestY}
-            x2={100 + cw/2 - 4} y2={chestY}
-            stroke={col} strokeWidth="1.8" strokeDasharray="5 3"
-          />
-          <circle cx={100 - cw/2 + 4} cy={chestY} r="3.5" fill={col}/>
-          <circle cx={100 + cw/2 - 4} cy={chestY} r="3.5" fill={col}/>
-
-          {/* Waist measurement line */}
-          <line
-            x1={100 - ww/2 + 2} y1="195"
-            x2={100 + ww/2 - 2} y2="195"
-            stroke={col} strokeWidth="1.5" strokeDasharray="5 3" opacity=".7"
-          />
-          <circle cx={100 - ww/2 + 2} cy="195" r="3" fill={col} opacity=".75"/>
-          <circle cx={100 + ww/2 - 2} cy="195" r="3" fill={col} opacity=".75"/>
-        </>
-      )}
-
-      {/* ── MEASUREMENT LABELS ── */}
-      {showPoints && (
-        <>
-          {/* Chest label pill */}
-          <rect x={100 - 22} y={chestY - 10} width="44" height="18" rx="9"
-            fill={col}/>
-          <text x="100" y={chestY + 4} textAnchor="middle"
-            fill="#fff" fontSize="10" fontWeight="700" fontFamily="Inter, sans-serif">
-            {sz.chest}cm
-          </text>
-
-          {/* Waist label (smaller, secondary) */}
-          <rect x={100 - 16} y="178" width="32" height="14" rx="7"
-            fill={col} opacity=".8"/>
-          <text x="100" y="189" textAnchor="middle"
-            fill="#fff" fontSize="8.5" fontWeight="600" fontFamily="Inter, sans-serif">
-            {sz.waist}cm
-          </text>
-
-          {/* Shoulder span annotation */}
-          <line x1={100 - sw/2 + 6} y1="74" x2={100 + sw/2 - 6} y2="74"
-            stroke={col} strokeWidth="1" strokeDasharray="3 2" opacity=".55"/>
-          <rect x={100 - 18} y="65" width="36" height="12" rx="6"
-            fill={col} opacity=".85"/>
-          <text x="100" y="75" textAnchor="middle"
-            fill="#fff" fontSize="8" fontWeight="600" fontFamily="Inter, sans-serif">
-            Vai {sz.shoulder}cm
-          </text>
-        </>
-      )}
-    </svg>
-  );
-};
-
 /* ═══════════════════════════════════════════════════════════════
    SPLIT VIEW
    ═══════════════════════════════════════════════════════════════ */
 interface ViewProps {
   sizeA: string; sizeB: string;
   showOutline: boolean; showPoints: boolean; showHeatmap: boolean;
+  bodyData?: any;
+  modelConfig?: any;
+  selectedColor?: string;
+  selectedFabric?: any;
+  fitRecommendations?: Record<string, any>;
+  comparePose?: string;
+  hoverZone?: string | null;
+  angle?: string;
+  diffOnly?: boolean;
+  cameraPreset?: string;
 }
 
-const SplitView: React.FC<ViewProps> = ({ sizeA, sizeB, showOutline, showPoints, showHeatmap }) => {
+const SplitView: React.FC<ViewProps> = ({ sizeA, sizeB, showHeatmap, bodyData, modelConfig, selectedColor, selectedFabric, fitRecommendations, comparePose, hoverZone, cameraPreset }) => {
   const [split, setSplit] = useState(50);
   const ref    = useRef<HTMLDivElement>(null);
   const drag   = useRef(false);
@@ -349,13 +137,31 @@ const SplitView: React.FC<ViewProps> = ({ sizeA, sizeB, showOutline, showPoints,
       {/* Panel A */}
       <div className="scr-panel"
         style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${split}%`, overflow: 'hidden' }}>
-        <div className="scr-panel-badge">
-          <div className="scr-size-tag a">Size {sizeA}</div>
-          <span className="scr-panel-fit">{fitLabel(sizeA)}</span>
+        <div style={{ position: 'absolute', top: 20, left: 20, zIndex: 10, background: 'rgba(255,255,255,0.95)', padding: '12px 16px', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.1)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.5)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                <div style={{ width: 10, height: 10, background: '#3B82F6', borderRadius: 2 }}></div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#1F2937' }}>SIZE {sizeA}</div>
+            </div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: fitRecommendations?.[sizeA]?.score >= 80 ? '#059669' : '#D97706', marginBottom: 2 }}>
+                {fitRecommendations?.[sizeA]?.score >= 80 ? '✨ Recommended' : '⚠️ Cần lưu ý'}
+            </div>
+            <div style={{ fontSize: 11, color: '#6B7280' }}>
+                Fit Score: <span style={{ fontWeight: 700, color: '#374151' }}>{Math.floor(fitRecommendations?.[sizeA]?.score || 0)}%</span>
+            </div>
         </div>
         <div className="scr-fig-wrap">
-          <BodyFigure sizeKey={sizeA} variant="a"
-            showOutline={showOutline} showPoints={showPoints} showHeatmap={showHeatmap}/>
+          <SizeCompare3DCanvas 
+            hoverZone={hoverZone} 
+            bodyData={bodyData} 
+            modelConfig={modelConfig} 
+            selectedSize={sizeA} 
+            selectedColor={selectedColor || ''} 
+            selectedFabric={selectedFabric}
+            heatmapEnabled={showHeatmap} 
+            fitZones={fitRecommendations?.[sizeA]?.zones} 
+            pose={comparePose}
+            cameraPreset={cameraPreset}
+          />
         </div>
         <div className="scr-panel-hint">Kéo để xoay · Cuộn để phóng to</div>
       </div>
@@ -376,13 +182,31 @@ const SplitView: React.FC<ViewProps> = ({ sizeA, sizeB, showOutline, showPoints,
       {/* Panel B */}
       <div className="scr-panel"
         style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: `${100 - split}%`, overflow: 'hidden' }}>
-        <div className="scr-panel-badge">
-          <div className="scr-size-tag b">Size {sizeB}</div>
-          <span className="scr-panel-fit">{fitLabel(sizeB)}</span>
+        <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 10, background: 'rgba(255,255,255,0.95)', padding: '12px 16px', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.1)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.5)', textAlign: 'right' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end', marginBottom: 4 }}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#1F2937' }}>SIZE {sizeB}</div>
+                <div style={{ width: 10, height: 10, background: '#F97316', borderRadius: 2 }}></div>
+            </div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: fitRecommendations?.[sizeB]?.score >= 80 ? '#059669' : '#D97706', marginBottom: 2 }}>
+                {fitRecommendations?.[sizeB]?.score >= 80 ? '✨ Recommended' : '⚠️ Cần lưu ý'}
+            </div>
+            <div style={{ fontSize: 11, color: '#6B7280' }}>
+                Fit Score: <span style={{ fontWeight: 700, color: '#374151' }}>{Math.floor(fitRecommendations?.[sizeB]?.score || 0)}%</span>
+            </div>
         </div>
         <div className="scr-fig-wrap">
-          <BodyFigure sizeKey={sizeB} variant="b"
-            showOutline={showOutline} showPoints={showPoints} showHeatmap={showHeatmap}/>
+          <SizeCompare3DCanvas 
+            hoverZone={hoverZone} 
+            bodyData={bodyData} 
+            modelConfig={modelConfig} 
+            selectedSize={sizeB} 
+            selectedColor={selectedColor || ''} 
+            selectedFabric={selectedFabric}
+            heatmapEnabled={showHeatmap} 
+            fitZones={fitRecommendations?.[sizeB]?.zones} 
+            pose={comparePose}
+            cameraPreset={cameraPreset}
+          />
         </div>
         <div className="scr-panel-hint">Kéo để xoay · Cuộn để phóng to</div>
       </div>
@@ -391,34 +215,44 @@ const SplitView: React.FC<ViewProps> = ({ sizeA, sizeB, showOutline, showPoints,
 };
 
 /* ═══════════════════════════════════════════════════════════════
-   OVERLAY VIEW
+   OUTLINE VIEW
    ═══════════════════════════════════════════════════════════════ */
-const OverlayView: React.FC<ViewProps> = ({ sizeA, sizeB, showOutline, showPoints, showHeatmap }) => {
-  const [opacity, setOpacity] = useState(55);
+const OutlineView: React.FC<ViewProps> = ({ sizeA, sizeB, showHeatmap, bodyData, modelConfig, selectedColor, selectedFabric, fitRecommendations, comparePose, hoverZone, diffOnly, cameraPreset }) => {
   return (
     <div className="scr-overlay">
-      <div className="scr-overlay-labels">
-        <div className="scr-size-tag a">Size {sizeA}</div>
-        <span style={{ color: '#9CA3AF', fontWeight: 700 }}>+</span>
-        <div className="scr-size-tag b">Size {sizeB}</div>
-        <span style={{ fontSize: 11, color: '#9CA3AF' }}>đè lên</span>
-      </div>
-
-      <div className="scr-overlay-fig" style={{ position: 'relative' }}>
-        <BodyFigure sizeKey={sizeA} variant="a"
-          showOutline={showOutline} showPoints={showPoints} showHeatmap={showHeatmap}/>
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
-          <BodyFigure sizeKey={sizeB} variant="b"
-            showOutline={showOutline} showPoints={false} showHeatmap={false}
-            opacity={opacity / 100}/>
+      <div className="scr-overlay-labels" style={{ top: 20 }}>
+        <div style={{display:'flex', alignItems:'center', gap: 16, background: '#fff', padding: '8px 16px', borderRadius: 100, boxShadow: '0 4px 12px rgba(0,0,0,0.1)'}}>
+            <div style={{display:'flex', alignItems:'center', gap: 8}}>
+                <div style={{width: 14, height: 14, background: '#3B82F6', borderRadius: 3}}></div>
+                <span style={{fontSize: 13, fontWeight: 700, color: '#1F2937'}}>Size {sizeA}</span>
+            </div>
+            <div style={{display:'flex', alignItems:'center', gap: 8}}>
+                <div style={{width: 14, height: 14, background: '#F97316', borderRadius: 3}}></div>
+                <span style={{fontSize: 13, fontWeight: 700, color: '#1F2937'}}>Size {sizeB}</span>
+            </div>
+            {diffOnly && (
+                <div style={{fontSize: 12, color: '#059669', fontWeight: 600, marginLeft: 8, paddingLeft: 12, borderLeft: '1px solid #E5E7EB'}}>
+                    Chỉ hiện chênh lệch
+                </div>
+            )}
         </div>
       </div>
 
-      <div className="scr-overlay-ctrl">
-        <span className="scr-ctrl-label">Opacity Size B</span>
-        <input type="range" min={20} max={80} value={opacity}
-          onChange={e => setOpacity(+e.target.value)} className="scr-ctrl-slider"/>
-        <span className="scr-ctrl-pct">{opacity}%</span>
+      <div className="scr-overlay-fig" style={{ position: 'absolute', inset: 0 }}>
+        <SizeCompare3DCanvas 
+            hoverZone={hoverZone} 
+            bodyData={bodyData} 
+            modelConfig={modelConfig} 
+            selectedSize={sizeA} 
+            selectedColor={selectedColor || ''} 
+            selectedFabric={selectedFabric}
+            heatmapEnabled={showHeatmap}
+            fitZones={fitRecommendations ? Object.values(fitRecommendations) : []}
+            pose={comparePose}
+            ghostSizes={[sizeA, sizeB]}
+            diffOnly={diffOnly}
+            cameraPreset={cameraPreset}
+        />
       </div>
     </div>
   );
@@ -427,7 +261,7 @@ const OverlayView: React.FC<ViewProps> = ({ sizeA, sizeB, showOutline, showPoint
 /* ═══════════════════════════════════════════════════════════════
    SLIDE VIEW
    ═══════════════════════════════════════════════════════════════ */
-const SlideView: React.FC<ViewProps> = ({ sizeA, sizeB, showOutline, showPoints, showHeatmap }) => {
+const SlideView: React.FC<ViewProps> = ({ sizeA, sizeB, showHeatmap, bodyData, modelConfig, selectedColor, selectedFabric, fitRecommendations, comparePose, hoverZone, cameraPreset }) => {
   const [pct, setPct] = useState(50);
   const ref  = useRef<HTMLDivElement>(null);
   const drag = useRef(false);
@@ -456,16 +290,36 @@ const SlideView: React.FC<ViewProps> = ({ sizeA, sizeB, showOutline, showPoints,
       {/* B — background */}
       <div className="scr-slide-bg">
         <div className="scr-slide-fig" style={{ height: '88%', maxHeight: 420, display: 'flex', alignItems: 'flex-end' }}>
-          <BodyFigure sizeKey={sizeB} variant="b"
-            showOutline={showOutline} showPoints={showPoints} showHeatmap={showHeatmap}/>
+          <SizeCompare3DCanvas 
+            hoverZone={hoverZone} 
+            bodyData={bodyData} 
+            modelConfig={modelConfig} 
+            selectedSize={sizeB} 
+            selectedColor={selectedColor || ''} 
+            selectedFabric={selectedFabric}
+            heatmapEnabled={showHeatmap} 
+            fitZones={fitRecommendations?.[sizeB]?.zones} 
+            pose={comparePose}
+            cameraPreset={cameraPreset}
+          />
         </div>
       </div>
 
       {/* A — clipped foreground */}
       <div className="scr-slide-fg" style={{ width: `${pct}%` }}>
         <div className="scr-slide-fig" style={{ height: '88%', maxHeight: 420, display: 'flex', alignItems: 'flex-end' }}>
-          <BodyFigure sizeKey={sizeA} variant="a"
-            showOutline={showOutline} showPoints={showPoints} showHeatmap={showHeatmap}/>
+          <SizeCompare3DCanvas 
+            hoverZone={hoverZone} 
+            bodyData={bodyData} 
+            modelConfig={modelConfig} 
+            selectedSize={sizeA} 
+            selectedColor={selectedColor || ''} 
+            selectedFabric={selectedFabric}
+            heatmapEnabled={showHeatmap} 
+            fitZones={fitRecommendations?.[sizeA]?.zones} 
+            pose={comparePose}
+            cameraPreset={cameraPreset}
+          />
         </div>
       </div>
 
@@ -474,70 +328,34 @@ const SlideView: React.FC<ViewProps> = ({ sizeA, sizeB, showOutline, showPoints,
         <div className="scr-slide-knob"><IcArrowsH/></div>
       </div>
 
-      <div className="scr-slide-lbl-a">Size {sizeA}</div>
-      <div className="scr-slide-lbl-b">Size {sizeB}</div>
-    </div>
-  );
-};
-
-/* ═══════════════════════════════════════════════════════════════
-   AI MODAL
-   ═══════════════════════════════════════════════════════════════ */
-const AiModal: React.FC<{ sizeA: string; sizeB: string; onClose: () => void; onPick: (s: string) => void }> =
-  ({ sizeA, sizeB, onClose, onPick }) => {
-  const [phase, setPhase] = useState<'loading' | 'result'>('loading');
-  const userChest = 96;
-  const rec  = SIZES[sizeA].chest <= userChest + 4 ? sizeA : sizeB;
-  const diff = SIZES[rec].chest - userChest;
-  const reason = `Dựa trên số đo của bạn (Ngực ${userChest}cm · Eo 80cm), size ${rec} phù hợp nhất${diff > 0 ? ` — dư ${diff}cm để thoải mái` : ''}.`;
-
-  useEffect(() => {
-    const t = setTimeout(() => setPhase('result'), 1800);
-    return () => clearTimeout(t);
-  }, []);
-
-  return (
-    <div className="scr-backdrop" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="scr-modal">
-        <div className="scr-modal-header">
-          <div className="scr-modal-title">✨ Gợi ý size phù hợp</div>
-          <button className="scr-icon-btn" onClick={onClose}><IcX/></button>
-        </div>
-        <div className="scr-modal-sub">
-          Phân tích {sizeA} và {sizeB} theo số đo cơ thể của bạn
-        </div>
-
-        {phase === 'loading' ? (
-          <div className="scr-modal-loading">
-            <div className="scr-spinner"/>
-            <div style={{ fontSize: 12, color: '#6B7280' }}>Đang phân tích số đo…</div>
+      <div style={{ position: 'absolute', top: 20, left: 20, zIndex: 10, background: 'rgba(255,255,255,0.95)', padding: '12px 16px', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.1)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.5)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <div style={{ width: 10, height: 10, background: '#3B82F6', borderRadius: 2 }}></div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: '#1F2937' }}>SIZE {sizeA}</div>
           </div>
-        ) : (
-          <>
-            <div className="scr-modal-result">
-              <div className="scr-modal-rec-label">Khuyến nghị của AI</div>
-              <div className="scr-modal-rec-size">Size {rec}</div>
-              <div className="scr-modal-rec-reason">{reason}</div>
-            </div>
-            <div className="scr-modal-actions">
-              <button className="scr-btn-outline" style={{ padding: '8px 16px' }} onClick={onClose}>
-                Đóng
-              </button>
-              <button className="scr-btn-primary" style={{ padding: '8px 18px' }}
-                onClick={() => { onPick(rec); onClose(); }}>
-                Chọn Size {rec}
-              </button>
-            </div>
-          </>
-        )}
+          <div style={{ fontSize: 12, fontWeight: 600, color: fitRecommendations?.[sizeA]?.score >= 80 ? '#059669' : '#D97706', marginBottom: 2 }}>
+              {fitRecommendations?.[sizeA]?.score >= 80 ? '✨ Recommended' : '⚠️ Cần lưu ý'}
+          </div>
+          <div style={{ fontSize: 11, color: '#6B7280' }}>
+              Fit Score: <span style={{ fontWeight: 700, color: '#374151' }}>{Math.floor(fitRecommendations?.[sizeA]?.score || 0)}%</span>
+          </div>
+      </div>
+      <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 10, background: 'rgba(255,255,255,0.95)', padding: '12px 16px', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.1)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.5)', textAlign: 'right' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end', marginBottom: 4 }}>
+              <div style={{ fontSize: 13, fontWeight: 800, color: '#1F2937' }}>SIZE {sizeB}</div>
+              <div style={{ width: 10, height: 10, background: '#F97316', borderRadius: 2 }}></div>
+          </div>
+          <div style={{ fontSize: 12, fontWeight: 600, color: fitRecommendations?.[sizeB]?.score >= 80 ? '#059669' : '#D97706', marginBottom: 2 }}>
+              {fitRecommendations?.[sizeB]?.score >= 80 ? '✨ Recommended' : '⚠️ Cần lưu ý'}
+          </div>
+          <div style={{ fontSize: 11, color: '#6B7280' }}>
+              Fit Score: <span style={{ fontWeight: 700, color: '#374151' }}>{Math.floor(fitRecommendations?.[sizeB]?.score || 0)}%</span>
+          </div>
       </div>
     </div>
   );
 };
 
-/* ═══════════════════════════════════════════════════════════════
-   SETTINGS PANEL
-   ═══════════════════════════════════════════════════════════════ */
 const SettingsPanel: React.FC<{ onClose: () => void }> = ({ onClose }) => (
   <div className="scr-settings-panel">
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -566,59 +384,74 @@ const SettingsPanel: React.FC<{ onClose: () => void }> = ({ onClose }) => (
 /* ═══════════════════════════════════════════════════════════════
    MAIN COMPONENT
    ═══════════════════════════════════════════════════════════════ */
-type ViewMode = 'split' | 'overlay' | 'slide';
+type ViewMode = 'split' | 'slide' | 'outline';
 type Angle    = 'front' | 'back' | 'left' | 'right' | 'top';
 
 interface SizeComparisonRoomProps {
-  product?: { name?: string; sku?: string; sizes?: string[] };
+  product?: { name?: string; sku?: string; sizes?: string[]; image?: string };
   onClose?: () => void;
   onAddToCart?: (size: string) => void;
+  bodyData?: Profile | any;
+  modelConfig?: ProductWithModel['model3D'] | any;
+  selectedColor?: string;
+  selectedFabric?: LocalFabricProfile | any;
+  fitRecommendations?: Record<string, any>;
+  garmentSizeSpecs?: Record<string, any>;
+  comparePose?: string;
 }
 
 const SizeComparisonRoom: React.FC<SizeComparisonRoomProps> = ({
-  product = { name: 'Áo khoác Unisex Bomber', sku: 'SKU-0291', sizes: SIZE_KEYS },
+  product = { name: 'Áo khoác Unisex Bomber', sku: 'SKU-0291', sizes: ['S', 'M', 'L'] },
   onClose,
   onAddToCart,
+  bodyData,
+  modelConfig,
+  selectedColor = '',
+  selectedFabric,
+  fitRecommendations = {},
+  garmentSizeSpecs = {},
+  comparePose,
 }) => {
   const [mode,        setMode]        = useState<ViewMode>('split');
   const [sizeA,       setSizeA]       = useState('M');
   const [sizeB,       setSizeB]       = useState('L');
-  const [angle,       setAngle]       = useState<Angle>('front');
+  const [angle] = useState<Angle>('front');
   const [zoom,        setZoom]        = useState(100);
   const [autoRotate,  setAutoRotate]  = useState(false);
-  const [showOutline, setShowOutline] = useState(true);
-  const [showPoints,  setShowPoints]  = useState(true);
+  const [cameraPreset, setCameraPreset] = useState('Front');
+  const [showOutline] = useState(true);
   const [showHeatmap, setShowHeatmap] = useState(false);
+  const [diffOnly, setDiffOnly] = useState(false);
   const [settings,    setSettings]    = useState(false);
-  const [aiModal,     setAiModal]     = useState(false);
+  
   const [sidebar,     setSidebar]     = useState(false);
+  const [sidebarTab,  setSidebarTab]  = useState<'info'|'compare'>('info');
   const [loading,     setLoading]     = useState(false);
+  const hoverZone = null;
 
-  const sizes = product.sizes || SIZE_KEYS;
+  const handleSnapshot = async () => {
+    const viewer = document.querySelector('.scr-viewer') as HTMLElement;
+    if (!viewer) return;
+    try {
+      const canvas = await html2canvas(viewer, { useCORS: true, allowTaint: true });
+      const link = document.createElement('a');
+      link.download = `size-compare-${sizeA}-${sizeB}.png`;
+      link.href = canvas.toDataURL();
+      link.click();
+    } catch (e) {
+      console.error('Lỗi khi chụp ảnh', e);
+    }
+  };
+
+  const sizes = product?.sizes || [];
 
   const changeA = (s: string) => { setLoading(true); setSizeA(s); setTimeout(() => setLoading(false), 450); };
   const changeB = (s: string) => { setLoading(true); setSizeB(s); setTimeout(() => setLoading(false), 450); };
 
-  const diff = getDiff(sizeA, sizeB);
+  const diff = getDiff(sizeA, sizeB, garmentSizeSpecs);
 
-  // Bottom chips
-  type ChipType = 'lbl' | 'up' | 'dn' | 'eq';
-  const chips: { t: ChipType; icon: React.ReactNode; text: string }[] = [
-    { t: 'lbl', icon: <IcRuler/>, text: `${sizeA} vs ${sizeB}` },
-    ...diff.map(r => ({
-      t:    (r.delta > 0 ? 'up' : r.delta < 0 ? 'dn' : 'eq') as ChipType,
-      icon: r.delta > 0 ? <IcArrowUp/> : r.delta < 0 ? <IcArrowDown/> : <IcMinus/>,
-      text: `${r.label.replace('Vòng ', '')} ${r.delta > 0 ? '+' : ''}${r.delta}cm`,
-    })),
-  ];
 
-  const angles: { k: Angle; l: string }[] = [
-    { k: 'front', l: 'Trước' }, { k: 'back', l: 'Sau' },
-    { k: 'left',  l: 'Bên trái' }, { k: 'right', l: 'Bên phải' },
-    { k: 'top',   l: 'Trên xuống' },
-  ];
-
-  const viewProps = { sizeA, sizeB, showOutline, showPoints, showHeatmap };
+  const viewProps = { sizeA, sizeB, showOutline, showPoints: true, showHeatmap, bodyData, modelConfig, selectedColor, selectedFabric, fitRecommendations, comparePose, hoverZone, angle, diffOnly, cameraPreset };
 
   return (
     <div className="scr">
@@ -631,10 +464,10 @@ const SizeComparisonRoom: React.FC<SizeComparisonRoomProps> = ({
         </button>
 
         {/* Product info */}
-        <div className="scr-product">
-          <div className="scr-product-icon"><IcShirt/></div>
-          <div className="scr-product-name">{product.name}</div>
-          {product.sku && <div className="scr-product-sku">{product.sku}</div>}
+        <div className="scr-product" style={{ maxWidth: 300, overflow: 'hidden' }}>
+          <div className="scr-product-icon" style={{ flexShrink: 0 }}><IcShirt/></div>
+          <div className="scr-product-name" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{product.name}</div>
+          {product.sku && <div className="scr-product-sku" style={{ flexShrink: 0, marginLeft: 8 }}>{product.sku}</div>}
         </div>
 
         <div className="scr-sep"/>
@@ -646,10 +479,10 @@ const SizeComparisonRoom: React.FC<SizeComparisonRoomProps> = ({
             onClick={() => setMode('split')}>
             <IcCols/><span>Split view</span>
           </button>
-          <button id="scr-btn-overlay"
-            className={`scr-toggle-btn${mode === 'overlay' ? ' on' : ''}`}
-            onClick={() => setMode('overlay')}>
-            <IcLayers/><span>Overlay</span>
+          <button id="scr-btn-outline"
+            className={`scr-toggle-btn${mode === 'outline' ? ' on' : ''}`}
+            onClick={() => setMode('outline')}>
+            <IcLayers/><span>Outline Mode</span>
           </button>
           <button id="scr-btn-slide"
             className={`scr-toggle-btn${mode === 'slide' ? ' on' : ''}`}
@@ -675,7 +508,7 @@ const SizeComparisonRoom: React.FC<SizeComparisonRoomProps> = ({
           <button id="scr-btn-download"
             className="scr-tool-btn"
             title="Tải xuống"
-            onClick={() => alert('Đang xuất ảnh...')}>
+            onClick={handleSnapshot}>
             <IcDl/>
           </button>
           <button className="scr-tool-btn" title="Thêm"><IcMore/></button>
@@ -692,90 +525,161 @@ const SizeComparisonRoom: React.FC<SizeComparisonRoomProps> = ({
       )}
 
       <aside className={`scr-sidebar${sidebar ? ' open' : ''}`}>
-
-        {/* Model */}
-        <div>
-          <div className="scr-section-title">Mô hình của bạn</div>
-          <div className="scr-model-card">
-            <div className="scr-avatar">A</div>
-            <div>
-              <div className="scr-model-name">Alex</div>
-              <div className="scr-model-stats">170cm · 62kg · Vai 43cm</div>
-            </div>
-          </div>
-          <button className="scr-upload-btn">
-            <IcUpload/> Tải mô hình khác
-          </button>
+        {/* TAB HEADER */}
+        <div style={{ display: 'flex', borderBottom: '1px solid #E5E7EB', padding: '16px 16px 0', gap: 16 }}>
+            <div onClick={() => setSidebarTab('info')} style={{ paddingBottom: 12, cursor: 'pointer', fontWeight: 600, fontSize: 14, color: sidebarTab === 'info' ? '#111827' : '#6B7280', borderBottom: sidebarTab === 'info' ? '2px solid #111827' : '2px solid transparent' }}>Thông tin</div>
+            <div onClick={() => setSidebarTab('compare')} style={{ paddingBottom: 12, cursor: 'pointer', fontWeight: 600, fontSize: 14, color: sidebarTab === 'compare' ? '#111827' : '#6B7280', borderBottom: sidebarTab === 'compare' ? '2px solid #111827' : '2px solid transparent' }}>So sánh</div>
         </div>
 
-        {/* Size config */}
-        <div>
-          <div className="scr-section-title">So sánh size</div>
+        {sidebarTab === 'info' && (
+            <div style={{ padding: '0 0 24px' }}>
+                {/* Product Card */}
+                <div style={{ padding: '16px 16px 0' }}>
+                    <div style={{ display: 'flex', gap: 12 }}>
+                        {product?.image ? (
+                            <img src={product.image} alt={product.name} style={{ width: 48, height: 64, objectFit: 'cover', borderRadius: 6, border: '1px solid #E5E7EB' }} />
+                        ) : (
+                            <div style={{ width: 48, height: 64, background: '#F3F4F6', borderRadius: 6, display: 'flex', alignItems:'center', justifyContent: 'center' }}>
+                                <IcShirt />
+                            </div>
+                        )}
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                            <div style={{ fontWeight: 700, fontSize: 13, color: '#111827', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{product?.name || 'Sản phẩm'}</div>
+                            <div style={{ fontSize: 11, color: '#6B7280', marginTop: 4 }}>SKU: {product?.sku || 'N/A'}</div>
+                        </div>
+                    </div>
+                </div>
 
-          <div className="scr-size-section">
-            <div className="scr-size-label">
-              <div className="scr-dot a"/>Size A
+                {/* Model */}
+                <div style={{ padding: '16px 16px 0' }}>
+                    <div className="scr-model-card" style={{ marginBottom: 0, padding: '10px 12px' }}>
+                        <div className="scr-avatar" style={{ width: 32, height: 32, fontSize: 14 }}>{bodyData?.name ? bodyData.name.charAt(0).toUpperCase() : '👤'}</div>
+                        <div>
+                        <div className="scr-model-name" style={{ fontSize: 13 }}>{bodyData?.name || 'Mô hình của bạn'}</div>
+                        <div className="scr-model-stats" style={{ fontSize: 11 }}>{bodyData?.height || 170}cm · {bodyData?.weight || 62}kg · Vai {bodyData?.shoulder || 43}cm</div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* AI Recommendation Leaderboard */}
+                <div style={{ padding: '16px 16px 0' }}>
+                    <div className="scr-section-title" style={{ marginTop: 0, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6, fontSize: 11 }}>✨ AI RECOMMENDATION</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        {sizes.map((s: string) => ({ size: s, score: fitRecommendations?.[s]?.score || 0 })).sort((a: any, b: any) => b.score - a.score).slice(0, 3).map((item: any, index: number) => (
+                            <div key={item.size} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: index === 0 ? '#EEF2FF' : '#F9FAFB', borderRadius: 8, border: `1px solid ${index === 0 ? '#C7D2FE' : '#E5E7EB'}` }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                    <div style={{ fontSize: 16 }}>{index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}</div>
+                                    <div style={{ fontWeight: 700, color: index === 0 ? '#4338CA' : '#374151', fontSize: 13 }}>Size {item.size}</div>
+                                </div>
+                                <div style={{ fontWeight: 600, color: index === 0 ? '#4F46E5' : '#6B7280', fontSize: 12 }}>{Math.floor(item.score)}% Fit</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* AI Reason Block */}
+                <div style={{ padding: '12px 16px 0' }}>
+                    <div style={{ background: '#F8FAFC', borderRadius: 8, padding: '12px 16px', border: '1px solid #E2E8F0' }}>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: '#0F172A', marginBottom: 8 }}>🎯 Vì sao chọn Size {sizes.map((s: string) => ({ size: s, score: fitRecommendations?.[s]?.score || 0 })).sort((a: any, b: any) => b.score - a.score)[0]?.size || 'M'}?</div>
+                        <div style={{ fontSize: 12, color: '#334155', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                            <div style={{ display: 'flex', gap: 8 }}><span style={{ color: '#10B981' }}>✓</span> Vai vừa vặn</div>
+                            <div style={{ display: 'flex', gap: 8 }}><span style={{ color: '#10B981' }}>✓</span> Ngực thoải mái</div>
+                            {sizes.map((s: string) => ({ size: s, score: fitRecommendations?.[s]?.score || 0 })).sort((a: any, b: any) => b.score - a.score).slice(1, 3).map((s: any) => (
+                                <div key={s.size} style={{ display: 'flex', gap: 8, color: '#B45309' }}><span style={{ color: '#F59E0B' }}>⚠</span> Size {s.size} sẽ rộng hơn ở phần thân</div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
             </div>
-            <select id="scr-select-a" className="scr-select a" value={sizeA}
-              onChange={e => changeA(e.target.value)}>
-              {sizes.map(s => (
-                <option key={s} value={s} disabled={s === sizeB}>
-                  {s} — Ngực {SIZES[s]?.chest}cm · Eo {SIZES[s]?.waist}cm
-                </option>
-              ))}
-            </select>
-          </div>
+        )}
 
-          <div className="scr-size-section" style={{ marginTop: 8 }}>
-            <div className="scr-size-label">
-              <div className="scr-dot b"/>Size B
+        {sidebarTab === 'compare' && (
+            <div style={{ padding: '0 0 24px' }}>
+                {/* Size config */}
+                <div style={{ padding: '20px 16px 0' }}>
+                    <div className="scr-size-section">
+                        <div className="scr-size-label">
+                        <div className="scr-dot a"/>Size A
+                        </div>
+                        <select id="scr-select-a" className="scr-select a" value={sizeA}
+                        onChange={e => changeA(e.target.value)}>
+                        {sizes.map((s: string) => (
+                            <option key={s} value={s} disabled={s === sizeB}>
+                            {s} — Ngực {garmentSizeSpecs?.[s]?.chest || '?'}cm · Eo {garmentSizeSpecs?.[s]?.waist || '?'}cm
+                            </option>
+                        ))}
+                        </select>
+                    </div>
+
+                    <div className="scr-size-section" style={{ marginTop: 8 }}>
+                        <div className="scr-size-label">
+                        <div className="scr-dot b"/>Size B
+                        </div>
+                        <select id="scr-select-b" className="scr-select b" value={sizeB}
+                        onChange={e => changeB(e.target.value)}>
+                        {sizes.map((s: string) => (
+                            <option key={s} value={s} disabled={s === sizeA}>
+                            {s} — Ngực {garmentSizeSpecs?.[s]?.chest || '?'}cm · Eo {garmentSizeSpecs?.[s]?.waist || '?'}cm
+                            </option>
+                        ))}
+                        </select>
+                    </div>
+                </div>
+
+                {/* Diff Summary Card */}
+                <div style={{ padding: '20px 16px 0' }}>
+                    <div style={{ background: '#F8FAFC', borderRadius: 8, padding: '12px 16px', border: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ fontWeight: 700, fontSize: 14, color: '#0F172A' }}>{sizeA} vs {sizeB}</div>
+                        <div style={{ fontSize: 13, color: '#475569', textAlign: 'right', fontWeight: 500 }}>
+                            {diff.length === 0 ? 'Tương đương' : diff.slice(0, 3).map(r => `${r.label.replace('Vòng ', '')} ${r.delta > 0 ? '+' : ''}${r.delta}cm`).join(', ')}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Diff Badges */}
+                <div style={{ padding: '24px 16px 0' }}>
+                    <div className="scr-section-title" style={{ marginTop: 0 }}>Chênh lệch chi tiết ({sizeB} vs {sizeA})</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                        {diff.length === 0 && <div style={{ fontSize: 13, color: '#6B7280' }}>Không có chênh lệch đáng kể.</div>}
+                        {diff.map(r => (
+                        <div key={r.label} style={{ background: r.delta > 0 ? '#FEF3C7' : '#D1FAE5', color: r.delta > 0 ? '#B45309' : '#047857', padding: '6px 12px', borderRadius: 100, fontSize: 12, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+                            {r.delta > 0 ? '▲' : '▼'} {r.label} {r.delta > 0 ? '+' : ''}{r.delta}cm
+                        </div>
+                        ))}
+                    </div>
+                </div>
             </div>
-            <select id="scr-select-b" className="scr-select b" value={sizeB}
-              onChange={e => changeB(e.target.value)}>
-              {sizes.map(s => (
-                <option key={s} value={s} disabled={s === sizeA}>
-                  {s} — Ngực {SIZES[s]?.chest}cm · Eo {SIZES[s]?.waist}cm
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Diff table */}
-          <div className="scr-diff-box" style={{ marginTop: 10 }}>
-            <div className="scr-diff-title">Số đo chênh lệch</div>
-            {diff.map(r => (
-              <div key={r.label} className="scr-diff-row">
-                <span className="scr-diff-key">{r.label}</span>
-                <span className={`scr-diff-val ${r.delta > 0 ? 'up' : r.delta < 0 ? 'dn' : 'eq'}`}>
-                  {r.delta > 0 ? <IcArrowUp/> : r.delta < 0 ? <IcArrowDown/> : <IcMinus/>}
-                  {r.delta > 0 ? '+' : ''}{r.delta}cm
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Display options */}
-        <div>
-          <div className="scr-section-title">Hiển thị</div>
-          {(
-            [
-              [showOutline, setShowOutline, 'Đường viền size'],
-              [showPoints,  setShowPoints,  'Điểm đo chi tiết'],
-              [showHeatmap, setShowHeatmap, 'Lớp nhiệt (heatmap)'],
-            ] as [boolean, React.Dispatch<React.SetStateAction<boolean>>, string][]
-          ).map(([val, setter, label]) => (
-            <label key={label} className="scr-check-label">
-              <input type="checkbox" className="scr-checkbox"
-                checked={val} onChange={e => setter(e.target.checked)}/>
-              {label}
-            </label>
-          ))}
-        </div>
+        )}
       </aside>
 
       {/* ══ VIEWER ══ */}
-      <main className="scr-viewer">
+      <main className="scr-viewer" style={{ position: 'relative' }}>
+        {/* Floating Toolbar (iOS Segmented Control Style) */}
+        {!loading && (
+            <div style={{ position: 'absolute', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 50, display: 'flex', background: 'rgba(243,244,246,0.85)', padding: 4, borderRadius: 12, boxShadow: '0 4px 24px rgba(0,0,0,0.08)', backdropFilter: 'blur(12px)', border: '1px solid rgba(229,231,235,0.8)' }}>
+                <button onClick={() => setShowHeatmap(!showHeatmap)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, background: showHeatmap ? '#FFFFFF' : 'transparent', color: showHeatmap ? '#EF4444' : '#6B7280', border: 'none', cursor: 'pointer', transition: 'all 0.2s', boxShadow: showHeatmap ? '0 2px 8px rgba(0,0,0,0.05)' : 'none' }}>
+                    🔥 Heatmap
+                </button>
+                <button onClick={() => { setMode(mode === 'outline' ? 'split' : 'outline'); setDiffOnly(false); }} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, background: mode === 'outline' && !diffOnly ? '#FFFFFF' : 'transparent', color: mode === 'outline' && !diffOnly ? '#111827' : '#6B7280', border: 'none', cursor: 'pointer', transition: 'all 0.2s', boxShadow: mode === 'outline' && !diffOnly ? '0 2px 8px rgba(0,0,0,0.05)' : 'none' }}>
+                    ◯ Outline
+                </button>
+                <button onClick={() => { setMode('outline'); setDiffOnly(true); }} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, background: diffOnly ? '#FFFFFF' : 'transparent', color: diffOnly ? '#059669' : '#6B7280', border: 'none', cursor: 'pointer', transition: 'all 0.2s', boxShadow: diffOnly ? '0 2px 8px rgba(0,0,0,0.05)' : 'none' }}>
+                    ✨ Difference Only
+                </button>
+            </div>
+        )}
+
+        {/* Camera Presets */}
+        {!loading && (
+            <div style={{ position: 'absolute', bottom: 70, left: 24, zIndex: 50, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {['Front', 'Side', '45°', 'Back', 'Free'].map(preset => (
+                    <button key={preset} onClick={() => setCameraPreset(preset)} style={{ width: 44, height: 44, borderRadius: '50%', background: cameraPreset === preset ? '#111827' : 'rgba(255,255,255,0.9)', color: cameraPreset === preset ? '#FFF' : '#374151', border: '1px solid rgba(229,231,235,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', backdropFilter: 'blur(8px)', transition: 'all 0.2s' }}>
+                        {preset}
+                    </button>
+                ))}
+            </div>
+        )}
+
         <div className="scr-canvas">
           {loading ? (
             <div className="scr-loading">
@@ -791,7 +695,7 @@ const SizeComparisonRoom: React.FC<SizeComparisonRoomProps> = ({
           ) : (
             <>
               {mode === 'split'   && <SplitView   {...viewProps}/>}
-              {mode === 'overlay' && <OverlayView {...viewProps}/>}
+              {mode === 'outline' && <OutlineView {...viewProps}/>}
               {mode === 'slide'   && <SlideView   {...viewProps}/>}
             </>
           )}
@@ -799,15 +703,10 @@ const SizeComparisonRoom: React.FC<SizeComparisonRoomProps> = ({
 
         {/* Sub-toolbar: angle + zoom */}
         <div className="scr-subtool">
-          <span className="scr-subtool-label">Góc nhìn:</span>
-          {angles.map(a => (
-            <button key={a.k} id={`scr-angle-${a.k}`}
-              className={`scr-angle-btn${angle === a.k ? ' on' : ''}`}
-              onClick={() => setAngle(a.k)}>
-              {a.l}
-            </button>
-          ))}
-          <div className="scr-zoom-row">
+          <span className="scr-subtool-label" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <IcRotate/> {cameraPreset === 'Free' ? 'Kéo thả chuột để xoay' : `Góc nhìn: ${cameraPreset}`}
+          </span>
+          <div className="scr-zoom-row" style={{ marginLeft: 'auto' }}>
             <span className="scr-zoom-label">Zoom</span>
             <input type="range" min={50} max={200} value={zoom}
               onChange={e => setZoom(+e.target.value)} className="scr-zoom-slider"/>
@@ -817,32 +716,38 @@ const SizeComparisonRoom: React.FC<SizeComparisonRoomProps> = ({
       </main>
 
       {/* ══ BOTTOM BAR ══ */}
-      <footer className="scr-bottom">
-        <div className="scr-chips">
-          {chips.map((c, i) => (
-            <div key={i} className={`scr-chip ${c.t}`}>
-              {c.icon}{c.text}
+      <footer className="scr-bottom" style={{ height: 'auto', padding: '16px 24px', borderTop: '1px solid #E5E7EB', background: '#fff' }}>
+        <div style={{ display: 'flex', width: '100%', maxWidth: 1100, margin: '0 auto', gap: 24, alignItems: 'center', justifyContent: 'space-between' }}>
+            {/* Compact Confirmation CTA */}
+            <div style={{ flex: 1, display: 'flex', gap: 16, alignItems: 'center' }}>
+                <div style={{ fontSize: 15, fontWeight: 800, color: '#0F172A', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    🎯 Kích thước phù hợp nhất: <span style={{ color: '#4F46E5' }}>Size {(() => {
+                        const bestSize = Object.keys(fitRecommendations || {}).reduce((a, b) => ((fitRecommendations?.[a]?.score || 0) > (fitRecommendations?.[b]?.score || 0) ? a : b), sizeA);
+                        return bestSize;
+                    })()}</span>
+                </div>
+                <div style={{ height: 16, width: 1, background: '#E5E7EB' }}></div>
+                <div style={{ fontSize: 13, color: '#10B981', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <div style={{ width: 16, height: 16, background: '#D1FAE5', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}>✓</div> 
+                    {Math.floor(fitRecommendations?.[Object.keys(fitRecommendations || {}).reduce((a, b) => ((fitRecommendations?.[a]?.score || 0) > (fitRecommendations?.[b]?.score || 0) ? a : b), sizeA)]?.score || 92)}% độ phù hợp
+                </div>
             </div>
-          ))}
-        </div>
-        <div className="scr-cta">
-          <button id="scr-ai-btn" className="scr-btn-outline" onClick={() => setAiModal(true)}>
-            Gợi ý size phù hợp ↗
-          </button>
-          <button id="scr-pick-btn" className="scr-btn-primary"
-            onClick={() => onAddToCart?.(sizeA)}>
-            Chọn size này
-          </button>
+
+            {/* CTA */}
+            <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+                <div style={{ fontSize: 12, color: '#6B7280', textAlign: 'right', lineHeight: 1.4 }}>
+                    <span style={{ fontWeight: 600, color: '#374151' }}>84%</span> người có số đo tương tự<br/>đã chọn Size này
+                </div>
+                <button id="scr-pick-btn" className="scr-btn-primary" onClick={() => onAddToCart?.(Object.keys(fitRecommendations || {}).reduce((a, b) => ((fitRecommendations?.[a]?.score || 0) > (fitRecommendations?.[b]?.score || 0) ? a : b), sizeA))} style={{ height: 48, padding: '0 32px', fontSize: 15, borderRadius: 8, boxShadow: '0 4px 12px rgba(26,86,219,.3)' }}>
+                    Mua với Size {Object.keys(fitRecommendations || {}).reduce((a, b) => ((fitRecommendations?.[a]?.score || 0) > (fitRecommendations?.[b]?.score || 0) ? a : b), sizeA)}
+                </button>
+            </div>
         </div>
       </footer>
 
       {/* ══ OVERLAYS ══ */}
       {settings && <SettingsPanel onClose={() => setSettings(false)}/>}
-      {aiModal  && (
-        <AiModal sizeA={sizeA} sizeB={sizeB}
-          onClose={() => setAiModal(false)}
-          onPick={s => { setSizeA(s); }}/>
-      )}
+      
     </div>
   );
 };
