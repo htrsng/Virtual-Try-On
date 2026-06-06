@@ -38,8 +38,8 @@ export type SizeCompare3DCanvasProps = {
 function CameraPresetController({ preset }: { preset: string }) {
     useFrame(({ camera }) => {
         if (!preset || preset === 'Free') return;
-        const radius = 1.8;
-        const height = 0.4;
+        const radius = 5.2;
+        const height = 0.8;
         const targetPos = new THREE.Vector3(0, height, radius);
         if (preset === 'Side') targetPos.set(radius, height, 0);
         else if (preset === 'Back') targetPos.set(0, height, -radius);
@@ -69,7 +69,7 @@ export default function SizeCompare3DCanvas({
 
     return (
         <div style={{ width: '100%', height: '100%', opacity, transition: 'opacity 0.3s' }}>
-            <Canvas camera={{ position: [0, 0.4, 1.8], fov: 35 }} dpr={[1, 1.5]} shadows>
+            <Canvas camera={{ position: [0, 0.8, 5.2], fov: 32 }} dpr={[1, 1.5]} shadows>
                 <ambientLight intensity={0.42} />
                 <directionalLight
                     position={[3, 6, 4]}
@@ -90,25 +90,7 @@ export default function SizeCompare3DCanvas({
                 <Suspense fallback={<Loader />}>
                     <Environment preset="city" />
                     <group position={[0, -1.08, 0]}>
-                        {/* Grid and Reflector Floor */}
-                        <Grid position={[0, 0, 0]} args={[50, 50]} cellColor="#d1d5db" sectionColor="#9ca3af" fadeDistance={50} />
-                        
-                        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]}>
-                            <planeGeometry args={[50, 50]} />
-                            <MeshReflectorMaterial
-                                blur={[300, 100]}
-                                resolution={1024}
-                                mixBlur={1}
-                                mixStrength={40}
-                                roughness={1}
-                                depthScale={1.2}
-                                minDepthThreshold={0.4}
-                                maxDepthThreshold={1.4}
-                                color="#e2e8f0"
-                                metalness={0.5}
-                                mirror={0.5}
-                            />
-                        </mesh>
+
 
                         <Avatar body={bodyData} pose={pose || 'Idle'} skinColor="#F2C9AC" onSceneReady={setAvatarScene} />
                         
@@ -165,8 +147,8 @@ export default function SizeCompare3DCanvas({
                     enablePan={false}
                     enableDamping
                     dampingFactor={0.08}
-                    minDistance={1.0}
-                    maxDistance={3.5}
+                    minDistance={1.5}
+                    maxDistance={6.0}
                 />
             </Canvas>
         </div>

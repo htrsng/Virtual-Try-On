@@ -331,7 +331,7 @@ function GarmentInstance({
 export default function GarmentModel({
     config,
     selectedSize,
-    selectedColor = '#f5f5f5',
+    selectedColor,
     fabricOverride,
     avatarScene = null,
     heatmapEnabled = false,

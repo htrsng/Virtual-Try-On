@@ -406,8 +406,7 @@ function SizeCompareViewport({
                     <Suspense fallback={<Loader />}>
                         <Environment preset="city" />
                         <group position={[0, -1.08, 0]}>
-                            {/* Grid và Sàn phản chiếu */}
-                            <Grid position={[0, 0, 0]} args={[10, 10]} cellColor="#d1d5db" sectionColor="#9ca3af" fadeDistance={20} />
+                            {/* Bục phản chiếu */}
                             
                             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]}>
                                 <planeGeometry args={[10, 10]} />
@@ -694,8 +693,8 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
     const [showEmptyAvatarModal, setShowEmptyAvatarModal] = useState(false);
     const [avatarScene, setAvatarScene] = useState<THREE.Group | null>(null);
     const [cameraView, setCameraView] = useState('front');
-    const [cameraPos, setCameraPos] = useState<[number, number, number]>([0, 0.7, 4.5]);
-    const [cameraTarget, setCameraTarget] = useState<[number, number, number]>([0, 0.4, 0]);
+    const [cameraPos, setCameraPos] = useState<[number, number, number]>([0, 0.8, 5.2]);
+    const [cameraTarget, setCameraTarget] = useState<[number, number, number]>([0, 0.3, 0]);
     const [savedOutfits, setSavedOutfits] = useState<SavedOutfit[]>([]);
     // const [isWishlisted, setIsWishlisted] = useState(false);
     const [selectedSidebarProduct, setSelectedSidebarProduct] = useState<TryOnProduct | null>(null);
@@ -709,6 +708,7 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
     const [activeTab, setActiveTab] = useState<'size'|'fit'|'tools'>('size');
     const [showMeasurements, setShowMeasurements] = useState(false);
     const [lightingMode, setLightingMode] = useState<'studio'|'warm'|'cool'|'outdoor'>('studio');
+    const [bgTheme, setBgTheme] = useState<'light'|'dark'>('dark');
     const [isWebglContextLost, setIsWebglContextLost] = useState(false);
     const sidebarScrollRef = useRef<HTMLDivElement | null>(null);
     const [canvasEventSource, setCanvasEventSource] = useState<HTMLElement | undefined>(undefined);
@@ -1440,7 +1440,7 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
     }, [isActiveItemReadyToWear, layeredGarments, refreshSavedOutfits, showToast]);
 
     return (
-        <div className="tryon-layout">
+        <div className={`tryon-layout theme-${bgTheme}`}>
             {/* ─── Top Navigation (Topbar) ─── */}
             <div className="tryon-topbar" style={{
               background: 'rgba(255,255,255,0.97)',
@@ -1514,8 +1514,8 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
               onOpenSizeCompare={handleOpenSizeCompareRoom}
               onReset={() => {
                 setCameraView('front');
-                setCameraPos([0, 0.7, 4.5]);
-                setCameraTarget([0, 0.4, 0]);
+                setCameraPos([0, 0.8, 5.2]);
+                setCameraTarget([0, 0.3, 0]);
                 setIsRotating(false);
               }}
               onChangeBackground={() => {}}
@@ -1538,14 +1538,119 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                     onClose={() => setIsClosetOpen(false)}
                 />
 
+
+
                 {/* 3D Preview – renders ALL garments layered by category */}
-                <div ref={(node) => setCanvasEventSource(node || undefined)} className={`canvas-studio-wrap light-${lightingMode}`}>
-                    <Canvas
+                <div ref={(node) => setCanvasEventSource(node || undefined)} className={`vfit-bg-canvas canvas-studio-wrap light-${lightingMode}`} style={{ height: '100%' }}>
+                    <style>{`
+                        :root {
+                          --vfit-bg-canvas: #1A1625;
+                          --vfit-bg-floor: #211D30;
+                          --vfit-bg-panel: rgba(26, 22, 37, 0.92);
+                          --vfit-bg-canvas-light: #E4DFF5;
+                          --vfit-bg-floor-light: #D6CFF0;
+                          --vfit-bg-panel-light: rgba(237, 234, 248, 0.92);
+                          
+                          --vfit-bubble-default: #F0C040;
+                          --vfit-bubble-done: #1D9E75;
+                          --vfit-bubble-badge: #E25C5C;
+                          --vfit-chip-accent: #7C6FCD;
+                          --vfit-chip-active-bg: #F0C040;
+                          --vfit-chip-active-text: #1A1625;
+
+                          --vfit-text-primary-dark: rgba(255,255,255,0.90);
+                          --vfit-text-secondary-dark: rgba(255,255,255,0.50);
+                          --vfit-text-tertiary-dark: rgba(255,255,255,0.30);
+                          --vfit-border-dark: rgba(255,255,255,0.10);
+
+                          --vfit-text-primary-light: rgba(20,15,40,0.90);
+                          --vfit-text-secondary-light: rgba(20,15,40,0.50);
+                          --vfit-text-tertiary-light: rgba(20,15,40,0.30);
+                          --vfit-border-light: rgba(100,80,180,0.15);
+                        }
+                        .vfit-bg-canvas.canvas-studio-wrap {
+                          background: var(--vfit-bg-canvas${bgTheme === 'light' ? '-light' : ''}) !important;
+                          transition: background-color 0.3s ease;
+                          z-index: 0;
+                        }
+                        .vfit-bg-canvas.canvas-studio-wrap::before { display: none !important; }
+                        .vfit-canvas-floor {
+                          position: absolute; bottom: 0; left: 0; right: 0; height: 80px; z-index: 1; pointer-events: none;
+                          background: linear-gradient(to top, var(--vfit-bg-floor${bgTheme === 'light' ? '-light' : ''}) 0%, transparent 100%);
+                          transition: background 0.3s ease;
+                        }
+                        .vfit-canvas-podium {
+                          position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%) scaleY(0.25);
+                          width: 260px; height: 260px; border-radius: 50%; z-index: 1; pointer-events: none;
+                          background: var(--vfit-bg-panel${bgTheme === 'light' ? '-light' : ''});
+                          border: 1px solid rgba(255,255,255,0.08);
+                          box-shadow: 0 0 40px rgba(0,0,0,0.4), inset 0 0 20px rgba(255,255,255,0.05);
+                          transition: all 0.3s ease;
+                        }
+                        .vfit-canvas-spotlight {
+                          position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 2; pointer-events: none;
+                          width: 100%; height: 100%;
+                          background: radial-gradient(ellipse 380px 380px at 50% 45%, rgba(255,255,255,${bgTheme === 'light' ? '0.2' : '0.12'}) 0%, transparent 70%);
+                          transition: background 0.3s ease;
+                        }
+                        .vfit-canvas-shadow {
+                          position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 3; pointer-events: none;
+                          width: 48px; height: 8px; border-radius: 50%; filter: blur(4px);
+                          background: rgba(0,0,0,0.25);
+                          transition: background 0.3s ease;
+                        }
+                        .vfit-canvas-rim {
+                          position: absolute; bottom: 21px; left: 50%; transform: translateX(-50%); z-index: 3; pointer-events: none;
+                          width: 90px; height: 18px; border-radius: 50%; filter: blur(8px);
+                          background: rgba(160, 130, 255, 0.18);
+                          transition: background 0.3s ease;
+                        }
+                        .vfit-canvas-vignette {
+                          position: absolute; inset: 0; z-index: 5; pointer-events: none;
+                          background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,${bgTheme === 'light' ? '0.05' : '0.4'}) 100%);
+                          transition: background 0.3s ease;
+                        }
+
+                        /* Camera Presets Theme Overrides */
+                        .theme-dark .vto-camera, .theme-light .vto-camera {
+                          z-index: 101;
+                          position: relative;
+                        }
+                        .theme-dark .vto-camera {
+                          background: var(--vfit-bg-panel);
+                          border-color: var(--vfit-border-dark);
+                        }
+                        .theme-dark .vto-camera__btn { color: var(--vfit-text-secondary-dark); }
+                        .theme-dark .vto-camera__btn:hover { color: var(--vfit-text-primary-dark); }
+                        .theme-dark .vto-camera__divider { background: var(--vfit-border-dark); }
+                        
+                        .theme-light .vto-camera {
+                          background: var(--vfit-bg-panel-light);
+                          border-color: var(--vfit-border-light);
+                        }
+                        .theme-light .vto-camera__btn { color: var(--vfit-text-secondary-light); }
+                        .theme-light .vto-camera__btn:hover { color: var(--vfit-text-primary-light); }
+                        .theme-light .vto-camera__divider { background: var(--vfit-border-light); }
+
+                        /* Common Active Chip State */
+                        .tryon-layout .vto-camera__btn.active {
+                          background: var(--vfit-chip-active-bg) !important;
+                          color: var(--vfit-chip-active-text) !important;
+                        }
+                    `}</style>
+                    <div className="vfit-canvas-floor" />
+                    <div className="vfit-canvas-podium" />
+                    <div className="vfit-canvas-spotlight" />
+                    <div className="vfit-canvas-shadow" />
+                    <div className="vfit-canvas-rim" />
+                    <div className="vfit-canvas-vignette" />
+                    <div style={{ flex: 1, position: 'relative', width: '100%', height: '100%', overflow: 'hidden', zIndex: 4 }}>
+                        <Canvas
                         ref={canvasRef}
                         eventSource={canvasEventSource}
                         frameloop={isWebglContextLost ? 'never' : 'always'}
                         dpr={[1, 1.5]}
-                        camera={{ position: [0, 0.7, 4.5], fov: 32 }}
+                        camera={{ position: [0, 0.8, 5.2], fov: 32 }}
                         shadows
                         gl={{ antialias: true, preserveDrawingBuffer: true, powerPreference: 'high-performance' }}
                         onCreated={({ gl }) => {
@@ -1585,7 +1690,6 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                         <Suspense fallback={<Loader />}>
                             <Environment preset="city" />
                             <group position={[0, -1.15, 0]}>
-                                <Grid position={[0, 0, 0]} args={[10, 10]} cellColor="#d1d5db" sectionColor="#9ca3af" fadeDistance={20} />
                                 <Avatar body={currentBodyData} pose={'Idle'} skinColor="#F2C9AC" onSceneReady={setAvatarScene} />
 
                                 {/* Render each garment – sorted by category layer order */}
@@ -1686,7 +1790,12 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                         </div>
                     </div>
 
-                    <div className="vto-canvas-overlay vto-canvas-overlay--top-left">
+                    <div className="vto-canvas-overlay vto-canvas-overlay--top-left" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div style={{ display: 'flex', gap: 6, background: 'rgba(0,0,0,0.4)', padding: 8, borderRadius: 20, width: 'max-content', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                            <span style={{ color: '#fff', fontSize: 11, fontWeight: 600, paddingLeft: 8, alignSelf: 'center', letterSpacing: '0.05em' }}>NỀN</span>
+                            <button onClick={() => setBgTheme('light')} style={{ width: 20, height: 20, borderRadius: '50%', background: '#E4DFF5', border: bgTheme === 'light' ? '2px solid #fff' : 'none', cursor: 'pointer', transition: 'all 0.2s' }} />
+                            <button onClick={() => setBgTheme('dark')} style={{ width: 20, height: 20, borderRadius: '50%', background: '#1A1625', border: bgTheme === 'dark' ? '2px solid #fff' : 'none', cursor: 'pointer', transition: 'all 0.2s' }} />
+                        </div>
                         <button
                             type="button"
                             className="vto-closet-button"
@@ -1732,9 +1841,10 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                         layeredGarments={layeredGarments}
                         onSave={handleSaveOutfit}
                     />
+                    </div>
                 </div>
 
-                {/* ─── Sidebar (Right Panel) ─── */}
+                {/* ─── Config Panel (Right Sidebar) ─── */}
                 <aside className="vto-aside panel-scroll" style={{ background: '#FFFFFF', borderLeft: '1px solid rgba(201,150,63,0.15)', display: 'flex', flexDirection: 'column' }}>
                     {/* Header cố định */}
                     <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>

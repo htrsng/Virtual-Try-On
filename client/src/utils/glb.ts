@@ -4,14 +4,14 @@ import { MODEL_INJECTION } from '../data/ThreeDConfig';
 export interface SelectionState {
   [productId: string]: {
     size: string;
-    colorHex: string;
+    colorHex?: string;
   };
 }
 
 export function resolveGlbUrl(
   item: OutfitItem,
   selectedSize: string,
-  selectedColorHex: string
+  selectedColorHex?: string
 ): string | undefined {
   if (item.glbVariants && item.glbVariants.length > 0) {
     const variant = item.glbVariants.find(
@@ -38,7 +38,7 @@ export function resolveOutfitGlbs(
     glbUrl: resolveGlbUrl(
       item,
       selections[item.id]?.size || 'M',
-      selections[item.id]?.colorHex || '#ffffff'
+      selections[item.id]?.colorHex
     ),
   }));
 }
@@ -59,7 +59,7 @@ export function initSelection(outfit: OutfitResult): SelectionState {
   if (!outfit || !outfit.items) return selections;
 
   outfit.items.forEach(item => {
-    let defaultColor = item.color || '#ffffff';
+    let defaultColor = item.color;
     if (item.availableColors && item.availableColors.length > 0) {
       const firstColor = item.availableColors[0];
       if (typeof firstColor === 'string') {

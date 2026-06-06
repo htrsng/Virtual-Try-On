@@ -7,11 +7,11 @@ interface CameraView {
 }
 
 const CAMERA_VIEWS: CameraView[] = [
-    { id: 'front', label: 'Trước', icon: '⊙', position: [0, 0.7, 4.5], target: [0, 0.4, 0] },
-    { id: 'side-left', label: 'Trái', icon: '◐', position: [4.5, 0.7, 0], target: [0, 0.4, 0] },
-    { id: 'side-right', label: 'Phải', icon: '◑', position: [-4.5, 0.7, 0], target: [0, 0.4, 0] },
-    { id: 'back', label: 'Sau', icon: '◉', position: [0, 0.7, -4.5], target: [0, 0.4, 0] },
-    { id: 'three-quarter', label: '3/4', icon: '◈', position: [3.2, 1.2, 3.2], target: [0, 0.4, 0] },
+    { id: 'front', label: 'Trước', icon: '⊙', position: [0, 0.8, 5.2], target: [0, 0.3, 0] },
+    { id: 'side-left', label: 'Trái', icon: '◐', position: [5.2, 0.8, 0], target: [0, 0.3, 0] },
+    { id: 'side-right', label: 'Phải', icon: '◑', position: [-5.2, 0.8, 0], target: [0, 0.3, 0] },
+    { id: 'back', label: 'Sau', icon: '◉', position: [0, 0.8, -5.2], target: [0, 0.3, 0] },
+    { id: 'three-quarter', label: '3/4', icon: '◈', position: [3.67, 1.2, 3.67], target: [0, 0.3, 0] },
 ];
 
 interface CameraPresetsProps {

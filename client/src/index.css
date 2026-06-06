@@ -2319,3 +2319,124 @@ html {
     flex-direction: column;
   }
 }
+
+/* --- VFit AI Stylist Animation Enhancements --- */
+
+/* 1. Navbar gradient/topbar shimmer (ZONE 1) */
+.shopee-header {
+  position: relative;
+}
+.shopee-header::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212,169,66,0.5), transparent);
+  animation: shimmer-border 3s infinite linear;
+}
+@keyframes shimmer-border {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* 2. Badge "Công nghệ độc quyền" (ZONE 2) */
+@keyframes pulse-ring {
+  0%   { transform: scale(1);   opacity: 0.8; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+.eyebrow-dot {
+  position: relative;
+}
+.eyebrow-dot::before {
+  content: '';
+  position: absolute; inset: -3px;
+  border-radius: 50%;
+  border: 2px solid var(--gold-primary, #C89B3C);
+  animation: pulse-ring 1.5s ease-out infinite;
+}
+
+/* 3. Shimmer chữ "AI & 3D" (ZONE 3) */
+@keyframes shimmer-text {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.title-gradient {
+  background: linear-gradient(
+    90deg, #C89B3C 0%, #F0C040 40%,
+    #fff8e0 50%, #F0C040 60%, #C89B3C 100%
+  ) !important;
+  background-size: 200% auto !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  animation: shimmer-text 3s linear infinite !important;
+}
+
+/* 4. Card scroll-in stagger (ZONE 4) */
+.feature-card {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.5s ease, transform 0.5s ease !important;
+}
+.feature-card.visible {
+  opacity: 1; 
+  transform: translateY(0);
+}
+@keyframes border-glow {
+  0% { box-shadow: 0 0 0 0 rgba(212,169,66,0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(212,169,66,0); }
+  100% { box-shadow: 0 0 0 0 rgba(212,169,66,0); }
+}
+.feature-card--highlight.visible {
+  animation: border-glow 2s infinite;
+}
+
+/* 5. CTA Button shimmer + hover scale (ZONE 5) */
+@keyframes btn-shimmer {
+  0%   { left: -100%; }
+  100% { left: 150%; }
+}
+.features-main-cta {
+  position: relative; overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+.features-main-cta::after {
+  content: '';
+  position: absolute; top: 0; left: -100%;
+  width: 60%; height: 100%;
+  background: linear-gradient(
+    90deg, transparent, rgba(255,255,255,0.25), transparent
+  );
+  animation: btn-shimmer 2.5s ease infinite;
+}
+.features-main-cta:hover {
+  transform: scale(1.03) !important;
+  box-shadow: 0 8px 24px rgba(194,155,60,0.35) !important;
+}
+
+/* 6. Floating orbs background (ZONE 6) */
+@keyframes drift {
+  0%, 100% { transform: translate(0, 0); }
+  50%       { transform: translate(20px, -20px); }
+}
+.features-inner { position: relative; z-index: 1; }
+.features-section { position: relative; overflow: hidden; }
+.orb-purple {
+  position: absolute; top: -60px; left: -60px;
+  width: 300px; height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(124,111,205,0.12) 0%, transparent 70%);
+  animation: drift 8s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+.orb-gold {
+  position: absolute; bottom: -40px; right: -40px;
+  width: 250px; height: 250px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(240,192,64,0.10) 0%, transparent 70%);
+  animation: drift 10s ease-in-out infinite reverse;
+  pointer-events: none;
+  z-index: 0;
+}

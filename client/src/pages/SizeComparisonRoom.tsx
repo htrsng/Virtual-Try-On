@@ -139,7 +139,7 @@ const SplitView: React.FC<ViewProps> = ({ sizeA, sizeB, showHeatmap, bodyData, m
         style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${split}%`, overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: 20, left: 20, zIndex: 10, background: 'rgba(255,255,255,0.95)', padding: '12px 16px', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.1)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.5)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                <div style={{ width: 10, height: 10, background: '#3B82F6', borderRadius: 2 }}></div>
+                <div style={{ width: 10, height: 10, background: '#7C6FCD', borderRadius: 2 }}></div>
                 <div style={{ fontSize: 13, fontWeight: 800, color: '#1F2937' }}>SIZE {sizeA}</div>
             </div>
             <div style={{ fontSize: 12, fontWeight: 600, color: fitRecommendations?.[sizeA]?.score >= 80 ? '#059669' : '#D97706', marginBottom: 2 }}>
@@ -185,7 +185,7 @@ const SplitView: React.FC<ViewProps> = ({ sizeA, sizeB, showHeatmap, bodyData, m
         <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 10, background: 'rgba(255,255,255,0.95)', padding: '12px 16px', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.1)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.5)', textAlign: 'right' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end', marginBottom: 4 }}>
                 <div style={{ fontSize: 13, fontWeight: 800, color: '#1F2937' }}>SIZE {sizeB}</div>
-                <div style={{ width: 10, height: 10, background: '#F97316', borderRadius: 2 }}></div>
+                <div style={{ width: 10, height: 10, background: '#F0C040', borderRadius: 2 }}></div>
             </div>
             <div style={{ fontSize: 12, fontWeight: 600, color: fitRecommendations?.[sizeB]?.score >= 80 ? '#059669' : '#D97706', marginBottom: 2 }}>
                 {fitRecommendations?.[sizeB]?.score >= 80 ? '✨ Recommended' : '⚠️ Cần lưu ý'}
@@ -223,11 +223,11 @@ const OutlineView: React.FC<ViewProps> = ({ sizeA, sizeB, showHeatmap, bodyData,
       <div className="scr-overlay-labels" style={{ top: 20 }}>
         <div style={{display:'flex', alignItems:'center', gap: 16, background: '#fff', padding: '8px 16px', borderRadius: 100, boxShadow: '0 4px 12px rgba(0,0,0,0.1)'}}>
             <div style={{display:'flex', alignItems:'center', gap: 8}}>
-                <div style={{width: 14, height: 14, background: '#3B82F6', borderRadius: 3}}></div>
+                <div style={{width: 14, height: 14, background: '#7C6FCD', borderRadius: 3}}></div>
                 <span style={{fontSize: 13, fontWeight: 700, color: '#1F2937'}}>Size {sizeA}</span>
             </div>
             <div style={{display:'flex', alignItems:'center', gap: 8}}>
-                <div style={{width: 14, height: 14, background: '#F97316', borderRadius: 3}}></div>
+                <div style={{width: 14, height: 14, background: '#F0C040', borderRadius: 3}}></div>
                 <span style={{fontSize: 13, fontWeight: 700, color: '#1F2937'}}>Size {sizeB}</span>
             </div>
             {diffOnly && (
@@ -330,7 +330,7 @@ const SlideView: React.FC<ViewProps> = ({ sizeA, sizeB, showHeatmap, bodyData, m
 
       <div style={{ position: 'absolute', top: 20, left: 20, zIndex: 10, background: 'rgba(255,255,255,0.95)', padding: '12px 16px', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.1)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.5)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-              <div style={{ width: 10, height: 10, background: '#3B82F6', borderRadius: 2 }}></div>
+              <div style={{ width: 10, height: 10, background: '#7C6FCD', borderRadius: 2 }}></div>
               <div style={{ fontSize: 13, fontWeight: 800, color: '#1F2937' }}>SIZE {sizeA}</div>
           </div>
           <div style={{ fontSize: 12, fontWeight: 600, color: fitRecommendations?.[sizeA]?.score >= 80 ? '#059669' : '#D97706', marginBottom: 2 }}>
@@ -343,7 +343,7 @@ const SlideView: React.FC<ViewProps> = ({ sizeA, sizeB, showHeatmap, bodyData, m
       <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 10, background: 'rgba(255,255,255,0.95)', padding: '12px 16px', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.1)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.5)', textAlign: 'right' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end', marginBottom: 4 }}>
               <div style={{ fontSize: 13, fontWeight: 800, color: '#1F2937' }}>SIZE {sizeB}</div>
-              <div style={{ width: 10, height: 10, background: '#F97316', borderRadius: 2 }}></div>
+              <div style={{ width: 10, height: 10, background: '#F0C040', borderRadius: 2 }}></div>
           </div>
           <div style={{ fontSize: 12, fontWeight: 600, color: fitRecommendations?.[sizeB]?.score >= 80 ? '#059669' : '#D97706', marginBottom: 2 }}>
               {fitRecommendations?.[sizeB]?.score >= 80 ? '✨ Recommended' : '⚠️ Cần lưu ý'}
@@ -566,12 +566,12 @@ const SizeComparisonRoom: React.FC<SizeComparisonRoomProps> = ({
                     <div className="scr-section-title" style={{ marginTop: 0, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6, fontSize: 11 }}>✨ AI RECOMMENDATION</div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                         {sizes.map((s: string) => ({ size: s, score: fitRecommendations?.[s]?.score || 0 })).sort((a: any, b: any) => b.score - a.score).slice(0, 3).map((item: any, index: number) => (
-                            <div key={item.size} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: index === 0 ? '#EEF2FF' : '#F9FAFB', borderRadius: 8, border: `1px solid ${index === 0 ? '#C7D2FE' : '#E5E7EB'}` }}>
+                            <div key={item.size} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: index === 0 ? '#F3F0FF' : '#F9FAFB', borderRadius: 8, border: `1px solid ${index === 0 ? '#D4CCF5' : '#E5E7EB'}` }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                                     <div style={{ fontSize: 16 }}>{index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}</div>
-                                    <div style={{ fontWeight: 700, color: index === 0 ? '#4338CA' : '#374151', fontSize: 13 }}>Size {item.size}</div>
+                                    <div style={{ fontWeight: 700, color: index === 0 ? '#7C6FCD' : '#374151', fontSize: 13 }}>Size {item.size}</div>
                                 </div>
-                                <div style={{ fontWeight: 600, color: index === 0 ? '#4F46E5' : '#6B7280', fontSize: 12 }}>{Math.floor(item.score)}% Fit</div>
+                                <div style={{ fontWeight: 600, color: index === 0 ? '#1D9E75' : '#6B7280', fontSize: 12 }}>{Math.floor(item.score)}% Fit</div>
                             </div>
                         ))}
                     </div>
@@ -663,7 +663,7 @@ const SizeComparisonRoom: React.FC<SizeComparisonRoomProps> = ({
                 <button onClick={() => { setMode(mode === 'outline' ? 'split' : 'outline'); setDiffOnly(false); }} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, background: mode === 'outline' && !diffOnly ? '#FFFFFF' : 'transparent', color: mode === 'outline' && !diffOnly ? '#111827' : '#6B7280', border: 'none', cursor: 'pointer', transition: 'all 0.2s', boxShadow: mode === 'outline' && !diffOnly ? '0 2px 8px rgba(0,0,0,0.05)' : 'none' }}>
                     ◯ Outline
                 </button>
-                <button onClick={() => { setMode('outline'); setDiffOnly(true); }} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, background: diffOnly ? '#FFFFFF' : 'transparent', color: diffOnly ? '#059669' : '#6B7280', border: 'none', cursor: 'pointer', transition: 'all 0.2s', boxShadow: diffOnly ? '0 2px 8px rgba(0,0,0,0.05)' : 'none' }}>
+                <button onClick={() => { setMode('outline'); setDiffOnly(true); }} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, background: diffOnly ? '#FFFFFF' : 'transparent', color: diffOnly ? '#1D9E75' : '#6B7280', border: 'none', cursor: 'pointer', transition: 'all 0.2s', boxShadow: diffOnly ? '0 2px 8px rgba(0,0,0,0.05)' : 'none' }}>
                     ✨ Difference Only
                 </button>
             </div>
@@ -721,7 +721,7 @@ const SizeComparisonRoom: React.FC<SizeComparisonRoomProps> = ({
             {/* Compact Confirmation CTA */}
             <div style={{ flex: 1, display: 'flex', gap: 16, alignItems: 'center' }}>
                 <div style={{ fontSize: 15, fontWeight: 800, color: '#0F172A', display: 'flex', alignItems: 'center', gap: 8 }}>
-                    🎯 Kích thước phù hợp nhất: <span style={{ color: '#4F46E5' }}>Size {(() => {
+                    🎯 Kích thước phù hợp nhất: <span style={{ color: '#1D9E75' }}>Size {(() => {
                         const bestSize = Object.keys(fitRecommendations || {}).reduce((a, b) => ((fitRecommendations?.[a]?.score || 0) > (fitRecommendations?.[b]?.score || 0) ? a : b), sizeA);
                         return bestSize;
                     })()}</span>
@@ -738,7 +738,7 @@ const SizeComparisonRoom: React.FC<SizeComparisonRoomProps> = ({
                 <div style={{ fontSize: 12, color: '#6B7280', textAlign: 'right', lineHeight: 1.4 }}>
                     <span style={{ fontWeight: 600, color: '#374151' }}>84%</span> người có số đo tương tự<br/>đã chọn Size này
                 </div>
-                <button id="scr-pick-btn" className="scr-btn-primary" onClick={() => onAddToCart?.(Object.keys(fitRecommendations || {}).reduce((a, b) => ((fitRecommendations?.[a]?.score || 0) > (fitRecommendations?.[b]?.score || 0) ? a : b), sizeA))} style={{ height: 48, padding: '0 32px', fontSize: 15, borderRadius: 8, boxShadow: '0 4px 12px rgba(26,86,219,.3)' }}>
+                <button id="scr-pick-btn" className="scr-btn-primary" onClick={() => onAddToCart?.(Object.keys(fitRecommendations || {}).reduce((a, b) => ((fitRecommendations?.[a]?.score || 0) > (fitRecommendations?.[b]?.score || 0) ? a : b), sizeA))} style={{ height: 48, padding: '0 32px', fontSize: 15, borderRadius: 8, background: '#C9963F', color: '#FFFFFF', border: 'none', boxShadow: '0 4px 12px rgba(201,150,63,0.3)', cursor: 'pointer', fontWeight: 600 }}>
                     Mua với Size {Object.keys(fitRecommendations || {}).reduce((a, b) => ((fitRecommendations?.[a]?.score || 0) > (fitRecommendations?.[b]?.score || 0) ? a : b), sizeA)}
                 </button>
             </div>

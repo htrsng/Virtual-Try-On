@@ -49,7 +49,7 @@ export default function TryOnScene({
                                 <GarmentModel
                                     config={config}
                                     selectedSize={size}
-                                    selectedColor={garment.purchasedColor || '#f5f1e8'}
+                                    selectedColor={garment.purchasedColor}
                                     avatarScene={undefined}
                                     heatmapEnabled={false}
                                 />

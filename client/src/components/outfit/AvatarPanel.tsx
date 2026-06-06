@@ -78,7 +78,7 @@ function AvatarPanel({
   const [isWebglContextLost, setIsWebglContextLost] = useState(false)
   const [lossCount, setLossCount] = useState(0)
   const [fallbackMode, setFallbackMode] = useState(false)
-  const [bgTheme, setBgTheme] = useState<'warm' | 'light' | 'dark'>('warm')
+  const [bgTheme, setBgTheme] = useState<'dark' | 'light'>('dark')
   const controlsRef = useRef<OrbitControlsImpl | null>(null)
   const canvasAreaRef = useRef<HTMLDivElement | null>(null)
   const canvasElementRef = useRef<HTMLCanvasElement | null>(null)
@@ -137,18 +137,19 @@ function AvatarPanel({
   const panelStyle: React.CSSProperties = {
     flex: 1,
     minWidth: 0,
-    background: 'var(--bg-primary)',
+    background: 'var(--vfit-bg-canvas, #1A1625)',
     position: 'relative',
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
+    transition: 'background-color 0.3s ease',
   }
 
   const badgeStyle: React.CSSProperties = {
     position: 'absolute',
-    top: 16,
+    top: 64,
     left: 16,
-    zIndex: 2,
+    zIndex: 101,
     fontSize: 12,
     borderRadius: 999,
     padding: '8px 12px',
@@ -162,15 +163,15 @@ function AvatarPanel({
     position: 'absolute',
     right: 16,
     bottom: 16,
-    zIndex: 2,
+    zIndex: 101,
     display: 'flex',
     gap: 8,
     padding: 8,
     borderRadius: 16,
-    border: '1px solid rgba(226,232,240,0.95)',
-    background: 'rgba(255,255,255,0.9)',
+    border: '1px solid var(--vfit-border)',
+    background: 'var(--vfit-bg-panel)',
     backdropFilter: 'blur(14px)',
-    boxShadow: '0 6px 18px rgba(15,23,42,0.08)',
+    boxShadow: '0 6px 18px rgba(0,0,0,0.15)',
   }
 
   const cameraPreset = useMemo(() => CAMERA_PRESETS[viewAngle], [viewAngle])
@@ -180,30 +181,104 @@ function AvatarPanel({
   const shoeItem = selectedOutfit?.items.find(i => i.category === 'shoes')
 
   return (
-    <div style={panelStyle}>
+    <div style={panelStyle} className="vfit-container" data-theme={bgTheme}>
       <style>{`
-        .ap-grid-overlay {
+        .vfit-container {
+          --vfit-bg-canvas: #1A1625;
+          --vfit-bg-floor: #211D30;
+          --vfit-bg-panel: rgba(26, 22, 37, 0.92);
+          --vfit-floor-fade: linear-gradient(to top, #211D30 0%, transparent 100%);
+          --vfit-text-primary: rgba(255,255,255,0.90);
+          --vfit-text-secondary: rgba(255,255,255,0.50);
+          --vfit-border: rgba(255,255,255,0.10);
+          --vfit-bubble-default: #F0C040;
+          --vfit-bubble-done: #1D9E75;
+          --vfit-bubble-badge: #E25C5C;
+          --vfit-accent: #7C6FCD;
+          --vfit-vignette: rgba(0,0,0,0.35);
+          --vfit-rim-glow: rgba(160,130,255,0.18);
+          --vfit-podium-bg: rgba(40, 35, 55, 0.85);
+          --vfit-podium-border: rgba(124, 111, 205, 0.35);
+          --vfit-podium-side: rgba(20, 15, 30, 0.9);
+          --vfit-podium-shadow: rgba(0, 0, 0, 0.5);
+        }
+        .vfit-container[data-theme="light"] {
+          --vfit-bg-canvas: #E4DFF5;
+          --vfit-bg-floor: #D6CFF0;
+          --vfit-bg-panel: rgba(237, 234, 248, 0.92);
+          --vfit-floor-fade: linear-gradient(to top, #D6CFF0 0%, transparent 100%);
+          --vfit-text-primary: rgba(20,15,40,0.90);
+          --vfit-text-secondary: rgba(20,15,40,0.50);
+          --vfit-border: rgba(100,80,180,0.15);
+          --vfit-vignette: rgba(160, 140, 210, 0.40);
+          --vfit-rim-glow: rgba(100, 80, 180, 0.18);
+          --vfit-podium-bg: rgba(235, 230, 245, 0.9);
+          --vfit-podium-border: rgba(124, 111, 205, 0.25);
+          --vfit-podium-side: rgba(190, 180, 210, 0.9);
+          --vfit-podium-shadow: rgba(0, 0, 0, 0.15);
+        }
+        .vfit-bg-canvas {
+          background-color: var(--vfit-bg-canvas);
+          transition: background-color 0.3s ease;
+        }
+        .vfit-canvas-floor {
+          position: absolute;
+          bottom: 0; left: 0; right: 0;
+          height: 55px;
+          background: var(--vfit-floor-fade);
+          z-index: 1;
+          pointer-events: none;
+        }
+        .vfit-canvas-vignette {
           position: absolute;
           inset: 0;
+          background: radial-gradient(ellipse 70% 70% at 50% 50%, transparent 30%, var(--vfit-vignette) 100%);
+          z-index: 2;
           pointer-events: none;
-          z-index: 0;
-          transition: background 0.4s ease;
         }
-        .ap-grid-overlay.theme-warm {
-          background:
-            radial-gradient(ellipse at 50% 45%, rgba(212,168,92,0.10), transparent 65%),
-            radial-gradient(ellipse at 50% 95%, rgba(30,24,18,0.06), transparent 40%),
-            linear-gradient(180deg, #faf8f4 0%, #f5f1ea 60%, #efe9df 100%);
+        .vfit-canvas-podium {
+          position: absolute;
+          bottom: 12px; left: 50%;
+          transform: translateX(-50%);
+          width: 220px; height: 60px;
+          border-radius: 50%;
+          background: var(--vfit-podium-bg);
+          border: 1px solid var(--vfit-podium-border);
+          box-shadow: 
+            0 6px 0 var(--vfit-podium-side),
+            0 12px 15px var(--vfit-podium-shadow),
+            inset 0 -4px 10px rgba(0,0,0,0.15),
+            inset 0 2px 4px rgba(255,255,255,0.08);
+          z-index: 1;
+          pointer-events: none;
         }
-        .ap-grid-overlay.theme-light {
-          background:
-            radial-gradient(ellipse at 50% 45%, rgba(212,168,92,0.05), transparent 65%),
-            linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+        .vfit-canvas-spotlight {
+          position: absolute;
+          top: 0; left: 0; right: 0; bottom: 0;
+          background: radial-gradient(ellipse 320px 320px at 50% 45%, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 45%, transparent 70%);
+          z-index: 2;
+          pointer-events: none;
         }
-        .ap-grid-overlay.theme-dark {
-          background:
-            radial-gradient(ellipse at 50% 45%, rgba(212,168,92,0.12), transparent 65%),
-            linear-gradient(180deg, #2a241e 0%, #1a1612 100%);
+        .vfit-canvas-shadow {
+          position: absolute;
+          bottom: 18px; left: 50%;
+          transform: translateX(-50%);
+          width: 100px; height: 14px;
+          background: rgba(0,0,0,0.25);
+          border-radius: 50%;
+          z-index: 3;
+          pointer-events: none;
+        }
+        .vfit-canvas-rim-light {
+          position: absolute;
+          bottom: 18px; left: 50%;
+          transform: translateX(-50%);
+          width: 130px; height: 18px;
+          background: var(--vfit-rim-glow);
+          border-radius: 50%;
+          filter: blur(8px);
+          z-index: 3;
+          pointer-events: none;
         }
         @keyframes avatarPulse {
           0%, 100% { opacity: 0.4; transform: scale(1); }
@@ -232,6 +307,27 @@ function AvatarPanel({
         }
       `}</style>
       
+      {/* Background Theme Controls */}
+      <div style={{
+        position: 'absolute',
+        left: 16,
+        top: 16,
+        zIndex: 101,
+        display: 'flex',
+        gap: 10,
+        padding: '10px 14px',
+        borderRadius: 16,
+        border: '1px solid var(--vfit-border)',
+        background: 'var(--vfit-bg-panel)',
+        backdropFilter: 'blur(14px)',
+        boxShadow: '0 6px 18px rgba(0,0,0,0.15)',
+        alignItems: 'center',
+      }}>
+        <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--vfit-text-secondary)', letterSpacing: '0.04em', paddingRight: '4px' }}>NỀN</div>
+        <button onClick={() => setBgTheme('light')} title="Sáng" style={{ width: 18, height: 18, borderRadius: '50%', background: '#E4DFF5', border: bgTheme === 'light' ? '2px solid var(--vfit-accent)' : '1px solid var(--vfit-border)', cursor: 'pointer' }} />
+        <button onClick={() => setBgTheme('dark')} title="Tối" style={{ width: 18, height: 18, borderRadius: '50%', background: '#1A1625', border: bgTheme === 'dark' ? '2px solid var(--vfit-accent)' : '1px solid var(--vfit-border)', cursor: 'pointer' }} />
+      </div>
+
       {/* Badge */}
       <div style={badgeStyle}>
         {isGenerating ? 'Generating outfit...' : `Current Outfit: ${selectedOutfit?.name ?? 'Default Preview'}`}
@@ -275,28 +371,33 @@ function AvatarPanel({
         </div>
       )}
 
-      {/* Background Pattern Overlay */}
-      <div className={`ap-grid-overlay theme-${bgTheme}`} />
+      {/* Background Pattern Overlay removed */}
 
       <div
         ref={canvasAreaRef}
+        className="vfit-bg-canvas"
         style={{ position: 'relative', width: '100%', height: '100%', minHeight: 420, flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
       >
-
+        <div className="vfit-canvas-floor" />
+        <div className="vfit-canvas-podium" />
+        <div className="vfit-canvas-vignette" />
+        <div className="vfit-canvas-spotlight" />
+        <div className="vfit-canvas-shadow" />
+        <div className="vfit-canvas-rim-light" />
 
         {/* Canvas Container */}
-        <div style={{ flex: 1, position: 'relative', width: '100%', overflow: 'hidden' }}>
+        <div style={{ flex: 1, position: 'relative', width: '100%', overflow: 'hidden', zIndex: 4 }}>
           <Canvas
             key={`canvas-vto-${lossCount}`}
             frameloop={isWebglContextLost ? 'never' : 'always'}
-            dpr={fallbackMode ? 1 : [1, 1.2]}
+            dpr={fallbackMode ? 1 : [1.5, 2]}
             performance={{ min: fallbackMode ? 0.25 : 0.5 }}
             camera={{ position: cameraPreset.position, fov: 32 }}
             shadows={false}
             gl={{
-              antialias: false,
+              antialias: true,
               preserveDrawingBuffer: false,
-              powerPreference: 'default',
+              powerPreference: 'high-performance',
               stencil: false,
               depth: true,
               alpha: true,
@@ -304,13 +405,13 @@ function AvatarPanel({
             onCreated={handleCanvasCreated}
             style={{ width: '100%', height: '100%', display: 'block' }}
           >
-            <ambientLight intensity={fallbackMode ? 0.55 : 0.4} />
+            <ambientLight intensity={fallbackMode ? 0.6 : 0.55} />
             <directionalLight
               position={[3, 6, 4]}
-              intensity={fallbackMode ? 0.9 : 1.05}
+              intensity={fallbackMode ? 1.0 : 1.25}
             />
-            <directionalLight position={[-2, 3, -2]} intensity={0.3} />
-            <hemisphereLight args={['#f5f0e8', '#3a3228', 0.35]} />
+            <directionalLight position={[-2, 3, -2]} intensity={0.4} />
+            <hemisphereLight args={['#f5f0e8', '#3a3228', 0.5]} />
 
             <CameraViewController view={viewAngle} controlsRef={controlsRef} />
 
@@ -320,7 +421,7 @@ function AvatarPanel({
               layeredGarments={layeredGarments}
               showEnvironment={!fallbackMode}
               showContactShadows={!fallbackMode}
-              showGrid={true}
+              showGrid={false}
             />
 
             <OrbitControls
@@ -356,7 +457,7 @@ function AvatarPanel({
               border: '1px solid',
               borderColor: viewAngle === angle ? 'var(--gold-primary)' : 'rgba(212,169,66,0.3)',
               background: viewAngle === angle ? 'var(--gold-primary)' : 'rgba(255,255,255,0.8)',
-              color: viewAngle === angle ? '#0F0B07' : 'var(--text-secondary)',
+              color: viewAngle === angle ? 'var(--vfit-text-primary)' : 'var(--vfit-text-secondary)',
               cursor: 'pointer',
             }}
           >
@@ -367,27 +468,7 @@ function AvatarPanel({
         ))}
       </div>
 
-      {/* Background Theme Controls */}
-      <div style={{
-        position: 'absolute',
-        left: 16,
-        top: 16,
-        zIndex: 2,
-        display: 'flex',
-        gap: 10,
-        padding: '10px 14px',
-        borderRadius: 16,
-        border: '1px solid rgba(226,232,240,0.95)',
-        background: 'rgba(255,255,255,0.9)',
-        backdropFilter: 'blur(14px)',
-        boxShadow: '0 6px 18px rgba(15,23,42,0.08)',
-        alignItems: 'center',
-      }}>
-        <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '0.04em', paddingRight: '4px' }}>NỀN</div>
-        <button onClick={() => setBgTheme('light')} title="Sáng" style={{ width: 18, height: 18, borderRadius: '50%', background: '#ffffff', border: bgTheme === 'light' ? '2px solid var(--gold-primary)' : '1px solid #dbe2ea', cursor: 'pointer', outline: bgTheme === 'light' ? '2px solid rgba(212,169,66,0.2)' : 'none' }} />
-        <button onClick={() => setBgTheme('warm')} title="Ấm" style={{ width: 18, height: 18, borderRadius: '50%', background: '#f5f1ea', border: bgTheme === 'warm' ? '2px solid var(--gold-primary)' : '1px solid #dbe2ea', cursor: 'pointer', outline: bgTheme === 'warm' ? '2px solid rgba(212,169,66,0.2)' : 'none' }} />
-        <button onClick={() => setBgTheme('dark')} title="Tối" style={{ width: 18, height: 18, borderRadius: '50%', background: '#2a241e', border: bgTheme === 'dark' ? '2px solid var(--gold-primary)' : '1px solid #dbe2ea', cursor: 'pointer', outline: bgTheme === 'dark' ? '2px solid rgba(212,169,66,0.2)' : 'none' }} />
-      </div>
+      {/* Background Theme Controls Removed */}
     </div>
   )
 }

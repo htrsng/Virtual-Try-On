@@ -988,17 +988,18 @@ export const prepareGarmentMaterialsWithTuning = (
     tuneGarmentMaterials(garmentRoot, tuning);
 };
 
-export const applyGarmentColor = (garmentRoot: THREE.Object3D, color: THREE.ColorRepresentation) => {
+export const applyGarmentColor = (garmentRoot: THREE.Object3D, color?: THREE.ColorRepresentation) => {
+    if (!color) return;
+
     let safeColor = color;
     if (safeColor === '0') safeColor = 0x000000;
-    else if (!safeColor) safeColor = '#f5f5f5';
     
     let nextColor: THREE.Color;
     try {
         nextColor = new THREE.Color(safeColor);
     } catch (err) {
-        console.warn(`[GarmentModel] Invalid color: ${color}, falling back to #f5f5f5`);
-        nextColor = new THREE.Color('#f5f5f5');
+        console.warn(`[GarmentModel] Invalid color: ${color}, ignoring`);
+        return;
     }
 
     garmentRoot.traverse((child) => {

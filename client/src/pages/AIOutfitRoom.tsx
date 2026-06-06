@@ -16,6 +16,55 @@ import type { OutfitFilter } from '../types/outfit';
 import '../features/virtual-tryon/VirtualTryOn.css';
 
 const AI_OUTFIT_ROOM_STYLES = `
+    :root {
+        --vfit-bg-canvas: #1A1625;
+        --vfit-bg-floor: #211D30;
+        --vfit-bg-panel: rgba(26, 22, 37, 0.92);
+
+        --vfit-bubble-default: #F0C040;
+        --vfit-bubble-done: #1D9E75;
+        --vfit-bubble-badge: #E25C5C;
+        --vfit-text-primary: rgba(255, 255, 255, 0.90);
+        --vfit-text-secondary: rgba(255, 255, 255, 0.50);
+        --vfit-border-subtle: rgba(255, 255, 255, 0.10);
+        --vfit-chip-active-bg: #F0C040;
+        --vfit-chip-active-text: #1A1625;
+    }
+
+    .vto-canvas-area {
+        background-color: var(--vfit-bg-canvas) !important;
+        z-index: 0;
+    }
+
+    .vto-canvas-floor {
+        position: absolute;
+        bottom: 0; left: 0; right: 0;
+        height: 80px;
+        background: linear-gradient(to top, var(--vfit-bg-floor) 0%, transparent 100%);
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    .vto-canvas-spotlight {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: radial-gradient(ellipse 260px 200px at 50% 40%, rgba(255, 255, 255, 0.045) 0%, transparent 70%);
+        z-index: 2;
+        pointer-events: none;
+    }
+
+    .vto-canvas-rim-light {
+        position: absolute;
+        bottom: 24px; left: 50%;
+        transform: translateX(-50%);
+        width: 90px; height: 18px;
+        background: rgba(160, 130, 255, 0.18);
+        border-radius: 50%;
+        filter: blur(8px);
+        z-index: 3;
+        pointer-events: none;
+    }
+
     /* Left panel — warm cream */
     .ai-outfit-left-container {
         width: 300px;
@@ -231,7 +280,7 @@ const AI_OUTFIT_ROOM_STYLES = `
         .ai-outfit-right-container { display: none; }
     }
 
-    .vto-canvas-overlay--bottom-left { z-index: 3; }
+    .vto-canvas-overlay--bottom-left { z-index: 101; }
 `;
 
 
@@ -419,7 +468,6 @@ function SceneContent({ environmentPreset, cameraPos, cameraTarget, isRotating }
             <hemisphereLight args={['#f5f0e8', '#3a3228', 0.35]} />
 
             {/* Environment & Background */}
-            <color attach="background" args={['#f5f1e8']} />
             <Environment preset={environmentPreset} />
             <ContactShadows position={[0, 0.01, 0]} opacity={0.32} blur={1.6} resolution={256} frames={1} far={3} />
 
@@ -630,6 +678,9 @@ export default function AIOutfitRoom() {
 
     const Avatar3DCanvas = () => (
         <div ref={canvasAreaRef} className="vto-canvas-area" style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+            <div className="vto-canvas-floor" />
+            <div className="vto-canvas-spotlight" />
+            <div className="vto-canvas-rim-light" />
             <Canvas
                 eventSource={canvasAreaRef}
                 frameloop={isWebglContextLost ? 'never' : 'always'}
@@ -640,9 +691,10 @@ export default function AIOutfitRoom() {
                     antialias: false,
                     preserveDrawingBuffer: false,
                     powerPreference: 'default',
+                    alpha: true,
                 }}
                 onCreated={handleCanvasCreated}
-                style={{ width: '100%', height: '100%', display: 'block' }}
+                style={{ width: '100%', height: '100%', display: 'block', position: 'relative', zIndex: 4 }}
             >
                 <SceneContent
                     environmentPreset={environmentPreset}

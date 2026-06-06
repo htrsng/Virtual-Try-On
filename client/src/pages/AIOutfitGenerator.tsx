@@ -167,7 +167,7 @@ export default function AIOutfitGenerator({ onAddToCart, onBuyNow, showToast }: 
         if (!slot) return null
         
         const size = selections[item.id]?.size || item.selectedSize || item.suggestedSize || 'M'
-        const color = selections[item.id]?.colorHex || item.selectedColor || item.color || '#ffffff'
+        const color = selections[item.id]?.colorHex || item.selectedColor || item.color
         
         let glbUrl = resolveGlbUrl(item, size, color)
 
