@@ -8,6 +8,7 @@ import { useFittingRoom } from '../contexts/FittingRoomContext';
 import GarmentModel from '../features/virtual-tryon/GarmentModel';
 import FilterPanel from '../components/outfit/FilterPanel';
 import OutfitCard from '../components/OutfitCard.tsx';
+import OutfitColorPicker from '../components/outfit/OutfitColorPicker';
 import CameraPresets from '../features/virtual-tryon/components/CameraPresets';
 import type { CameraView } from '../features/virtual-tryon/components/CameraPresets';
 import type { AIOutfit, AIOutfitItem } from '../types/aiOutfit';
@@ -767,6 +768,7 @@ export default function AIOutfitRoom() {
 
                     <div className="vto-canvas-area" style={{ flex: 2, minWidth: 0, position: 'relative', overflow: 'hidden' }}>
                         <Avatar3DCanvas />
+                        <OutfitColorPicker />
                     </div>
 
                     <div className="ai-outfit-right-container">

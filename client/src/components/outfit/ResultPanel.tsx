@@ -12,6 +12,8 @@ interface ResultPanelProps {
   onSendMessage: (text: string) => void
   activeTab: 'describe' | 'occasion'
   fallbackMode?: boolean
+  onUpdateItem?: (outfitId: string, itemId: string, updates: Partial<OutfitItem>) => void
+  onOpenTryonPanel?: (outfitId: string) => void
 }
 
 export default function ResultPanel({
@@ -24,6 +26,8 @@ export default function ResultPanel({
   onSendMessage,
   activeTab,
   fallbackMode = false,
+  onUpdateItem,
+  onOpenTryonPanel,
 }: ResultPanelProps) {
   const panelStyle: React.CSSProperties = {
     width: '100%',
@@ -216,6 +220,8 @@ export default function ResultPanel({
                 onSelect={onSelectOutfit}
                 onTryItem={onTryItem}
                 isLocalFallback={outfit.id.startsWith('local-') || fallbackMode}
+                onUpdateItem={onUpdateItem}
+                onOpenTryonPanel={onOpenTryonPanel}
               />
             ))}
           </div>

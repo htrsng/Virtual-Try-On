@@ -2,11 +2,13 @@ import type { OutfitFilter, Occasion, StyleTag } from '../../types/outfit'
 
 interface LeftPanelProps {
     activeTab: 'describe' | 'occasion'
+    setActiveTab: (tab: 'describe' | 'occasion') => void
     filter: OutfitFilter
     onChange: (filter: OutfitFilter) => void
     onGenerate: () => void
     isGenerating: boolean
     shopLoading?: boolean
+    onClose?: () => void
 }
 
 const OCCASIONS: { value: Occasion; label: string; emoji: string }[] = [
@@ -39,7 +41,7 @@ const COLORS = [
     { hex: '#c4b5fd', label: 'Tím' },
 ]
 
-export default function LeftPanel({ activeTab, filter, onChange, onGenerate, isGenerating, shopLoading = false }: LeftPanelProps) {
+export default function LeftPanel({ activeTab, setActiveTab, filter, onChange, onGenerate, isGenerating, shopLoading = false, onClose }: LeftPanelProps) {
     const toggleOccasion = (occasion: Occasion) => {
         const next = filter.occasions.includes(occasion)
             ? filter.occasions.filter((value) => value !== occasion)
@@ -71,13 +73,12 @@ export default function LeftPanel({ activeTab, filter, onChange, onGenerate, isG
 
     return (
         <div style={{
-            background: 'var(--surface-elevated)',
-            borderRight: '1px solid var(--gold-divider)',
             height: '100%',
             overflowY: 'auto',
             display: 'flex',
             flexDirection: 'column',
             scrollbarWidth: 'none',
+            position: 'relative'
         }}>
             <style>{`
                 .lp-textarea:focus {
@@ -122,27 +123,93 @@ export default function LeftPanel({ activeTab, filter, onChange, onGenerate, isG
             `}</style>
 
             <div style={{ padding: '20px 20px 0' }}>
-                <div style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '5px',
-                    fontSize: '9px',
-                    letterSpacing: '0.12em',
-                    color: 'var(--gold-primary)',
-                    opacity: 0.7,
-                    marginBottom: '4px'
-                }}>
-                    ✦ AI STYLIST
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                    <div style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        fontSize: '9px',
+                        letterSpacing: '0.12em',
+                        color: 'var(--gold-primary)',
+                        opacity: 0.7
+                    }}>
+                        ✦ AI STYLIST
+                    </div>
+                    {onClose && (
+                        <button
+                            onClick={onClose}
+                            style={{
+                                background: 'rgba(255,255,255,0.1)',
+                                border: '1px solid rgba(255,255,255,0.2)',
+                                borderRadius: '50%',
+                                width: '28px',
+                                height: '28px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: '#fff',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                            }}
+                            title="Thu gọn"
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                        >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                    )}
                 </div>
-                <h2 style={{ fontSize: '18px', fontWeight: '600', color: 'var(--text-primary)', margin: '0 0 2px' }}>
-                    Bộ lọc
+                <h2 style={{ fontSize: '18px', fontWeight: '600', color: '#f8fafc', margin: '0 0 2px' }}>
+                    Tạo Outfit mới
                 </h2>
-                <p style={{ fontSize: '11px', color: 'var(--text-secondary)', margin: '0 0 16px' }}>
-                    Chọn ngữ cảnh để AI tạo outfit
+                <p style={{ fontSize: '11px', color: '#94a3b8', margin: '0 0 16px' }}>
+                    Chọn phương thức và thiết lập bộ lọc
                 </p>
-            </div>
 
-            <div style={{ height: '1px', background: 'var(--gold-divider)', margin: '0 20px 16px' }} />
+                {/* Tabs */}
+                <div style={{
+                    display: 'flex',
+                    background: 'rgba(255,255,255,0.05)',
+                    borderRadius: '12px',
+                    padding: '4px',
+                    marginBottom: '16px'
+                }}>
+                    <button
+                        onClick={() => setActiveTab('describe')}
+                        style={{
+                            flex: 1,
+                            background: activeTab === 'describe' ? 'var(--gold-primary)' : 'transparent',
+                            color: activeTab === 'describe' ? '#0F0B07' : '#94a3b8',
+                            border: 'none',
+                            borderRadius: '8px',
+                            padding: '8px 0',
+                            fontSize: '12px',
+                            fontWeight: activeTab === 'describe' ? '600' : '500',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        Mô tả
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('occasion')}
+                        style={{
+                            flex: 1,
+                            background: activeTab === 'occasion' ? 'var(--gold-primary)' : 'transparent',
+                            color: activeTab === 'occasion' ? '#0F0B07' : '#94a3b8',
+                            border: 'none',
+                            borderRadius: '8px',
+                            padding: '8px 0',
+                            fontSize: '12px',
+                            fontWeight: activeTab === 'occasion' ? '600' : '500',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        Ngữ cảnh
+                    </button>
+                </div>
+            </div>
 
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 {activeTab === 'describe' && (
@@ -150,7 +217,7 @@ export default function LeftPanel({ activeTab, filter, onChange, onGenerate, isG
                         <div style={{
                             fontSize: '10px',
                             letterSpacing: '0.1em',
-                            color: 'var(--text-secondary)',
+                            color: '#94a3b8',
                             fontWeight: '500',
                             padding: '0 20px',
                             marginBottom: '8px'
@@ -162,12 +229,12 @@ export default function LeftPanel({ activeTab, filter, onChange, onGenerate, isG
                             style={{
                                 margin: '0 16px',
                                 width: 'calc(100% - 32px)',
-                                background: 'var(--surface-subtle)',
-                                border: '1px solid var(--gold-border)',
+                                background: 'rgba(255,255,255,0.05)',
+                                border: '1px solid rgba(212,169,66,0.2)',
                                 borderRadius: '12px',
                                 padding: '12px 14px',
                                 fontSize: '12px',
-                                color: 'var(--text-primary)',
+                                color: '#f8fafc',
                                 lineHeight: '1.6',
                                 resize: 'none',
                                 minHeight: '90px',
@@ -188,7 +255,7 @@ export default function LeftPanel({ activeTab, filter, onChange, onGenerate, isG
                         <div style={{
                             fontSize: '10px',
                             letterSpacing: '0.1em',
-                            color: 'var(--text-secondary)',
+                            color: '#94a3b8',
                             fontWeight: '500',
                             padding: '0 20px',
                             marginBottom: '8px'
@@ -210,8 +277,8 @@ export default function LeftPanel({ activeTab, filter, onChange, onGenerate, isG
                                         className="lp-occasion-chip"
                                         onClick={() => toggleOccasion(occasion.value)}
                                         style={{
-                                            background: isSelected ? 'var(--gold-light)' : 'var(--surface-card)',
-                                            border: isSelected ? '1.5px solid var(--gold-primary)' : '1px solid var(--gold-border)',
+                                            background: isSelected ? 'rgba(212,169,66,0.15)' : 'rgba(255,255,255,0.03)',
+                                            border: isSelected ? '1.5px solid var(--gold-primary)' : '1px solid rgba(255,255,255,0.1)',
                                             borderRadius: '10px',
                                             padding: '10px 12px',
                                             display: 'flex',
@@ -220,7 +287,7 @@ export default function LeftPanel({ activeTab, filter, onChange, onGenerate, isG
                                             cursor: 'pointer',
                                             transition: 'all 0.18s ease',
                                             fontSize: '12px',
-                                            color: isSelected ? 'var(--gold-primary)' : 'var(--text-primary)',
+                                            color: isSelected ? 'var(--gold-primary)' : '#f8fafc',
                                             fontWeight: isSelected ? '500' : 'normal',
                                             boxSizing: 'border-box'
                                         }}
@@ -238,7 +305,7 @@ export default function LeftPanel({ activeTab, filter, onChange, onGenerate, isG
                         <div style={{
                             fontSize: '10px',
                             letterSpacing: '0.1em',
-                            color: 'var(--text-secondary)',
+                            color: '#94a3b8',
                             fontWeight: '500',
                             padding: '0 20px',
                             marginBottom: '8px'
@@ -260,12 +327,12 @@ export default function LeftPanel({ activeTab, filter, onChange, onGenerate, isG
                                         className="lp-style-chip"
                                         onClick={() => toggleStyle(style)}
                                         style={{
-                                            background: isSelected ? 'var(--gold-light)' : 'var(--surface-subtle)',
-                                            border: isSelected ? '1px solid var(--gold-primary)' : '1px solid var(--gold-border)',
+                                            background: isSelected ? 'rgba(212,169,66,0.15)' : 'rgba(255,255,255,0.05)',
+                                            border: isSelected ? '1px solid var(--gold-primary)' : '1px solid rgba(255,255,255,0.1)',
                                             borderRadius: '20px',
                                             padding: '5px 14px',
                                             fontSize: '11px',
-                                            color: isSelected ? 'var(--gold-primary)' : 'var(--text-secondary)',
+                                            color: isSelected ? 'var(--gold-primary)' : '#cbd5e1',
                                             cursor: 'pointer',
                                             transition: 'all 0.15s ease',
                                             fontWeight: isSelected ? '500' : 'normal',
@@ -282,7 +349,7 @@ export default function LeftPanel({ activeTab, filter, onChange, onGenerate, isG
                 <div style={{
                     fontSize: '10px',
                     letterSpacing: '0.1em',
-                    color: 'var(--text-secondary)',
+                    color: '#94a3b8',
                     fontWeight: '500',
                     padding: '0 20px',
                     marginBottom: '8px',
@@ -304,10 +371,10 @@ export default function LeftPanel({ activeTab, filter, onChange, onGenerate, isG
                                     borderRadius: '50%',
                                     cursor: 'pointer',
                                     transition: 'transform 0.15s, box-shadow 0.15s',
-                                    border: isSelected ? '2px solid var(--gold-primary)' : '2px solid transparent',
+                                    border: isSelected ? '2px solid var(--gold-primary)' : '2px solid rgba(255,255,255,0.2)',
                                     backgroundColor: color.hex,
                                     transform: isSelected ? 'scale(1.15)' : 'none',
-                                    boxShadow: isSelected ? '0 0 0 2px var(--gold-light)' : '0 1px 3px rgba(0,0,0,0.1)',
+                                    boxShadow: isSelected ? '0 0 0 2px rgba(212,169,66,0.2)' : '0 1px 3px rgba(0,0,0,0.3)',
                                     boxSizing: 'border-box'
                                 }}
                             />
@@ -325,14 +392,14 @@ export default function LeftPanel({ activeTab, filter, onChange, onGenerate, isG
                     <div style={{
                         fontSize: '10px',
                         letterSpacing: '0.1em',
-                        color: 'var(--text-secondary)',
+                        color: '#94a3b8',
                         fontWeight: '500'
                     }}>
                         NGÂN SÁCH
                     </div>
                     <div style={{
-                        background: 'var(--gold-light)',
-                        border: '1px solid var(--gold-border)',
+                        background: 'rgba(212,169,66,0.15)',
+                        border: '1px solid rgba(212,169,66,0.3)',
                         borderRadius: '8px',
                         padding: '2px 10px',
                         fontSize: '11px',
@@ -356,16 +423,16 @@ export default function LeftPanel({ activeTab, filter, onChange, onGenerate, isG
             </div>
 
             <div style={{
-                marginTop: 'auto',
+                marginTop: '16px',
                 padding: '16px',
-                borderTop: '1px solid var(--gold-divider)',
+                borderTop: '1px solid rgba(212,169,66,0.1)',
             }}>
                 <div style={{
                     fontSize: '11px',
-                    color: 'var(--text-secondary)',
+                    color: '#94a3b8',
                     textAlign: 'center',
                     marginBottom: '10px',
-                    opacity: 0.6
+                    opacity: 0.8
                 }}>
                     {activeTab === 'describe'
                         ? 'Nhập mô tả để AI gợi ý outfit'

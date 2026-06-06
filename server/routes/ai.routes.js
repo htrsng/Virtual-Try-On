@@ -165,6 +165,7 @@ function createAiRouter(deps) {
                         aiStylist.material
                         aiStylist.description
                         model3D
+                        variants
                     `)
                     .limit(120)
                     .lean(), 6000, "product lookup");
@@ -181,6 +182,7 @@ function createAiRouter(deps) {
                         aiStylist.formFit
                         aiStylist.material
                         model3D
+                        variants
                     `)
                     .limit(120)
                     .lean(), 6000, "product fallback lookup");
@@ -594,7 +596,7 @@ OUTPUT FORMAT (JSON thuần, không markdown, không giải thích):
                     if (!dbProduct && mongoose.Types.ObjectId.isValid(productId)) {
                         try {
                             dbProduct = await ProductModel.findById(productId)
-                                .select("name price imageUrl category model3D")
+                                .select("name price imageUrl category model3D variants")
                                 .lean();
                         } catch (_) {}
                     }
@@ -635,6 +637,23 @@ OUTPUT FORMAT (JSON thuần, không markdown, không giải thích):
                         
                         // Check if 3D model exists for try-on
                         item.tryon_ready = !!(dbProduct.model3D && dbProduct.model3D.url);
+
+                        // Populate availableColors and availableSizes from dbProduct.variants
+                        if (dbProduct.variants && dbProduct.variants.length > 0) {
+                            item.availableColors = dbProduct.variants.map((v) => ({
+                                hex: v.color.hex,
+                                label: v.color.name,
+                                image: v.color.image,
+                            }));
+
+                            const allSizes = new Set();
+                            dbProduct.variants.forEach((v) => {
+                                if (Array.isArray(v.sizes)) {
+                                    v.sizes.forEach((s) => allSizes.add(s.size));
+                                }
+                            });
+                            item.availableSizes = Array.from(allSizes);
+                        }
 
                         validItems.push(item);
                     }

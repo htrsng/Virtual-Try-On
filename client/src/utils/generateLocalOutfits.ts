@@ -133,23 +133,48 @@ export function generateLocalOutfits(
         const items: OutfitItem[] = [top, bottom, shoe]
             .filter(Boolean)
             .map(p => {
-                const productId = String(p?._id || p?.id || p?.productId || '');
+                const productId = String(p?.productId || p?.id || p?._id || '');
                 const isOwned = ownedIds.has(productId);
 
-                return {
-                    id: productId,
-                    name: p?.name || 'Sản phẩm',
-                    category: mapCategory(p?.category || ''),
-                    price: p?.price || 0,
-                    imageUrl: p?.imageUrl || p?.img || 'https://via.placeholder.com/300x400?text=No+Image',
-                    productUrl: `/product/${productId}`,
-                    color: p?.color || '#888888',
-                    source: isOwned ? 'closet' : 'shop',
-                    suggestedSize: 'M', // Default size for local engine
-                    sizeReason: 'Kích thước mặc định',
-                    owned: isOwned,
-                    slot: mapCategory(p?.category || ''),
-                };
+                    let availableColors: any[] | undefined = undefined;
+                    let availableSizes: string[] | undefined = undefined;
+
+                    if ((p as any).variants && Array.isArray((p as any).variants)) {
+                        const variants = (p as any).variants;
+                        availableColors = variants.map((v: any) => ({
+                            hex: v.color?.hex,
+                            label: v.color?.name,
+                            image: v.color?.image || v.color?.img
+                        })).filter((c: any) => c.hex);
+
+                        const sizesSet = new Set<string>();
+                        variants.forEach((v: any) => {
+                            if (Array.isArray(v.sizes)) {
+                                v.sizes.forEach((s: any) => sizesSet.add(s.size));
+                            }
+                        });
+                        if (sizesSet.size > 0) {
+                            availableSizes = Array.from(sizesSet);
+                        }
+                    }
+
+                    return {
+                        id: productId,
+                        name: p?.name || 'Sản phẩm',
+                        category: mapCategory(p?.category || ''),
+                        price: p?.price || 0,
+                        imageUrl: p?.imageUrl || p?.img || 'https://via.placeholder.com/300x400?text=No+Image',
+                        productUrl: `/product/${productId}`,
+                        color: p?.color || '#888888',
+                        source: isOwned ? 'closet' : 'shop',
+                        suggestedSize: 'M', // Default size for local engine
+                        sizeReason: 'Kích thước mặc định',
+                        owned: isOwned,
+                        slot: mapCategory(p?.category || ''),
+                        model3D: (p as any).model3D || (p as any).model3d,
+                        availableColors,
+                        availableSizes,
+                    };
             });
 
         if (items.length < 2) continue;

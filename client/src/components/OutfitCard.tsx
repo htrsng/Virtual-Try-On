@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useFittingRoom, type SilentWearItem } from '../contexts/FittingRoomContext';
 import type { AIOutfit } from '../types/aiOutfit';
+import { calculateRecommendedSize, generateMockSizeChart } from '../utils/sizeCalculator';
 
 interface OutfitCardProps {
     outfit: AIOutfit;
@@ -8,7 +9,7 @@ interface OutfitCardProps {
 }
 
 export default function OutfitCard({ outfit, onWear }: OutfitCardProps) {
-    const { applyFullOutfit } = useFittingRoom();
+    const { applyFullOutfit, currentAvatar } = useFittingRoom();
     const [isApplying, setIsApplying] = useState(false);
 
     const handleWearOutfit = async () => {
@@ -24,13 +25,17 @@ export default function OutfitCard({ outfit, onWear }: OutfitCardProps) {
                     else if (item.source === 'import') mappedSource = 'import';
                     else mappedSource = 'fallback';
 
+                    const layerCategory = mapLayerToCategory(item.layer);
+                    const sizeChart = item.sizeChart || generateMockSizeChart(layerCategory);
+                    const { recommendedSize } = calculateRecommendedSize(currentAvatar, sizeChart, layerCategory);
+
                     return {
                         itemId: item.productId,
                         productId: item.productId,
                         name: item.name,
-                        category: mapLayerToCategory(item.layer),
-                        purchasedSize: 'M', // Default size, could be customized
-                        purchasedColor: '#000', // Default color
+                        category: layerCategory,
+                        purchasedSize: recommendedSize,
+                        purchasedColor: item.defaultColor || '#000000',
                         thumbnail: item.thumbnail,
                         source: mappedSource || (item.type === 'closet' ? 'order' : 'fallback'),
                         model3D: item.model3DUrl ? { url: item.model3DUrl } : undefined,
@@ -68,38 +73,49 @@ export default function OutfitCard({ outfit, onWear }: OutfitCardProps) {
 
             {/* Items Grid */}
             <div className="outfit-card-items">
-                {outfit.items.slice(0, 3).map((item, idx) => (
-                    <div key={`${outfit.id}-${idx}`} className="outfit-item">
-                        {/* Thumbnail */}
-                        <div className="outfit-item-thumbnail">
-                            {item.thumbnail ? (
-                                <img src={item.thumbnail} alt={item.name} />
-                            ) : (
-                                <div className="outfit-item-placeholder">Ảnh</div>
-                            )}
+                {outfit.items.slice(0, 3).map((item, idx) => {
+                    const layerCategory = mapLayerToCategory(item.layer);
+                    const sizeChart = item.sizeChart || generateMockSizeChart(layerCategory);
+                    const { recommendedSize, fitScore } = calculateRecommendedSize(currentAvatar, sizeChart, layerCategory);
 
-                            {/* Type Badge */}
-                            {item.type === 'closet' ? (
-                                <span className="outfit-item-badge closet">✓ Có</span>
-                            ) : (
-                                <span className="outfit-item-badge shop">+ Mua</span>
-                            )}
-                        </div>
+                    return (
+                        <div key={`${outfit.id}-${idx}`} className="outfit-item">
+                            {/* Thumbnail */}
+                            <div className="outfit-item-thumbnail">
+                                {item.thumbnail ? (
+                                    <img src={item.thumbnail} alt={item.name} />
+                                ) : (
+                                    <div className="outfit-item-placeholder">Ảnh</div>
+                                )}
 
-                        {/* Item Info */}
-                        <div className="outfit-item-info">
-                            <p className="outfit-item-name">{item.name}</p>
-                            {item.price && (
-                                <p className="outfit-item-price">
-                                    {new Intl.NumberFormat('vi-VN', {
-                                        style: 'currency',
-                                        currency: 'VND',
-                                    }).format(item.price)}
-                                </p>
-                            )}
+                                {/* Type Badge */}
+                                {item.type === 'closet' ? (
+                                    <span className="outfit-item-badge closet">✓ Có</span>
+                                ) : (
+                                    <span className="outfit-item-badge shop">+ Mua</span>
+                                )}
+
+                                {/* Size Badge */}
+                                <div className="outfit-item-size-badge">
+                                    Size {recommendedSize} · {fitScore}%
+                                </div>
+                            </div>
+
+                            {/* Item Info */}
+                            <div className="outfit-item-info">
+                                <p className="outfit-item-name">{item.name}</p>
+                                {item.price && (
+                                    <p className="outfit-item-price">
+                                        {new Intl.NumberFormat('vi-VN', {
+                                            style: 'currency',
+                                            currency: 'VND',
+                                        }).format(item.price)}
+                                    </p>
+                                )}
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             {/* Summary */}
@@ -236,6 +252,20 @@ export default function OutfitCard({ outfit, onWear }: OutfitCardProps) {
           background: #fff3cd;
           color: #856404;
           border: 0.5px solid #ffeaa7;
+        }
+
+        .outfit-item-size-badge {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          background: rgba(26, 22, 18, 0.75);
+          color: rgba(255, 255, 255, 0.95);
+          font-size: 9px;
+          padding: 3px 0;
+          text-align: center;
+          font-weight: 600;
+          backdrop-filter: blur(4px);
         }
 
         .outfit-item-info {

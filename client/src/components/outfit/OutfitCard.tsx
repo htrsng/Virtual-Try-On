@@ -9,6 +9,8 @@ interface OutfitCardProps {
     onSelect: (id: string) => void;
     onTryItem: (item: OutfitItem) => void;
     isLocalFallback?: boolean;
+    onUpdateItem?: (outfitId: string, itemId: string, updates: Partial<OutfitItem>) => void;
+    onOpenTryonPanel?: (outfitId: string) => void;
 }
 
 export default function OutfitCard({
@@ -18,6 +20,8 @@ export default function OutfitCard({
     onSelect,
     onTryItem,
     isLocalFallback = false,
+    onUpdateItem,
+    onOpenTryonPanel,
 }: OutfitCardProps) {
     const [expanded, setExpanded] = useState(isSelected);
     const [isLoadingSession, setIsLoadingSession] = useState(false);
@@ -70,6 +74,27 @@ export default function OutfitCard({
                 }
                 .ai-reason-content.expanded {
                     max-height: 200px;
+                }
+                .oc-color-swatch {
+                    width: 18px;
+                    height: 18px;
+                    border-radius: 50%;
+                    cursor: pointer;
+                    border: 1px solid rgba(0,0,0,0.1);
+                    display: inline-block;
+                }
+                .oc-color-swatch.selected {
+                    border: 2px solid var(--gold-primary);
+                    transform: scale(1.1);
+                }
+                .oc-size-select {
+                    background: var(--surface-card);
+                    border: 1px solid var(--gold-border);
+                    color: var(--text-secondary);
+                    border-radius: 4px;
+                    padding: 2px 6px;
+                    font-size: 10px;
+                    outline: none;
                 }
             `}</style>
 
@@ -280,19 +305,51 @@ export default function OutfitCard({
                                             fontWeight: '500',
                                         }}>Mua mới</span>
                                     )}
-                                    {(item.suggestedSize || (item as any).size) && (
-                                        <span style={{
-                                            background: 'var(--surface-card)',
-                                            border: '1px solid var(--gold-border)',
-                                            color: 'var(--text-secondary)',
-                                            borderRadius: '4px',
-                                            padding: '1px 6px',
-                                            fontSize: '9px',
-                                        }}>
-                                            Size {item.suggestedSize || (item as any).size}
-                                        </span>
-                                    )}
                                 </div>
+                                {isSelected && (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '6px', flexWrap: 'wrap' }}>
+                                        {/* Color Selector */}
+                                        <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                                            {(item.availableColors || ['#000000', '#ffffff', '#808080']).map((c: string) => (
+                                                <div
+                                                    key={c}
+                                                    className={`oc-color-swatch ${item.selectedColor === c || (!item.selectedColor && item.color === c) ? 'selected' : ''}`}
+                                                    style={{ background: c }}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        onUpdateItem?.(outfit.id, item.id, { selectedColor: c });
+                                                    }}
+                                                />
+                                            ))}
+                                            {/* fallback color picker if availableColors is just fake */}
+                                            <input 
+                                                type="color" 
+                                                value={item.selectedColor || item.color || '#000000'}
+                                                onChange={(e) => {
+                                                    onUpdateItem?.(outfit.id, item.id, { selectedColor: e.target.value });
+                                                }}
+                                                onClick={e => e.stopPropagation()}
+                                                style={{ width: '20px', height: '20px', padding: 0, border: 'none', cursor: 'pointer', background: 'transparent' }}
+                                            />
+                                        </div>
+                                        {/* Size Selector */}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <select 
+                                                className="oc-size-select"
+                                                value={item.selectedSize || item.suggestedSize || 'M'}
+                                                onChange={(e) => {
+                                                    onUpdateItem?.(outfit.id, item.id, { selectedSize: e.target.value });
+                                                }}
+                                                onClick={e => e.stopPropagation()}
+                                            >
+                                                {(item.availableSizes || ['S', 'M', 'L', 'XL']).map((s: string) => (
+                                                    <option key={s} value={s}>{s}</option>
+                                                ))}
+                                            </select>
+                                            <span style={{ fontSize: '9px', color: 'var(--gold-primary)', background: 'var(--gold-light)', padding: '2px 4px', borderRadius: '4px' }}>AI Gợi ý</span>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             {/* PRICE + ACTION */}
@@ -319,11 +376,7 @@ export default function OutfitCard({
                                         <button
                                             onClick={e => {
                                                 e.stopPropagation();
-                                                const productId = (item as any)._id || item.id || (item as any).productId;
-                                                const size = item.suggestedSize || (item as any).size || (item as any).recommendedSize || 'M';
-                                                if (productId) {
-                                                    navigate(`/try-on?product_id=${productId}&size=${size}`);
-                                                }
+                                                onTryItem(item);
                                             }}
                                             style={{
                                                 background: 'var(--gold-primary)',
@@ -417,36 +470,10 @@ export default function OutfitCard({
             {isSelected && outfit.items?.length > 0 && (
                 <div style={{ padding: '0 14px 14px' }}>
                     <button
-                        onClick={async (e) => {
+                        onClick={(e) => {
                             e.stopPropagation();
-                            try {
-                                setIsLoadingSession(true);
-                                const token = localStorage.getItem("token");
-                                const itemsPayload = outfit.items.map((i: any) => ({
-                                    productId: i._id || i.id || i.productId,
-                                    size: i.suggestedSize || i.size || i.recommendedSize || 'M'
-                                }));
-                                
-                                const res = await fetch("http://localhost:5000/api/tryon/session", {
-                                    method: "POST",
-                                    headers: {
-                                        "Content-Type": "application/json",
-                                        "Authorization": `Bearer ${token}`
-                                    },
-                                    body: JSON.stringify({ items: itemsPayload })
-                                });
-                                const data = await res.json();
-                                if (data.success && data.session_url) {
-                                    // analytics.track('tryon_from_stylist', { outfit_id: outfit.id, source: 'ai_stylist' })
-                                    navigate(data.session_url.replace('/virtual-try-on', '/try-on'));
-                                }
-                            } catch (err) {
-                                console.error("Tryon session error", err);
-                            } finally {
-                                setIsLoadingSession(false);
-                            }
+                            onOpenTryonPanel?.(outfit.id);
                         }}
-                        disabled={isLoadingSession}
                         style={{
                             width: '100%',
                             background: 'linear-gradient(135deg, var(--gold-primary) 0%, #B8860B 100%)',
@@ -456,21 +483,18 @@ export default function OutfitCard({
                             padding: '10px',
                             fontSize: '13px',
                             fontWeight: '700',
-                            cursor: isLoadingSession ? 'not-allowed' : 'pointer',
+                            cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             gap: '8px',
                             transition: 'all 0.2s ease',
-                            opacity: isLoadingSession ? 0.7 : 1,
                             boxShadow: '0 4px 12px rgba(212,169,66,0.3)'
                         }}
                     >
-                        {isLoadingSession ? 'Đang tạo phòng thử...' : (
-                            <>
-                                <span style={{ fontSize: '16px' }}>👕</span> Thử cả bộ Outfit này
-                            </>
-                        )}
+                        <>
+                            <span style={{ fontSize: '16px' }}>👕</span> Thử cả bộ Outfit này
+                        </>
                     </button>
                 </div>
             )}

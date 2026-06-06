@@ -843,10 +843,10 @@ function App() {
             <Route path="/avatar-studio" element={<AvatarStudioPage />} />
 
             {/* TRANG AI OUTFIT ROOM - PHÒNG AI GỢI Ý PHỐI ĐỒ (3D + AI) */}
-            <Route path="/ai-outfit" element={<AIOutfitGenerator />} />
+            <Route path="/ai-outfit" element={<AIOutfitGenerator onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} showToast={showToast} />} />
 
             {/* TRANG AI OUTFIT GENERATOR - PHIÊN BẢN CHAT CŨ */}
-            <Route path="/ai-outfit-generator" element={<AIOutfitGenerator />} />
+            <Route path="/ai-outfit-generator" element={<AIOutfitGenerator onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} showToast={showToast} />} />
 
             {/* TRANG NỘI DUNG BANNER */}
             <Route path="/banner/:bannerId" element={<BannerContentPage />} />

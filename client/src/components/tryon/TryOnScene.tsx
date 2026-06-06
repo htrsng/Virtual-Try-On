@@ -39,24 +39,16 @@ export default function TryOnScene({
                     <Avatar body={body} pose={'Idle'} skinColor="#F2C9AC" onSceneReady={onSceneReady} />
 
                     {layeredGarments && Object.entries(layeredGarments).map(([slot, garment]) => {
-                        if (!garment?.model3D || !(garment.model3D as any).url) return null
+                        if (!garment?.model3D) return null
 
-                        const config = {
-                            enable: true,
-                            sizes: {
-                                M: {
-                                    url: String((garment.model3D as any).url),
-                                    autoNormalize: true,
-                                    followAvatarBones: false,
-                                },
-                            },
-                        }
+                        const config = garment.model3D;
+                        const size = garment.purchasedSize || 'M';
 
                         return (
                             <Suspense key={`${slot}-${garment.itemId}`} fallback={null}>
                                 <GarmentModel
                                     config={config}
-                                    selectedSize="M"
+                                    selectedSize={size}
                                     selectedColor={garment.purchasedColor || '#f5f1e8'}
                                     avatarScene={undefined}
                                     heatmapEnabled={false}

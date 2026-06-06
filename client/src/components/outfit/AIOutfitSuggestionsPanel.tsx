@@ -15,6 +15,8 @@ interface AIOutfitSuggestionsPanelProps {
     onSendMessage: (text: string) => void
     activeTab?: 'describe' | 'occasion'
     fallbackMode?: boolean
+    onUpdateItem?: (outfitId: string, itemId: string, updates: Partial<OutfitItem>) => void
+    onOpenTryonPanel?: (outfitId: string) => void
 }
 
 export default function AIOutfitSuggestionsPanel({
@@ -30,6 +32,8 @@ export default function AIOutfitSuggestionsPanel({
     onSendMessage,
     activeTab = 'describe',
     fallbackMode = false,
+    onUpdateItem,
+    onOpenTryonPanel,
 }: AIOutfitSuggestionsPanelProps) {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#fff', overflow: 'hidden' }}>
@@ -44,6 +48,8 @@ export default function AIOutfitSuggestionsPanel({
                     onSendMessage={onSendMessage}
                     activeTab={activeTab}
                     fallbackMode={fallbackMode}
+                    onUpdateItem={onUpdateItem}
+                    onOpenTryonPanel={onOpenTryonPanel}
                 />
             </div>
         </div>

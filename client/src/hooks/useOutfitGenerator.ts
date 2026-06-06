@@ -304,6 +304,7 @@ export function useOutfitGenerator(options: UseOutfitGeneratorOptions) {
 
                 setOutfits(data.outfits);
                 console.info('[AI] ✓ Gemini API succeeded. Outfits loaded:', data.outfits.length);
+                return data.outfits;
 
             } catch (err: any) {
                 // ─── FALLBACK: Circuit Breaker Triggered ───
@@ -318,6 +319,7 @@ export function useOutfitGenerator(options: UseOutfitGeneratorOptions) {
                         setOutfits(localOutfits);
                         setFallbackMode(true); // Signal to UI that we're using fallback
                         console.info('[AI] ✓ Local Engine succeeded. Outfits generated:', localOutfits.length);
+                        return localOutfits;
                     } else {
                         throw new Error('Local engine generated no outfits');
                     }
@@ -329,6 +331,7 @@ export function useOutfitGenerator(options: UseOutfitGeneratorOptions) {
                         'Hệ thống tạm thời gián đoạn. Vui lòng thử lại sau hoặc điều chỉnh bộ lọc.'
                     );
                     setOutfits([]);
+                    return [];
                 }
 
             } finally {

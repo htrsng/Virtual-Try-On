@@ -33,6 +33,16 @@ export interface OutfitItem {
   owned?: boolean
   slot?: string
   model3D?: Record<string, unknown>
+  selectedSize?: string
+  selectedColor?: string
+  availableColors?: string[] | { hex: string; label: string; isDefault?: boolean }[]
+  availableSizes?: string[]
+  glbVariants?: {
+    size: string;
+    colorHex: string;
+    glbUrl: string;
+    variantId?: string;
+  }[]
 }
 
 export interface OutfitResult {

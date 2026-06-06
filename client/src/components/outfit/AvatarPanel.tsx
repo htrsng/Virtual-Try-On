@@ -20,10 +20,10 @@ interface AvatarPanelProps {
 }
 
 const CAMERA_PRESETS: Record<ViewAngle, { position: [number, number, number], target: [number, number, number] }> = {
-  front: { position: [0, 0.6, 2.8], target: [0, 0.4, 0] },
-  back: { position: [0, 0.6, -2.8], target: [0, 0.4, 0] },
-  left: { position: [-2.8, 0.6, 0], target: [0, 0.4, 0] },
-  right: { position: [2.8, 0.6, 0], target: [0, 0.4, 0] },
+  front: { position: [0, 0.7, 4.2], target: [0, 0.4, 0] },
+  back: { position: [0, 0.7, -4.2], target: [0, 0.4, 0] },
+  left: { position: [-4.2, 0.7, 0], target: [0, 0.4, 0] },
+  right: { position: [4.2, 0.7, 0], target: [0, 0.4, 0] },
 }
 
 function LoadingScreen() {
@@ -371,7 +371,7 @@ function AvatarPanel({
       <div style={{
         position: 'absolute',
         left: 16,
-        bottom: 16,
+        top: 16,
         zIndex: 2,
         display: 'flex',
         gap: 10,

@@ -8,14 +8,23 @@ import { generateOutfit } from '../services/aiOutfitService'
 import LeftPanel from '../components/ai-outfit/LeftPanel'
 import AvatarPanel from '../components/outfit/AvatarPanel'
 import AIOutfitSuggestionsPanel from '../components/outfit/AIOutfitSuggestionsPanel'
+import TryOnPanel from '../components/outfit/TryOnPanel'
 import BodyEditorDrawer from '../features/virtual-tryon/components/BodyEditorDrawer'
+import { MODEL_INJECTION } from '../data/ThreeDConfig'
 import { useFittingRoom, type GarmentSlot, type Profile } from '../contexts/FittingRoomContext'
 import type { OutfitFilter, OutfitResult, ChatMessage, ViewAngle } from '../types/outfit'
 import type { OutfitItem } from '../types/outfit'
 import { useOutfitGenerator } from '../hooks/useOutfitGenerator'
+import { initSelection, SelectionState, resolveGlbUrl } from '../utils/glb'
 import '../features/virtual-tryon/VirtualTryOn.css'
 
-export default function AIOutfitGenerator() {
+interface AIOutfitGeneratorProps {
+  onAddToCart?: (product: any, size?: string) => void;
+  onBuyNow?: (product: any, size?: string) => void;
+  showToast?: (message: string, type?: string) => void;
+}
+
+export default function AIOutfitGenerator({ onAddToCart, onBuyNow, showToast }: AIOutfitGeneratorProps = {}) {
   const navigate = useNavigate()
   const { user } = useAuth()
   const {
@@ -45,6 +54,14 @@ export default function AIOutfitGenerator() {
   const [closetItems, setClosetItems] = useState<any[]>([])
   const [isBodyEditorOpen, setIsBodyEditorOpen] = useState(false)
   const [bodyEditorNotice, setBodyEditorNotice] = useState<string>('')
+  
+  // TryOnPanel State
+  const [isTryOnPanelOpen, setIsTryOnPanelOpen] = useState(false)
+  const [tryOnPanelOutfitId, setTryOnPanelOutfitId] = useState<string | null>(null)
+  const [selections, setSelections] = useState<SelectionState>({})
+
+  // Floating Bubble State
+  const [isLeftPanelExpanded, setIsLeftPanelExpanded] = useState(true)
 
   // Circuit Breaker Hook - handles Gemini fallback to Local Engine
   const {
@@ -67,6 +84,12 @@ export default function AIOutfitGenerator() {
   })
 
   const selectedOutfit = outfits.find(o => o.id === selectedOutfitId) || outfits[0] || null
+
+  useEffect(() => {
+    if (selectedOutfit) {
+      setSelections(initSelection(selectedOutfit));
+    }
+  }, [selectedOutfitId, outfits]);
 
   const activeAvatarData = useMemo(() => ({
     avatar: currentAvatar,
@@ -104,21 +127,60 @@ export default function AIOutfitGenerator() {
     return null
   }
 
+  const resolveModel3D = (itemId: string | number, itemModel3D?: any, productUrl?: string, category?: string) => {
+    // If backend returns a config object
+    if (itemModel3D && typeof itemModel3D === 'object' && itemModel3D.sizes) return itemModel3D;
+    
+    // If backend returns a raw URL string
+    if (itemModel3D && typeof itemModel3D === 'string') {
+        return {
+            enable: true,
+            sizes: {
+                S: { url: itemModel3D, autoNormalize: true, followAvatarBones: false },
+                M: { url: itemModel3D, autoNormalize: true, followAvatarBones: false },
+                L: { url: itemModel3D, autoNormalize: true, followAvatarBones: false },
+                XL: { url: itemModel3D, autoNormalize: true, followAvatarBones: false },
+            }
+        };
+    }
+
+    const modelMap = MODEL_INJECTION as any;
+    
+    // First try the item ID
+    let strId = String(itemId).trim();
+    if (strId && modelMap[strId]) return modelMap[strId];
+    
+    // If it didn't match, the item ID might be a MongoDB ObjectID. 
+    // Try to extract the real product ID from the productUrl.
+    if (productUrl && productUrl.includes('/product/')) {
+        const extractedId = productUrl.split('/product/').pop()?.trim();
+        if (extractedId && modelMap[extractedId]) return modelMap[extractedId];
+    }
+    
+    return undefined;
+  }
+
   const applyOutfitToAvatar = (outfit: OutfitResult) => {
     const silentWearItems = outfit.items
       .map((item) => {
         const slot = mapToSilentWearSlot(item.category)
         if (!slot) return null
+        
+        const size = selections[item.id]?.size || item.selectedSize || item.suggestedSize || 'M'
+        const color = selections[item.id]?.colorHex || item.selectedColor || item.color || '#ffffff'
+        
+        let glbUrl = resolveGlbUrl(item, size, color)
+
         return {
           itemId: item.id,
           productId: item.id,
           name: item.name,
           category: slot,
-          purchasedSize: 'M',
-          purchasedColor: item.color,
+          purchasedSize: size,
+          purchasedColor: color,
           thumbnail: item.imageUrl,
           source: 'fallback' as const,
-          model3D: item.model3D,
+          model3D: glbUrl ? { enable: true, sizes: { [size]: { url: glbUrl, autoNormalize: true } } } : resolveModel3D(item.id, item.model3D, item.productUrl, item.category),
         }
       })
       .filter((item): item is NonNullable<typeof item> => Boolean(item))
@@ -132,8 +194,79 @@ export default function AIOutfitGenerator() {
     const outfit = outfits.find((entry) => entry.id === outfitId)
     if (!outfit) return
     setSelectedOutfitId(outfitId)
-    applyOutfitToAvatar(outfit)
   }
+
+  const handleUpdateOutfitItem = (outfitId: string, itemId: string, updates: Partial<OutfitItem>) => {
+    setOutfits(prevOutfits => prevOutfits.map(outfit => {
+      if (outfit.id !== outfitId) return outfit;
+      return {
+        ...outfit,
+        items: outfit.items.map(item => {
+          if (item.id !== itemId) return item;
+          return { ...item, ...updates };
+        })
+      };
+    }));
+  };
+
+  const handleOpenTryOnPanel = (outfitId: string) => {
+    setTryOnPanelOutfitId(outfitId);
+    setIsTryOnPanelOpen(true);
+  };
+
+  const handleCloseTryOnPanel = () => {
+    setIsTryOnPanelOpen(false);
+  };
+
+  const handleTryOnPanelIndexChange = (index: number) => {
+    const nextOutfit = outfits[index];
+    if (nextOutfit) {
+      setTryOnPanelOutfitId(nextOutfit.id);
+      setSelectedOutfitId(nextOutfit.id);
+      applyOutfitToAvatar(nextOutfit);
+    }
+  };
+
+  const handleAddToCart = (outfit: OutfitResult) => {
+    if (!onAddToCart) {
+      alert('Đã thêm Outfit vào giỏ hàng!');
+      return;
+    }
+    outfit.items.forEach(item => {
+      onAddToCart({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        img: item.imageUrl,
+        category: item.category,
+      }, item.selectedSize || item.suggestedSize || 'M');
+    });
+    if (showToast) showToast('Đã thêm Outfit vào giỏ hàng!');
+  };
+
+  const handleBuyNow = (outfit: OutfitResult) => {
+    if (!onBuyNow) {
+      alert('Đang chuyển đến trang thanh toán...');
+      handleCloseTryOnPanel();
+      return;
+    }
+    outfit.items.forEach((item, index) => {
+      const product = {
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        img: item.imageUrl,
+        category: item.category,
+      };
+      const size = item.selectedSize || item.suggestedSize || 'M';
+      if (index === outfit.items.length - 1) {
+         onBuyNow(product, size);
+      } else {
+         if (onAddToCart) onAddToCart(product, size);
+      }
+    });
+    handleCloseTryOnPanel();
+  };
 
   const handleTryItem = (item: OutfitItem) => {
     const slot = mapToSilentWearSlot(item.category)
@@ -144,11 +277,11 @@ export default function AIOutfitGenerator() {
       productId: item.id,
       name: item.name,
       category: slot,
-      purchasedSize: 'M',
-      purchasedColor: item.color,
+      purchasedSize: item.selectedSize || item.suggestedSize || 'M',
+      purchasedColor: item.selectedColor || item.color,
       thumbnail: item.imageUrl,
       source: 'fallback',
-      model3D: item.model3D,
+      model3D: resolveModel3D(item.id, item.model3D, item.productUrl, item.category),
     })
   }
 
@@ -165,19 +298,23 @@ export default function AIOutfitGenerator() {
       .catch(() => { }) // không crash nếu chưa có closet
   }, [])
 
+  // Close bubble if there are already generated outfits when the component loads
+  useEffect(() => {
+    if (outfits && outfits.length > 0) {
+      setIsLeftPanelExpanded(false)
+    }
+  }, [outfits.length])
+
   // Handle outfit generation with Circuit Breaker pattern
   const handleGenerate = async () => {
+    setIsLeftPanelExpanded(false)
     setMessages([])
-    await handleGenerateOutfit(filter)
+    const generatedOutfits = await handleGenerateOutfit(filter)
 
-    // After outfit generation, apply the first outfit to avatar if successful
-    setOutfits(currentOutfits => {
-      if (currentOutfits.length > 0) {
-        setSelectedOutfitId(currentOutfits[0].id)
-        applyOutfitToAvatar(currentOutfits[0])
-      }
-      return currentOutfits
-    })
+    // After outfit generation, select the first outfit but do NOT apply it automatically
+    if (generatedOutfits && generatedOutfits.length > 0) {
+      setSelectedOutfitId(generatedOutfits[0].id)
+    }
   }
 
   // Handle chat/refinement with real API
@@ -197,7 +334,6 @@ export default function AIOutfitGenerator() {
       if (result.outfits.length > 0) {
         setOutfits(result.outfits)
         setSelectedOutfitId(result.outfits[0].id)
-        applyOutfitToAvatar(result.outfits[0])
       }
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
@@ -309,49 +445,6 @@ export default function AIOutfitGenerator() {
         </div>
 
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            background: 'var(--surface-subtle)',
-            border: '1px solid var(--gold-border)',
-            borderRadius: '100px',
-            padding: '4px 6px',
-            gap: '4px',
-          }}>
-            <button
-              onClick={() => setActiveTab('describe')}
-              style={{
-                background: activeTab === 'describe' ? 'var(--gold-primary)' : 'transparent',
-                border: 'none',
-                borderRadius: '100px',
-                color: activeTab === 'describe' ? '#0F0B07' : 'var(--text-secondary)',
-                padding: '6px 16px',
-                fontSize: '12px',
-                fontWeight: activeTab === 'describe' ? '600' : '500',
-                transition: 'all 0.2s ease',
-                cursor: 'pointer',
-              }}
-            >
-              Gợi ý theo mô tả
-            </button>
-            <button
-              onClick={() => setActiveTab('occasion')}
-              style={{
-                background: activeTab === 'occasion' ? 'var(--gold-primary)' : 'transparent',
-                border: 'none',
-                borderRadius: '100px',
-                color: activeTab === 'occasion' ? '#0F0B07' : 'var(--text-secondary)',
-                padding: '6px 16px',
-                fontSize: '12px',
-                fontWeight: activeTab === 'occasion' ? '600' : '500',
-                transition: 'all 0.2s ease',
-                cursor: 'pointer',
-              }}
-            >
-              Chọn theo dịp
-            </button>
-          </div>
-
           <div style={{
             display: 'flex',
             alignItems: 'center',
@@ -501,26 +594,91 @@ export default function AIOutfitGenerator() {
 
       <div style={{
         display: 'grid',
-        gridTemplateColumns: '300px 1fr 480px',
+        gridTemplateColumns: '1fr 480px',
         height: 'calc(100vh - 60px - 53px)', /* 60px header + 53px strip */
         background: 'var(--bg-primary)',
         overflow: 'hidden',
+        position: 'relative',
       }}>
-        {/* Left Column - Filter Panel */}
+        {/* Floating Left Panel (Bubble) */}
         <div style={{
+          position: 'absolute',
+          bottom: '24px',
+          left: '24px',
+          zIndex: 50,
           display: 'flex',
           flexDirection: 'column',
-          height: '100%',
-          overflow: 'hidden',
+          alignItems: 'flex-start',
+          pointerEvents: 'none', // Let clicks pass through empty space
         }}>
-          <LeftPanel
-            activeTab={activeTab}
-            filter={filter}
-            onChange={setFilter}
-            onGenerate={handleGenerate}
-            isGenerating={isGenerating}
-            shopLoading={shopLoading}
-          />
+          {isLeftPanelExpanded ? (
+            <div style={{
+              pointerEvents: 'auto',
+              background: 'rgba(15, 15, 30, 0.92)',
+              backdropFilter: 'blur(8px)',
+              borderRadius: '24px',
+              border: '1px solid rgba(212, 169, 66, 0.3)',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+              width: '320px',
+              maxHeight: 'calc(100vh - 120px)',
+              overflowY: 'auto',
+              transform: 'translateY(0)',
+              opacity: 1,
+              transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease',
+              display: 'flex',
+              flexDirection: 'column',
+              scrollbarWidth: 'none',
+            }}>
+              <LeftPanel
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                filter={filter}
+                onChange={setFilter}
+                onGenerate={handleGenerate}
+                isGenerating={isGenerating}
+                shopLoading={shopLoading}
+                onClose={() => setIsLeftPanelExpanded(false)}
+              />
+            </div>
+          ) : (
+            <button
+              onClick={() => setIsLeftPanelExpanded(true)}
+              style={{
+                pointerEvents: 'auto',
+                height: '56px',
+                width: outfits.length > 0 ? 'auto' : '56px',
+                borderRadius: '28px',
+                padding: outfits.length > 0 ? '0 24px' : '0',
+                background: outfits.length > 0 ? 'rgba(15,15,30,0.92)' : 'linear-gradient(135deg, var(--gold-primary) 0%, #E8B84B 100%)',
+                border: outfits.length > 0 ? '1px solid rgba(212,169,66,0.4)' : 'none',
+                boxShadow: outfits.length > 0 ? '0 10px 30px rgba(0,0,0,0.3)' : '0 8px 24px rgba(201,150,63,0.3)',
+                backdropFilter: 'blur(8px)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                justifyContent: 'center',
+                transform: 'translateY(0) scale(1)',
+                transition: 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s',
+                color: outfits.length > 0 ? 'var(--gold-primary)' : '#0F0B07'
+              }}
+              onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-4px) scale(1.02)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0) scale(1)'}
+              title={outfits.length > 0 ? "Chỉnh sửa bộ lọc" : "Mở bộ lọc AI"}
+            >
+              {outfits.length > 0 ? (
+                <>
+                  <span style={{ fontSize: '20px' }}>✨</span>
+                  <span style={{ fontSize: '13px', fontWeight: '600' }}>Sửa bộ lọc</span>
+                  <div style={{ background: 'var(--gold-primary)', color: '#0F0B07', fontSize: '11px', fontWeight: 'bold', padding: '2px 8px', borderRadius: '10px', marginLeft: '2px' }}>
+                    {outfits.length}
+                  </div>
+                </>
+              ) : (
+                <span style={{ fontSize: '24px' }}>✨</span>
+              )}
+            </button>
+          )}
         </div>
 
         {/* Middle Column - Avatar Panel */}
@@ -536,6 +694,12 @@ export default function AIOutfitGenerator() {
             viewAngle={viewAngle}
             onViewChange={setViewAngle}
           />
+          {isTryOnPanelOpen && (
+            <div 
+                style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.18)', zIndex: 40, cursor: 'pointer' }}
+                onClick={handleCloseTryOnPanel}
+            />
+          )}
         </div>
 
         {/* Right Column - AI Suggestions Panel */}
@@ -558,8 +722,24 @@ export default function AIOutfitGenerator() {
             onSendMessage={handleSendMessage}
             activeTab={activeTab}
             fallbackMode={fallbackMode}
+            onUpdateItem={handleUpdateOutfitItem}
+            onOpenTryonPanel={handleOpenTryOnPanel}
           />
         </div>
+
+        {/* Try On Panel Overlay */}
+        <TryOnPanel
+            isOpen={isTryOnPanelOpen}
+            outfits={outfits}
+            currentIndex={outfits.findIndex(o => o.id === tryOnPanelOutfitId)}
+            closetItems={closetItems}
+            onClose={handleCloseTryOnPanel}
+            onIndexChange={handleTryOnPanelIndexChange}
+            onUpdateItem={handleUpdateOutfitItem}
+            onAddToCart={handleAddToCart}
+            onBuyNow={handleBuyNow}
+            onTryOutfit={(outfit) => applyOutfitToAvatar(outfit)}
+        />
       </div>
 
       <BodyEditorDrawer
