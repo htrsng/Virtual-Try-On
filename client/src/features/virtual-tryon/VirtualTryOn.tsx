@@ -603,6 +603,28 @@ const resolveModel3D = (item: TryOnProduct) => {
 };
 
 /* ─── Main Component ─── */
+function CameraHotspot({ position, label, onClick }: { position: [number, number, number], label: string, onClick: () => void }) {
+    return (
+        <group position={position}>
+            <Html center zIndexRange={[100, 0]}>
+                <div 
+                    onClick={onClick} 
+                    style={{
+                        width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(255,255,255,0.85)',
+                        border: '2px solid #C9963F', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        boxShadow: '0 0 10px rgba(0,0,0,0.2)', transition: 'transform 0.2s',
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.2)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+                    title={label}
+                >
+                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#C9963F' }} />
+                </div>
+            </Html>
+        </group>
+    );
+}
+
 export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyNow, showToast }: VirtualTryOnProps) {
     const location = useLocation();
     const navigate = useNavigate();
@@ -689,6 +711,14 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
 
     // UI state
     const [isRotating, setIsRotating] = useState(false);
+    const [showGestureHint, setShowGestureHint] = useState(true);
+    const [history, setHistory] = useState<{sizes: Record<string, string>, colors: Record<string, string>}[]>([]);
+    const [historyIndex, setHistoryIndex] = useState(-1);
+
+    useEffect(() => {
+        const timer = setTimeout(() => setShowGestureHint(false), 3000);
+        return () => clearTimeout(timer);
+    }, []);
     const [hasSkippedAvatarSetup, setHasSkippedAvatarSetup] = useState(false);
     const [showEmptyAvatarModal, setShowEmptyAvatarModal] = useState(false);
     const [avatarScene, setAvatarScene] = useState<THREE.Group | null>(null);
@@ -1120,14 +1150,55 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
 
     const handleItemSizeChange = useCallback((size: string) => {
         const key = String(activeItem.id);
-        setItemSizes(prev => ({ ...prev, [key]: size }));
+        const newSizes = { ...itemSizes, [key]: size };
+        setItemSizes(newSizes);
         setSelectedSize(size);
-    }, [activeItem, setSelectedSize]);
+        setHistory(prev => {
+            const nextHistory = prev.slice(0, historyIndex + 1);
+            return [...nextHistory, { sizes: newSizes, colors: itemColors }];
+        });
+        setHistoryIndex(prev => prev + 1);
+    }, [activeItem, setSelectedSize, itemSizes, itemColors, historyIndex]);
 
     const handleItemColorChange = useCallback((color: string) => {
         const key = String(activeItem.id);
-        setItemColors(prev => ({ ...prev, [key]: color }));
-    }, [activeItem]);
+        const newColors = { ...itemColors, [key]: color };
+        setItemColors(newColors);
+        setHistory(prev => {
+            const nextHistory = prev.slice(0, historyIndex + 1);
+            return [...nextHistory, { sizes: itemSizes, colors: newColors }];
+        });
+        setHistoryIndex(prev => prev + 1);
+    }, [activeItem, itemSizes, itemColors, historyIndex]);
+
+    useEffect(() => {
+        if (history.length === 0 && Object.keys(itemSizes).length > 0) {
+            setHistory([{ sizes: itemSizes, colors: itemColors }]);
+            setHistoryIndex(0);
+        }
+    }, [history.length, itemColors, itemSizes]);
+
+    const handleUndo = useCallback(() => {
+        if (historyIndex > 0) {
+            const prev = history[historyIndex - 1];
+            setItemSizes(prev.sizes);
+            setItemColors(prev.colors);
+            setHistoryIndex(historyIndex - 1);
+            const activeKey = String(activeItem.id);
+            setSelectedSize(prev.sizes[activeKey] || null);
+        }
+    }, [history, historyIndex, activeItem]);
+
+    const handleRedo = useCallback(() => {
+        if (historyIndex < history.length - 1) {
+            const next = history[historyIndex + 1];
+            setItemSizes(next.sizes);
+            setItemColors(next.colors);
+            setHistoryIndex(historyIndex + 1);
+            const activeKey = String(activeItem.id);
+            setSelectedSize(next.sizes[activeKey] || null);
+        }
+    }, [history, historyIndex, activeItem]);
 
     const handleWearClosetItem = useCallback(async (closetItem: ClosetItem, selectedColor?: string, selectedSize?: string) => {
         applySilentWear({
@@ -1518,12 +1589,14 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                 setCameraTarget([0, 0.3, 0]);
                 setIsRotating(false);
               }}
-              onChangeBackground={() => {}}
-              onChangeLighting={() => {
-                 const modes: ('studio'|'warm'|'cool'|'outdoor')[] = ['studio', 'warm', 'cool', 'outdoor'];
-                 const nextIdx = (modes.indexOf(lightingMode) + 1) % modes.length;
-                 setLightingMode(modes[nextIdx]);
+              onChangeBackground={() => {
+                setBgTheme(prev => prev === 'light' ? 'dark' : 'light');
               }}
+              onChangeLighting={() => {}}
+              onUndo={handleUndo}
+              onRedo={handleRedo}
+              canUndo={historyIndex > 0}
+              canRedo={historyIndex < history.length - 1}
             />
 
             {/* ─── Workspace Canvas ─── */}
@@ -1569,14 +1642,14 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                           --vfit-border-light: rgba(100,80,180,0.15);
                         }
                         .vfit-bg-canvas.canvas-studio-wrap {
-                          background: var(--vfit-bg-canvas${bgTheme === 'light' ? '-light' : ''}) !important;
+                          background: radial-gradient(ellipse at center, #F8F5EE 40%, #E8DEC8 100%) !important;
                           transition: background-color 0.3s ease;
                           z-index: 0;
                         }
                         .vfit-bg-canvas.canvas-studio-wrap::before { display: none !important; }
                         .vfit-canvas-floor {
                           position: absolute; bottom: 0; left: 0; right: 0; height: 80px; z-index: 1; pointer-events: none;
-                          background: linear-gradient(to top, var(--vfit-bg-floor${bgTheme === 'light' ? '-light' : ''}) 0%, transparent 100%);
+                          background: transparent;
                           transition: background 0.3s ease;
                         }
                         .vfit-canvas-podium {
@@ -1590,7 +1663,7 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                         .vfit-canvas-spotlight {
                           position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 2; pointer-events: none;
                           width: 100%; height: 100%;
-                          background: radial-gradient(ellipse 380px 380px at 50% 45%, rgba(255,255,255,${bgTheme === 'light' ? '0.2' : '0.12'}) 0%, transparent 70%);
+                          background: radial-gradient(ellipse 380px 380px at 50% 45%, rgba(212, 168, 92, 0.12) 0%, transparent 70%);
                           transition: background 0.3s ease;
                         }
                         .vfit-canvas-shadow {
@@ -1602,12 +1675,12 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                         .vfit-canvas-rim {
                           position: absolute; bottom: 21px; left: 50%; transform: translateX(-50%); z-index: 3; pointer-events: none;
                           width: 90px; height: 18px; border-radius: 50%; filter: blur(8px);
-                          background: rgba(160, 130, 255, 0.18);
+                          background: rgba(200, 168, 103, 0.10);
                           transition: background 0.3s ease;
                         }
                         .vfit-canvas-vignette {
                           position: absolute; inset: 0; z-index: 5; pointer-events: none;
-                          background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,${bgTheme === 'light' ? '0.05' : '0.4'}) 100%);
+                          background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.05) 100%);
                           transition: background 0.3s ease;
                         }
 
@@ -1615,31 +1688,28 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                         .theme-dark .vto-camera, .theme-light .vto-camera {
                           z-index: 101;
                           position: relative;
+                          background: #F2EDE2 !important;
+                          border-color: #E0D0B0 !important;
                         }
-                        .theme-dark .vto-camera {
-                          background: var(--vfit-bg-panel);
-                          border-color: var(--vfit-border-dark);
+                        .theme-dark .vto-camera__btn, .theme-light .vto-camera__btn { 
+                          color: #8A7050 !important; 
+                          background: rgba(200,168,103,0.08) !important; 
                         }
-                        .theme-dark .vto-camera__btn { color: var(--vfit-text-secondary-dark); }
-                        .theme-dark .vto-camera__btn:hover { color: var(--vfit-text-primary-dark); }
-                        .theme-dark .vto-camera__divider { background: var(--vfit-border-dark); }
-                        
-                        .theme-light .vto-camera {
-                          background: var(--vfit-bg-panel-light);
-                          border-color: var(--vfit-border-light);
+                        .theme-dark .vto-camera__btn:hover, .theme-light .vto-camera__btn:hover { 
+                          color: #2C1F0E !important; 
+                          background: rgba(200,168,103,0.15) !important;
                         }
-                        .theme-light .vto-camera__btn { color: var(--vfit-text-secondary-light); }
-                        .theme-light .vto-camera__btn:hover { color: var(--vfit-text-primary-light); }
-                        .theme-light .vto-camera__divider { background: var(--vfit-border-light); }
+                        .theme-dark .vto-camera__divider, .theme-light .vto-camera__divider { 
+                          background: #E0D0B0 !important; 
+                        }
 
                         /* Common Active Chip State */
                         .tryon-layout .vto-camera__btn.active {
-                          background: var(--vfit-chip-active-bg) !important;
-                          color: var(--vfit-chip-active-text) !important;
+                          background: #C8A867 !important;
+                          color: #2C1F0E !important;
                         }
                     `}</style>
                     <div className="vfit-canvas-floor" />
-                    <div className="vfit-canvas-podium" />
                     <div className="vfit-canvas-spotlight" />
                     <div className="vfit-canvas-shadow" />
                     <div className="vfit-canvas-rim" />
@@ -1686,6 +1756,8 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                         <hemisphereLight args={['#f5f0e8', '#3a3228', 0.35]} />
 
                         <CameraAnimator targetPosition={cameraPos} targetLookAt={cameraTarget} />
+                        
+
 
                         <Suspense fallback={<Loader />}>
                             <Environment preset="city" />
@@ -1739,6 +1811,7 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                                     );
                                 })}
 
+                                <Grid position={[0, 0, 0]} args={[10, 10]} cellColor="#d1d5db" sectionColor="#9ca3af" fadeDistance={20} />
                                 <ContactShadows position={[0, 0.01, 0]} opacity={0.45} blur={1.8} resolution={512} frames={1} far={3} />
                             </group>
                         </Suspense>
@@ -1791,24 +1864,19 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                     </div>
 
                     <div className="vto-canvas-overlay vto-canvas-overlay--top-left" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <div style={{ display: 'flex', gap: 6, background: 'rgba(0,0,0,0.4)', padding: 8, borderRadius: 20, width: 'max-content', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                            <span style={{ color: '#fff', fontSize: 11, fontWeight: 600, paddingLeft: 8, alignSelf: 'center', letterSpacing: '0.05em' }}>NỀN</span>
-                            <button onClick={() => setBgTheme('light')} style={{ width: 20, height: 20, borderRadius: '50%', background: '#E4DFF5', border: bgTheme === 'light' ? '2px solid #fff' : 'none', cursor: 'pointer', transition: 'all 0.2s' }} />
-                            <button onClick={() => setBgTheme('dark')} style={{ width: 20, height: 20, borderRadius: '50%', background: '#1A1625', border: bgTheme === 'dark' ? '2px solid #fff' : 'none', cursor: 'pointer', transition: 'all 0.2s' }} />
+                        <div style={{ display: 'flex', gap: 6, background: 'rgba(0,0,0,0.4)', padding: 8, borderRadius: 20, width: 'max-content', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', alignItems: 'center' }}>
+                            <span style={{ color: '#fff', fontSize: 11, fontWeight: 600, paddingLeft: 8, letterSpacing: '0.05em' }}>SÁNG</span>
+                            <select 
+                                value={lightingMode} 
+                                onChange={(e) => setLightingMode(e.target.value as any)}
+                                style={{ background: 'transparent', color: '#fff', border: 'none', outline: 'none', fontSize: 11, cursor: 'pointer', marginLeft: 4 }}
+                            >
+                                <option value="studio" style={{ color: '#000' }}>Studio</option>
+                                <option value="warm" style={{ color: '#000' }}>Tự nhiên (Ấm)</option>
+                                <option value="cool" style={{ color: '#000' }}>Lạnh</option>
+                                <option value="outdoor" style={{ color: '#000' }}>Ngoài trời</option>
+                            </select>
                         </div>
-                        <button
-                            type="button"
-                            className="vto-closet-button"
-                            onClick={() => setIsClosetOpen(true)}
-                            aria-label="Mở tủ đồ cá nhân"
-                            title="Virtual Personal Closet"
-                            data-testid="open-closet-btn"
-                        >
-                            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
-                                <path d="M20 6h-2.15a2.5 2.5 0 0 0-4.7 0H6.85a2.5 2.5 0 0 0-4.7 0H2a1 1 0 0 0-1 1v11a3 3 0 0 0 3 3h16a3 3 0 0 0 3-3V7a1 1 0 0 0-1-1zm-9-2a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0zm9 13H4a1 1 0 0 1-1-1V8h18v10a1 1 0 0 1-1 1z" />
-                            </svg>
-                            <span className="vto-closet-button__label">Tủ đồ</span>
-                        </button>
                     </div>
 
                     {/* Heatmap legend */}
@@ -1841,6 +1909,20 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                         layeredGarments={layeredGarments}
                         onSave={handleSaveOutfit}
                     />
+
+                    {showGestureHint && (
+                        <div style={{
+                            position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+                            background: 'rgba(0,0,0,0.6)', color: '#fff', padding: '12px 24px', borderRadius: '30px',
+                            display: 'flex', alignItems: 'center', gap: '8px', zIndex: 100, backdropFilter: 'blur(10px)',
+                            pointerEvents: 'none', animation: 'fadeOut 0.5s ease 2.5s forwards'
+                        }}>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M5 12h14" /><path d="M12 5l7 7-7 7" />
+                            </svg>
+                            <span style={{ fontSize: '13px', fontWeight: 500 }}>Kéo để xoay 360°</span>
+                        </div>
+                    )}
                     </div>
                 </div>
 

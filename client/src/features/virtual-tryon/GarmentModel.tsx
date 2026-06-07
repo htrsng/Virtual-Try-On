@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useMemo } from 'react';
+import { Suspense, useEffect, useMemo, useRef } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -14,6 +14,8 @@ import {
     type GarmentHeatmapZone,
     prepareGarmentMaterialsWithTuning,
     syncGarmentMorphTargets,
+    setGarmentTargetColor,
+    lerpGarmentColor,
 } from './garmentBinding';
 
 import type { FitZone } from './components/SizeRecommendation';
@@ -187,18 +189,22 @@ function GarmentInstance({
             fabricProfile: effectiveFabric,
         });
 
-        if (wireframeColor) {
+        if (ghostOpacity !== undefined) {
             cloned.traverse((child) => {
                 const mesh = child as THREE.Mesh;
                 if (mesh.isMesh) {
-                    mesh.material = new THREE.MeshStandardMaterial({
-                        color: wireframeColor,
-                        wireframe: true,
-                        transparent: true,
-                        opacity: ghostOpacity || 0.6,
-                        emissive: wireframeColor,
-                        emissiveIntensity: emissiveIntensity !== undefined ? emissiveIntensity : 0.3
-                    });
+                    const originalMat = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material;
+                    const newMat = originalMat.clone() as THREE.MeshStandardMaterial;
+                    newMat.transparent = true;
+                    newMat.opacity = ghostOpacity;
+                    newMat.depthWrite = false;
+                    
+                    if (emissiveIntensity !== undefined && emissiveIntensity > 0) {
+                        newMat.emissive = new THREE.Color(wireframeColor || '#FFFFFF');
+                        newMat.emissiveIntensity = emissiveIntensity;
+                    }
+                    
+                    mesh.material = newMat;
                 }
             });
         }
@@ -211,6 +217,9 @@ function GarmentInstance({
         garment.softness.envMapIntensity,
         garment.softness.metalness,
         garment.softness.roughness,
+        wireframeColor,
+        ghostOpacity,
+        emissiveIntensity,
     ]);
 
     const { actions, names } = useAnimations(gltf.animations, garmentScene);
@@ -225,8 +234,15 @@ function GarmentInstance({
         }
     }, [actions, names]);
 
+    const initialColorSet = useRef(false);
+
     useEffect(() => {
-        applyGarmentColor(garmentScene, selectedColor);
+        if (!initialColorSet.current) {
+            applyGarmentColor(garmentScene, selectedColor);
+            initialColorSet.current = true;
+        } else {
+            setGarmentTargetColor(garmentScene, selectedColor);
+        }
     }, [garmentScene, selectedColor]);
 
     useEffect(() => {
@@ -309,16 +325,15 @@ function GarmentInstance({
         return bindings;
     }, [avatarScene, garmentScene]);
 
-    useFrame(() => {
-        if (morphBindings.length === 0) {
-            return;
+    useFrame((_, delta) => {
+        if (morphBindings.length > 0) {
+            syncGarmentMorphTargets(morphBindings, {
+                influenceScale: garment.softness.morphInfluence,
+                smoothing: garment.softness.morphSmoothing,
+                maxInfluence: garment.softness.maxMorphInfluence,
+            });
         }
-
-        syncGarmentMorphTargets(morphBindings, {
-            influenceScale: garment.softness.morphInfluence,
-            smoothing: garment.softness.morphSmoothing,
-            maxInfluence: garment.softness.maxMorphInfluence,
-        });
+        lerpGarmentColor(garmentScene, delta);
     });
 
     return (

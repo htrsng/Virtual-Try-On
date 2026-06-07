@@ -1,7 +1,10 @@
 import React, { useState, Suspense, useEffect, useRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Environment, ContactShadows, Grid, MeshReflectorMaterial, useProgress, Html } from '@react-three/drei';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { OrbitControls, Environment, ContactShadows, useProgress, Html } from '@react-three/drei';
 import * as THREE from 'three';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
 import { Avatar } from '../../../three/controls/avatar/Avatar';
 import GarmentModel from '../GarmentModel';
 import { type Profile } from '../../../contexts/FittingRoomContext';
@@ -33,6 +36,7 @@ export type SizeCompare3DCanvasProps = {
     ghostSizes?: string[]; // If present, renders 2 wireframes instead of 1 mesh
     diffOnly?: boolean; // In outline mode, only show differences?
     cameraPreset?: string; // 'Front', 'Side', 'Back', '45°'
+    outlineIntensity?: number;
 };
 
 function CameraPresetController({ preset }: { preset: string }) {
@@ -50,6 +54,60 @@ function CameraPresetController({ preset }: { preset: string }) {
     return null;
 }
 
+function CustomOutline({ target1, target2, color1, color2, edgeStrength1, edgeStrength2 }: { target1: THREE.Object3D | null, target2: THREE.Object3D | null, color1: string, color2: string, edgeStrength1: number, edgeStrength2: number }) {
+    const { gl, scene, camera, size } = useThree();
+    const composer = useRef<EffectComposer | null>(null);
+    const pass1 = useRef<OutlinePass | null>(null);
+    const pass2 = useRef<OutlinePass | null>(null);
+
+    useEffect(() => {
+        const comp = new EffectComposer(gl);
+        const renderPass = new RenderPass(scene, camera);
+        comp.addPass(renderPass);
+
+        const outline1 = new OutlinePass(new THREE.Vector2(size.width, size.height), scene, camera);
+        outline1.edgeThickness = 1.0;
+        outline1.visibleEdgeColor.set(color1);
+        outline1.hiddenEdgeColor.set(color1);
+        comp.addPass(outline1);
+        pass1.current = outline1;
+
+        const outline2 = new OutlinePass(new THREE.Vector2(size.width, size.height), scene, camera);
+        outline2.edgeThickness = 1.0;
+        outline2.visibleEdgeColor.set(color2);
+        outline2.hiddenEdgeColor.set(color2);
+        comp.addPass(outline2);
+        pass2.current = outline2;
+
+        composer.current = comp;
+
+        return () => {
+            comp.dispose();
+            outline1.dispose();
+            outline2.dispose();
+        };
+    }, [gl, scene, camera, size, color1, color2]);
+
+    useEffect(() => {
+        if (pass1.current) {
+            pass1.current.selectedObjects = target1 ? [target1] : [];
+            pass1.current.edgeStrength = edgeStrength1;
+        }
+        if (pass2.current) {
+            pass2.current.selectedObjects = target2 ? [target2] : [];
+            pass2.current.edgeStrength = edgeStrength2;
+        }
+    }, [target1, target2, edgeStrength1, edgeStrength2]);
+
+    useFrame(() => {
+        if (composer.current) {
+            composer.current.render();
+        }
+    }, 1);
+
+    return null;
+}
+
 export default function SizeCompare3DCanvas({
     bodyData,
     modelConfig,
@@ -64,8 +122,11 @@ export default function SizeCompare3DCanvas({
     ghostSizes,
     diffOnly = false,
     cameraPreset = 'Front',
+    outlineIntensity,
 }: SizeCompare3DCanvasProps) {
     const [avatarScene, setAvatarScene] = useState<THREE.Group | null>(null);
+    const ghost1Ref = useRef<THREE.Group>(null);
+    const ghost2Ref = useRef<THREE.Group>(null);
 
     return (
         <div style={{ width: '100%', height: '100%', opacity, transition: 'opacity 0.3s' }}>
@@ -92,37 +153,47 @@ export default function SizeCompare3DCanvas({
                     <group position={[0, -1.08, 0]}>
 
 
-                        <Avatar body={bodyData} pose={pose || 'Idle'} skinColor="#F2C9AC" onSceneReady={setAvatarScene} />
+                        <Avatar 
+                            body={bodyData} 
+                            pose={pose || 'Idle'} 
+                            skinColor="#F2C9AC" 
+                            color={ghostSizes ? '#FDFBF7' : undefined}
+                            opacity={ghostSizes ? 0.2 : 1}
+                            onSceneReady={setAvatarScene} 
+                        />
                         
                         {modelConfig && selectedSize && selectedColor && (
                             ghostSizes ? (
                                 <>
                                     {ghostSizes[0] && (
-                                        <GarmentModel
-                                            config={modelConfig}
-                                            selectedSize={ghostSizes[0]}
-                                            selectedColor={selectedColor}
-                                            fabricOverride={selectedFabric}
-                                            avatarScene={avatarScene}
-                                            heatmapEnabled={false}
-                                            heatmapZones={[]}
-                                            wireframeColor="#3B82F6"
-                                            ghostOpacity={diffOnly ? 0.05 : 0.65}
-                                        />
+                                        <group ref={ghost1Ref}>
+                                            <GarmentModel
+                                                config={modelConfig}
+                                                selectedSize={ghostSizes[0]}
+                                                selectedColor={selectedColor}
+                                                fabricOverride={selectedFabric}
+                                                avatarScene={avatarScene}
+                                                heatmapEnabled={false}
+                                                heatmapZones={[]}
+                                                ghostOpacity={diffOnly ? 0.0 : (outlineIntensity !== undefined ? outlineIntensity * 0.4 + 0.1 : 0.3)}
+                                                emissiveIntensity={0}
+                                            />
+                                        </group>
                                     )}
                                     {ghostSizes[1] && (
-                                        <GarmentModel
-                                            config={modelConfig}
-                                            selectedSize={ghostSizes[1]}
-                                            selectedColor={selectedColor}
-                                            fabricOverride={selectedFabric}
-                                            avatarScene={avatarScene}
-                                            heatmapEnabled={false}
-                                            heatmapZones={[]}
-                                            wireframeColor={diffOnly ? "#22D3EE" : "#F97316"}
-                                            ghostOpacity={diffOnly ? 0.95 : 0.8}
-                                            emissiveIntensity={diffOnly ? 2.0 : 0}
-                                        />
+                                        <group ref={ghost2Ref}>
+                                            <GarmentModel
+                                                config={modelConfig}
+                                                selectedSize={ghostSizes[1]}
+                                                selectedColor={selectedColor}
+                                                fabricOverride={selectedFabric}
+                                                avatarScene={avatarScene}
+                                                heatmapEnabled={false}
+                                                heatmapZones={[]}
+                                                ghostOpacity={diffOnly ? 0.0 : (outlineIntensity !== undefined ? outlineIntensity * 0.4 + 0.1 : 0.3)}
+                                                emissiveIntensity={0}
+                                            />
+                                        </group>
                                     )}
                                 </>
                             ) : (
@@ -139,6 +210,17 @@ export default function SizeCompare3DCanvas({
                         )}
                         <ContactShadows position={[0, 0.01, 0]} opacity={0.6} scale={5} blur={2.5} resolution={1024} frames={1} />
                     </group>
+
+                    {ghostSizes && (
+                        <CustomOutline 
+                            target1={ghost1Ref.current} 
+                            target2={ghost2Ref.current} 
+                            color1="#D5C9B3" 
+                            color2="#C8A867" 
+                            edgeStrength1={diffOnly ? 0 : 2}
+                            edgeStrength2={diffOnly ? 4 : 3}
+                        />
+                    )}
                 </Suspense>
 
                 <CameraPresetController preset={cameraPreset} />

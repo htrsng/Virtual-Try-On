@@ -401,7 +401,7 @@
   position: absolute;
   left: 0; top: 0; bottom: 0;
   width: 2px;
-  background: var(--a);
+  background: #C8A867;
   transform: translateX(-50%);
 }
 .scr-divider-handle {
@@ -410,17 +410,17 @@
   transform: translate(-50%, -50%);
   width: 32px; height: 32px;
   border-radius: 50%;
-  background: var(--a);
+  background: #C8A867;
   color: #fff;
   display: flex; align-items: center; justify-content: center;
   cursor: ew-resize;
   pointer-events: all;
-  box-shadow: 0 2px 12px rgba(26,86,219,.35);
+  box-shadow: 0 2px 12px rgba(200, 168, 103, 0.4);
   transition: transform .12s, box-shadow .12s;
 }
 .scr-divider-handle:hover {
   transform: translate(-50%, -50%) scale(1.1);
-  box-shadow: 0 4px 20px rgba(26,86,219,.45);
+  box-shadow: 0 4px 20px rgba(200, 168, 103, 0.5);
 }
 .scr-divider-handle svg { width: 14px; height: 14px; }
 
@@ -720,7 +720,7 @@
 }
 .scr-heatmap-bar {
   height: 8px; border-radius: 4px;
-  background: linear-gradient(to right, #4CAF50, #FFEB3B, #F44336);
+  background: linear-gradient(to right, #FEF08A, #F97316, #EF4444);
   margin: 4px 0;
 }
 .scr-heatmap-labels {

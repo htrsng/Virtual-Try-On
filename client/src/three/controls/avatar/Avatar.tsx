@@ -13,11 +13,13 @@ const MODEL_PATH = '/assets/models/avatar_morph.glb';
 // starts downloading before the component mounts and Suspense triggers.
 useGLTF.preload(MODEL_PATH);
 
-export const Avatar: React.FC<AvatarProps & { skinColor?: string; onSceneReady?: (scene: THREE.Group) => void }> = ({
+export const Avatar: React.FC<AvatarProps & { skinColor?: string; opacity?: number; color?: string; onSceneReady?: (scene: THREE.Group) => void }> = ({
     body,
     pose = 'Idle',
     onSceneReady,
     skinColor,
+    opacity = 1,
+    color,
 }) => {
     const group = useRef<THREE.Group>(null);
     const { scene, animations } = useGLTF(MODEL_PATH) as { scene: THREE.Group; animations: THREE.AnimationClip[] };
@@ -135,12 +137,24 @@ export const Avatar: React.FC<AvatarProps & { skinColor?: string; onSceneReady?:
         avatarDataRef.current = map;
     }, [avatarScene]);
 
-    // 1b. Cập nhật màu da (skinColor) một cách an toàn mà không clone lại material
+    // 1b. Cập nhật màu da (skinColor) và độ trong suốt một cách an toàn
     useEffect(() => {
-        if (!skinColor) return;
         const updateColor = (mat: THREE.Material) => {
-            if ((mat as THREE.MeshStandardMaterial).color) {
-                (mat as THREE.MeshStandardMaterial).color.set(skinColor);
+            const m = mat as THREE.MeshStandardMaterial;
+            if (color) {
+                m.color.set(color);
+            } else if (skinColor) {
+                m.color.set(skinColor);
+            }
+
+            if (opacity < 1) {
+                m.transparent = true;
+                m.opacity = opacity;
+                m.depthWrite = false;
+            } else {
+                m.transparent = false;
+                m.opacity = 1;
+                m.depthWrite = true;
             }
         };
         avatarScene.traverse((child: THREE.Object3D) => {
@@ -153,7 +167,7 @@ export const Avatar: React.FC<AvatarProps & { skinColor?: string; onSceneReady?:
                 }
             }
         });
-    }, [avatarScene, skinColor]);
+    }, [avatarScene, skinColor, color, opacity]);
 
     useEffect(() => {
         if (onSceneReady) {

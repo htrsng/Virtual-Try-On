@@ -4978,5 +4978,85 @@ tbody tr:hover {
 
 /* Tool button transitions */
 .tool-btn-item {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  color: #A08060;
+  margin-bottom: 2px;
   transition: all 0.15s ease;
+  position: relative;
+}
+
+.tool-btn-item:hover {
+  background: #FFF8EC;
+  color: #C8A867;
+}
+
+.tool-btn-item.active {
+  background: #FFF8EC;
+  border: 1px solid #E0C88A;
+  color: #C8A867;
+}
+
+.tool-btn-icon {
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tool-btn-label {
+  font-size: 7px;
+  letter-spacing: 0.04em;
+  font-weight: 500;
+}
+
+/* Tooltip on hover */
+.tool-btn-item[data-tooltip]::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 8px);
+  transform: translateY(-50%) translateX(10px);
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 100;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  letter-spacing: normal;
+}
+
+.tool-btn-item[data-tooltip]::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 3px);
+  transform: translateY(-50%) translateX(10px);
+  border-width: 5px 5px 5px 0;
+  border-style: solid;
+  border-color: transparent rgba(0, 0, 0, 0.85) transparent transparent;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 100;
+}
+
+.tool-btn-item[data-tooltip]:hover::before,
+.tool-btn-item[data-tooltip]:hover::after {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
 }

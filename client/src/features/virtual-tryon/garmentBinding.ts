@@ -274,9 +274,9 @@ const FABRIC_PROFILE_PRESETS: Record<GarmentFabricPreset, ResolvedFabricProfile>
 };
 
 const HEATMAP_COLORS: Record<HeatmapFitLevel, THREE.Color> = {
-    tight: new THREE.Color('#ef4444'),
-    fitted: new THREE.Color('#eab308'),
-    comfortable: new THREE.Color('#22c55e'),
+    tight: new THREE.Color('#EF4444'),
+    fitted: new THREE.Color('#EAB308'),
+    comfortable: new THREE.Color('#22C55E'),
     loose: new THREE.Color('#166534'),
 };
 
@@ -1017,6 +1017,53 @@ export const applyGarmentColor = (garmentRoot: THREE.Object3D, color?: THREE.Col
             const mutableMaterial = material as MaterialWithColor;
             if (mutableMaterial.color) {
                 mutableMaterial.color.copy(nextColor);
+                mutableMaterial.needsUpdate = true;
+                if (!mutableMaterial.userData) mutableMaterial.userData = {};
+                mutableMaterial.userData.targetColor = nextColor.clone();
+            }
+        });
+    });
+};
+
+export const setGarmentTargetColor = (garmentRoot: THREE.Object3D, color?: THREE.ColorRepresentation) => {
+    if (!color) return;
+
+    let safeColor = color;
+    if (safeColor === '0') safeColor = 0x000000;
+    
+    let nextColor: THREE.Color;
+    try {
+        nextColor = new THREE.Color(safeColor);
+    } catch (err) {
+        console.warn(`[GarmentModel] Invalid color: ${color}, ignoring`);
+        return;
+    }
+
+    garmentRoot.traverse((child) => {
+        if (!(child instanceof THREE.Mesh) || isAvatarMesh(child)) {
+            return;
+        }
+
+        const materials = toMaterialArray(child.material);
+        materials.forEach((material) => {
+            const mutableMaterial = material as MaterialWithColor;
+            if (mutableMaterial.color) {
+                if (!mutableMaterial.userData) mutableMaterial.userData = {};
+                mutableMaterial.userData.targetColor = nextColor;
+            }
+        });
+    });
+};
+
+export const lerpGarmentColor = (garmentRoot: THREE.Object3D, delta: number) => {
+    garmentRoot.traverse((child) => {
+        if (!(child instanceof THREE.Mesh) || isAvatarMesh(child)) return;
+
+        const materials = toMaterialArray(child.material);
+        materials.forEach((material) => {
+            const mutableMaterial = material as MaterialWithColor;
+            if (mutableMaterial.color && mutableMaterial.userData?.targetColor) {
+                mutableMaterial.color.lerp(mutableMaterial.userData.targetColor, delta * 5);
                 mutableMaterial.needsUpdate = true;
             }
         });

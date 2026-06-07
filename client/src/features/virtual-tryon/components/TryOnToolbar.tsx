@@ -9,7 +9,10 @@ interface TryOnToolbarProps {
   onOpenSizeCompare: () => void;
   onReset: () => void;
   onChangeBackground: () => void;
-  onChangeLighting: () => void;
+  onUndo?: () => void;
+  onRedo?: () => void;
+  canUndo?: boolean;
+  canRedo?: boolean;
 }
 
 export default function TryOnToolbar({
@@ -21,73 +24,91 @@ export default function TryOnToolbar({
   onOpenSizeCompare,
   onReset,
   onChangeBackground,
-  onChangeLighting,
+  onUndo,
+  onRedo,
+  canUndo = false,
+  canRedo = false,
 }: TryOnToolbarProps) {
   return (
     <div className="tryon-toolbar" style={{
-      width: '72px',
-      background: 'rgba(255,255,255,0.92)',
-      borderRight: '1px solid rgba(201,150,63,0.15)',
+      width: '64px',
+      background: '#FFFFFF',
+      border: 'none',
+      borderRadius: '16px',
+      margin: '12px 0 12px 8px',
+      height: 'calc(100% - 24px)',
+      boxShadow: '0 4px 20px rgba(180, 140, 80, 0.12)',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      padding: '10px 0',
+      padding: '16px 0',
       gap: 0,
       overflowY: 'auto',
-      scrollbarWidth: 'none',
-      height: '100%'
+      scrollbarWidth: 'none'
     }}>
-      {/* GROUP 1 — Avatar & Closet */}
+      {/* GROUP 1 — Avatar tools */}
       <div style={{
         display: 'flex',
         flexDirection: 'column',
         width: '100%',
         alignItems: 'center',
-        borderBottom: '1px solid rgba(201,150,63,0.15)',
-        paddingBottom: '8px',
-        marginBottom: '8px'
+        borderBottom: '0.5px solid #E8DCC8',
+        paddingBottom: '12px',
+        marginBottom: '12px'
       }}>
         <ToolButton icon="👤" label="Avatar" onClick={onOpenAvatar} />
         <ToolButton icon="👕" label="Tủ đồ" onClick={onToggleCloset} />
       </div>
 
-      {/* GROUP 2 — Canvas Controls */}
+      {/* GROUP 2 — Scene tools */}
       <div style={{
         display: 'flex',
         flexDirection: 'column',
         width: '100%',
-        alignItems: 'center',
-        borderBottom: '1px solid rgba(201,150,63,0.15)',
-        paddingBottom: '8px',
-        marginBottom: '8px'
+        alignItems: 'center'
       }}>
-        <ToolButton icon="💡" label="Ánh sáng" onClick={onChangeLighting} />
         <ToolButton icon="📐" label="Đo" active={showMeasurements} onClick={onToggleMeasurements} />
         <ToolButton icon="🎨" label="Nền" onClick={onChangeBackground} />
-      </div>
-
-      {/* GROUP 3 — Actions */}
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        width: '100%',
-        alignItems: 'center',
-        borderBottom: '1px solid rgba(201,150,63,0.15)',
-        paddingBottom: '8px',
-        marginBottom: '8px'
-      }}>
         <ToolButton icon="📸" label="Chụp" onClick={onTakeScreenshot} />
         <ToolButton icon="↕" label="So sánh" onClick={onOpenSizeCompare} />
       </div>
 
-      {/* GROUP 4 — bottom */}
+      {/* GROUP 3 — Actions (Bottom) */}
       <div style={{
         display: 'flex',
         flexDirection: 'column',
         width: '100%',
         alignItems: 'center',
-        marginTop: 'auto'
+        marginTop: 'auto',
+        borderTop: '0.5px solid #E8DCC8',
+        paddingTop: '12px'
       }}>
+        <div style={{ display: 'flex', gap: '4px', marginBottom: '8px' }}>
+          <button 
+            onClick={onUndo} 
+            disabled={!canUndo}
+            title="Undo"
+            style={{
+              width: '28px', height: '28px', borderRadius: '6px', 
+              border: 'none', background: 'transparent', cursor: canUndo ? 'pointer' : 'not-allowed',
+              opacity: canUndo ? 1 : 0.3, display: 'flex', alignItems: 'center', justifyContent: 'center'
+            }}
+          >
+            <span style={{ fontSize: '14px' }}>↶</span>
+          </button>
+          <button 
+            onClick={onRedo} 
+            disabled={!canRedo}
+            title="Redo"
+            style={{
+              width: '28px', height: '28px', borderRadius: '6px', 
+              border: 'none', background: 'transparent', cursor: canRedo ? 'pointer' : 'not-allowed',
+              opacity: canRedo ? 1 : 0.3, display: 'flex', alignItems: 'center', justifyContent: 'center'
+            }}
+          >
+            <span style={{ fontSize: '14px' }}>↷</span>
+          </button>
+        </div>
         <ToolButton icon="↺" label="Reset" onClick={onReset} />
       </div>
     </div>
@@ -95,42 +116,15 @@ export default function TryOnToolbar({
 }
 
 function ToolButton({ icon, label, active = false, onClick }: { icon: string; label: string; active?: boolean; onClick: () => void }) {
-  const baseStyle = {
-    width: '48px',
-    height: '48px',
-    borderRadius: '10px',
-    background: active ? 'rgba(201,150,63,0.12)' : 'transparent',
-    border: active ? '1px solid rgba(201,150,63,0.25)' : 'none',
-    cursor: 'pointer',
-    display: 'flex',
-    flexDirection: 'column' as const,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '3px',
-    color: active ? '#C9963F' : 'rgba(0,0,0,0.5)',
-    marginBottom: '2px'
-  };
-
+  // We remove inline hover/active styles so CSS can handle the #8B5CF6 highlight and tooltips
   return (
     <button
-      className="tool-btn-item"
-      style={baseStyle}
+      className={`tool-btn-item ${active ? 'active' : ''}`}
       onClick={onClick}
-      onMouseOver={(e) => {
-        if (!active) {
-          e.currentTarget.style.background = 'rgba(201,150,63,0.08)';
-          e.currentTarget.style.color = '#C9963F';
-        }
-      }}
-      onMouseOut={(e) => {
-        if (!active) {
-          e.currentTarget.style.background = 'transparent';
-          e.currentTarget.style.color = 'rgba(0,0,0,0.5)';
-        }
-      }}
+      data-tooltip={label}
     >
-      <span style={{ fontSize: '18px' }}>{icon}</span>
-      <span style={{ fontSize: '7px', letterSpacing: '0.04em', fontWeight: 500 }}>{label}</span>
+      <span className="tool-btn-icon">{icon}</span>
+      <span className="tool-btn-label">{label}</span>
     </button>
   );
 }
