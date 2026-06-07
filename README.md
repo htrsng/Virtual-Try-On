@@ -4,18 +4,24 @@
 
 **Nền tảng Thương mại điện tử thời trang tích hợp phòng thử đồ 3D và AI Stylist thời gian thực**
 
+**[🔗 XEM LIVE DEMO TẠI ĐÂY](#)** | **[🎥 XEM VIDEO PREVIEW TẠI ĐÂY](#)** *(Vui lòng cập nhật link thực tế)*
+
 [![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=white)](https://react.dev/)
 [![Three.js](https://img.shields.io/badge/Three.js-0.182-000000?logo=threedotjs&logoColor=white)](https://threejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-Express_5-339933?logo=nodedotjs&logoColor=white)](https://expressjs.com/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/atlas)
 [![Vite](https://img.shields.io/badge/Vite-7.2-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![CI/CD](https://github.com/htrsng/Virtual-Try-On/actions/workflows/main.yml/badge.svg)](https://github.com/htrsng/Virtual-Try-On/actions)
 
 </div>
 
 ---
 
 ## 📖 Giới thiệu
+
+> **Elevator Pitch:** VFitAI giải quyết bài toán lớn nhất của thời trang trực tuyến — "mua nhưng không biết mặc lên có hợp không". Bằng cách số hóa 3D hình thể người dùng và quần áo, chúng tôi cung cấp phòng thử đồ ảo chân thực cùng AI Stylist, giúp giảm tỷ lệ hoàn trả đơn hàng và nâng tầm trải nghiệm mua sắm cá nhân hóa.
 
 ### Bối cảnh đề tài
 Trong kỷ nguyên thương mại điện tử, tỷ lệ đổi trả các sản phẩm thời trang do **không vừa size**, **phối không hợp** hoặc **khác kỳ vọng** thường chiếm tới 30-40% tổng đơn hàng. Nguyên nhân cốt lõi là người mua không thể hình dung chính xác một sản phẩm sẽ trông như thế nào khi mặc lên cơ thể thực tế, cũng như khó kết hợp với các trang phục mình đang có.
@@ -130,6 +136,10 @@ Virtual-Try-On/
 │   ├── src/
 │   │   ├── features/
 │   │   │   └── virtual-tryon/  # Logic cốt lõi: 3D Try-on, AI Stylist, Smart Closet
+│   │   │       ├── components/ # Giao diện 3D Canvas, UI Controls (Avatar, Size)
+│   │   │       ├── hooks/      # Custom hooks (useAvatar, useGarment, useHeatmap)
+│   │   │       ├── utils/      # Thuật toán Match Score, Size Recommendation
+│   │   │       └── services/   # Tích hợp API xử lý mô hình 3D
 │   │   ├── pages/              # Các trang chính: Home, Product, Cart, Admin...
 │   │   ├── components/         # UI Components dùng chung
 │   │   ├── contexts/           # State Management (Auth, FittingRoom, Theme...)
@@ -140,7 +150,7 @@ Virtual-Try-On/
 ├── server/                     # Backend API Application
 │   ├── index.js                # Entry point & API Routes
 │   └── package.json            
-└── README.md                   # Tài liệu dự án (bạn đang đọc)
+└── README.md                   # Tài liệu dự án
 ```
 
 ---
@@ -165,9 +175,23 @@ cd Virtual-Try-On
 ```bash
 cd server
 npm install
+```
 
-# (Tùy chọn) Tạo file .env và điền các biến như: PORT, MONGODB_URI, JWT_SECRET...
+Tạo file `.env` trong thư mục `server/` và cấu hình các biến sau:
+```env
+# --- Bắt buộc ---
+PORT=5000
+MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/vfitai
+JWT_SECRET=your_secret_key_here
 
+# --- Tùy chọn (Feature Flags & Services) ---
+ENABLE_EMAIL_SERVICE=true
+SMTP_HOST=smtp.gmail.com
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_app_password
+```
+
+```bash
 npm start    # hoặc `node index.js`
 ```
 *Server mặc định chạy tại `http://localhost:5000`*
@@ -177,12 +201,27 @@ npm start    # hoặc `node index.js`
 # Mở một terminal mới
 cd client
 npm install
+```
 
-# Tạo file .env và cấu hình API URL nếu cần (VD: VITE_API_URL=http://localhost:5000)
+Tạo file `.env` trong thư mục `client/` và cấu hình các biến sau:
+```env
+# --- Bắt buộc ---
+VITE_API_URL=http://localhost:5000/api
 
+# --- Tùy chọn (Feature Flags) ---
+VITE_ENABLE_3D_HIGH_RES=true
+VITE_ENABLE_AI_STYLIST=true
+```
+
+```bash
 npm run dev
 ```
 *Ứng dụng Web sẽ mở tại `http://localhost:5173`*
+
+### 🆘 Xử lý sự cố 
+- **Lỗi hiển thị màn hình đen khi bật phòng thử đồ**: Đảm bảo trình duyệt của bạn đã bật tính năng **Hardware Acceleration** (Kiểm tra tại `chrome://settings/system`) và hỗ trợ WebGL.
+- **Lỗi `EADDRINUSE: address already in use :::5000`**: Port 5000 đã bị chiếm. Hãy đổi `PORT` trong `server/.env` thành `5001` và cập nhật `VITE_API_URL` bên client tương ứng.
+- **Không kết nối được MongoDB (`MongooseError`)**: Kiểm tra IP Whitelist trên MongoDB Atlas, đảm bảo IP hiện tại của bạn được phép truy cập (Chọn *Add Current IP Address* trong Network Access).
 
 ### Scripts hỗ trợ (Client)
 - `npm run dev`: Chạy server phát triển.
@@ -193,18 +232,21 @@ npm run dev
 
 ## 📡 API Endpoints (Tóm tắt)
 
-Hệ thống cung cấp RESTful APIs. Một số nhóm API chính:
+Hệ thống cung cấp RESTful APIs. Dưới đây là các nhóm API chính và ví dụ tham khảo:
+
+### Các nhóm API chính
 - **Auth**: `/api/auth/*` (Login, Register, Profile, Admin)
 - **Products**: `/api/products/*` (CRUD sản phẩm, danh mục)
 - **Orders**: `/api/orders/*` (Tạo đơn, Hủy đơn, Lấy danh sách, Trạng thái)
 - **Smart Closet**: `/api/virtual-closet`, `/api/saved-outfits` (Quản lý tủ đồ cá nhân, Outfit)
 - **Promotions**: `/api/newsletter/*` (Mã giảm giá, Đăng ký nhận tin)
 
----
+
 
 ## 📸 Thư viện Ảnh (Screenshots)
 
 *Dưới đây là một số giao diện nổi bật của VFitAI:*
+*(Lưu ý: Để ảnh hiển thị đúng trên GitHub, cần đảm bảo thư mục `doc/Screenshots/` đã được commit cùng mã nguồn. Nếu bị broken, vui lòng kiểm tra lại đường dẫn).*
 
 <table>
     <tr>
@@ -244,6 +286,26 @@ Hệ thống cung cấp RESTful APIs. Một số nhóm API chính:
         </td>
     </tr>
 </table>
+
+---
+
+## 🗺️ Roadmap & Known Issues
+
+### Tính năng dự kiến (Upcoming Features)
+- [ ] Hỗ trợ thử phụ kiện 3D (Mắt kính, Mũ, Túi xách, Giày).
+- [ ] Tích hợp AR: Cho phép ướm thử đồ trực tiếp qua Camera điện thoại trong thời gian thực.
+- [ ] Đề xuất kích cỡ tự động dựa trên phân tích hình ảnh AI (Computer Vision).
+
+### Hạn chế đã biết (Known Issues)
+- Thời gian tải mô hình 3D (.glb) ban đầu có thể chậm trên các thiết bị cấu hình yếu hoặc băng thông mạng thấp.
+- Tính năng vật lý của vải (Fabric Simulation) chưa hoạt động hoàn hảo với các loại vải xuyên thấu hoặc quá mỏng.
+- Trải nghiệm chưa được tối ưu hóa tốt nhất cho các thiết bị di động có màn hình rất nhỏ (< 375px chiều rộng).
+
+---
+
+## 🤝 Đóng góp & Bản quyền (Credits)
+
+Dự án được phát triển bởi nhóm sinh viên. Chúng tôi rất hoan nghênh các đóng góp từ cộng đồng thông qua Pull Requests hoặc báo cáo lỗi qua Issues.
 
 ---
 
