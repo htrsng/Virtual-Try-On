@@ -243,7 +243,12 @@ function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, onBu
                     ...finalProduct,
                     // Quan trọng: Gửi kèm biến thể đang chọn để trang 3D biết load màu gì
                     currentVariant: activeVariant
-                }
+                },
+                selectedItems: [{
+                    ...finalProduct,
+                    size: selectedSize || 'M',
+                    currentVariant: activeVariant
+                }]
             }
         });
     };
@@ -349,9 +354,8 @@ function ProductDetailPage({ products, flashSaleProducts = [], onAddToCart, onBu
                                                 isOut ? 'size-btn--out' : '',
                                                 isLow ? 'size-btn--low' : '',
                                             ].filter(Boolean).join(' ')}
-                                            onClick={() => !isOut && setSelectedSize(sizeItem.size)}
-                                            disabled={isOut}
-                                            title={isOut ? 'Hết hàng' : `Còn ${stock} sản phẩm`}
+                                            onClick={() => setSelectedSize(sizeItem.size)}
+                                            title={isOut ? 'Hết hàng (vẫn có thể thử 3D)' : `Còn ${stock} sản phẩm`}
                                         >
                                             {sizeItem.size}
                                             {isLow && !isOut && <span className="size-low-dot" />}

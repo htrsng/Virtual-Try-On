@@ -735,7 +735,7 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
     const [sizeComparePair, setSizeComparePair] = useState({ left: '', right: '' });
     // const [hasSidebarScrollFade, setHasSidebarScrollFade] = useState(false);
     const [isClosetOpen, setIsClosetOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState<'size'|'fit'|'tools'>('size');
+    const [activeTab, setActiveTab] = useState<'size'|'fit'>('size');
     const [showMeasurements, setShowMeasurements] = useState(false);
     const [lightingMode, setLightingMode] = useState<'studio'|'warm'|'cool'|'outdoor'>('studio');
     const [bgTheme, setBgTheme] = useState<'light'|'dark'>('dark');
@@ -931,6 +931,17 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
         () => resolveColorConfig(activeModel3D, activeSelectedColor),
         [activeModel3D, activeSelectedColor],
     );
+
+    const isSelectedSizeOutOfStock = useMemo(() => {
+        if (!activeSelectedSize) return false;
+        if (activeItem.currentVariant && activeItem.currentVariant.sizes) {
+            const sizeInfo = activeItem.currentVariant.sizes.find((s: any) => s.size === activeSelectedSize);
+            if (sizeInfo) {
+                return sizeInfo.stock <= 0;
+            }
+        }
+        return false;
+    }, [activeItem, activeSelectedSize]);
 
     // const activeFabricKind = useMemo(() => {
     //     const selectedConfig = activeSelectedSize ? activeModel3D?.sizes?.[activeSelectedSize] : undefined;
@@ -1510,6 +1521,44 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
         }
     }, [isActiveItemReadyToWear, layeredGarments, refreshSavedOutfits, showToast]);
 
+    const lightConfig = useMemo(() => {
+        switch (lightingMode) {
+            case 'warm':
+                return {
+                    bg: '#D4B896',
+                    ambient: '#F7F2EC',
+                    keyLight: '#FFDE9A',
+                    hemiSky: '#FFDE9A',
+                    hemiGround: '#C8A070'
+                };
+            case 'cool':
+                return {
+                    bg: '#BFD0DF',
+                    ambient: '#D6E6F5',
+                    keyLight: '#ffffff',
+                    hemiSky: '#D6E6F5',
+                    hemiGround: '#7090B0'
+                };
+            case 'outdoor':
+                return {
+                    bg: '#C8D8B8',
+                    ambient: '#ffffff',
+                    keyLight: '#F0F8E0',
+                    hemiSky: '#F0F8E0',
+                    hemiGround: '#6A9050'
+                };
+            case 'studio':
+            default:
+                return {
+                    bg: '#E8DFD0',
+                    ambient: '#F7F2EC',
+                    keyLight: '#FFF8F0',
+                    hemiSky: '#f5f0e8',
+                    hemiGround: '#3a3228'
+                };
+        }
+    }, [lightingMode]);
+
     return (
         <div className={`tryon-layout theme-${bgTheme}`}>
             {/* ─── Top Navigation (Topbar) ─── */}
@@ -1577,26 +1626,9 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
 
             {/* ─── Vertical Toolbar (Left) ─── */}
             <TryOnToolbar
-              showMeasurements={showMeasurements}
+              isClosetOpen={isClosetOpen}
               onOpenAvatar={handleOpenAvatarStudio}
-              onToggleCloset={() => setIsClosetOpen(true)}
-              onToggleMeasurements={() => setShowMeasurements(s => !s)}
-              onTakeScreenshot={handleScreenshot}
-              onOpenSizeCompare={handleOpenSizeCompareRoom}
-              onReset={() => {
-                setCameraView('front');
-                setCameraPos([0, 0.8, 5.2]);
-                setCameraTarget([0, 0.3, 0]);
-                setIsRotating(false);
-              }}
-              onChangeBackground={() => {
-                setBgTheme(prev => prev === 'light' ? 'dark' : 'light');
-              }}
-              onChangeLighting={() => {}}
-              onUndo={handleUndo}
-              onRedo={handleRedo}
-              canUndo={historyIndex > 0}
-              canRedo={historyIndex < history.length - 1}
+              onToggleCloset={() => setIsClosetOpen(c => !c)}
             />
 
             {/* ─── Workspace Canvas ─── */}
@@ -1730,14 +1762,17 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                     >
 
 
+                        <color attach="background" args={[lightConfig.bg]} />
+
                         {/* Base fill light */}
-                        <ambientLight intensity={0.4} />
+                        <ambientLight intensity={0.4} color={lightConfig.ambient} />
 
                         {/* Key light with shadow map */}
                         <directionalLight
                             position={[3, 6, 4]}
                             intensity={1.4}
                             castShadow
+                            color={lightConfig.keyLight}
                             shadow-mapSize-width={1024}
                             shadow-mapSize-height={1024}
                             shadow-camera-near={0.5}
@@ -1753,7 +1788,7 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                         <directionalLight position={[-2, 3, -2]} intensity={0.3} />
 
                         {/* Hemisphere light for soft ambient occlusion feel at garment intersection */}
-                        <hemisphereLight args={['#f5f0e8', '#3a3228', 0.35]} />
+                        <hemisphereLight args={[lightConfig.hemiSky, lightConfig.hemiGround, 0.35]} />
 
                         <CameraAnimator targetPosition={cameraPos} targetLookAt={cameraTarget} />
                         
@@ -1964,7 +1999,7 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                         </div>
                         {/* Tabs */}
                         <div style={{ display: 'flex', gap: '20px', marginTop: '20px', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
-                            {(['size', 'fit', 'tools'] as const).map(t => (
+                            {(['size', 'fit'] as const).map(t => (
                                 <button
                                   key={t}
                                   onClick={() => setActiveTab(t)}
@@ -1976,7 +2011,7 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                                       borderBottom: activeTab === t ? '2px solid #C9963F' : '2px solid transparent'
                                   }}
                                 >
-                                    {t === 'size' ? 'MÀU & SIZE' : t === 'fit' ? 'ĐỘ VỪA VẶN' : 'CÔNG CỤ'}
+                                    {t === 'size' ? 'MÀU & SIZE' : 'ĐỘ VỪA VẶN'}
                                 </button>
                             ))}
                         </div>
@@ -2039,34 +2074,40 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                             </div>
                         )}
 
-                        {activeTab === 'tools' && (
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                                <button className="tool-btn-item" onClick={handleScreenshot} style={{ padding: '16px', background: '#F9F9F9', border: '1px solid rgba(0,0,0,0.08)', borderRadius: '8px', color: '#2C1F0E', cursor: 'pointer', fontWeight: 500 }}>
-                                    📸 Chụp ảnh
-                                </button>
-                                <button className="tool-btn-item" onClick={() => handleSaveOutfit('Outfit')} style={{ padding: '16px', background: '#F9F9F9', border: '1px solid rgba(0,0,0,0.08)', borderRadius: '8px', color: '#2C1F0E', cursor: 'pointer', fontWeight: 500 }}>
-                                    💾 Lưu Outfit
-                                </button>
-                                <button className="tool-btn-item" onClick={() => setIsRotating(r => !r)} style={{ padding: '16px', background: isRotating ? 'rgba(201,150,63,0.1)' : '#F9F9F9', border: isRotating ? '1px solid #C9963F' : '1px solid rgba(0,0,0,0.08)', borderRadius: '8px', color: isRotating ? '#C9963F' : '#2C1F0E', cursor: 'pointer', fontWeight: 500 }}>
-                                    🔄 Xoay 360
-                                </button>
-                            </div>
-                        )}
+
                     </div>
 
                     {/* Footer CTA cố định */}
                     <div style={{ padding: '24px', borderTop: '1px solid rgba(0,0,0,0.05)', display: 'flex', gap: '12px' }}>
                         <button
-                            onClick={() => onAddToCart(activeItem, activeSelectedSize || undefined)}
-                            style={{ flex: 1, padding: '14px', background: 'transparent', border: '1px solid #C9963F', borderRadius: '30px', color: '#C9963F', fontWeight: 600, cursor: 'pointer' }}
+                            onClick={() => !isSelectedSizeOutOfStock && onAddToCart(activeItem, activeSelectedSize || undefined)}
+                            disabled={isSelectedSizeOutOfStock}
+                            style={{ 
+                                flex: 1, padding: '14px', 
+                                background: 'transparent', 
+                                border: `1px solid ${isSelectedSizeOutOfStock ? '#E5E7EB' : '#C9963F'}`, 
+                                borderRadius: '30px', 
+                                color: isSelectedSizeOutOfStock ? '#9CA3AF' : '#C9963F', 
+                                fontWeight: 600, 
+                                cursor: isSelectedSizeOutOfStock ? 'not-allowed' : 'pointer' 
+                            }}
                         >
                             GIỎ HÀNG
                         </button>
                         <button
-                            onClick={() => onBuyNow(activeItem, activeSelectedSize || undefined)}
-                            style={{ flex: 1, padding: '14px', background: '#C9963F', border: 'none', borderRadius: '30px', color: '#FFFFFF', fontWeight: 600, cursor: 'pointer' }}
+                            onClick={() => !isSelectedSizeOutOfStock && onBuyNow(activeItem, activeSelectedSize || undefined)}
+                            disabled={isSelectedSizeOutOfStock}
+                            style={{ 
+                                flex: 1, padding: '14px', 
+                                background: isSelectedSizeOutOfStock ? '#F3F4F6' : '#C9963F', 
+                                border: 'none', 
+                                borderRadius: '30px', 
+                                color: isSelectedSizeOutOfStock ? '#9CA3AF' : '#FFFFFF', 
+                                fontWeight: 600, 
+                                cursor: isSelectedSizeOutOfStock ? 'not-allowed' : 'pointer' 
+                            }}
                         >
-                            MUA NGAY
+                            {isSelectedSizeOutOfStock ? 'HẾT HÀNG' : 'MUA NGAY'}
                         </button>
                     </div>
                 </aside>
