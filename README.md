@@ -4,7 +4,6 @@
 
 **Nền tảng Thương mại điện tử thời trang tích hợp phòng thử đồ 3D và AI Stylist thời gian thực**
 
-**[🔗 XEM LIVE DEMO TẠI ĐÂY](#)** | **[🎥 XEM VIDEO PREVIEW TẠI ĐÂY](#)** *(Vui lòng cập nhật link thực tế)*
 
 [![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=white)](https://react.dev/)
 [![Three.js](https://img.shields.io/badge/Three.js-0.182-000000?logo=threedotjs&logoColor=white)](https://threejs.org/)
@@ -53,21 +52,25 @@ Người dùng không chỉ có thể tạo ra **Avatar 3D** với vóc dáng ch
 │  │           │  │ & AI Stylist │  │                  │ │
 │  └─────┬─────┘  └──────┬───────┘  └────────┬─────────┘ │
 │        └───────────────┼───────────────────┘           │
-<div align="center">
-
-# VFitAI — Virtual Try-On & SmartFit 3D Platform
-
-Nền tảng thương mại điện tử thời trang tích hợp thử đồ 3D, AI Stylist và tủ đồ cá nhân.
-
-[![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=white)](https://react.dev/)
-[![Three.js](https://img.shields.io/badge/Three.js-0.182-000000?logo=threedotjs&logoColor=white)](https://threejs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-Express_5-339933?logo=nodedotjs&logoColor=white)](https://expressjs.com/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/atlas)
-[![Vite](https://img.shields.io/badge/Vite-7.2-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
-</div>
+│                        │ Axios / Fetch                │
+└────────────────────────┼───────────────────────────────┘
+                         │ REST API
+┌────────────────────────┼────────────────────────────────┐
+│                   SERVER (API)                          │
+│  Node.js + Express 5                                    │
+│  ┌──────────┐  ┌───────────┐  ┌─────────────┐           │
+│  │ Auth/User│  │ Product & │  │ Order &     │           │
+│  │ Module   │  │ Closet    │  │ Outfit      │           │
+│  └────┬─────┘  └─────┬─────┘  └──────┬──────┘           │
+│       └──────────────│───────────────┘                  │
+│                      │ Mongoose ODM                     │
+└──────────────────────┼──────────────────────────────────┘
+                       │
+              ┌────────▼─────────┐
+              │   MongoDB Atlas  │
+              │   (Cloud NoSQL)   │
+              └──────────────────┘
+```
 
 ---
 
@@ -268,18 +271,19 @@ Thư mục ảnh minh họa nằm trong `doc/Screenshots/`.
 
 <table>
   <tr>
-    <td align="center"><strong>Homepage</strong><br/><img src="doc/Screenshots/Homepage.png" alt="home-page" width="230" /></td>
-    <td align="center"><strong>Product List</strong><br/><img src="doc/Screenshots/product-list.png" alt="product-list" width="230" /></td>
+    <td align="center"><strong>Homepage</strong><br/><img src="doc/Screenshots/Trangchu.png" alt="home-page" width="230" /></td>
+    <td align="center"><strong>Product List</strong><br/><img src="doc/Screenshots/Sanpham.png" alt="product-list" width="230" /></td>
+    <td align="center"><strong>Virtual Try-On</strong><br/><img src="doc/Screenshots/PhongThuDo.png" alt="virtual-try-on" width="230" /></td>
   </tr>
   <tr>
-    <td align="center"><strong>Virtual Try-On</strong><br/><img src="doc/Screenshots/virtual-try-on.png" alt="virtual-try-on" width="230" /></td>
-    <td align="center"><strong>Avatar Creation</strong><br/><img src="doc/Screenshots/avatar-creation.png" alt="avatar-creation" width="230" /></td>
-    <td align="center"><strong>Heatmap & AI Size</strong><br/><img src="doc/Screenshots/heatmap.png" alt="heatmap" width="230" /></td>
+    <td align="center"><strong>Avatar Creation</strong><br/><img src="doc/Screenshots/PhongtaoAvatar(hinhanh).png" alt="avatar-creation" width="230" /></td>
+    <td align="center"><strong>Heatmap & AI Size</strong><br/><img src="doc/Screenshots/BanDoNhiet.png" alt="heatmap" width="230" /></td>
+    <td align="center"><strong>Size Compare</strong><br/><img src="doc/Screenshots/PhongSoSanh.png" alt="size-comparison" width="230" /></td>
   </tr>
   <tr>
-    <td align="center"><strong>Size Compare</strong><br/><img src="doc/Screenshots/size-comparison.png" alt="size-comparison" width="230" /></td>
-    <td align="center"><strong>SmartFit Closet</strong><br/><img src="doc/Screenshots/outfit-builder.png" alt="smartfit-closet" width="230" /></td>
-    <td align="center"><strong>Admin Dashboard</strong><br/><img src="doc/Screenshots/admin-dashboard.png" alt="admin-dashboard" width="230" /></td>
+    <td align="center"><strong>SmartFit Closet</strong><br/><img src="doc/Screenshots/TuDoCaNhan.png" alt="smartfit-closet" width="230" /></td>
+    <td align="center"><strong>AI Stylist</strong><br/><img src="doc/Screenshots/PhongAIStylist.png" alt="ai-stylist" width="230" /></td>
+    <td align="center"><strong>Cart / Mini-Closet</strong><br/><img src="doc/Screenshots/GioHang.png" alt="cart" width="230" /></td>
   </tr>
 </table>
 
