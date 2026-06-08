@@ -71,6 +71,7 @@ interface GarmentModelProps {
     avatarScene?: THREE.Group | null;
     heatmapEnabled?: boolean;
     heatmapZones?: FitZone[];
+    avatarProfile?: any;
 }
 
 const mergeSoftnessConfig = (
@@ -130,6 +131,9 @@ type GarmentInstanceProps = {
     wireframeColor?: string;
     ghostOpacity?: number;
     emissiveIntensity?: number;
+    avatarProfile?: any;
+    config?: GarmentConfig;
+    selectedSize?: string | null;
 };
 
 function GarmentInstance({
@@ -142,8 +146,55 @@ function GarmentInstance({
     wireframeColor,
     ghostOpacity,
     emissiveIntensity,
+    avatarProfile,
+    config,
+    selectedSize,
 }: GarmentInstanceProps) {
     const gltf = useLoader(GLTFLoader, garment.url) as GLTF;
+
+    const garmentScaleFactors = useMemo(() => {
+        let scaleX = 1;
+        let scaleY = 1;
+        let scaleZ = 1;
+
+        if (avatarProfile && garment.followAvatarBones) {
+            const safeHeight = Number.isFinite(avatarProfile.height) && avatarProfile.height > 0 ? avatarProfile.height : 165;
+            const globalScale = Math.min(Math.max(safeHeight / 165, 0.75), 1.45);
+
+            // Width axes (X, Z) map from product size -> Fixed physical width.
+            // We must counteract the avatar's global uniform scale so the garment keeps its authored width.
+            scaleX = 1 / globalScale;
+            scaleZ = 1 / globalScale;
+            
+            // Length axis (Y) maps from avatar body.
+            // The 3D skinning naturally stretches Y to match the avatar's bones.
+            scaleY = 1; 
+        }
+
+        let sizeRatio = 1;
+        let widthRatio = 1;
+        const normalizedSize = String(selectedSize || 'M').trim().toUpperCase();
+        const sizeSpecs = (config as any)?.measurementProfile?.sizeSpecs;
+        if (sizeSpecs) {
+            // Length Ratio (Y axis)
+            const currentLength = sizeSpecs[normalizedSize]?.garmentLength;
+            const refLength = sizeSpecs['M']?.garmentLength || (Object.values(sizeSpecs)[0] as any)?.garmentLength;
+            if (currentLength && refLength) {
+                sizeRatio = currentLength / refLength;
+            }
+
+            // Width Ratio (X, Z axes)
+            // Use waist, hips, or chest to determine the proportional width difference between sizes
+            const currentWidth = sizeSpecs[normalizedSize]?.waist || sizeSpecs[normalizedSize]?.hips || sizeSpecs[normalizedSize]?.chest;
+            const refWidth = sizeSpecs['M']?.waist || sizeSpecs['M']?.hips || sizeSpecs['M']?.chest || (Object.values(sizeSpecs)[0] as any)?.waist || (Object.values(sizeSpecs)[0] as any)?.hips || (Object.values(sizeSpecs)[0] as any)?.chest;
+            
+            if (currentWidth && refWidth) {
+                widthRatio = currentWidth / refWidth;
+            }
+        }
+
+        return new THREE.Vector3(scaleX * widthRatio, scaleY * sizeRatio, scaleZ * widthRatio);
+    }, [avatarProfile, garment.followAvatarBones, config, selectedSize]);
 
     const garmentScene = useMemo(() => {
         const cloned = clone(gltf.scene) as THREE.Group;
@@ -157,28 +208,18 @@ function GarmentInstance({
             }
         }
 
-        // Manual scale adjustment for dresses: some dress GLBs are authored
-        // smaller than the avatar. Apply a modest uniform scale so the
-        // garment better matches the avatar body. Tweak `dressScale` as needed.
         try {
-            // Apply uniform scale if provided (useful for garments authored at different sizes).
             if (typeof garment.scale === 'number' && Math.abs(garment.scale - 1) > 1e-6) {
                 cloned.scale.multiplyScalar(garment.scale);
             }
 
-            // Apply optional translation after centering and scaling.
             try {
                 const t = garment.translate || [0, 0, 0];
                 if (Array.isArray(t) && t.length === 3 && (t[0] !== 0 || t[1] !== 0 || t[2] !== 0)) {
                     cloned.position.add(new THREE.Vector3(t[0], t[1], t[2]));
                 }
-            } catch (innerErr) {
-                // ignore translate errors
-            }
+            } catch (innerErr) {}
         } catch (e) {
-            // swallow any unexpected errors here to avoid breaking rendering
-            // in case cloned.scale is not present for some reason.
-            // eslint-disable-next-line no-console
             console.warn('[GarmentModel] Failed to apply dress scale', e);
         }
 
@@ -246,8 +287,8 @@ function GarmentInstance({
     }, [garmentScene, selectedColor]);
 
     useEffect(() => {
-        applyGarmentHeatmap(garmentScene, heatmapEnabled, heatmapZones, avatarScene);
-    }, [avatarScene, garmentScene, heatmapEnabled, heatmapZones]);
+        applyGarmentHeatmap(garmentScene, heatmapEnabled, heatmapZones, avatarScene, garment.garmentType);
+    }, [avatarScene, garmentScene, heatmapEnabled, heatmapZones, garment.garmentType]);
 
     const adaptiveSkinOffset = useMemo(() => {
         const baseOffset = garment.softness.skinOffset ?? 0;
@@ -284,6 +325,8 @@ function GarmentInstance({
             garmentScene,
             avatarScene,
             adaptiveSkinOffset,
+            garmentScaleFactors,
+            garment.garmentType
         );
 
         if (bindResult.boundMeshCount === 0 && bindResult.attachedMeshCount === 0) {
@@ -351,6 +394,7 @@ export default function GarmentModel({
     avatarScene = null,
     heatmapEnabled = false,
     heatmapZones,
+    avatarProfile,
 }: GarmentModelProps) {
     const garment = useMemo(() => resolveGarmentConfig(config, selectedSize), [config, selectedSize]);
     const normalizedHeatmapZones = useMemo<GarmentHeatmapZone[]>(() => {
@@ -386,6 +430,9 @@ export default function GarmentModel({
                 avatarScene={avatarScene}
                 heatmapEnabled={Boolean(heatmapEnabled)}
                 heatmapZones={normalizedHeatmapZones}
+                avatarProfile={avatarProfile}
+                config={config}
+                selectedSize={selectedSize}
             />
         </Suspense>
     );

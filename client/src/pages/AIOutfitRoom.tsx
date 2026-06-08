@@ -498,20 +498,21 @@ function SceneContent({ environmentPreset, cameraPos, cameraTarget, isRotating }
                             M: {
                                 url: String((garment as any).model3D.url),
                                 autoNormalize: true,
-                                followAvatarBones: false,
+                                followAvatarBones: true,
                             },
                         },
                     };
 
                     return (
                         <Suspense key={`${slot}-${garment.itemId}`} fallback={null}>
-                            <GarmentModel
-                                config={config}
-                                selectedSize="M"
-                                selectedColor={garment.purchasedColor || '#f5f1e8'}
-                                avatarScene={avatarScene}
-                                heatmapEnabled={false}
-                            />
+                                <GarmentModel
+                                    config={config}
+                                    selectedSize="M"
+                                    selectedColor={garment.purchasedColor || '#f5f1e8'}
+                                    avatarScene={avatarScene}
+                                    heatmapEnabled={false}
+                                    avatarProfile={currentAvatar}
+                                />
                         </Suspense>
                     );
                 })}

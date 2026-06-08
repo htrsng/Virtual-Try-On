@@ -243,7 +243,7 @@ function SceneContent({ environmentPreset, cameraPos, cameraTarget, isRotating }
                         M: {
                             url: String((garment as any).model3D.url),
                             autoNormalize: true,
-                            followAvatarBones: false,
+                            followAvatarBones: true,
                         },
                     },
                 };
@@ -256,6 +256,7 @@ function SceneContent({ environmentPreset, cameraPos, cameraTarget, isRotating }
                             selectedColor={garment.purchasedColor || '#f5f1e8'}
                             avatarScene={avatarScene}
                             heatmapEnabled={false}
+                            avatarProfile={currentAvatar}
                         />
                     </Suspense>
                 );

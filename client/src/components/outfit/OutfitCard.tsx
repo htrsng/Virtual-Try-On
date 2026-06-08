@@ -310,27 +310,42 @@ export default function OutfitCard({
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '6px', flexWrap: 'wrap' }}>
                                         {/* Color Selector */}
                                         <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-                                            {(item.availableColors || ['#000000', '#ffffff', '#808080']).map((c: string) => (
-                                                <div
-                                                    key={c}
-                                                    className={`oc-color-swatch ${item.selectedColor === c || (!item.selectedColor && item.color === c) ? 'selected' : ''}`}
-                                                    style={{ background: c }}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        onUpdateItem?.(outfit.id, item.id, { selectedColor: c });
-                                                    }}
-                                                />
-                                            ))}
+                                            {(() => {
+                                                let colorsToRender = item.availableColors;
+                                                const itemName = (item.name || '').toLowerCase();
+                                                
+                                                if (itemName.includes('áo')) {
+                                                    colorsToRender = ['#f5f5f5', '#222222', '#47484c', '#d4c3a3']; // Trắng, Đen, Xám, Kaki
+                                                } else if (itemName.includes('quần')) {
+                                                    colorsToRender = ['#222222']; // Đen
+                                                }
+
+                                                const finalColors = (colorsToRender || ['#000000', '#ffffff', '#808080']).map((c: any) => typeof c === 'string' ? c : c.hex).filter(Boolean);
+                                                
+                                                return finalColors.map((c: string) => (
+                                                    <div
+                                                        key={c}
+                                                        className={`oc-color-swatch ${item.selectedColor === c || (!item.selectedColor && item.color === c) ? 'selected' : ''}`}
+                                                        style={{ background: c }}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            onUpdateItem?.(outfit.id, item.id, { selectedColor: c });
+                                                        }}
+                                                    />
+                                                ));
+                                            })()}
                                             {/* fallback color picker if availableColors is just fake */}
-                                            <input 
-                                                type="color" 
-                                                value={item.selectedColor || item.color || '#000000'}
-                                                onChange={(e) => {
-                                                    onUpdateItem?.(outfit.id, item.id, { selectedColor: e.target.value });
-                                                }}
-                                                onClick={e => e.stopPropagation()}
-                                                style={{ width: '20px', height: '20px', padding: 0, border: 'none', cursor: 'pointer', background: 'transparent' }}
-                                            />
+                                            {!(item.name?.toLowerCase().includes('áo') || item.name?.toLowerCase().includes('quần')) && (
+                                                <input 
+                                                    type="color" 
+                                                    value={item.selectedColor || item.color || '#000000'}
+                                                    onChange={(e) => {
+                                                        onUpdateItem?.(outfit.id, item.id, { selectedColor: e.target.value });
+                                                    }}
+                                                    onClick={e => e.stopPropagation()}
+                                                    style={{ width: '20px', height: '20px', padding: 0, border: 'none', cursor: 'pointer', background: 'transparent' }}
+                                                />
+                                            )}
                                         </div>
                                         {/* Size Selector */}
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>

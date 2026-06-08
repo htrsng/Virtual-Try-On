@@ -548,16 +548,27 @@ const applyFabricProfileToMaterial = (
     material.needsUpdate = true;
 };
 
-const buildFallbackAnchors = (mesh: THREE.Mesh): GarmentHeatmapAnchors => {
+const buildFallbackAnchors = (mesh: THREE.Mesh, garmentType?: string): GarmentHeatmapAnchors => {
     const bounds = getMeshBounds(mesh);
-    const { min, center, size } = bounds;
+    const { min, max, center, size } = bounds;
 
-    const shoulderY = min.y + size.y * 0.86;
-    const chestY = min.y + size.y * 0.68;
-    const waistY = min.y + size.y * 0.5;
-    const hipsY = min.y + size.y * 0.33;
-    const thighY = min.y + size.y * 0.2;
-    const legY = min.y + size.y * 0.09;
+    let shoulderY, chestY, waistY, hipsY, thighY, legY;
+
+    if (garmentType === 'bottom') {
+        shoulderY = max.y + size.y * 0.5;
+        chestY = max.y + size.y * 0.2;
+        waistY = max.y - size.y * 0.05;
+        hipsY = max.y - size.y * 0.25;
+        thighY = max.y - size.y * 0.5;
+        legY = min.y + size.y * 0.1;
+    } else {
+        shoulderY = min.y + size.y * 0.86;
+        chestY = min.y + size.y * 0.68;
+        waistY = min.y + size.y * 0.5;
+        hipsY = min.y + size.y * 0.33;
+        thighY = min.y + size.y * 0.2;
+        legY = min.y + size.y * 0.09;
+    }
 
     const shoulderOffsetX = Math.max(size.x * 0.22, 0.06);
     const legOffsetX = Math.max(size.x * 0.16, 0.05);
@@ -582,14 +593,14 @@ const buildFallbackAnchors = (mesh: THREE.Mesh): GarmentHeatmapAnchors => {
     };
 };
 
-const getHeatmapState = (material: THREE.MeshStandardMaterial, mesh: THREE.Mesh): GarmentHeatmapState => {
+const getHeatmapState = (material: THREE.MeshStandardMaterial, mesh: THREE.Mesh, garmentType?: string): GarmentHeatmapState => {
     const userData = material.userData as Record<string, unknown>;
     const existing = userData.vtoHeatmap as HeatmapUserData | undefined;
     if (existing?.state) {
         return existing.state;
     }
 
-    const anchors = buildFallbackAnchors(mesh);
+    const anchors = buildFallbackAnchors(mesh, garmentType);
     const state: GarmentHeatmapState = {
         enabled: { value: 0 },
         shoulder: { value: new THREE.Vector4(0, 0, 0, 0) },
@@ -1106,8 +1117,8 @@ const worldToMeshLocal = (mesh: THREE.Mesh, worldPoint: THREE.Vector3) => mesh.w
 
 const blendVec3 = (from: THREE.Vector3, to: THREE.Vector3, alpha: number) => from.clone().lerp(to, alpha);
 
-const buildAnchorsFromAvatar = (mesh: THREE.Mesh, avatarScene: THREE.Object3D): GarmentHeatmapAnchors => {
-    const fallback = buildFallbackAnchors(mesh);
+const buildAnchorsFromAvatar = (mesh: THREE.Mesh, avatarScene: THREE.Object3D, garmentType?: string): GarmentHeatmapAnchors => {
+    const fallback = buildFallbackAnchors(mesh, garmentType);
     const lookup = buildAvatarBoneLookup(avatarScene);
 
     const leftShoulderWorld = averageBoneWorldPosition(lookup, HEATMAP_BONE_HINTS.shoulderLeft);
@@ -1196,6 +1207,7 @@ export const applyGarmentHeatmap = (
     enabled: boolean,
     zones: GarmentHeatmapZone[] = [],
     avatarScene: THREE.Object3D | null = null,
+    garmentType?: string,
 ) => {
     const zoneMap = zones.reduce<Partial<Record<GarmentHeatmapZoneKey, GarmentHeatmapZone>>>((acc, zone) => {
         acc[zone.key] = zone;
@@ -1233,12 +1245,12 @@ export const applyGarmentHeatmap = (
                 return;
             }
 
-            const state = existing?.state || getHeatmapState(material, child);
+            const state = existing?.state || getHeatmapState(material, child, garmentType);
             state.enabled.value = enabled ? 1 : 0;
 
             const anchors = avatarScene
-                ? buildAnchorsFromAvatar(child, avatarScene)
-                : buildFallbackAnchors(child);
+                ? buildAnchorsFromAvatar(child, avatarScene, garmentType)
+                : buildFallbackAnchors(child, garmentType);
 
             state.shoulderLCenter.value.copy(anchors.shoulderL);
             state.shoulderRCenter.value.copy(anchors.shoulderR);
@@ -1289,6 +1301,8 @@ export const bindGarmentToAvatarSkeleton = (
     garmentRoot: THREE.Object3D,
     avatarScene: THREE.Object3D,
     skinOffset = 0,
+    scaleFactors?: THREE.Vector3,
+    garmentType?: string
 ): { boundMeshCount: number; attachedMeshCount: number; missingBoneNames: string[] } => {
     const lookup = buildAvatarBoneLookup(avatarScene);
     const missingBoneNames = new Set<string>();
@@ -1324,7 +1338,50 @@ export const bindGarmentToAvatarSkeleton = (
             mesh.skeleton.boneInverses.map((inverse) => inverse.clone()),
         );
 
-        mesh.bind(remappedSkeleton, mesh.bindMatrix.clone());
+        if (scaleFactors) {
+            // Find the original authored Y-position of the anchor bone.
+            // For bottoms, we anchor at the Hips.
+            // For tops/dresses, we anchor at the Neck or Chest.
+            let garmentAnchorY = 1.0; // Fallback
+            
+            const gAnchor = mesh.skeleton.bones.find(b => {
+                const name = b.name.toLowerCase();
+                if (garmentType === 'top' || garmentType === 'dress') {
+                    return name.includes('neck') || name.includes('spine2') || name.includes('chest') || name.includes('shoulder');
+                }
+                return name.includes('hips') || name.includes('pelvis') || name.includes('waist');
+            });
+
+            if (gAnchor) {
+                const anchorIndex = mesh.skeleton.bones.indexOf(gAnchor);
+                if (anchorIndex >= 0 && mesh.skeleton.boneInverses[anchorIndex]) {
+                    const anchorInverse = mesh.skeleton.boneInverses[anchorIndex];
+                    const anchorWorld = anchorInverse.clone().invert();
+                    const pos = new THREE.Vector3();
+                    pos.setFromMatrixPosition(anchorWorld);
+                    garmentAnchorY = pos.y;
+                }
+            } else if (garmentType === 'top' || garmentType === 'dress') {
+                garmentAnchorY = 1.4; // Fallback for tops
+            }
+
+            const scaleMatrix = new THREE.Matrix4().makeScale(scaleFactors.x, scaleFactors.y, scaleFactors.z);
+            const transToOrigin = new THREE.Matrix4().makeTranslation(0, -garmentAnchorY, 0);
+            const transBack = new THREE.Matrix4().makeTranslation(0, garmentAnchorY, 0);
+            
+            // M = TransBack * Scale * TransToOrigin
+            const anchorScaleMatrix = new THREE.Matrix4()
+                .multiply(transBack)
+                .multiply(scaleMatrix)
+                .multiply(transToOrigin);
+
+            const scaledBindMatrix = anchorScaleMatrix.clone().multiply(mesh.bindMatrix);
+            
+            mesh.bind(remappedSkeleton, scaledBindMatrix);
+        } else {
+            mesh.bind(remappedSkeleton, mesh.bindMatrix.clone());
+        }
+
         mesh.normalizeSkinWeights();
         mesh.frustumCulled = false;
         boundMeshCount += 1;
@@ -1460,11 +1517,18 @@ export const syncGarmentMorphTargets = (
 
         channels.forEach(({ targetIndex, sourceIndex, sourceInfluences }) => {
             const sourceValue = sourceInfluences[sourceIndex] ?? 0;
-            const targetValue = THREE.MathUtils.clamp(sourceValue * influenceScale, 0, maxInfluence);
-
-            if (smoothing >= 0.999) {
-                targetInfluences[targetIndex] = targetValue;
-                return;
+            
+            let targetValue = 0;
+            if (sourceValue >= 0) {
+                // Avatar is getting fatter/wider.
+                // To prevent clipping, the garment MUST stretch heavily to cover the body.
+                // We boost the influenceScale for positive morphs.
+                const stretchInfluence = Math.max(influenceScale, 0.98); 
+                targetValue = THREE.MathUtils.clamp(sourceValue * stretchInfluence, 0, 1.5);
+            } else {
+                // Avatar is getting skinnier/narrower.
+                // To preserve "loose/oversized" fits, we allow the garment to shrink LESS than the avatar.
+                targetValue = THREE.MathUtils.clamp(sourceValue * influenceScale, -1.5, 0);
             }
 
             const currentValue = targetInfluences[targetIndex] ?? 0;

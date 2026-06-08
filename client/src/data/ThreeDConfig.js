@@ -19,7 +19,7 @@ export const MODEL_INJECTION = {
             roughness: 0.95,
             metalness: 0.0,
             envMapIntensity: 0.2,
-            skinOffset: 0.003
+            skinOffset: 0.006
         },
 
         fabric: {
@@ -59,12 +59,12 @@ export const MODEL_INJECTION = {
                     fitIntent: 'regular'
                 },
                 L: {
-                    chest: 106,
-                    waist: 102,
-                    hips: 108,
-                    shoulder: 45.5,
-                    sleeveLength: 22.5,
-                    garmentLength: 71,
+                    chest: 104,
+                    waist: 100,
+                    hips: 106,
+                    shoulder: 45,
+                    sleeveLength: 22,
+                    garmentLength: 70,
                     stretchWarp: 0.06,
                     stretchWeft: 0.10,
                     fitIntent: 'regular'
@@ -455,9 +455,9 @@ export const MODEL_INJECTION = {
         measurementProfile: {
             garmentType: 'bottom',
             sizeSpecs: {
-                S: { waist: 66, hips: 94, thigh: 60, legOpening: 58, garmentLength: 98, fitIntent: 'loose' },
-                M: { waist: 70, hips: 98, thigh: 64, legOpening: 60, garmentLength: 100, fitIntent: 'loose' },
-                L: { waist: 74, hips: 102, thigh: 68, legOpening: 62, garmentLength: 102, fitIntent: 'loose' }
+                S: { waist: 68, hips: 92, thigh: 56, legOpening: 54, garmentLength: 96, fitIntent: 'loose' },
+                M: { waist: 70, hips: 96, thigh: 58, legOpening: 56, garmentLength: 99, fitIntent: 'loose' },
+                L: { waist: 74, hips: 100, thigh: 60, legOpening: 58, garmentLength: 102, fitIntent: 'loose' }
             }
         },
         sizes: {

@@ -60,7 +60,14 @@ export function initSelection(outfit: OutfitResult): SelectionState {
 
   outfit.items.forEach(item => {
     let defaultColor = item.color;
-    if (item.availableColors && item.availableColors.length > 0) {
+    
+    // Explicit override for AI styles (Áo and Quần)
+    const itemName = (item.name || '').toLowerCase();
+    if (itemName.includes('áo')) {
+      defaultColor = '#f5f5f5'; // Trắng
+    } else if (itemName.includes('quần')) {
+      defaultColor = '#222222'; // Đen
+    } else if (item.availableColors && item.availableColors.length > 0) {
       const firstColor = item.availableColors[0];
       if (typeof firstColor === 'string') {
         defaultColor = firstColor;

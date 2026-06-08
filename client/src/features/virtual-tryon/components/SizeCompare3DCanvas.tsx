@@ -177,6 +177,7 @@ export default function SizeCompare3DCanvas({
                                                 heatmapZones={[]}
                                                 ghostOpacity={diffOnly ? 0.0 : (outlineIntensity !== undefined ? outlineIntensity * 0.4 + 0.1 : 0.3)}
                                                 emissiveIntensity={0}
+                                                avatarProfile={bodyData}
                                             />
                                         </group>
                                     )}
@@ -192,6 +193,7 @@ export default function SizeCompare3DCanvas({
                                                 heatmapZones={[]}
                                                 ghostOpacity={diffOnly ? 0.0 : (outlineIntensity !== undefined ? outlineIntensity * 0.4 + 0.1 : 0.3)}
                                                 emissiveIntensity={0}
+                                                avatarProfile={bodyData}
                                             />
                                         </group>
                                     )}
@@ -205,6 +207,7 @@ export default function SizeCompare3DCanvas({
                                     avatarScene={avatarScene}
                                     heatmapEnabled={heatmapEnabled || !!hoverZone}
                                     heatmapZones={hoverZone ? fitZones?.filter((z: any) => z.key === hoverZone) : fitZones}
+                                    avatarProfile={bodyData}
                                 />
                             )
                         )}

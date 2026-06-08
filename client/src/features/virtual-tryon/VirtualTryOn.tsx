@@ -434,6 +434,7 @@ function SizeCompareViewport({
                                 avatarScene={avatarScene}
                                 heatmapEnabled={heatmapEnabled}
                                 heatmapZones={fitZones}
+                                avatarProfile={bodyData}
                             />
                             <ContactShadows position={[0, 0.01, 0]} opacity={0.6} scale={5} blur={2.5} resolution={1024} frames={1} />
                         </group>
@@ -1820,6 +1821,7 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                                             avatarScene={avatarScene}
                                             heatmapEnabled={isHeatmapOpen}
                                             heatmapZones={itemFitZonesByKey[key]}
+                                            avatarProfile={currentBodyData}
                                         />
                                     );
                                 })}
@@ -1842,6 +1844,7 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                                             avatarScene={avatarScene}
                                             heatmapEnabled={isHeatmapOpen}
                                             heatmapZones={[]}
+                                            avatarProfile={currentBodyData}
                                         />
                                     );
                                 })}

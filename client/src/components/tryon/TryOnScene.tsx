@@ -52,6 +52,7 @@ export default function TryOnScene({
                                     selectedColor={garment.purchasedColor}
                                     avatarScene={undefined}
                                     heatmapEnabled={false}
+                                    avatarProfile={body}
                                 />
                             </Suspense>
                         )

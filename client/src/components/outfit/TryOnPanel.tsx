@@ -245,30 +245,38 @@ export default function TryOnPanel({
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                             <span style={{ fontSize: '11px', color: 'var(--text-secondary)', width: '30px' }}>Màu:</span>
                                             <div style={{ display: 'flex', gap: '6px' }}>
-                                                {(item.availableColors && item.availableColors.length > 0 ? item.availableColors : ['#000000', '#ffffff', '#808080']).map((c: any, cIdx: number) => {
-                                                    const hex = typeof c === 'string' ? c : (c.hex || '#ffffff');
-                                                    const img = typeof c === 'string' ? null : c.image;
-                                                    const label = typeof c === 'string' ? undefined : c.label;
+                                                {(() => {
+                                                    let colorsToRender = item.availableColors;
+                                                    const itemName = (item.name || '').toLowerCase();
                                                     
-                                                    // Determine the internal "selected color" ID.
-                                                    // In ProductDetail it uses colorName or colorHex, here we check hex or label.
-                                                    const isColorSelected = (item.selectedColor || item.color) === hex || (label && (item.selectedColor || item.color) === label);
-                                                    
-                                                    return (
-                                                        <div 
-                                                            key={label || hex || cIdx}
-                                                            title={label}
-                                                            onClick={() => onUpdateItem(outfit.id, item.id, { selectedColor: label || hex })}
-                                                            style={{ 
-                                                                width: '20px', height: '20px', borderRadius: '50%', cursor: 'pointer',
-                                                                background: img ? `url(${img}) center/cover` : hex,
-                                                                border: isColorSelected ? '2px solid var(--gold-primary)' : '1px solid rgba(0,0,0,0.1)',
-                                                                transform: isColorSelected ? 'scale(1.1)' : 'none'
-                                                            }}
-                                                        />
-                                                    );
-                                                })}
-                                                {(!item.availableColors || item.availableColors.length === 0) && (
+                                                    if (itemName.includes('áo')) {
+                                                        colorsToRender = ['#f5f5f5', '#222222', '#47484c', '#d4c3a3']; // Trắng, Đen, Xám, Kaki
+                                                    } else if (itemName.includes('quần')) {
+                                                        colorsToRender = ['#222222']; // Đen
+                                                    }
+
+                                                    const finalColors = (colorsToRender && colorsToRender.length > 0 ? colorsToRender : ['#000000', '#ffffff', '#808080'])
+                                                        .map((c: any) => typeof c === 'string' ? c : c.hex)
+                                                        .filter(Boolean);
+
+                                                    return finalColors.map((hex: string, cIdx: number) => {
+                                                        const isColorSelected = (item.selectedColor || item.color) === hex;
+                                                        
+                                                        return (
+                                                            <div 
+                                                                key={hex || cIdx}
+                                                                onClick={() => onUpdateItem(outfit.id, item.id, { selectedColor: hex })}
+                                                                style={{ 
+                                                                    width: '20px', height: '20px', borderRadius: '50%', cursor: 'pointer',
+                                                                    background: hex,
+                                                                    border: isColorSelected ? '2px solid var(--gold-primary)' : '1px solid rgba(0,0,0,0.1)',
+                                                                    transform: isColorSelected ? 'scale(1.1)' : 'none'
+                                                                }}
+                                                            />
+                                                        );
+                                                    });
+                                                })()}
+                                                {!(item.name?.toLowerCase().includes('áo') || item.name?.toLowerCase().includes('quần')) && (!item.availableColors || item.availableColors.length === 0) && (
                                                     <input 
                                                         type="color" 
                                                         value={item.selectedColor || item.color || '#000000'}
