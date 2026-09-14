@@ -1,0 +1,332 @@
+{
+  "static_analysis_tool": "semgrep (custom local ruleset)",
+  "semgrep_findings_count": 26,
+  "semgrep_findings": [
+    {
+      "rule_id": "route-missing-auth-middleware",
+      "file": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\node_harness\\index.js",
+      "line_start": 236,
+      "line_end": 244,
+      "cwe": "CWE-862",
+      "message": "Route Express nhan yeu cau thay doi/xoa/xem du lieu nhay cam (users, orders, products, admin) nhung KHONG co middleware 'authenticateToken' hoac 'requireAdmin' trong chuoi handler. Tuong duong CWE-862 (Missing Authorization)."
+    },
+    {
+      "rule_id": "route-missing-auth-middleware",
+      "file": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\node_harness\\index.js",
+      "line_start": 260,
+      "line_end": 278,
+      "cwe": "CWE-862",
+      "message": "Route Express nhan yeu cau thay doi/xoa/xem du lieu nhay cam (users, orders, products, admin) nhung KHONG co middleware 'authenticateToken' hoac 'requireAdmin' trong chuoi handler. Tuong duong CWE-862 (Missing Authorization)."
+    },
+    {
+      "rule_id": "route-missing-auth-middleware",
+      "file": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\node_harness\\index.js",
+      "line_start": 280,
+      "line_end": 297,
+      "cwe": "CWE-862",
+      "message": "Route Express nhan yeu cau thay doi/xoa/xem du lieu nhay cam (users, orders, products, admin) nhung KHONG co middleware 'authenticateToken' hoac 'requireAdmin' trong chuoi handler. Tuong duong CWE-862 (Missing Authorization)."
+    },
+    {
+      "rule_id": "route-missing-auth-middleware",
+      "file": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\node_harness\\index.js",
+      "line_start": 299,
+      "line_end": 313,
+      "cwe": "CWE-862",
+      "message": "Route Express nhan yeu cau thay doi/xoa/xem du lieu nhay cam (users, orders, products, admin) nhung KHONG co middleware 'authenticateToken' hoac 'requireAdmin' trong chuoi handler. Tuong duong CWE-862 (Missing Authorization)."
+    },
+    {
+      "rule_id": "route-missing-auth-middleware",
+      "file": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\node_harness\\index.js",
+      "line_start": 315,
+      "line_end": 322,
+      "cwe": "CWE-862",
+      "message": "Route Express nhan yeu cau thay doi/xoa/xem du lieu nhay cam (users, orders, products, admin) nhung KHONG co middleware 'authenticateToken' hoac 'requireAdmin' trong chuoi handler. Tuong duong CWE-862 (Missing Authorization)."
+    },
+    {
+      "rule_id": "route-missing-auth-middleware",
+      "file": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\node_harness\\index.js",
+      "line_start": 360,
+      "line_end": 391,
+      "cwe": "CWE-862",
+      "message": "Route Express nhan yeu cau thay doi/xoa/xem du lieu nhay cam (users, orders, products, admin) nhung KHONG co middleware 'authenticateToken' hoac 'requireAdmin' trong chuoi handler. Tuong duong CWE-862 (Missing Authorization)."
+    },
+    {
+      "rule_id": "route-missing-auth-middleware",
+      "file": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\node_harness\\index.js",
+      "line_start": 544,
+      "line_end": 552,
+      "cwe": "CWE-862",
+      "message": "Route Express nhan yeu cau thay doi/xoa/xem du lieu nhay cam (users, orders, products, admin) nhung KHONG co middleware 'authenticateToken' hoac 'requireAdmin' trong chuoi handler. Tuong duong CWE-862 (Missing Authorization)."
+    },
+    {
+      "rule_id": "route-missing-auth-middleware",
+      "file": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\node_harness\\index.js",
+      "line_start": 555,
+      "line_end": 562,
+      "cwe": "CWE-862",
+      "message": "Route Express nhan yeu cau thay doi/xoa/xem du lieu nhay cam (users, orders, products, admin) nhung KHONG co middleware 'authenticateToken' hoac 'requireAdmin' trong chuoi handler. Tuong duong CWE-862 (Missing Authorization)."
+    },
+    {
+      "rule_id": "route-missing-auth-middleware",
+      "file": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\node_harness\\index.js",
+      "line_start": 565,
+      "line_end": 576,
+      "cwe": "CWE-862",
+      "message": "Route Express nhan yeu cau thay doi/xoa/xem du lieu nhay cam (users, orders, products, admin) nhung KHONG co middleware 'authenticateToken' hoac 'requireAdmin' trong chuoi handler. Tuong duong CWE-862 (Missing Authorization)."
+    },
+    {
+      "rule_id": "mongoose-mass-assignment",
+      "file": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\node_harness\\index.js",
+      "line_start": 567,
+      "line_end": 571,
+      "cwe": "CWE-915",
+      "message": "Truyen thang req.body (khong loc field) vao ham cap nhat Mongoose (findByIdAndUpdate/updateOne/...). Cho phep nguoi dung gui them field khong mong muon (vd. 'role': 'admin') de tu leo quyen. Tuong duong CWE-915 (Improper Control of Dynamically-Managed Attributes / Mass Assignment)."
+    },
+    {
+      "rule_id": "route-missing-auth-middleware",
+      "file": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\node_harness\\index.js",
+      "line_start": 579,
+      "line_end": 587,
+      "cwe": "CWE-862",
+      "message": "Route Express nhan yeu cau thay doi/xoa/xem du lieu nhay cam (users, orders, products, admin) nhung KHONG co middleware 'authenticateToken' hoac 'requireAdmin' trong chuoi handler. Tuong duong CWE-862 (Missing Authorization)."
+    },
+    {
+      "rule_id": "route-missing-auth-middleware",
+      "file": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\node_harness\\index.js",
+      "line_start": 590,
+      "line_end": 597,
+      "cwe": "CWE-862",
+      "message": "Route Express nhan yeu cau thay doi/xoa/xem du lieu nhay cam (users, orders, products, admin) nhung KHONG co middleware 'authenticateToken' hoac 'requireAdmin' trong chuoi handler. Tuong duong CWE-862 (Missing Authorization)."
+    },
+    {
+      "rule_id": "route-missing-auth-middleware",
+      "file": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\node_harness\\index.js",
+      "line_start": 600,
+      "line_end": 607,
+      "cwe": "CWE-862",
+      "message": "Route Express nhan yeu cau thay doi/xoa/xem du lieu nhay cam (users, orders, products, admin) nhung KHONG co middleware 'authenticateToken' hoac 'requireAdmin' trong chuoi handler. Tuong duong CWE-862 (Missing Authorization)."
+    },
+    {
+      "rule_id": "route-missing-auth-middleware",
+      "file": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\node_harness\\index.js",
+      "line_start": 610,
+      "line_end": 627,
+      "cwe": "CWE-862",
+      "message": "Route Express nhan yeu cau thay doi/xoa/xem du lieu nhay cam (users, orders, products, admin) nhung KHONG co middleware 'authenticateToken' hoac 'requireAdmin' trong chuoi handler. Tuong duong CWE-862 (Missing Authorization)."
+    },
+    {
+      "rule_id": "client-controlled-price-field",
+      "file": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\node_harness\\index.js",
+      "line_start": 648,
+      "line_end": 720,
+      "cwe": "CWE-602",
+      "message": "Gia tri tien (totalAmount/discountAmount/voucherDiscount/shippingFee) duoc lay truc tiep tu req.body va luu thang vao don hang, khong tinh lai tu gia san pham that trong CSDL. Cho phep client tu khai gia (price tampering). Tuong duong CWE-602 (Client-Side Enforcement of Server-Side Security)."
+    },
+    {
+      "rule_id": "route-missing-auth-middleware",
+      "file": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\node_harness\\index.js",
+      "line_start": 797,
+      "line_end": 806,
+      "cwe": "CWE-862",
+      "message": "Route Express nhan yeu cau thay doi/xoa/xem du lieu nhay cam (users, orders, products, admin) nhung KHONG co middleware 'authenticateToken' hoac 'requireAdmin' trong chuoi handler. Tuong duong CWE-862 (Missing Authorization)."
+    },
+    {
+      "rule_id": "route-missing-auth-middleware",
+      "file": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\node_harness\\index.js",
+      "line_start": 809,
+      "line_end": 860,
+      "cwe": "CWE-862",
+      "message": "Route Express nhan yeu cau thay doi/xoa/xem du lieu nhay cam (users, orders, products, admin) nhung KHONG co middleware 'authenticateToken' hoac 'requireAdmin' trong chuoi handler. Tuong duong CWE-862 (Missing Authorization)."
+    },
+    {
+      "rule_id": "route-missing-auth-middleware",
+      "file": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\node_harness\\index.js",
+      "line_start": 863,
+      "line_end": 870,
+      "cwe": "CWE-862",
+      "message": "Route Express nhan yeu cau thay doi/xoa/xem du lieu nhay cam (users, orders, products, admin) nhung KHONG co middleware 'authenticateToken' hoac 'requireAdmin' trong chuoi handler. Tuong duong CWE-862 (Missing Authorization)."
+    },
+    {
+      "rule_id": "route-missing-auth-middleware",
+      "file": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\node_harness\\index.js",
+      "line_start": 1716,
+      "line_end": 1758,
+      "cwe": "CWE-862",
+      "message": "Route Express nhan yeu cau thay doi/xoa/xem du lieu nhay cam (users, orders, products, admin) nhung KHONG co middleware 'authenticateToken' hoac 'requireAdmin' trong chuoi handler. Tuong duong CWE-862 (Missing Authorization)."
+    },
+    {
+      "rule_id": "route-missing-auth-middleware",
+      "file": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\node_harness\\index.js",
+      "line_start": 1761,
+      "line_end": 1775,
+      "cwe": "CWE-862",
+      "message": "Route Express nhan yeu cau thay doi/xoa/xem du lieu nhay cam (users, orders, products, admin) nhung KHONG co middleware 'authenticateToken' hoac 'requireAdmin' trong chuoi handler. Tuong duong CWE-862 (Missing Authorization)."
+    },
+    {
+      "rule_id": "route-missing-auth-middleware",
+      "file": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\node_harness\\index.js",
+      "line_start": 1778,
+      "line_end": 1796,
+      "cwe": "CWE-862",
+      "message": "Route Express nhan yeu cau thay doi/xoa/xem du lieu nhay cam (users, orders, products, admin) nhung KHONG co middleware 'authenticateToken' hoac 'requireAdmin' trong chuoi handler. Tuong duong CWE-862 (Missing Authorization)."
+    },
+    {
+      "rule_id": "route-missing-auth-middleware",
+      "file": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\node_harness\\index.js",
+      "line_start": 1997,
+      "line_end": 2029,
+      "cwe": "CWE-862",
+      "message": "Route Express nhan yeu cau thay doi/xoa/xem du lieu nhay cam (users, orders, products, admin) nhung KHONG co middleware 'authenticateToken' hoac 'requireAdmin' trong chuoi handler. Tuong duong CWE-862 (Missing Authorization)."
+    },
+    {
+      "rule_id": "route-missing-auth-middleware",
+      "file": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\node_harness\\index.js",
+      "line_start": 2032,
+      "line_end": 2093,
+      "cwe": "CWE-862",
+      "message": "Route Express nhan yeu cau thay doi/xoa/xem du lieu nhay cam (users, orders, products, admin) nhung KHONG co middleware 'authenticateToken' hoac 'requireAdmin' trong chuoi handler. Tuong duong CWE-862 (Missing Authorization)."
+    },
+    {
+      "rule_id": "route-missing-auth-middleware",
+      "file": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\node_harness\\index.js",
+      "line_start": 2096,
+      "line_end": 2131,
+      "cwe": "CWE-862",
+      "message": "Route Express nhan yeu cau thay doi/xoa/xem du lieu nhay cam (users, orders, products, admin) nhung KHONG co middleware 'authenticateToken' hoac 'requireAdmin' trong chuoi handler. Tuong duong CWE-862 (Missing Authorization)."
+    },
+    {
+      "rule_id": "route-missing-auth-middleware",
+      "file": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\node_harness\\index.js",
+      "line_start": 2134,
+      "line_end": 2184,
+      "cwe": "CWE-862",
+      "message": "Route Express nhan yeu cau thay doi/xoa/xem du lieu nhay cam (users, orders, products, admin) nhung KHONG co middleware 'authenticateToken' hoac 'requireAdmin' trong chuoi handler. Tuong duong CWE-862 (Missing Authorization)."
+    },
+    {
+      "rule_id": "route-missing-auth-middleware",
+      "file": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\node_harness\\index.js",
+      "line_start": 2187,
+      "line_end": 2217,
+      "cwe": "CWE-862",
+      "message": "Route Express nhan yeu cau thay doi/xoa/xem du lieu nhay cam (users, orders, products, admin) nhung KHONG co middleware 'authenticateToken' hoac 'requireAdmin' trong chuoi handler. Tuong duong CWE-862 (Missing Authorization)."
+    }
+  ],
+  "risk_assessment": [
+    {
+      "id": "BUG-02",
+      "cwe": "CWE-862",
+      "name": "Thieu authorization o /api/users/* (xem/sua/xoa user bat ky)",
+      "exploitability_subscore": 3.89,
+      "impact_subscore": 5.45,
+      "base_score": 9.3,
+      "severity": "CRITICAL",
+      "detected_by": [
+        "semgrep_custom_rule",
+        "manual_code_review"
+      ]
+    },
+    {
+      "id": "BUG-03",
+      "cwe": "CWE-862",
+      "name": "Thieu authorization o /api/orders (xem/sua/xoa don hang bat ky)",
+      "exploitability_subscore": 3.89,
+      "impact_subscore": 5.45,
+      "base_score": 9.3,
+      "severity": "CRITICAL",
+      "detected_by": [
+        "semgrep_custom_rule",
+        "manual_code_review",
+        "ch1_kripke_model_checking"
+      ]
+    },
+    {
+      "id": "BUG-05",
+      "cwe": "CWE-862",
+      "name": "Endpoint xoa/reset toan bo du lieu khong can xac thuc",
+      "exploitability_subscore": 3.89,
+      "impact_subscore": 5.45,
+      "base_score": 9.3,
+      "severity": "CRITICAL",
+      "detected_by": [
+        "semgrep_custom_rule",
+        "manual_code_review"
+      ]
+    },
+    {
+      "id": "BUG-01",
+      "cwe": "CWE-798",
+      "name": "Hardcode secret key leo quyen admin (create-admin)",
+      "exploitability_subscore": 3.89,
+      "impact_subscore": 5.18,
+      "base_score": 9.1,
+      "severity": "CRITICAL",
+      "detected_by": [
+        "manual_code_review"
+      ]
+    },
+    {
+      "id": "BUG-08",
+      "cwe": "CWE-915",
+      "name": "Mass assignment o PUT /api/users/:id (tu set role=admin)",
+      "exploitability_subscore": 3.89,
+      "impact_subscore": 5.18,
+      "base_score": 9.1,
+      "severity": "CRITICAL",
+      "detected_by": [
+        "semgrep_custom_rule",
+        "manual_code_review"
+      ]
+    },
+    {
+      "id": "BUG-04",
+      "cwe": "CWE-862",
+      "name": "Thieu authorization o /api/products (sua/xoa san pham)",
+      "exploitability_subscore": 3.89,
+      "impact_subscore": 4.7,
+      "base_score": 8.6,
+      "severity": "HIGH",
+      "detected_by": [
+        "semgrep_custom_rule",
+        "manual_code_review"
+      ]
+    },
+    {
+      "id": "BUG-09",
+      "cwe": "CWE-798",
+      "name": "Hardcode JWT_SECRET va Gmail App Password trong config/env.js",
+      "exploitability_subscore": 2.22,
+      "impact_subscore": 5.18,
+      "base_score": 7.4,
+      "severity": "HIGH",
+      "detected_by": [
+        "semgrep_custom_rule",
+        "manual_code_review"
+      ]
+    },
+    {
+      "id": "BUG-06",
+      "cwe": "CWE-602",
+      "name": "Client tu khai gia don hang (totalAmount khong duoc tinh lai o server)",
+      "exploitability_subscore": 2.84,
+      "impact_subscore": 3.6,
+      "base_score": 6.4,
+      "severity": "MEDIUM",
+      "detected_by": [
+        "semgrep_custom_rule",
+        "manual_code_review"
+      ]
+    },
+    {
+      "id": "BUG-07",
+      "cwe": "CWE-307",
+      "name": "Khong rate-limit dang nhap + lo user enumeration qua ma loi",
+      "exploitability_subscore": 3.89,
+      "impact_subscore": 1.41,
+      "base_score": 5.3,
+      "severity": "MEDIUM",
+      "detected_by": [
+        "manual_code_review"
+      ]
+    }
+  ]
+}

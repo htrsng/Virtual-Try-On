@@ -1,0 +1,86 @@
+{
+  "spec": {
+    "system_name": "VFitAI-OrderLifecycle-v1-SPEC",
+    "properties": [
+      {
+        "id": "P1_SAFETY_NO_REVERT_FROM_DELIVERED",
+        "formula": "delivered_reverted",
+        "description": "Khong bao gio ton tai trang thai 'da giao nhung bi doi nguoc lai' - mot don hang da giao thanh cong khong the bi sua trang thai ve truoc do.",
+        "holds": true
+      },
+      {
+        "id": "P2_SAFETY_NO_SHIP_AFTER_CANCEL",
+        "formula": "cancelled_then_shipped",
+        "description": "Khong bao gio ton tai trang thai 'da huy nhung van duoc giao' - mot don hang da huy (va coupon/hang da duoc hoan) khong duoc phep tiep tuc giao.",
+        "holds": true
+      },
+      {
+        "id": "P3_REACHABILITY_DELIVERED",
+        "formula": "delivered",
+        "description": "Ton tai it nhat mot duong di hop le tu trang thai khoi tao den 'Da giao' (tinh kha thi cua he thong - khong bi thiet ke qua chat den muc khong the giao hang duoc).",
+        "holds": true,
+        "witness_states": [
+          "S0",
+          "S1",
+          "S2"
+        ],
+        "witness_events": [
+          "admin_mark_shipping",
+          "admin_mark_delivered"
+        ]
+      }
+    ]
+  },
+  "actual": {
+    "system_name": "VFitAI-OrderLifecycle-v1-ACTUAL",
+    "properties": [
+      {
+        "id": "P1_SAFETY_NO_REVERT_FROM_DELIVERED",
+        "formula": "delivered_reverted",
+        "description": "Khong bao gio ton tai trang thai 'da giao nhung bi doi nguoc lai'. DU KIEN: VI PHAM trong he thong that, vi PUT /api/orders/:id khong kiem tra status hien tai va khong yeu cau xac thuc.",
+        "holds": false,
+        "witness_states": [
+          "S0",
+          "S1",
+          "S2",
+          "S4"
+        ],
+        "witness_events": [
+          "PUT_status=Dang_giao",
+          "PUT_status=Da_giao",
+          "PUT_status=Dang_xu_ly (khong kiem tra, khong auth)"
+        ]
+      },
+      {
+        "id": "P2_SAFETY_NO_SHIP_AFTER_CANCEL",
+        "formula": "cancelled_then_shipped",
+        "description": "Khong bao gio ton tai trang thai 'da huy nhung van duoc giao'. DU KIEN: VI PHAM trong he thong that vi cung ly do tren - co the 'hoi sinh' don da huy va tiep tuc giao hang du coupon/hang da duoc xu ly hoan tra.",
+        "holds": false,
+        "witness_states": [
+          "S0",
+          "S3",
+          "S5"
+        ],
+        "witness_events": [
+          "PUT_status=Da_huy (cancel endpoint)",
+          "PUT_status=Dang_giao (khong kiem tra, khong auth)"
+        ]
+      },
+      {
+        "id": "P3_REACHABILITY_DELIVERED",
+        "formula": "delivered",
+        "description": "Ton tai duong di hop le den 'Da giao' (kiem tra he thong khong bi hong hoan toan, vong doi binh thuong van hoat dong duoc).",
+        "holds": true,
+        "witness_states": [
+          "S0",
+          "S1",
+          "S2"
+        ],
+        "witness_events": [
+          "PUT_status=Dang_giao",
+          "PUT_status=Da_giao"
+        ]
+      }
+    ]
+  }
+}

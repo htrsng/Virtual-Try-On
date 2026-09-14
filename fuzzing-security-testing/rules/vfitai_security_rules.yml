@@ -1,0 +1,76 @@
+rules:
+  - id: hardcoded-secret-fallback
+    languages: [javascript]
+    severity: ERROR
+    message: >
+      Bien moi truong nhay cam (secret/password/key) co gia tri fallback hardcode
+      truc tiep trong source code bang toan tu '||'. Neu bien moi truong that
+      (.env) bi thieu, he thong se am tham dung gia tri yeu/lo lot nay ma khong
+      canh bao. Tuong duong CWE-798 (Use of Hard-coded Credentials).
+    metadata:
+      cwe: "CWE-798"
+      references: ["BUG-09"]
+    patterns:
+      - pattern-either:
+          - pattern: process.env.$VAR || "$FALLBACK"
+      - metavariable-regex:
+          metavariable: $VAR
+          regex: (?i).*(secret|password|pass|key|token).*
+
+  - id: mongoose-mass-assignment
+    languages: [javascript]
+    severity: ERROR
+    message: >
+      Truyen thang req.body (khong loc field) vao ham cap nhat Mongoose
+      (findByIdAndUpdate/updateOne/...). Cho phep nguoi dung gui them field
+      khong mong muon (vd. 'role': 'admin') de tu leo quyen.
+      Tuong duong CWE-915 (Improper Control of Dynamically-Managed Attributes /
+      Mass Assignment).
+    metadata:
+      cwe: "CWE-915"
+      references: ["BUG-08"]
+    patterns:
+      - pattern-either:
+          - pattern: $MODEL.findByIdAndUpdate($ID, req.body, ...)
+          - pattern: $MODEL.updateOne($FILTER, req.body, ...)
+          - pattern: $MODEL.findOneAndUpdate($FILTER, req.body, ...)
+
+  - id: route-missing-auth-middleware
+    languages: [javascript]
+    severity: WARNING
+    message: >
+      Route Express nhan yeu cau thay doi/xoa/xem du lieu nhay cam (users, orders,
+      products, admin) nhung KHONG co middleware 'authenticateToken' hoac
+      'requireAdmin' trong chuoi handler. Tuong duong CWE-862 (Missing
+      Authorization).
+    metadata:
+      cwe: "CWE-862"
+      references: ["BUG-02", "BUG-03", "BUG-04", "BUG-05"]
+    patterns:
+      - pattern-either:
+          - pattern: app.get("$ROUTE", async (req, res) => { ... })
+          - pattern: app.post("$ROUTE", async (req, res) => { ... })
+          - pattern: app.put("$ROUTE", async (req, res) => { ... })
+          - pattern: app.delete("$ROUTE", async (req, res) => { ... })
+      - metavariable-regex:
+          metavariable: $ROUTE
+          regex: ^/api/(users|orders|products|admin)(/|$)
+
+  - id: client-controlled-price-field
+    languages: [javascript]
+    severity: ERROR
+    message: >
+      Gia tri tien (totalAmount/discountAmount/voucherDiscount/shippingFee)
+      duoc lay truc tiep tu req.body va luu thang vao don hang, khong tinh
+      lai tu gia san pham that trong CSDL. Cho phep client tu khai gia
+      (price tampering). Tuong duong CWE-602 (Client-Side Enforcement of
+      Server-Side Security).
+    metadata:
+      cwe: "CWE-602"
+      references: ["BUG-06"]
+    patterns:
+      - pattern-either:
+          - pattern: |
+              const { ..., totalAmount, ... } = req.body;
+              ...
+              new $ORDERMODEL({ ..., totalAmount, ... })

@@ -1,0 +1,9 @@
+{
+  "products": [{"productId": 1, "name": "Ao thun", "price": 200000, "quantity": 2}],
+  "totalAmount": 400000,
+  "shippingInfo": {"fullName": "Nguyen Van A", "phone": "0900000000", "address": "123 Duong ABC"},
+  "paymentMethod": "COD",
+  "discountCode": "",
+  "discountAmount": 0,
+  "shippingFee": 0
+}

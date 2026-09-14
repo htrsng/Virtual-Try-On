@@ -1,0 +1,31 @@
+[
+  {
+    "id": "SMT-01_PRICE_TAMPERING",
+    "context": "So sanh dac ta DUNG (P) voi hanh vi THAT cua code (Q) tai POST /api/orders (index.js dong 643-720) ve viec xac thuc totalAmount cua don hang.",
+    "original": "And(qty >= 1, unit_price == 500000, totalAmount == qty*unit_price)",
+    "optimized": "And(qty >= 1, unit_price == 500000, qty == qty)",
+    "is_equivalent": false,
+    "expected_equivalent": false,
+    "counterexample": {
+      "unit_price": "500000",
+      "totalAmount": "500001",
+      "qty": "1"
+    },
+    "note": "P (dac ta DUNG): don hang chi duoc chap nhan neu totalAmount = so_luong * gia_that_trong_catalog. Q (code THAT): route chi kiem tra gio hang khong rong (qty>=1) va co day du shippingInfo, KHONG doi chieu totalAmount voi gia that (BUG-06, CWE-602). Z3 se tim phan vi du cu the: mot bo (qty, totalAmount) ma code THAT chap nhan nhung dac ta DUNG se tu choi - chinh la kich ban tan cong 'tu khai gia'.",
+    "matches_expectation": true
+  },
+  {
+    "id": "SMT-02_PRIVILEGE_ESCALATION",
+    "context": "So sanh dac ta DUNG (P) voi hanh vi THAT cua code (Q) tai PUT /api/users/:id (index.js dong 565-576) ve dieu kien duoc phep dat role=admin cho mot user.",
+    "original": "Implies(sets_role_admin, req_is_admin)",
+    "optimized": "Or(req_is_admin, Not(req_is_admin))",
+    "is_equivalent": false,
+    "expected_equivalent": false,
+    "counterexample": {
+      "req_is_admin": "False",
+      "sets_role_admin": "True"
+    },
+    "note": "P (dac ta DUNG): chi khi nguoi goi request DA la admin (req_is_admin=True) thi moi duoc phep dat role='admin' cho mot user (sets_role_admin=True). Q (code THAT): bieu thuc luon dung (tautology) vi route hoan toan khong co middleware requireAdmin/authenticateToken (BUG-02, BUG-08), nghia la request duoc chap nhan bat ke gia tri cua 2 bien. Z3 se tim phan vi du: req_is_admin=False, sets_role_admin=True - dung la kich ban leo quyen (privilege escalation, CWE-915 + CWE-862).",
+    "matches_expectation": true
+  }
+]

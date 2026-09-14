@@ -1,0 +1,41 @@
+{
+  "system_name": "VFitAI-OrderLifecycle-v1-ACTUAL",
+  "description": "Mo hinh Kripke phan anh DUNG HANH VI CODE THAT cua endpoint PUT /api/orders/:id (index.js dong 809-816): 'const { status } = req.body; ... findByIdAndUpdate(req.params.id, { status }, ...)'. Endpoint nay KHONG kiem tra trang thai hien tai, KHONG gioi han tap gia tri status hop le, va KHONG co middleware authenticateToken/requireAdmin (xem BUG-03). Vi vay tu BAT KY trang thai nao, he thong co the chuyen sang BAT KY trang thai nao khac chi bang mot request PUT don gian. Hai trang thai S4, S5 duoc them vao de bieu dien cu the 2 kich ban vi pham quy tac nghiep vu duoc phat hien.",
+  "atomic_propositions": ["processing", "shipping", "delivered", "cancelled", "terminal", "delivered_reverted", "cancelled_then_shipped"],
+  "states": [
+    {"id": "S0", "name": "Dang_xu_ly",                    "labels": ["processing"]},
+    {"id": "S1", "name": "Dang_giao",                      "labels": ["shipping"]},
+    {"id": "S2", "name": "Da_giao",                        "labels": ["delivered", "terminal"]},
+    {"id": "S3", "name": "Da_huy",                         "labels": ["cancelled", "terminal"]},
+    {"id": "S4", "name": "Da_giao_BI_DOI_NGUOC",           "labels": ["delivered_reverted"]},
+    {"id": "S5", "name": "Da_huy_NHUNG_VAN_DUOC_GIAO",     "labels": ["cancelled_then_shipped"]}
+  ],
+  "initial_states": ["S0"],
+  "transitions": [
+    {"from": "S0", "event": "PUT_status=Dang_giao",                    "to": "S1"},
+    {"from": "S1", "event": "PUT_status=Da_giao",                      "to": "S2"},
+    {"from": "S0", "event": "PUT_status=Da_huy (cancel endpoint)",     "to": "S3"},
+    {"from": "S2", "event": "PUT_status=Dang_xu_ly (khong kiem tra, khong auth)", "to": "S4"},
+    {"from": "S3", "event": "PUT_status=Dang_giao (khong kiem tra, khong auth)",  "to": "S5"}
+  ],
+  "properties_to_check": [
+    {
+      "id": "P1_SAFETY_NO_REVERT_FROM_DELIVERED",
+      "type": "AG_NOT",
+      "formula": "delivered_reverted",
+      "description": "Khong bao gio ton tai trang thai 'da giao nhung bi doi nguoc lai'. DU KIEN: VI PHAM trong he thong that, vi PUT /api/orders/:id khong kiem tra status hien tai va khong yeu cau xac thuc."
+    },
+    {
+      "id": "P2_SAFETY_NO_SHIP_AFTER_CANCEL",
+      "type": "AG_NOT",
+      "formula": "cancelled_then_shipped",
+      "description": "Khong bao gio ton tai trang thai 'da huy nhung van duoc giao'. DU KIEN: VI PHAM trong he thong that vi cung ly do tren - co the 'hoi sinh' don da huy va tiep tuc giao hang du coupon/hang da duoc xu ly hoan tra."
+    },
+    {
+      "id": "P3_REACHABILITY_DELIVERED",
+      "type": "EF",
+      "formula": "delivered",
+      "description": "Ton tai duong di hop le den 'Da giao' (kiem tra he thong khong bi hong hoan toan, vong doi binh thuong van hoat dong duoc)."
+    }
+  ]
+}

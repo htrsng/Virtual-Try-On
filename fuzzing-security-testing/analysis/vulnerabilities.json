@@ -1,0 +1,77 @@
+{
+  "system_name": "VFitAI-server-Auth-Orders-modules",
+  "vulnerabilities": [
+    {
+      "id": "BUG-01", "cwe": "CWE-798",
+      "name": "Hardcode secret key leo quyen admin (create-admin)",
+      "attack_vector": "NETWORK", "attack_complexity": "LOW",
+      "privileges_required": "NONE", "user_interaction": "NONE",
+      "confidentiality_impact": "HIGH", "integrity_impact": "HIGH", "availability_impact": "NONE",
+      "detected_by": ["manual_code_review"]
+    },
+    {
+      "id": "BUG-02", "cwe": "CWE-862",
+      "name": "Thieu authorization o /api/users/* (xem/sua/xoa user bat ky)",
+      "attack_vector": "NETWORK", "attack_complexity": "LOW",
+      "privileges_required": "NONE", "user_interaction": "NONE",
+      "confidentiality_impact": "HIGH", "integrity_impact": "HIGH", "availability_impact": "LOW",
+      "detected_by": ["semgrep_custom_rule", "manual_code_review"]
+    },
+    {
+      "id": "BUG-03", "cwe": "CWE-862",
+      "name": "Thieu authorization o /api/orders (xem/sua/xoa don hang bat ky)",
+      "attack_vector": "NETWORK", "attack_complexity": "LOW",
+      "privileges_required": "NONE", "user_interaction": "NONE",
+      "confidentiality_impact": "HIGH", "integrity_impact": "HIGH", "availability_impact": "LOW",
+      "detected_by": ["semgrep_custom_rule", "manual_code_review", "ch1_kripke_model_checking"]
+    },
+    {
+      "id": "BUG-04", "cwe": "CWE-862",
+      "name": "Thieu authorization o /api/products (sua/xoa san pham)",
+      "attack_vector": "NETWORK", "attack_complexity": "LOW",
+      "privileges_required": "NONE", "user_interaction": "NONE",
+      "confidentiality_impact": "LOW", "integrity_impact": "HIGH", "availability_impact": "LOW",
+      "detected_by": ["semgrep_custom_rule", "manual_code_review"]
+    },
+    {
+      "id": "BUG-05", "cwe": "CWE-862",
+      "name": "Endpoint xoa/reset toan bo du lieu khong can xac thuc",
+      "attack_vector": "NETWORK", "attack_complexity": "LOW",
+      "privileges_required": "NONE", "user_interaction": "NONE",
+      "confidentiality_impact": "LOW", "integrity_impact": "HIGH", "availability_impact": "HIGH",
+      "detected_by": ["semgrep_custom_rule", "manual_code_review"]
+    },
+    {
+      "id": "BUG-06", "cwe": "CWE-602",
+      "name": "Client tu khai gia don hang (totalAmount khong duoc tinh lai o server)",
+      "attack_vector": "NETWORK", "attack_complexity": "LOW",
+      "privileges_required": "LOW", "user_interaction": "NONE",
+      "confidentiality_impact": "NONE", "integrity_impact": "HIGH", "availability_impact": "NONE",
+      "detected_by": ["semgrep_custom_rule", "manual_code_review"]
+    },
+    {
+      "id": "BUG-07", "cwe": "CWE-307",
+      "name": "Khong rate-limit dang nhap + lo user enumeration qua ma loi",
+      "attack_vector": "NETWORK", "attack_complexity": "LOW",
+      "privileges_required": "NONE", "user_interaction": "NONE",
+      "confidentiality_impact": "LOW", "integrity_impact": "NONE", "availability_impact": "NONE",
+      "detected_by": ["manual_code_review"]
+    },
+    {
+      "id": "BUG-08", "cwe": "CWE-915",
+      "name": "Mass assignment o PUT /api/users/:id (tu set role=admin)",
+      "attack_vector": "NETWORK", "attack_complexity": "LOW",
+      "privileges_required": "NONE", "user_interaction": "NONE",
+      "confidentiality_impact": "HIGH", "integrity_impact": "HIGH", "availability_impact": "NONE",
+      "detected_by": ["semgrep_custom_rule", "manual_code_review"]
+    },
+    {
+      "id": "BUG-09", "cwe": "CWE-798",
+      "name": "Hardcode JWT_SECRET va Gmail App Password trong config/env.js",
+      "attack_vector": "NETWORK", "attack_complexity": "HIGH",
+      "privileges_required": "NONE", "user_interaction": "NONE",
+      "confidentiality_impact": "HIGH", "integrity_impact": "HIGH", "availability_impact": "NONE",
+      "detected_by": ["semgrep_custom_rule", "manual_code_review"]
+    }
+  ]
+}
