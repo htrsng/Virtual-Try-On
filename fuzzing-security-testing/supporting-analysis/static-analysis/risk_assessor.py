@@ -25,7 +25,7 @@ from __future__ import annotations
 import json
 import os
 
-BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Trong so (weight) mo phong theo tinh than CVSS v3.1 (don gian hoa)
 AV_WEIGHT = {"NETWORK": 0.85, "ADJACENT": 0.62, "LOCAL": 0.55, "PHYSICAL": 0.2}
@@ -103,8 +103,8 @@ def print_report(results: list[dict]):
 
 
 if __name__ == "__main__":
-    # Trong cau truc du an: vulnerabilities.json nam CUNG thu muc analysis/
-    # voi file nay; ket qua duoc ghi vao thu muc results/ o goc du an.
+    # vulnerabilities.json nam cung thu muc voi file nay; ket qua ghi vao
+    # thu muc results/ o goc du an.
     HERE = os.path.dirname(os.path.abspath(__file__))
     PROJECT_ROOT = os.path.dirname(HERE)
 
