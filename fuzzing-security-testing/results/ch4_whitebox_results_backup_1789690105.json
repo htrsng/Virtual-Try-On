@@ -281,6 +281,83 @@
       "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_6.json"
     },
     {
+      "iteration": 43,
+      "input": {
+        "products": [
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          }
+        ],
+        "totalAmount": 400000,
+        "shippingInfo": {
+          "fullName": "Nguyen Van A",
+          "phone": "0900000000",
+          "address": "123 Duong ABC"
+        },
+        "discountCode": "",
+        "discountAmount": 0,
+        "shippingFee": 0
+      },
+      "type": "PROCESS_ERROR",
+      "detail": "TIMEOUT",
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_7.json"
+    },
+    {
+      "iteration": 44,
+      "input": {
+        "products": [
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          }
+        ],
+        "totalAmount": 400000,
+        "shippingInfo": {
+          "fullName": 999999999999999999,
+          "phone": "0900000000",
+          "address": "123 Duong ABC"
+        },
+        "paymentMethod": "COD",
+        "discountCode": "",
+        "discountAmount": 0,
+        "shippingFee": 0
+      },
+      "type": "PROCESS_ERROR",
+      "detail": "TIMEOUT",
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_8.json"
+    },
+    {
+      "iteration": 45,
+      "input": {
+        "products": [
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          }
+        ],
+        "totalAmount": 400000,
+        "shippingInfo": {
+          "fullName": "Nguyen Van A",
+          "phone": "0900000000",
+          "address": "{\"$ne\": null}"
+        },
+        "paymentMethod": "COD",
+        "discountCode": "",
+        "discountAmount": 0,
+        "shippingFee": 0
+      },
+      "type": "PROCESS_ERROR",
+      "detail": "TIMEOUT",
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_9.json"
+    },
+    {
       "iteration": 49,
       "input": {
         "products": [
@@ -302,7 +379,7 @@
         "shippingFee": 0
       },
       "type": "HTTP_500",
-      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_7.json"
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_10.json"
     },
     {
       "iteration": 56,
@@ -327,7 +404,7 @@
         "shippingFee": 0
       },
       "type": "HTTP_500",
-      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_8.json"
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_11.json"
     },
     {
       "iteration": 72,
@@ -356,7 +433,7 @@
         "shippingFee": 0
       },
       "type": "HTTP_500",
-      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_9.json"
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_12.json"
     },
     {
       "iteration": 90,
@@ -381,7 +458,7 @@
         "shippingFee": "not_an_object"
       },
       "type": "HTTP_500",
-      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_10.json"
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_13.json"
     },
     {
       "iteration": 96,
@@ -405,7 +482,7 @@
         "shippingFee": 0
       },
       "type": "HTTP_500",
-      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_11.json"
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_14.json"
     },
     {
       "iteration": 114,
@@ -429,7 +506,7 @@
         "shippingFee": 0
       },
       "type": "HTTP_500",
-      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_12.json"
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_15.json"
     },
     {
       "iteration": 130,
@@ -454,7 +531,7 @@
         "shippingFee": 0
       },
       "type": "HTTP_500",
-      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_13.json"
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_16.json"
     },
     {
       "iteration": 131,
@@ -479,7 +556,7 @@
         "shippingFee": "not_an_object"
       },
       "type": "HTTP_500",
-      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_14.json"
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_17.json"
     },
     {
       "iteration": 133,
@@ -508,7 +585,7 @@
         "shippingFee": 0
       },
       "type": "HTTP_500",
-      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_15.json"
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_18.json"
     },
     {
       "iteration": 138,
@@ -532,7 +609,7 @@
         "shippingFee": 0
       },
       "type": "HTTP_500",
-      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_16.json"
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_19.json"
     },
     {
       "iteration": 146,
@@ -557,7 +634,7 @@
         "shippingFee": "' OR '1'='1"
       },
       "type": "HTTP_500",
-      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_17.json"
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_20.json"
     },
     {
       "iteration": 155,
@@ -582,7 +659,7 @@
         "shippingFee": "{\"$ne\": null}"
       },
       "type": "HTTP_500",
-      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_18.json"
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_21.json"
     },
     {
       "iteration": 162,
@@ -607,7 +684,7 @@
         "shippingFee": 0
       },
       "type": "HTTP_500",
-      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_19.json"
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_22.json"
     },
     {
       "iteration": 163,
@@ -636,7 +713,7 @@
         "shippingFee": 0
       },
       "type": "HTTP_500",
-      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_20.json"
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_23.json"
     },
     {
       "iteration": 167,
@@ -661,7 +738,7 @@
         "shippingFee": 0
       },
       "type": "HTTP_500",
-      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_21.json"
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_24.json"
     },
     {
       "iteration": 181,
@@ -685,7 +762,7 @@
         "shippingFee": 0
       },
       "type": "HTTP_500",
-      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_22.json"
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_25.json"
     },
     {
       "iteration": 186,
@@ -710,7 +787,7 @@
         "shippingFee": 0
       },
       "type": "HTTP_500",
-      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_23.json"
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_26.json"
     },
     {
       "iteration": 189,
@@ -734,7 +811,7 @@
         "shippingFee": 0
       },
       "type": "HTTP_500",
-      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_24.json"
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_27.json"
     },
     {
       "iteration": 191,
@@ -759,7 +836,7 @@
         "shippingFee": "not_an_object"
       },
       "type": "HTTP_500",
-      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_25.json"
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_28.json"
     },
     {
       "iteration": 208,
@@ -784,7 +861,7 @@
         "shippingFee": 0
       },
       "type": "HTTP_500",
-      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_26.json"
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_29.json"
     },
     {
       "iteration": 210,
@@ -809,7 +886,7 @@
         "shippingFee": 0
       },
       "type": "HTTP_500",
-      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_27.json"
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_30.json"
     },
     {
       "iteration": 211,
@@ -834,7 +911,7 @@
         "shippingFee": "not_an_object"
       },
       "type": "HTTP_500",
-      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_28.json"
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_31.json"
     },
     {
       "iteration": 218,
@@ -863,7 +940,7 @@
         "shippingFee": 0
       },
       "type": "HTTP_500",
-      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_29.json"
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_32.json"
     },
     {
       "iteration": 221,
@@ -888,7 +965,7 @@
         "shippingFee": 0
       },
       "type": "HTTP_500",
-      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_30.json"
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_33.json"
     },
     {
       "iteration": 228,
@@ -913,7 +990,7 @@
         "shippingFee": 0
       },
       "type": "HTTP_500",
-      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_31.json"
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_34.json"
     },
     {
       "iteration": 231,
@@ -938,7 +1015,7 @@
         "shippingFee": 0
       },
       "type": "HTTP_500",
-      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_32.json"
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_35.json"
     },
     {
       "iteration": 236,
@@ -963,7 +1040,7 @@
         "shippingFee": "NaN"
       },
       "type": "HTTP_500",
-      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_33.json"
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_36.json"
     },
     {
       "iteration": 243,
@@ -988,7 +1065,7 @@
         "shippingFee": "%s%s%s%s"
       },
       "type": "HTTP_500",
-      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_34.json"
+      "saved_to": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\crashes\\whitebox_crash_37.json"
     }
   ],
   "vuln_findings": [

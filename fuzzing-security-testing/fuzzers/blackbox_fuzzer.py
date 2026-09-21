@@ -41,9 +41,6 @@ os.makedirs(CRASH_DIR, exist_ok=True)
 SEED_EMAIL = "fuzzuser@test.com"
 SEED_PASSWORD = "Fuzz123!"
 
-# Tu dien gia tri "dang ngo" - kien thuc CHUNG cua mot tester hop den
-# (khong lay tu doc source), bao gom bien dang so hoc, chuoi injection,
-# sai kieu du lieu, gia tri rong/qua khoTruy - dung cho MOI truong JSON.
 DICTIONARY = [
     None, "", 0, -1, -999999999, 999999999999999999,
     "A" * 5000, "' OR '1'='1", "{\"$ne\": null}", "<script>alert(1)</script>",

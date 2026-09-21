@@ -114,4 +114,3 @@ if __name__ == "__main__":
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
     print(f"\nDa ghi ket qua: {out_path}")
-    print("\n>>> Gui lai file JSON nay cho Claude de phan tich va dua vao bao cao <<<")
