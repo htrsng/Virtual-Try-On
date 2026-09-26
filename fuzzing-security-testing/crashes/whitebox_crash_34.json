@@ -17,15 +17,15 @@
     "paymentMethod": "COD",
     "discountCode": "",
     "discountAmount": 0,
-    "shippingFee": "%s%s%s%s"
+    "shippingFee": "NaN"
   },
   "result": {
     "ok": true,
     "status": 500,
     "body": {
       "message": "Lỗi server khi tạo đơn hàng",
-      "error": "Cast to Number failed for value \"\"%s%s%s%s\"\" at path \"shippingFee\"",
-      "details": "CastError: Cast to Number failed for value \"\"%s%s%s%s\"\" at path \"shippingFee\""
+      "error": "Cast to Number failed for value \"\"NaN\"\" at path \"shippingFee\"",
+      "details": "CastError: Cast to Number failed for value \"\"NaN\"\" at path \"shippingFee\""
     },
     "covered_lines": [
       1,

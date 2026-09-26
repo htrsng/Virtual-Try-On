@@ -1,28 +1,10 @@
 {
-  "target": "orders",
+  "target": "order_status",
   "input": {
-    "products": [
-      {
-        "productId": 1,
-        "name": "Ao thun",
-        "price": 200000,
-        "quantity": 2
-      }
-    ],
-    "shippingInfo": {
-      "fullName": "Nguyen Van A",
-      "phone": "0900000000",
-      "address": "123 Duong ABC"
-    },
-    "paymentMethod": "COD",
-    "discountCode": "",
-    "discountAmount": 0,
-    "shippingFee": 0
+    "status": []
   },
   "status": 500,
   "body": {
-    "message": "Lỗi server khi tạo đơn hàng",
-    "error": "Order validation failed: totalAmount: Path `totalAmount` is required.",
-    "details": "ValidationError: Order validation failed: totalAmount: Path `totalAmount` is required."
+    "error": "Cast to string failed for value [] (type object) at path \"status\""
   }
 }

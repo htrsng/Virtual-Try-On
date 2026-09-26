@@ -1,0 +1,16 @@
+{
+  "target": "product_create",
+  "input": {
+    "name": "Quan jean",
+    "price": 350000,
+    "stock": {},
+    "totalStock": 5,
+    "category": "Quan"
+  },
+  "status": 500,
+  "body": {
+    "error": "Cast to Number failed for value \"{}\" at path \"stock\""
+  },
+  "iteration": 383,
+  "type": "HTTP_500"
+}

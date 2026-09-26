@@ -1,34 +1,47 @@
 """
-Chuong 4 - Fuzzing Hop den (Black-box Fuzzing) cho VFitAI Auth + Orders
-========================================================================
+Chuong 4 - Fuzzing Hop den (Black-box Fuzzing) cho VFitAI
+==========================================================
 Ap dung dung tinh than Lab 8 (blackbox_fuzzer.py): fuzzer KHONG nhin thay
 ma nguon hay coverage cua server - no chi gui HTTP request toi server
 THAT dang chay (localhost:5050) va quan sat response tu BEN NGOAI.
 
-Khac voi Lab 8 (dot bien tren 1 chuoi ky tu don), muc tieu o day la REST
-API nhan JSON co cau truc, nen ky thuat dot bien duoc mo rong thanh 2 lop:
+Ky thuat dot bien (mutate_json) ap dung CHUNG cho ca 7 target, chia
+2 lop dot bien:
   1. Dot bien GIA TRI truong (field-level): thay 1 truong bang 1 gia tri
      "dang ngo" tu DICTIONARY (rong, rat dai, am, NaN, sai kieu, chuoi
-     injection...) - tuong duong "splice_token" cua Lab8.
+     injection...).
   2. Dot bien CAU TRUC (structural): xoa 1 truong bat buoc, doi kieu ca
-     mot object thanh string/số/array - tuong duong "insert/delete_char"
-     nhung o muc do JSON thay vi ky tu.
+     mot object thanh string/số/array.
 
-Oracle (tieu chi phat hien "loi"):
-  - CRASH: HTTP 500 (loi khong duoc xu ly / unhandled exception) hoac
-    request bi timeout/mat ket noi (server treo/sap) - tuong duong
-    "AddressSanitizer bao loi" trong Lab8 nhung o muc HTTP.
-  - VULN_CONFIRMED: request duoc CHAP NHAN (200/201) nhung du lieu tra ve
-    vi pham quy tac nghiep vu da biet tu Chuong 1-3 (vd: totalAmount am,
-    hoac totalAmount lech qua nhieu so voi tong gia * so luong that) -
-    day la dang loi "logic/bao mat" ma cac cong cu tinh (Ch2, Ch3) da
-    du doan truoc, nay fuzzer XAC NHAN duoc bang thuc nghiem dong.
+7 TARGET duoc fuzz (module -> endpoint):
+  - Auth        : POST /api/auth/login
+  - Orders      : POST /api/orders
+  - OrderStatus : PUT  /api/orders/:id        (module bo sung)
+  - UserAdmin   : PUT  /api/users/:id (self)  (module bo sung)
+  - UserAdmin   : PUT  /api/users/:id (victim - nguoi khac)  (module bo sung)
+  - Product     : POST /api/products          (module bo sung)
+  - Product     : PUT  /api/products/:id      (module bo sung)
+
+Oracle (tieu chi phat hien "loi"), theo tung nhom:
+  A) CRASH  : HTTP 500 hoac mat ket noi/timeout - ap dung cho CA 7 target.
+  B) Orders : request duoc CHAP NHAN (200/201) nhung totalAmount am, hoac
+     lech qua nhieu so voi gia * so luong that (BUG-06).
+  C) OrderStatus: (i) cap nhat THANH CONG ma KHONG co token (BUG-03);
+     (ii) status ngoai tap gia tri hop le van duoc chap nhan; (iii)
+     chuyen trang thai VI PHAM mo hinh vong doi da xac dinh (SPEC) -
+     doi lech voi ACTUAL da phat hien qua Kripke model checking (vd:
+     "Da giao" bi doi nguoc, "Da huy" chuyen sang "Dang giao").
+  D) UserAdmin: (i) sua thong tin THANH CONG ma KHONG co token (BUG-02);
+     (ii) sua duoc thong tin cua NGUOI KHAC bang token cua chinh minh
+     (IDOR/BOLA); (iii) tu dat duoc role=admin qua mass assignment
+     (BUG-08).
+  E) Product: (i) tao/sua san pham THANH CONG ma KHONG co token (BUG-04);
+     (ii) gia san pham AM van duoc chap nhan.
 """
 from __future__ import annotations
 import json
 import os
 import random
-import string
 import time
 import requests
 
@@ -40,6 +53,7 @@ os.makedirs(CRASH_DIR, exist_ok=True)
 
 SEED_EMAIL = "fuzzuser@test.com"
 SEED_PASSWORD = "Fuzz123!"
+VICTIM_EMAIL = "victim@test.com"
 
 DICTIONARY = [
     None, "", 0, -1, -999999999, 999999999999999999,
@@ -47,6 +61,17 @@ DICTIONARY = [
     "NaN", "Infinity", -0.5, True, False, [], {}, "🙂" * 50, "\x00\x01",
     "../../../etc/passwd", "0000000000", "%s%s%s%s", "admin",
 ]
+
+# Trang thai HOP LE va chuyen doi HOP LE theo dac ta vong doi don hang
+# (order_state_model_SPEC.json): Dang xu ly -> Dang giao -> Da giao (mot
+# chieu); Dang xu ly -> Da huy (mot chieu, khong quay lai duoc).
+VALID_STATUSES = {"Đang xử lý", "Đang giao", "Đã giao", "Đã hủy"}
+VALID_TRANSITIONS = {
+    "Đang xử lý": {"Đang xử lý", "Đang giao", "Đã hủy"},
+    "Đang giao": {"Đang giao", "Đã giao"},
+    "Đã giao": {"Đã giao"},
+    "Đã hủy": {"Đã hủy"},
+}
 
 
 def load_seed(name: str) -> dict:
@@ -72,10 +97,8 @@ def mutate_json(payload: dict, rng: random.Random) -> dict:
         del candidate[k]
     elif op == "type_confuse_root":
         k = rng.choice(keys)
-        # Doi ca mot object/array thanh 1 kieu hoan toan khac
         candidate[k] = rng.choice(["not_an_object", 12345, [1, 2, 3], None])
     elif op == "nested_field_value":
-        # Tim 1 truong con la dict/list de dot bien sau hon (vd shippingInfo, products[0])
         nested_keys = [k for k in keys if isinstance(candidate[k], (dict, list))]
         if nested_keys:
             k = rng.choice(nested_keys)
@@ -104,7 +127,7 @@ def compute_expected_total(products) -> float | None:
 
 
 def check_order_response(request_body: dict, resp: requests.Response) -> str | None:
-    """Tra ve mo ta loi 'VULN_CONFIRMED' neu phat hien, nguoc lai None."""
+    """Oracle cho POST /api/orders (BUG-06)."""
     if resp.status_code not in (200, 201):
         return None
     try:
@@ -124,68 +147,51 @@ def check_order_response(request_body: dict, resp: requests.Response) -> str | N
     return None
 
 
-def fuzz(iterations: int = 2000, seed: int = 42) -> dict:
-    rng = random.Random(seed)
-    session = requests.Session()
+def check_order_status_response(from_status: str, request_body: dict, resp: requests.Response, had_auth: bool) -> str | None:
+    """Oracle cho PUT /api/orders/:id (BUG-03 + vi pham mo hinh trang thai)."""
+    if resp.status_code not in (200, 201):
+        return None
+    if not had_auth:
+        return "Cap nhat trang thai don hang THANH CONG ma KHONG can token xac thuc"
+    new_status = request_body.get("status")
+    if not isinstance(new_status, str):
+        return None
+    if new_status not in VALID_STATUSES:
+        return f"status '{new_status}' ngoai tap gia tri hop le nhung van duoc chap nhan"
+    allowed = VALID_TRANSITIONS.get(from_status, set())
+    if new_status not in allowed:
+        return f"Chuyen trang thai bat hop le duoc chap nhan: '{from_status}' -> '{new_status}'"
+    return None
 
-    seed_login = load_seed("seed_login_valid.json")
-    seed_order = load_seed("seed_order_valid.json")
 
-    # Dang nhap 1 lan de lay token that (khong phai target fuzz, chi la
-    # buoc chuan bi de co the goi POST /api/orders can xac thuc).
-    login_resp = session.post(f"{BASE_URL}/api/auth/login", json=seed_login, timeout=5)
-    token = login_resp.json().get("token")
-    auth_headers = {"Authorization": f"Bearer {token}"}
-
-    crashes = []
-    vuln_findings = []
-    status_counter: dict[str, int] = {}
-
-    targets = [
-        {"name": "login", "url": f"{BASE_URL}/api/auth/login", "seed": seed_login, "headers": {}},
-        {"name": "orders", "url": f"{BASE_URL}/api/orders", "seed": seed_order, "headers": auth_headers},
-    ]
-
-    for i in range(iterations):
-        target = targets[i % len(targets)]
-        candidate = mutate_json(target["seed"], rng)
-
+def check_user_update_response(request_body: dict, resp: requests.Response, had_auth: bool, target_is_self: bool) -> str | None:
+    """Oracle cho PUT /api/users/:id (BUG-02 thieu authorization, BUG-08 mass assignment)."""
+    if resp.status_code not in (200, 201):
+        return None
+    if not had_auth:
+        return "Sua thong tin user THANH CONG ma KHONG can token xac thuc"
+    if not target_is_self:
+        return "Sua thong tin user KHAC (khong phai chinh minh) THANH CONG du dung token user thuong"
+    if isinstance(request_body.get("role"), str) and request_body["role"] == "admin":
         try:
-            resp = session.post(target["url"], json=candidate, headers=target["headers"], timeout=5)
-        except requests.exceptions.RequestException as e:
-            crash_id = len(crashes)
-            crash_path = os.path.join(CRASH_DIR, f"blackbox_crash_{crash_id}.json")
-            with open(crash_path, "w", encoding="utf-8") as f:
-                json.dump({"target": target["name"], "input": candidate, "error": str(e)}, f, ensure_ascii=False, indent=2)
-            crashes.append({"iteration": i, "target": target["name"], "input": candidate,
-                             "type": "CONNECTION_ERROR", "detail": str(e), "saved_to": crash_path})
-            continue
+            body = resp.json()
+            if body.get("role") == "admin":
+                return "Tu dat role=admin qua PUT /api/users/:id (mass assignment) THANH CONG"
+        except Exception:
+            pass
+    return None
 
-        key = f"{target['name']}:{resp.status_code}"
-        status_counter[key] = status_counter.get(key, 0) + 1
 
-        if resp.status_code == 500:
-            crash_id = len(crashes)
-            crash_path = os.path.join(CRASH_DIR, f"blackbox_crash_{crash_id}.json")
-            with open(crash_path, "w", encoding="utf-8") as f:
-                json.dump({"target": target["name"], "input": candidate,
-                            "status": resp.status_code, "body": _safe_json(resp)},
-                          f, ensure_ascii=False, indent=2)
-            crashes.append({"iteration": i, "target": target["name"], "input": candidate,
-                             "type": "HTTP_500", "saved_to": crash_path})
-
-        if target["name"] == "orders":
-            finding = check_order_response(candidate, resp)
-            if finding:
-                vuln_findings.append({"iteration": i, "input": candidate, "finding": finding,
-                                       "response_status": resp.status_code})
-
-    return {
-        "iterations": iterations,
-        "status_counter": status_counter,
-        "crashes": crashes,
-        "vuln_findings": vuln_findings,
-    }
+def check_product_response(request_body: dict, resp: requests.Response, had_auth: bool) -> str | None:
+    """Oracle cho POST/PUT /api/products (BUG-04 thieu authorization + gia tri vo ly)."""
+    if resp.status_code not in (200, 201):
+        return None
+    if not had_auth:
+        return "Tao/sua san pham THANH CONG ma KHONG can token xac thuc"
+    price = request_body.get("price")
+    if isinstance(price, (int, float)) and price < 0:
+        return f"Gia san pham am duoc chap nhan: {price}"
+    return None
 
 
 def _safe_json(resp: requests.Response):
@@ -195,9 +201,120 @@ def _safe_json(resp: requests.Response):
         return resp.text[:500]
 
 
+def _save_crash(name: str, record: dict, crashes: list):
+    crash_id = len(crashes)
+    crash_path = os.path.join(CRASH_DIR, f"blackbox_crash_{crash_id}.json")
+    with open(crash_path, "w", encoding="utf-8") as f:
+        json.dump(record, f, ensure_ascii=False, indent=2)
+    record["saved_to"] = crash_path
+    crashes.append(record)
+
+
+def fuzz(iterations: int = 3500, seed: int = 42) -> dict:
+    rng = random.Random(seed)
+    session = requests.Session()
+
+    seed_login = load_seed("seed_login_valid.json")
+    seed_order = load_seed("seed_order_valid.json")
+    seed_status = load_seed("seed_order_status_valid.json")
+    seed_user_update = load_seed("seed_user_update_valid.json")
+    seed_product = load_seed("seed_product_valid.json")
+
+    # --- Chuan bi mot lan (khong tinh la fuzz input): dang nhap, tao 1
+    # don hang that de co :id, lay _id cua user self/victim, lay id san
+    # pham co san. ---
+    login_resp = session.post(f"{BASE_URL}/api/auth/login", json=seed_login, timeout=5)
+    token = login_resp.json().get("token")
+    auth_headers = {"Authorization": f"Bearer {token}"}
+
+    order_resp = session.post(f"{BASE_URL}/api/orders", json=seed_order, headers=auth_headers, timeout=5)
+    order_id = order_resp.json().get("order", {}).get("_id")
+
+    users_resp = session.get(f"{BASE_URL}/api/users", timeout=5)
+    users = users_resp.json()
+    self_user = next((u for u in users if u.get("email") == SEED_EMAIL), None)
+    victim_user = next((u for u in users if u.get("email") == VICTIM_EMAIL), None)
+    self_id = self_user["_id"] if self_user else None
+    victim_id = victim_user["_id"] if victim_user else None
+
+    products_resp = session.get(f"{BASE_URL}/api/products", timeout=5)
+    products = products_resp.json()
+    product_id = products[0]["id"] if products else 1
+
+    crashes: list[dict] = []
+    vuln_findings: list[dict] = []
+    status_counter: dict[str, int] = {}
+
+    targets = [
+        {"name": "login", "method": "POST", "url": f"{BASE_URL}/api/auth/login",
+         "seed": seed_login, "fixed_headers": {}, "toggle_auth": False},
+        {"name": "orders", "method": "POST", "url": f"{BASE_URL}/api/orders",
+         "seed": seed_order, "fixed_headers": auth_headers, "toggle_auth": False},
+        {"name": "order_status", "method": "PUT", "url": f"{BASE_URL}/api/orders/{order_id}",
+         "seed": seed_status, "fixed_headers": auth_headers, "toggle_auth": True},
+        {"name": "user_update_self", "method": "PUT", "url": f"{BASE_URL}/api/users/{self_id}",
+         "seed": seed_user_update, "fixed_headers": auth_headers, "toggle_auth": True},
+        {"name": "user_update_victim", "method": "PUT", "url": f"{BASE_URL}/api/users/{victim_id}",
+         "seed": seed_user_update, "fixed_headers": auth_headers, "toggle_auth": True},
+        {"name": "product_create", "method": "POST", "url": f"{BASE_URL}/api/products",
+         "seed": seed_product, "fixed_headers": auth_headers, "toggle_auth": True},
+        {"name": "product_update", "method": "PUT", "url": f"{BASE_URL}/api/products/{product_id}",
+         "seed": seed_product, "fixed_headers": auth_headers, "toggle_auth": True},
+    ]
+
+    for i in range(iterations):
+        target = targets[i % len(targets)]
+        candidate = mutate_json(target["seed"], rng)
+        # Voi target co toggle_auth=True: xen ke co/khong co token, de
+        # kiem tra CA logic nghiep vu (co token) LAN thieu-authorization
+        # (khong token). login/orders giu nguyen hanh vi cu (khong doi).
+        use_auth = True if not target["toggle_auth"] else (i % 2 == 0)
+        headers = target["fixed_headers"] if use_auth else {}
+
+        try:
+            resp = session.request(target["method"], target["url"], json=candidate, headers=headers, timeout=5)
+        except requests.exceptions.RequestException as e:
+            _save_crash(target["name"], {"target": target["name"], "input": candidate, "error": str(e)}, crashes)
+            crashes[-1].update({"iteration": i, "type": "CONNECTION_ERROR"})
+            continue
+
+        key = f"{target['name']}:{resp.status_code}"
+        status_counter[key] = status_counter.get(key, 0) + 1
+
+        if resp.status_code == 500:
+            _save_crash(target["name"], {"target": target["name"], "input": candidate,
+                                          "status": resp.status_code, "body": _safe_json(resp)}, crashes)
+            crashes[-1].update({"iteration": i, "type": "HTTP_500"})
+
+        finding = None
+        if target["name"] == "orders":
+            finding = check_order_response(candidate, resp)
+        elif target["name"] == "order_status":
+            finding = check_order_status_response(seed_status["status"], candidate, resp, had_auth=use_auth)
+        elif target["name"] == "user_update_self":
+            finding = check_user_update_response(candidate, resp, had_auth=use_auth, target_is_self=True)
+        elif target["name"] == "user_update_victim":
+            finding = check_user_update_response(candidate, resp, had_auth=use_auth, target_is_self=False)
+        elif target["name"] in ("product_create", "product_update"):
+            finding = check_product_response(candidate, resp, had_auth=use_auth)
+
+        if finding:
+            vuln_findings.append({"iteration": i, "target": target["name"], "input": candidate,
+                                   "finding": finding, "response_status": resp.status_code,
+                                   "had_auth": use_auth})
+
+    return {
+        "iterations": iterations,
+        "status_counter": status_counter,
+        "crashes": crashes,
+        "vuln_findings": vuln_findings,
+        "setup": {"order_id": order_id, "self_id": self_id, "victim_id": victim_id, "product_id": product_id},
+    }
+
+
 if __name__ == "__main__":
     t0 = time.time()
-    result = fuzz(iterations=2000, seed=42)
+    result = fuzz(iterations=3500, seed=42)
     elapsed = time.time() - t0
     print(f"=== Fuzzing Hop den: {result['iterations']} lan thu trong {elapsed:.1f}s ===")
     print("Phan bo status code:", result["status_counter"])
@@ -205,8 +322,8 @@ if __name__ == "__main__":
     for c in result["crashes"][:10]:
         print(f"  Lan thu {c['iteration']} [{c['target']}] type={c['type']} -> {c['saved_to']}")
     print(f"\nSo phat hien vi pham nghiep vu (VULN_CONFIRMED): {len(result['vuln_findings'])}")
-    for v in result["vuln_findings"][:10]:
-        print(f"  Lan thu {v['iteration']}: {v['finding']}")
+    for v in result["vuln_findings"][:15]:
+        print(f"  Lan thu {v['iteration']} [{v['target']}] auth={v['had_auth']}: {v['finding']}")
 
     out_path = os.path.join(BASE_DIR, "results", "ch4_blackbox_results.json")
     _last_err = None

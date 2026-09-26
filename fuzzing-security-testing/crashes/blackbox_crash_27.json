@@ -9,7 +9,6 @@
         "quantity": 2
       }
     ],
-    "totalAmount": 400000,
     "shippingInfo": {
       "fullName": "Nguyen Van A",
       "phone": "0900000000",
@@ -18,12 +17,12 @@
     "paymentMethod": "COD",
     "discountCode": "",
     "discountAmount": 0,
-    "shippingFee": "%s%s%s%s"
+    "shippingFee": 0
   },
   "status": 500,
   "body": {
     "message": "Lỗi server khi tạo đơn hàng",
-    "error": "Cast to Number failed for value \"\"%s%s%s%s\"\" at path \"shippingFee\"",
-    "details": "CastError: Cast to Number failed for value \"\"%s%s%s%s\"\" at path \"shippingFee\""
+    "error": "Order validation failed: totalAmount: Path `totalAmount` is required.",
+    "details": "ValidationError: Order validation failed: totalAmount: Path `totalAmount` is required."
   }
 }

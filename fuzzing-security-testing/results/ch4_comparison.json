@@ -1,25 +1,43 @@
 {
   "black_box": {
-    "iterations": 2000,
-    "crashes_found": 125,
-    "crash_rate_percent": 6.25,
-    "vuln_findings": 245,
+    "iterations": 3500,
+    "crashes_found": 240,
+    "crash_rate_percent": 6.86,
+    "vuln_findings": 1572,
     "uses_coverage_feedback": false,
     "targets": [
       "login",
-      "orders"
+      "orders",
+      "order_status",
+      "user_update_self",
+      "user_update_victim",
+      "product_create",
+      "product_update"
     ]
   },
   "white_box": {
-    "iterations": 251,
-    "crashes_found": 35,
-    "crash_rate_percent": 13.94,
-    "vuln_findings": 40,
+    "iterations": 276,
+    "crashes_found": 31,
+    "crash_rate_percent": 11.23,
+    "vuln_findings": 135,
     "uses_coverage_feedback": true,
-    "total_lines_covered_in_index_js": 533,
-    "new_coverage_events": 8,
+    "total_lines_covered_in_index_js": 2827,
+    "per_target_lines_covered": {
+      "orders": 527,
+      "order_status": 544,
+      "user_update_self": 432,
+      "user_update_victim": 432,
+      "product_create": 450,
+      "product_update": 442
+    },
+    "new_coverage_events": 14,
     "targets": [
-      "orders"
+      "orders",
+      "order_status",
+      "user_update_self",
+      "user_update_victim",
+      "product_create",
+      "product_update"
     ]
   }
 }

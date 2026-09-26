@@ -1,29 +1,14 @@
 {
-  "target": "orders",
+  "target": "product_update",
   "input": {
-    "products": [
-      {
-        "productId": 1,
-        "name": "Ao thun",
-        "price": 200000,
-        "quantity": 2
-      }
-    ],
-    "totalAmount": 400000,
-    "shippingInfo": {
-      "fullName": "Nguyen Van A",
-      "phone": "0900000000",
-      "address": "123 Duong ABC"
-    },
-    "paymentMethod": "COD",
-    "discountCode": "",
-    "discountAmount": "\u0000\u0001",
-    "shippingFee": 0
+    "name": "Quan jean",
+    "price": 350000,
+    "stock": "not_an_object",
+    "totalStock": 5,
+    "category": "Quan"
   },
   "status": 500,
   "body": {
-    "message": "Lỗi server khi tạo đơn hàng",
-    "error": "Cast to Number failed for value \"\"\\u0000\\u0001\"\" at path \"discountAmount\"",
-    "details": "CastError: Cast to Number failed for value \"\"\\u0000\\u0001\"\" at path \"discountAmount\""
+    "error": "Cast to Number failed for value \"\"not_an_object\"\" at path \"stock\""
   }
 }

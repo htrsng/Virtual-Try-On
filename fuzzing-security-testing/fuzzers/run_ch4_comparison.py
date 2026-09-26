@@ -1,6 +1,6 @@
 """
 Chuong 4 - Tong hop va so sanh dinh luong Black-box vs White-box fuzzing,
-dung cho bang so sanh trong bao cao (yeu cau bat buoc theo slide huong dan).
+dung cho bang so sanh trong bao cao.
 """
 import json, os, time
 
@@ -46,7 +46,8 @@ comparison = {
         "crash_rate_percent": round(100 * len(bb["crashes"]) / bb["iterations"], 2),
         "vuln_findings": len(bb["vuln_findings"]),
         "uses_coverage_feedback": False,
-        "targets": ["login", "orders"],
+        "targets": ["login", "orders", "order_status", "user_update_self",
+                    "user_update_victim", "product_create", "product_update"],
     },
     "white_box": {
         "iterations": wb["iterations_used"],
@@ -55,8 +56,9 @@ comparison = {
         "vuln_findings": len(wb["vuln_findings"]),
         "uses_coverage_feedback": True,
         "total_lines_covered_in_index_js": wb["total_lines_covered"],
-        "new_coverage_events": len(wb["new_coverage_events"]),
-        "targets": ["orders"],
+        "per_target_lines_covered": {t: s["lines_covered"] for t, s in wb["per_target"].items()},
+        "new_coverage_events": wb["new_coverage_events"],
+        "targets": list(wb["per_target"].keys()),
     },
 }
 out = os.path.join(BASE, "results", "ch4_comparison.json")

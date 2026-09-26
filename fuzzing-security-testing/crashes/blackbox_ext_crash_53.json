@@ -1,0 +1,16 @@
+{
+  "target": "product_create",
+  "input": {
+    "name": "Quan jean",
+    "price": 350000,
+    "stock": "<script>alert(1)</script>",
+    "totalStock": 5,
+    "category": "Quan"
+  },
+  "status": 500,
+  "body": {
+    "error": "Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"stock\""
+  },
+  "iteration": 778,
+  "type": "HTTP_500"
+}

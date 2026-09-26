@@ -18,12 +18,12 @@
     "paymentMethod": "COD",
     "discountCode": "",
     "discountAmount": 0,
-    "shippingFee": "not_an_object"
+    "shippingFee": "NaN"
   },
   "status": 500,
   "body": {
     "message": "Lỗi server khi tạo đơn hàng",
-    "error": "Cast to Number failed for value \"\"not_an_object\"\" at path \"shippingFee\"",
-    "details": "CastError: Cast to Number failed for value \"\"not_an_object\"\" at path \"shippingFee\""
+    "error": "Cast to Number failed for value \"\"NaN\"\" at path \"shippingFee\"",
+    "details": "CastError: Cast to Number failed for value \"\"NaN\"\" at path \"shippingFee\""
   }
 }

@@ -1,4 +1,5 @@
 {
+  "target": "orders",
   "input": {
     "products": [
       {

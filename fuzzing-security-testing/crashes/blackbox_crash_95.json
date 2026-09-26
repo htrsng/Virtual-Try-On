@@ -17,13 +17,13 @@
     },
     "paymentMethod": "COD",
     "discountCode": "",
-    "discountAmount": {},
+    "discountAmount": "🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂",
     "shippingFee": 0
   },
   "status": 500,
   "body": {
     "message": "Lỗi server khi tạo đơn hàng",
-    "error": "Cast to Number failed for value \"{}\" at path \"discountAmount\"",
-    "details": "CastError: Cast to Number failed for value \"{}\" at path \"discountAmount\""
+    "error": "Cast to Number failed for value \"\"🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂\"\" at path \"discountAmount\"",
+    "details": "CastError: Cast to Number failed for value \"\"🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂\"\" at path \"discountAmount\""
   }
 }

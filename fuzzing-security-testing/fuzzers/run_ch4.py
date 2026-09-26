@@ -1,11 +1,14 @@
 """
 Chuong 4 - Script dieu phoi: chay Black-box fuzzer, White-box fuzzer,
-roi tong hop bang so sanh dinh luong. Khop phong cach run_ch1.py /
-run_ch2.py (script "runner" tong hop cho tung chuong).
+roi tong hop bang so sanh dinh luong. Ca 2 fuzzer da duoc gop du 7
+target (2 module goc + 5 module bo sung: OrderStatus, UserAdmin,
+Product).
 
 Luu y: black-box fuzzer can server dang chay (vd: `node index.js`
 trong thu muc node_harness/, hoac server that cua ban tren
 localhost:5050 - xem TARGET_URL trong blackbox_fuzzer.py).
+White-box fuzzer KHONG can server dang chay rieng - no tu spawn tien
+trinh Node moi cho moi lan thu qua single_run_harness.js.
 """
 import subprocess
 import sys
