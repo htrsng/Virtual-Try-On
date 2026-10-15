@@ -1,0 +1,20 @@
+{
+  "iteration": 2819,
+  "target": "product_create",
+  "input": {
+    "name": [
+      1,
+      2,
+      3
+    ],
+    "price": 350000,
+    "stock": 5,
+    "totalStock": 5,
+    "category": "Quan"
+  },
+  "type": "HTTP_5XX",
+  "status": 500,
+  "body": {
+    "error": "Cast to string failed for value [1,2,3] (type object) at path \"name\""
+  }
+}

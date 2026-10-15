@@ -1,0 +1,31 @@
+{
+  "iteration": 3249,
+  "target": "orders",
+  "input": {
+    "products": [
+      {
+        "productId": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "quantity": 2
+      }
+    ],
+    "totalAmount": "%s%s%s%s",
+    "shippingInfo": {
+      "fullName": "Nguyen Van A",
+      "phone": "0900000000",
+      "address": "123 Duong ABC"
+    },
+    "paymentMethod": "COD",
+    "discountCode": "",
+    "discountAmount": 0,
+    "shippingFee": 0
+  },
+  "type": "HTTP_5XX",
+  "status": 500,
+  "body": {
+    "message": "Lỗi server khi tạo đơn hàng",
+    "error": "Cast to Number failed for value \"\"%s%s%s%s\"\" at path \"totalAmount\"",
+    "details": "CastError: Cast to Number failed for value \"\"%s%s%s%s\"\" at path \"totalAmount\""
+  }
+}

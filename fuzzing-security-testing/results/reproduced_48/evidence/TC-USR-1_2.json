@@ -1,0 +1,93 @@
+{
+  "case": {
+    "id": "TC-USR-1:None",
+    "testcase": "TC-USR-1",
+    "steps": [
+      {
+        "url": "/api/users/{victim}",
+        "body": {
+          "fullName": "Fuzz probe"
+        },
+        "actor": null,
+        "method": "PUT"
+      }
+    ],
+    "check": {
+      "kind": "status",
+      "allowed": [
+        401,
+        403
+      ]
+    }
+  },
+  "status": "FAIL",
+  "evidence": {
+    "ok": true,
+    "environment": "node_harness_stub",
+    "limitations": [
+      "Datastore and services are simulated; conclusions apply to this harness only."
+    ],
+    "catalog": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6ad0ffea4c901c2c21832d3b",
+        "createdAt": "2026-10-15T16:31:38.080Z"
+      }
+    ],
+    "observations": [
+      {
+        "method": "PUT",
+        "url": "/api/users/000000000000000000000002",
+        "actor": null,
+        "input": {
+          "fullName": "Fuzz probe"
+        },
+        "status": 200,
+        "body": {
+          "__v": 1,
+          "_id": "000000000000000000000002",
+          "email": "victim@test.com",
+          "role": "user",
+          "fullName": "Fuzz probe",
+          "phone": "",
+          "address": "",
+          "city": "",
+          "district": "",
+          "ward": "",
+          "addresses": [],
+          "createdAt": "2026-10-15T16:31:38.080Z"
+        },
+        "elapsed_ms": 4.593000000000075,
+        "entity_after": null
+      }
+    ],
+    "password_audit": null,
+    "final_products": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6ad0ffea4c901c2c21832d3b",
+        "createdAt": "2026-10-15T16:31:38.080Z"
+      }
+    ],
+    "notifications": null,
+    "login_counter": null,
+    "initial_entity": null,
+    "final_entity": null,
+    "actor_ids": {
+      "self": "000000000000000000000001"
+    }
+  },
+  "elapsed_seconds": 0.635491600000023
+}

@@ -1,3 +1,4 @@
+const { versionedUpdate } = require("./concurrency");
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -280,11 +281,8 @@ app.get("/api/products/:id/stock", async (req, res) => {
 app.put("/api/products/:id", async (req, res) => {
   try {
     const inventory = normalizeProductInventory(req.body);
-    const updatedProduct = await ProductModel.findOneAndUpdate(
-      buildProductLookupFilter(req.params.id),
-      { $set: { ...req.body, ...inventory } },
-      { new: true },
-    );
+    const updatedProduct = await versionedUpdate(ProductModel,
+      buildProductLookupFilter(req.params.id), req.body, inventory);
 
     if (!updatedProduct) {
       return res.status(404).json({ error: "Không tìm thấy sản phẩm" });
@@ -292,7 +290,7 @@ app.put("/api/products/:id", async (req, res) => {
 
     res.json(updatedProduct);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(err.status || 500).json({ error: err.message });
   }
 });
 
@@ -415,6 +413,7 @@ app.post("/api/auth/login", async (req, res) => {
     // Kiểm tra mật khẩu
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
+      await UserModel.findOneAndUpdate({ _id: user._id }, { $inc: { failedLoginCount: 1 } });
       return res
         .status(401)
         .json({ message: "Email hoặc mật khẩu không đúng" });
@@ -564,14 +563,14 @@ app.delete("/api/users/:id", async (req, res) => {
 // 3. Sửa quyền (Admin/User)
 app.put("/api/users/:id", async (req, res) => {
   try {
-    const updatedUser = await UserModel.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true },
-    ).select("-password");
-    res.json(updatedUser);
+    const updatedUser = await versionedUpdate(UserModel, { _id: req.params.id }, req.body);
+    if (!updatedUser) return res.status(404).json({ error: "User not found" });
+    const safeUser = updatedUser.toObject ? updatedUser.toObject() : { ...updatedUser };
+    delete safeUser.password;
+    delete safeUser.failedLoginCount;
+    res.json(safeUser);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(err.status || 500).json({ error: err.message });
   }
 });
 
@@ -809,11 +808,8 @@ app.get("/api/orders", async (req, res) => {
 app.put("/api/orders/:id", async (req, res) => {
   try {
     const { status } = req.body;
-    const updatedOrder = await OrderModel.findByIdAndUpdate(
-      req.params.id,
-      { status },
-      { new: true },
-    );
+    const updatedOrder = await versionedUpdate(OrderModel, { _id: req.params.id }, { status, __v: req.body.__v });
+    if (!updatedOrder) return res.status(404).json({ error: "Order not found" });
 
     // Gửi thông báo cho user
     if (updatedOrder && updatedOrder.userId) {
@@ -855,7 +851,7 @@ app.put("/api/orders/:id", async (req, res) => {
 
     res.json(updatedOrder);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(err.status || 500).json({ error: err.message });
   }
 });
 

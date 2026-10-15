@@ -1,0 +1,12 @@
+{
+  "iteration": 2550,
+  "target": "order_status",
+  "input": {
+    "status": []
+  },
+  "type": "HTTP_5XX",
+  "status": 500,
+  "body": {
+    "error": "Cast to string failed for value [] (type object) at path \"status\""
+  }
+}

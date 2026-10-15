@@ -32,7 +32,7 @@ loadEnvFile(path.join(__dirname, "..", ".env"));
 module.exports = {
     JWT_SECRET: process.env.JWT_SECRET || "your-secret-key-change-this-in-production",
     MONGODB_URI: process.env.MONGODB_URI,
-    EMAIL_USER: process.env.EMAIL_USER || "thanhtb2005@gmail.com",
-    EMAIL_PASS: process.env.EMAIL_PASS || "xndu nxcu wuea aizn",
+    EMAIL_USER: process.env.EMAIL_USER || "",
+    EMAIL_PASS: process.env.EMAIL_PASS || "",
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,
 };

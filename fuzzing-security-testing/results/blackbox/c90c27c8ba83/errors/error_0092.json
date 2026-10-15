@@ -1,0 +1,16 @@
+{
+  "iteration": 1398,
+  "target": "product_create",
+  "input": {
+    "name": "Quan jean",
+    "price": "\u0000\u0001",
+    "stock": 5,
+    "totalStock": 5,
+    "category": "Quan"
+  },
+  "type": "HTTP_5XX",
+  "status": 500,
+  "body": {
+    "error": "Cast to Number failed for value \"\"\\u0000\\u0001\"\" at path \"price\""
+  }
+}

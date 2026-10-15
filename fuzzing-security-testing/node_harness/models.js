@@ -106,6 +106,7 @@ function castStringOrThrow(path, value) {
 
 // [FIX-3] Ep kieu ObjectId cho tham so :id. Tra ve chuoi id hop le.
 function castObjectIdOrThrow(value, path = "_id") {
+  if (value instanceof mongoose.Types.ObjectId) return String(value);
   if (value === null || typeof value === "object" || value === undefined) {
     throw new FakeTypedCastError("ObjectId", path, value);
   }
@@ -180,6 +181,23 @@ function chainable(resolver) {
 // ---------------- UserModel ----------------
 const _users = new Map(); // id(string) -> user object
 
+function atomicUpdate(store, filter, update, fields, cast = x => x) {
+  return chainable(() => {
+    const id = filter._id === undefined ? undefined : castObjectIdOrThrow(filter._id);
+    const doc = Array.from(store.values()).find(d =>
+      (id === undefined || String(d._id) === id) &&
+      (filter.email === undefined || d.email === filter.email) &&
+      (filter.__v === undefined || (d.__v || 0) === filter.__v));
+    if (!doc) return null;
+    const patch = cast(pickFields(update.$set || {}, fields));
+    for (const [key, amount] of Object.entries(update.$inc || {})) {
+      if (['__v','failedLoginCount'].includes(key)) patch[key] = (doc[key] || 0) + amount;
+    }
+    Object.assign(doc, patch);
+    return doc;
+  });
+}
+
 // Cac truong cua UserSchema (theo cac truong ma constructor ben duoi su dung).
 const USER_FIELDS = [
   "email", "password", "role", "fullName", "phone", "address",
@@ -189,11 +207,13 @@ const USER_FIELDS = [
 const UserModel = {
   async findOne(filter = {}) {
     for (const u of _users.values()) {
+      if (filter._id !== undefined && String(u._id) !== castObjectIdOrThrow(filter._id)) continue;
       if (filter.email !== undefined && u.email !== filter.email) continue;
       return u;
     }
     return null;
   },
+  findOneAndUpdate(filter, update) { return atomicUpdate(_users, filter, update, USER_FIELDS); },
   findById(id) {
     return chainable(() => _users.get(castObjectIdOrThrow(id)) || null);
   },
@@ -224,6 +244,8 @@ const UserModel = {
 };
 
 function UserModelCtor(data) {
+  this.__v = 0;
+  this.failedLoginCount = 0;
   this._id = newId();
   this.email = data.email;
   this.password = data.password;
@@ -255,6 +277,12 @@ Object.assign(UserModelCtor, UserModel);
 const _orders = new Map();
 
 const OrderModelStatics = {
+  findOneAndUpdate(filter, update) {
+    return atomicUpdate(_orders, filter, update, ['status'], patch => {
+      if (patch.status !== undefined) patch.status = castStringOrThrow('status', patch.status);
+      return patch;
+    });
+  },
   findById(id) {
     return chainable(() => _orders.get(castObjectIdOrThrow(id)) || null);
   },
@@ -269,6 +297,7 @@ const OrderModelStatics = {
   },
   async findOne(filter = {}) {
     for (const o of _orders.values()) {
+      if (filter._id !== undefined && String(o._id) !== castObjectIdOrThrow(filter._id)) continue;
       if (filter.userId !== undefined && String(o.userId) !== String(filter.userId)) continue;
       return o;
     }
@@ -301,6 +330,7 @@ const OrderModelStatics = {
 };
 
 function OrderModelCtor(data) {
+  this.__v = 0;
   this._id = newId();
   this.userId = data.userId;
   this.products = data.products;
@@ -365,6 +395,7 @@ function castProductFields(obj) {
 //   {id: <so>}
 //   {id: {$type: "number"}}
 function productMatches(p, filter = {}) {
+  if (filter.__v !== undefined && (p.__v || 0) !== filter.__v) return false;
   if (filter._id !== undefined) {
     if (String(p._id) !== castObjectIdOrThrow(filter._id)) return false;
   }
@@ -419,6 +450,7 @@ const ProductModelStatics = {
       const src = update.$set || update;
       const patch = castProductFields(pickFields(src, PRODUCT_FIELDS));
       Object.assign(p, patch);
+      if (update.$inc?.__v) p.__v = (p.__v || 0) + update.$inc.__v;
       return p;
     });
   },
@@ -441,6 +473,7 @@ const ProductModelStatics = {
 };
 
 function ProductModelCtor(data) {
+  this.__v = 0;
   Object.assign(this, pickFields(data || {}, PRODUCT_FIELDS));
   this._id = newId();
   this.createdAt = new Date();
@@ -470,6 +503,8 @@ function NotificationModelCtor(data) {
   this._id = newId();
   this.save = async () => { _notifications.push(this); return this; };
 }
+NotificationModelCtor.find = (filter = {}) => chainable(() =>
+  _notifications.filter(n => Object.entries(filter).every(([key, value]) => String(n[key]) === String(value))));
 
 // ---------------- UsedCouponModel ----------------
 const _usedCoupons = new Map();
@@ -545,6 +580,8 @@ const SEED_VICTIM_PASSWORD = "Victim123!";
     role: "user",
     fullName: "Fuzz Test User",
   });
+  // Stable fixture identities keep JWT subjects valid across isolated Node runs.
+  u._id = new mongoose.Types.ObjectId("000000000000000000000001");
   _users.set(u._id.toString(), u);
 
   // Dung cost thap (4) cho user phu de khong lam cham viec spawn tien
@@ -555,6 +592,7 @@ const SEED_VICTIM_PASSWORD = "Victim123!";
     role: "admin",
     fullName: "Fuzz Admin",
   });
+  admin._id = new mongoose.Types.ObjectId("000000000000000000000003");
   _users.set(admin._id.toString(), admin);
 
   const victim = new UserModelCtor({
@@ -563,6 +601,7 @@ const SEED_VICTIM_PASSWORD = "Victim123!";
     role: "user",
     fullName: "Victim User",
   });
+  victim._id = new mongoose.Types.ObjectId("000000000000000000000002");
   _users.set(victim._id.toString(), victim);
 
   const p = new ProductModelCtor({

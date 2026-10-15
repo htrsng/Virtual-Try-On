@@ -23,3 +23,29 @@ dist-ssr
 *.sln
 *.sw?
 server/.env
+
+# Local analysis tools and generated compiler/cache files
+.tmp-pdf-reader/
+fuzzing-security-testing/.runtime/
+__pycache__/
+*.pyc
+fuzzing-security-testing/results/**/*.o
+
+# Local credentials, temporary tools, and document lock files
+.env
+.env.*
+!.env.example
+!.env.sample
+~$*
+*.tmp
+.tmp-*/
+
+# Local backups and redundant development runs (keep final report evidence)
+fuzzing-security-testing/BaoCaoATPM/SaoLuu_TruocLamRo/
+fuzzing-security-testing/results/cleanup_*/
+fuzzing-security-testing/results/manual_mode_verification_auto/
+fuzzing-security-testing/results/spec_clarified_audit/
+fuzzing-security-testing/results/blackbox/*/
+!fuzzing-security-testing/results/blackbox/c90c27c8ba83/
+fuzzing-security-testing/results/whitebox/*/
+!fuzzing-security-testing/results/whitebox/98522cd13f6b/

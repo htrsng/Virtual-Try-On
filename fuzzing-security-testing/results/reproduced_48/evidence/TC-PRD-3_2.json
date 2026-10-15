@@ -1,0 +1,86 @@
+{
+  "case": {
+    "id": "TC-PRD-3:price-object",
+    "testcase": "TC-PRD-3",
+    "steps": [
+      {
+        "url": "/api/products/1",
+        "body": {
+          "price": {
+            "a": 1
+          }
+        },
+        "actor": "admin",
+        "method": "PUT"
+      }
+    ],
+    "check": {
+      "kind": "status",
+      "allowed": [
+        400,
+        422
+      ]
+    }
+  },
+  "status": "FAIL",
+  "evidence": {
+    "ok": true,
+    "environment": "node_harness_stub",
+    "limitations": [
+      "Datastore and services are simulated; conclusions apply to this harness only."
+    ],
+    "catalog": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6ad0fff2107b98ccf4fb1c1a",
+        "createdAt": "2026-10-15T16:31:46.481Z"
+      }
+    ],
+    "observations": [
+      {
+        "method": "PUT",
+        "url": "/api/products/1",
+        "actor": "admin",
+        "input": {
+          "price": {
+            "a": 1
+          }
+        },
+        "status": 500,
+        "body": {
+          "error": "Cast to Number failed for value \"{\"a\":1}\" at path \"price\""
+        },
+        "elapsed_ms": 4.879199999999969,
+        "entity_after": null
+      }
+    ],
+    "password_audit": null,
+    "final_products": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6ad0fff2107b98ccf4fb1c1a",
+        "createdAt": "2026-10-15T16:31:46.481Z"
+      }
+    ],
+    "notifications": null,
+    "login_counter": null,
+    "initial_entity": null,
+    "final_entity": null,
+    "actor_ids": {
+      "self": "000000000000000000000001"
+    }
+  },
+  "elapsed_seconds": 0.7334910000008676
+}

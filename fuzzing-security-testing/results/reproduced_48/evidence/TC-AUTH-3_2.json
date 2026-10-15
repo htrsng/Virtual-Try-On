@@ -1,0 +1,104 @@
+{
+  "case": {
+    "id": "TC-AUTH-3:enumeration",
+    "testcase": "TC-AUTH-3",
+    "steps": [
+      {
+        "url": "/api/auth/login",
+        "body": {
+          "email": "absent@test.com",
+          "password": "Fuzz123!"
+        },
+        "actor": null,
+        "method": "POST"
+      },
+      {
+        "url": "/api/auth/login",
+        "body": {
+          "email": "fuzzuser@test.com",
+          "password": "wrong"
+        },
+        "actor": null,
+        "method": "POST"
+      }
+    ],
+    "check": {
+      "kind": "same_response"
+    }
+  },
+  "status": "FAIL",
+  "evidence": {
+    "ok": true,
+    "environment": "node_harness_stub",
+    "limitations": [
+      "Datastore and services are simulated; conclusions apply to this harness only."
+    ],
+    "catalog": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6ad0ffd4b252a25f2f73779e",
+        "createdAt": "2026-10-15T16:31:16.243Z"
+      }
+    ],
+    "observations": [
+      {
+        "method": "POST",
+        "url": "/api/auth/login",
+        "actor": null,
+        "input": {
+          "email": "absent@test.com",
+          "password": "Fuzz123!"
+        },
+        "status": 404,
+        "body": {
+          "message": "Không tìm thấy tài khoản với email này"
+        },
+        "elapsed_ms": 3.657799999999952,
+        "entity_after": null
+      },
+      {
+        "method": "POST",
+        "url": "/api/auth/login",
+        "actor": null,
+        "input": {
+          "email": "fuzzuser@test.com",
+          "password": "wrong"
+        },
+        "status": 401,
+        "body": {
+          "message": "Email hoặc mật khẩu không đúng"
+        },
+        "elapsed_ms": 63.56200000000001,
+        "entity_after": null
+      }
+    ],
+    "password_audit": null,
+    "final_products": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6ad0ffd4b252a25f2f73779e",
+        "createdAt": "2026-10-15T16:31:16.243Z"
+      }
+    ],
+    "notifications": null,
+    "login_counter": null,
+    "initial_entity": null,
+    "final_entity": null,
+    "actor_ids": {
+      "self": "000000000000000000000001"
+    }
+  },
+  "elapsed_seconds": 0.7628717000006873
+}

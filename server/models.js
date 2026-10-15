@@ -92,6 +92,7 @@ ProductSchema.pre("save", function () {
 const ProductModel = mongoose.model("products", ProductSchema);
 
 const UserSchema = new mongoose.Schema({
+  failedLoginCount: { type: Number, default: 0, select: false },
   id: Number,
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
