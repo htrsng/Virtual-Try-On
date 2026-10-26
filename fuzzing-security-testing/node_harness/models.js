@@ -40,6 +40,7 @@
  */
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
+const branchTrace = require("./branch_trace");
 
 const newId = () => new mongoose.Types.ObjectId();
 
@@ -82,14 +83,15 @@ class FakeTypedCastError extends Error {
 // truoc day (khong ep kieu) se BO SOT - fuzzer se khong tim ra neu
 // thieu doan nay.
 function castNumberOrThrow(path, value) {
-  if (value === undefined || value === null) return value;
-  if (typeof value === "number") {
+  const trace = (id, condition) => path === "totalAmount" ? branchTrace.branch(id, condition) : condition;
+  if (trace("cast.empty", value === undefined || value === null)) return value;
+  if (trace("cast.number", typeof value === "number")) {
     if (!Number.isFinite(value)) throw new FakeCastError(path, value);
     return value;
   }
-  if (typeof value === "boolean") return value ? 1 : 0;
+  if (trace("cast.boolean", typeof value === "boolean")) return value ? 1 : 0;
   const n = Number(value);
-  if (Number.isNaN(n) || (typeof value === "object")) {
+  if (trace("cast.invalid", Number.isNaN(n) || (typeof value === "object"))) {
     throw new FakeCastError(path, value);
   }
   return n;
@@ -352,11 +354,12 @@ function OrderModelCtor(data) {
     if (this.userId === undefined || this.userId === null) {
       throw new FakeValidationError("Order validation failed: userId: Path `userId` is required.");
     }
-    if (this.totalAmount === undefined || this.totalAmount === null) {
+    if (branchTrace.branch("order.total.required", this.totalAmount === undefined || this.totalAmount === null)) {
       throw new FakeValidationError("Order validation failed: totalAmount: Path `totalAmount` is required.");
     }
     // Ep kieu Number giong Mongoose that - co the throw CastError (xem
-    // castNumberOrThrow o tren). Day la nguon "crash" (500) chinh ma
+    // castNumberOrThrow o tren). HTTP 500 la loi ung dung, khong tu
+    // chung minh crash tien trinh hay loi bo nho.
     // fuzzer o Chuong 4 duoc ky vong tim ra qua type confusion.
     this.totalAmount = castNumberOrThrow("totalAmount", this.totalAmount);
     this.discountAmount = castNumberOrThrow("discountAmount", this.discountAmount);

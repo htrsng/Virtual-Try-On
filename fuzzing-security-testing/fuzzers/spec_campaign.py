@@ -1,7 +1,7 @@
 """Kiểm thử API bán hàng: Excel → kịch bản tái hiện được → harness mô phỏng → bằng chứng.
 
 PASS/FAIL đánh giá các kịch bản API đã thực thi. Lỗi hạ tầng được ghi là ERROR.
-Các ví dụ minh họa C/Python/SMT được tách khỏi kết quả kiểm thử ứng dụng.
+Bộ đặc tả giữ đầy đủ testcase; bộ chạy hiện thực thi nhóm API đã có kịch bản.
 """
 from __future__ import annotations
 import argparse
@@ -42,20 +42,20 @@ def read_specs():
     return specs
 
 
-# Tách ví dụ C/Python khỏi phạm vi testcase API bán hàng.
+# Lấy các testcase trong bộ đặc tả API hiện tại.
 def application_cases(specs):
-    """Separate explicit generated-fixture tests without discarding source records."""
-    included, excluded = [], []
+    """Tách nhóm API có kịch bản khỏi testcase tài liệu chưa chạy trong campaign này."""
+    executable_ids = {case["testcase"] for case in scenarios(0, 7)}
+    included = []
+    excluded = []
     for spec in specs:
         for tc in spec["sheets"]["TestCase"]:
             entry = {"spec": spec["file"], "testcase": tc}
-            if any(label in tc["TieuDe"] for label in ("Hàm sinh mã C",
-                 "Hàm Python",
-                 "Kiểm tra tràn số")):
-                excluded.append({**entry,
-                     "reason": "Generated educational fixture, outside sales API scope"})
-            else:
+            if tc["ID"] in executable_ids:
                 included.append(entry)
+            else:
+                entry["reason"] = "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+                excluded.append(entry)
     return included, excluded
 
 
@@ -112,7 +112,7 @@ def write_report(output, summary):
          f"Environment: `{summary['environment']}`; seed: {summary['random_seed']}.",
         "",
              "PASS/FAIL apply only to executed API scenarios. ERROR is a setup/runner/oracle failure.",
-        "Generated memory/SMT fixtures are excluded from these counts; see excluded_testcases.json.",
+        "Scope: API input validation, authorization, stored data and order lifecycle.",
              "",
         "| Testcase | Title | Status | Executions |", "|---|---|---|---|"]
     for entry in summary["traceability"]:

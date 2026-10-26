@@ -1,0 +1,32 @@
+{
+  "environment": "node_harness_stub",
+  "seed": 7,
+  "elapsed_seconds": 11.493973200000255,
+  "blackbox_inputs": 21,
+  "blackbox_evidence": {
+    "error_categories": {
+      "APPLICATION_HTTP_ERROR": 1
+    },
+    "business_or_security_observations": 12,
+    "confirmed_memory_errors": null,
+    "confirmed_process_crashes": null,
+    "note": "Memory errors/process crashes are not measured by these HTTP oracles; timeout is not a confirmed hang."
+  },
+  "whitebox_status": "EXECUTED",
+  "whitebox_inputs": 16,
+  "whitebox_evidence": {
+    "error_categories": {
+      "APPLICATION_HTTP_ERROR": 6
+    },
+    "business_or_security_observations": 6,
+    "confirmed_memory_errors": null,
+    "confirmed_process_crashes": null,
+    "note": "Memory errors/process crashes are not measured by these HTTP oracles; timeout is not a confirmed hang."
+  },
+  "limitations": [
+    "Không có ứng viên không chứng minh hệ thống an toàn.",
+    "Khảo sát lân cận không chứng minh vùng biên đầy đủ.",
+    "HTTP 5xx không là crash; timeout chỉ là nghi vấn hang.",
+    "Chưa đo lỗi bộ nhớ bằng sanitizer trong luồng API."
+  ]
+}

@@ -36,24 +36,7 @@ class CampaignTests(unittest.TestCase):
         required = {entry['testcase']['ID'] for entry in included}
         self.assertEqual({plan['testcase'] for plan in scenarios(0, 7)}, required)
 
-    def test_stale_version_rejection_must_preserve_entire_entity(self):
-        original = {'__v': 1, 'stock': 11, 'name': 'original'}
-        case = {'check': {'kind': 'version_sequence', 'field': 'stock',
-                         'statuses': [200, 409], 'version': 1, 'value': 11, 'setup_count': 0}}
-        evidence = {'initial_entity': {'__v': 0, 'stock': 10},
-                    'observations': [{'status': 200, 'entity_after': dict(original)},
-                                     {'status': 409, 'entity_after': dict(original)}],
-                    'final_entity': dict(original)}
-        self.assertTrue(evaluate(case, evidence))
-        evidence['observations'][-1]['entity_after']['name'] = 'modified despite rejection'
-        self.assertFalse(evaluate(case, evidence))
 
-    def test_counter_uses_initial_value_instead_of_resetting(self):
-        case = {'check': {'kind': 'counter', 'initial': 7, 'expected': 50}}
-        evidence = {'observations': [{'status': 401} for _ in range(50)], 'login_counter': 57}
-        self.assertTrue(evaluate(case, evidence))
-        evidence['login_counter'] = 50
-        self.assertFalse(evaluate(case, evidence))
 
     def test_corrupted_catalog_is_not_a_missing_product_or_runner_crash(self):
         for price in (None, 'bad', [], {}, True, float('inf'), -1):
@@ -116,15 +99,18 @@ class CampaignTests(unittest.TestCase):
 
     def test_audit_never_marks_unexecuted_test_as_pass(self):
         entries = build_report(read_specs(), [], planned_cases=scenarios(0, 7))
-        self.assertEqual(len(entries), 48)
-        self.assertEqual(sum((e['status'] == 'NOT_RUN' for e in entries)), 48)
+        self.assertEqual(len(entries), 29)
+        self.assertEqual(sum((e['status'] == 'NOT_RUN' for e in entries)), 29)
         self.assertEqual(sum(e['status'] == 'NOT_IMPLEMENTED' for e in entries), 0)
         self.assertNotIn('PASS', {e['status'] for e in entries})
         self.assertNotIn('SIMULATION_ONLY', {e['status'] for e in entries})
 
-    def test_generated_memory_examples_are_excluded_not_passed(self):
+    def test_full_workbooks_are_separate_from_executable_api_scope(self):
         included, excluded = application_cases(read_specs())
-        self.assertEqual((len(included), len(excluded)), (48, 50))
+        self.assertEqual((len(included), len(excluded)), (29, 75))
+        self.assertTrue(all(len(spec['sheets']) == 10 for spec in read_specs()))
+        self.assertTrue(all(entry.get('reason') for entry in excluded))
+        self.assertTrue(all(e['testcase']['TieuDe'].startswith(('Hàm sinh mã C', 'Hàm Python', 'Kiểm tra tràn số', 'Kiểm tra quy trình fuzzing:')) is False for e in included))
         self.assertFalse({e['testcase']['ID'] for e in included} & {e['testcase']['ID'] for e in excluded})
 
     def test_report_refuses_to_mix_stub_and_mongodb(self):

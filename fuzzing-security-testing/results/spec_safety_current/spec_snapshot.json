@@ -1,0 +1,3157 @@
+[
+  {
+    "file": "Module_Auth_Login_spec.xlsx",
+    "sha256": "61b5820e07c8044aadcccbe8cb661ca8cf368ef16b8c6b8a2244a04736c59dfd",
+    "sheets": {
+      "ThongTin": [
+        {
+          "Truong": "name",
+          "GiaTri": "Auth_Login"
+        },
+        {
+          "Truong": "description",
+          "GiaTri": "Đặc tả yêu cầu module AUTH của hệ thống bán hàng. API được kiểm thử trên node_harness với datastore trong bộ nhớ; các request có thể chạy đồng thời. Cụm khóa và hàm C/Python/SMT là mô hình kiểm chứng minh họa theo template, gồm lỗi cấy có chủ đích; không phải bằng chứng lỗi bộ nhớ của Node.js. Đây là hợp đồng mong đợi để xây dựng testcase; mức đáp ứng của code được đánh giá riêng, không khẳng định mọi yêu cầu đã triển khai."
+        },
+        {
+          "Truong": "pham_vi_chinh",
+          "GiaTri": "An toàn phần mềm: seed và trạng thái ban đầu → đột biến input → quan sát lỗi/ngoại lệ/tài nguyên → tái hiện và lưu bằng chứng. 29 testcase API có kịch bản hiện tại; điều kiện bổ sung trong Excel là mục tiêu cần kiểm tra, không tự coi đã được oracle hiện tại bao phủ đầy đủ."
+        },
+        {
+          "Truong": "pham_vi_bo_tro",
+          "GiaTri": "Giữ 104 testcase và 10 sheet cho toàn bộ tài liệu. Hàm C/Python là mẫu lỗi cấy độc lập; số học là mô hình theo giả định. 75 testcase ngoài campaign API chưa được chạy lại. Crash/hang/lỗi bộ nhớ cần bằng chứng riêng; không đồng nhất với HTTP 500."
+        },
+        {
+          "Truong": "thu_tu_testcase",
+          "GiaTri": "API an toàn đầu vào/quyền/trạng thái → tái hiện và phân loại bằng chứng → mẫu ngoại lệ/bộ nhớ độc lập → concurrency/timing/số học → seed đối chứng. Trong từng nhóm: HIGH, MEDIUM, LOW. ID không thay đổi; kết quả thực tế lưu ở report, không điền vào KetQuaMongDoi."
+        }
+      ],
+      "YeuCauChucNang": [
+        {
+          "ID": "REQ-AUTH-1",
+          "MoTa": "Thiếu email hoặc password (rỗng sau khi trim) phải bị từ chối với HTTP 400, không được xử lý tiếp",
+          "DanhMuc": "functional",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-AUTH-2",
+          "MoTa": "Input email/password sai kiểu dữ liệu (object, array, number...) không được gây phản hồi HTTP 500 do đầu vào không hợp lệ",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-AUTH-3",
+          "MoTa": "Phản hồi khi tài khoản không tồn tại và sai mật khẩu không được phân biệt được từ bên ngoài (chống user enumeration)",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-AUTH-4",
+          "MoTa": "Bộ đếm failedLoginCount phải tăng nguyên tử cho mỗi lần sai mật khẩu của tài khoản tồn tại; từ 0, 50 request sai đồng thời phải cho 50 phản hồi 401 và bộ đếm bằng 50. Đây không phải cơ chế rate limiting.",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-AUTH-5",
+          "MoTa": "Trường role gán vào JWT token phải đúng bằng role lưu trong hệ thống, không được đọc từ dữ liệu client gửi lên",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-AUTH-6",
+          "MoTa": "Thời gian phản hồi giữa nhánh tài khoản không tồn tại và nhánh sai mật khẩu không được chênh lệch đủ để làm oracle timing side-channel",
+          "DanhMuc": "safety",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-AUTH-7",
+          "MoTa": "Mọi request đăng nhập đúng cú pháp JSON cuối cùng phải nhận được phản hồi (200/400/401/404), không được treo vô thời hạn",
+          "DanhMuc": "liveness",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-AUTH-8",
+          "MoTa": "Việc phân tích chuỗi email đầu vào ở tầng xử lý thấp không được vượt qua vùng đệm cố định dành cho nó Phạm vi: mô hình C minh họa sinh từ HamSinhMa, không phải quản lý bộ nhớ của API Node.js.",
+          "DanhMuc": "memory",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-AUTH-FIX-parse_login_email",
+          "MoTa": "Mô hình minh họa parse_login_email phải sinh mã C theo Loai=buffer_copy; công cụ phải nhận diện lỗi cấy buffer-overflow.",
+          "DanhMuc": "memory",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-AUTH-FIX-write_login_attempt_log",
+          "MoTa": "Mô hình minh họa write_login_attempt_log phải sinh mã C theo Loai=alloc_release; công cụ phải nhận diện lỗi cấy memory-leak.",
+          "DanhMuc": "memory",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-AUTH-FIX-close_login_session",
+          "MoTa": "Mô hình minh họa close_login_session phải sinh mã C theo Loai=alloc_release; công cụ phải nhận diện lỗi cấy double-free.",
+          "DanhMuc": "memory",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-AUTH-FIX-release_token_cache_buffer",
+          "MoTa": "Mô hình minh họa release_token_cache_buffer phải sinh mã C theo Loai=alloc_release; công cụ phải nhận diện lỗi cấy use-after-free.",
+          "DanhMuc": "memory",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-AUTH-FIX-login_attempt_delta",
+          "MoTa": "Mô hình login_attempt_delta phải sinh hàm C số học theo tham số khai báo để phân tích AST/SMT.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-AUTH-FIX-failed_login_ratio",
+          "MoTa": "Mô hình Python failed_login_ratio phải sinh đúng loại divide; fuzzing phải lưu input gây ngoại lệ khi tìm được. Không coi số lần chạy hữu hạn không có lỗi là chứng minh an toàn.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-AUTH-FIX-debug_bypass_code_check",
+          "MoTa": "Mô hình Python debug_bypass_code_check phải sinh đúng loại magic_value; fuzzing phải lưu input gây ngoại lệ khi tìm được. Không coi số lần chạy hữu hạn không có lỗi là chứng minh an toàn.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-AUTH-SMT-daily_failed_login_counter",
+          "MoTa": "Mô hình số học daily_failed_login_counter phải kiểm tra SAT của DieuKien và khả năng vượt int32 của BieuThucTran bằng hai phép kiểm tra riêng. Ngưỡng nghiệp vụ không phải ràng buộc tự động của phép kiểm tra overflow; không suy ra kiểu số Node.js từ mô hình này.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-AUTH-SMT-concurrent_session_counter",
+          "MoTa": "Mô hình số học concurrent_session_counter phải kiểm tra SAT của DieuKien và khả năng vượt int32 của BieuThucTran bằng hai phép kiểm tra riêng. Ngưỡng nghiệp vụ không phải ràng buộc tự động của phép kiểm tra overflow; không suy ra kiểu số Node.js từ mô hình này.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-AUTH-SMT-total_login_attempt_counter",
+          "MoTa": "Mô hình số học total_login_attempt_counter phải kiểm tra SAT của DieuKien và khả năng vượt int32 của BieuThucTran bằng hai phép kiểm tra riêng. Ngưỡng nghiệp vụ không phải ràng buộc tự động của phép kiểm tra overflow; không suy ra kiểu số Node.js từ mô hình này.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-AUTH-SMT-token_issued_counter",
+          "MoTa": "Mô hình số học token_issued_counter phải kiểm tra SAT của DieuKien và khả năng vượt int32 của BieuThucTran bằng hai phép kiểm tra riêng. Ngưỡng nghiệp vụ không phải ràng buộc tự động của phép kiểm tra overflow; không suy ra kiểu số Node.js từ mô hình này.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-AUTH-SMT-account_lockout_counter",
+          "MoTa": "Mô hình số học account_lockout_counter phải kiểm tra SAT của DieuKien và khả năng vượt int32 của BieuThucTran bằng hai phép kiểm tra riêng. Ngưỡng nghiệp vụ không phải ràng buộc tự động của phép kiểm tra overflow; không suy ra kiểu số Node.js từ mô hình này.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-AUTH-RATE-1",
+          "MoTa": "Yêu cầu mở rộng: tối đa 5 lần sai mật khẩu trong 60 giây trên cùng tài khoản; lần tiếp theo trả 429. Phải kiểm tra riêng cửa sổ thời gian và reset; bộ đếm 50 lần không chứng minh yêu cầu này đã đạt.",
+          "DanhMuc": "functional",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-AUTH-FUZZ-19",
+          "MoTa": "Bộ điều phối phải phân biệt timeout, lỗi setup và nghi vấn hang; chỉ xác nhận hang sau tái hiện và quan sát tiến trình mục tiêu.",
+          "DanhMuc": "functional",
+          "MucUuTien": "HIGH"
+        }
+      ],
+      "YeuCauPhiChucNang": [
+        {
+          "ID": "NFR-AUTH-1",
+          "MoTa": "Chênh lệch thời gian phản hồi trung bình giữa nhánh 404 và 401 phải nhỏ hơn 20ms trên mẫu 100 request",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "NFR-AUTH-2",
+          "MoTa": "Token JWT phát hành phải có thời hạn <= 7 ngày (hiện tại: 7d, cấu hình expiresIn)",
+          "MucUuTien": "LOW"
+        },
+        {
+          "ID": "NFR-AUTH-3",
+          "MoTa": "Hệ thống phải xử lý tối thiểu 200 yêu cầu đăng nhập đồng thời/giây trên phần cứng tham chiếu Đo 60 giây sau 10 giây làm nóng; ghi mức đồng thời, CPU/RAM, runtime và tỷ lệ lỗi. Chưa có phép đo thì ghi chưa đánh giá.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "NFR-AUTH-4",
+          "MoTa": "Tỷ lệ HTTP 500 trên tổng số request đăng nhập phải bằng 0% Đo trên 1000 request/module, seed=7, ghi riêng lỗi bộ chạy; báo cáo phân bố input và số HTTP 5xx.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "NFR-AUTH-5",
+          "MoTa": "Bộ đếm số lần đăng nhập sai (failed_login_counter) phải được cập nhật chính xác kể cả khi có >= 50 request đồng thời tới cùng 1 tài khoản",
+          "MucUuTien": "MEDIUM"
+        }
+      ],
+      "RangBuoc": [
+        {
+          "ID": "CON-AUTH-1",
+          "MoTa": "email và password phải là chuỗi khác rỗng sau khi trim; thiếu hoặc sai kiểu phải bị từ chối HTTP 400.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "CON-AUTH-2",
+          "MoTa": "Email phải được chuẩn hóa nhất quán khi tra cứu; phải có testcase cho chữ hoa/thường và khoảng trắng.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "CON-AUTH-3",
+          "MoTa": "JWT phải được ký bằng bí mật cấu hình ngoài mã nguồn; thời hạn dương và không quá 7 ngày.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "CON-AUTH-4",
+          "MoTa": "Giới hạn email là 254 ký tự trong hợp đồng API; mô hình C minh họa dùng KichThuocBuffer=254 theo template. Phải phân biệt ký tự API với byte và ký tự kết thúc chuỗi C.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "CON-AUTH-5",
+          "MoTa": "Mật khẩu dùng UTF-8; đầu vào bcrypt không vượt 72 byte, vượt giới hạn phải bị từ chối HTTP 400, không được cắt ngầm.",
+          "MucUuTien": "MEDIUM"
+        }
+      ],
+      "MoHinhTrangThai": [
+        {
+          "TrangThai": "start",
+          "KhoiTao": "x",
+          "Nhan": "begin",
+          "ChuyenDenCacTrangThai": "missing_params, checking_credentials"
+        },
+        {
+          "TrangThai": "missing_params",
+          "KhoiTao": null,
+          "Nhan": "rejected_400",
+          "ChuyenDenCacTrangThai": "missing_params"
+        },
+        {
+          "TrangThai": "checking_credentials",
+          "KhoiTao": null,
+          "Nhan": "internal_lookup",
+          "ChuyenDenCacTrangThai": "user_not_found, wrong_password, success"
+        },
+        {
+          "TrangThai": "user_not_found",
+          "KhoiTao": null,
+          "Nhan": "rejected_404",
+          "ChuyenDenCacTrangThai": "user_not_found"
+        },
+        {
+          "TrangThai": "wrong_password",
+          "KhoiTao": null,
+          "Nhan": "rejected_401",
+          "ChuyenDenCacTrangThai": "wrong_password"
+        },
+        {
+          "TrangThai": "success",
+          "KhoiTao": null,
+          "Nhan": "authenticated_200",
+          "ChuyenDenCacTrangThai": "success"
+        },
+        {
+          "TrangThai": "login_attempt_free",
+          "KhoiTao": "x",
+          "Nhan": "safe",
+          "ChuyenDenCacTrangThai": "login_attempt_main_holds, login_attempt_log_holds"
+        },
+        {
+          "TrangThai": "login_attempt_main_holds",
+          "KhoiTao": null,
+          "Nhan": "main_locked",
+          "ChuyenDenCacTrangThai": "login_attempt_free, login_attempt_conflict"
+        },
+        {
+          "TrangThai": "login_attempt_log_holds",
+          "KhoiTao": null,
+          "Nhan": "log_locked",
+          "ChuyenDenCacTrangThai": "login_attempt_free"
+        },
+        {
+          "TrangThai": "login_attempt_conflict",
+          "KhoiTao": null,
+          "Nhan": "main_locked, log_locked, violation",
+          "ChuyenDenCacTrangThai": "login_attempt_free"
+        }
+      ],
+      "ThuocTinhAnToan": [
+        {
+          "CongThucCTL": "AG(!violation)"
+        },
+        {
+          "CongThucCTL": "EF(main_locked)"
+        },
+        {
+          "CongThucCTL": "AG(rejected_400 -> !EX(internal_lookup))"
+        },
+        {
+          "CongThucCTL": "AG(internal_lookup -> AF(rejected_404 | rejected_401 | authenticated_200))"
+        }
+      ],
+      "LoaiTruLanNhau": [
+        {
+          "MenhDe1": "main_locked",
+          "MenhDe2": "log_locked"
+        },
+        {
+          "MenhDe1": "violation",
+          "MenhDe2": "safe"
+        },
+        {
+          "MenhDe1": "rejected_404",
+          "MenhDe2": "authenticated_200"
+        },
+        {
+          "MenhDe1": "rejected_400",
+          "MenhDe2": "authenticated_200"
+        },
+        {
+          "MenhDe1": "rejected_401",
+          "MenhDe2": "rejected_404"
+        }
+      ],
+      "HamSinhMa": [
+        {
+          "Ten": "parse_login_email",
+          "NgonNgu": "c",
+          "Loai": "buffer_copy",
+          "ThamSo": "email_input",
+          "KichThuocBuffer": 254,
+          "Loi": "buffer-overflow",
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "write_login_attempt_log",
+          "NgonNgu": "c",
+          "Loai": "alloc_release",
+          "ThamSo": "attempt_record",
+          "KichThuocBuffer": 32,
+          "Loi": "memory-leak",
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "close_login_session",
+          "NgonNgu": "c",
+          "Loai": "alloc_release",
+          "ThamSo": "session_handle",
+          "KichThuocBuffer": 8,
+          "Loi": "double-free",
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "release_token_cache_buffer",
+          "NgonNgu": "c",
+          "Loai": "alloc_release",
+          "ThamSo": "token_cache",
+          "KichThuocBuffer": 16,
+          "Loi": "use-after-free",
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "login_attempt_delta",
+          "NgonNgu": "c",
+          "Loai": "arithmetic",
+          "ThamSo": "success_count, fail_count",
+          "KichThuocBuffer": null,
+          "Loi": null,
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "failed_login_ratio",
+          "NgonNgu": "python",
+          "Loai": "divide",
+          "ThamSo": "failed_attempts, total_attempts",
+          "KichThuocBuffer": null,
+          "Loi": null,
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "debug_bypass_code_check",
+          "NgonNgu": "python",
+          "Loai": "magic_value",
+          "ThamSo": "code_a, code_b",
+          "KichThuocBuffer": null,
+          "Loi": null,
+          "GiaTriBiMat1": 1337,
+          "GiaTriBiMat2": 7331
+        }
+      ],
+      "KiemTraSoHoc": [
+        {
+          "Ten": "daily_failed_login_counter",
+          "BienSoNguyen": "failed_today, failed_backlog",
+          "DieuKien": "failed_today >= 0 and failed_backlog >= 0 and failed_today + failed_backlog > 32767",
+          "BieuThucTran": "failed_today + failed_backlog"
+        },
+        {
+          "Ten": "concurrent_session_counter",
+          "BienSoNguyen": "active_sessions, pending_sessions",
+          "DieuKien": "active_sessions >= 0 and pending_sessions >= 0 and active_sessions + pending_sessions > 65535",
+          "BieuThucTran": "active_sessions + pending_sessions"
+        },
+        {
+          "Ten": "total_login_attempt_counter",
+          "BienSoNguyen": "attempts_today, attempts_backlog",
+          "DieuKien": "attempts_today >= 0 and attempts_backlog >= 0 and attempts_today + attempts_backlog > 2000000000",
+          "BieuThucTran": "attempts_today + attempts_backlog"
+        },
+        {
+          "Ten": "token_issued_counter",
+          "BienSoNguyen": "tokens_issued_today, tokens_issued_backlog",
+          "DieuKien": "tokens_issued_today >= 0 and tokens_issued_backlog >= 0 and tokens_issued_today + tokens_issued_backlog > 65535",
+          "BieuThucTran": "tokens_issued_today + tokens_issued_backlog"
+        },
+        {
+          "Ten": "account_lockout_counter",
+          "BienSoNguyen": "locked_accounts, unlocking_accounts",
+          "DieuKien": "locked_accounts >= 0 and unlocking_accounts >= 0 and locked_accounts + unlocking_accounts > 32767",
+          "BieuThucTran": "locked_accounts + unlocking_accounts"
+        }
+      ],
+      "TestCase": [
+        {
+          "ID": "TC-AUTH-1",
+          "YeuCauLienQuan": "REQ-AUTH-1",
+          "TieuDe": "Xử lý an toàn trường xác thực bị thiếu hoặc rỗng",
+          "DieuKienTienQuyet": "Server đang chạy",
+          "CacBuoc": "Gửi POST /api/auth/login với body rỗng\nGửi với chỉ có email, thiếu password\nLưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",
+          "KetQuaMongDoi": "HTTP 400 cho input thiếu/rỗng; không trả stack trace hoặc phát hành token.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-AUTH-2",
+          "YeuCauLienQuan": "REQ-AUTH-2",
+          "TieuDe": "Ngoại lệ khi email/password sai kiểu dữ liệu",
+          "DieuKienTienQuyet": "Server đang chạy",
+          "CacBuoc": "Gửi email là object/array\nLặp lại 2000 lần bằng blackbox_fuzzer.py\nLưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",
+          "KetQuaMongDoi": "Không phát sinh HTTP 5xx do sai kiểu; không phát hành token cho thông tin không hợp lệ. HTTP 500 là lỗi ứng dụng, chưa phải crash tiến trình.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-AUTH-3",
+          "YeuCauLienQuan": "REQ-AUTH-3",
+          "TieuDe": "Rò rỉ sự tồn tại tài khoản qua phản hồi đăng nhập",
+          "DieuKienTienQuyet": "Có 1 tài khoản hợp lệ đã seed",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. So sánh mã HTTP và message giữa email sai vs password sai\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.\nLưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",
+          "KetQuaMongDoi": "Hai trường hợp tài khoản không tồn tại và sai mật khẩu có cùng mã trạng thái và thông báo công khai; không cấp token.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-AUTH-5",
+          "YeuCauLienQuan": "REQ-AUTH-5",
+          "TieuDe": "Chèn role vào input xác thực để nâng quyền",
+          "DieuKienTienQuyet": "Có tài khoản role=user và role=admin",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Đăng nhập bằng tài khoản role=user, decode token, kiểm tra role\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.\nLưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",
+          "KetQuaMongDoi": "Role trong token lấy từ dữ liệu tài khoản phía server, không lấy từ role do client gửi.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-AUTH-7",
+          "YeuCauLienQuan": "REQ-AUTH-8",
+          "TieuDe": "Khả năng xử lý email dài bất thường",
+          "DieuKienTienQuyet": "Server đang chạy",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Gửi email = chuỗi 5000 ký tự 'A'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.\nLưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",
+          "KetQuaMongDoi": "Với mẫu email 5000 ký tự, trả HTTP 400/404 có kiểm soát, không HTTP 5xx. Kết luận crash/hang cần bằng chứng tiến trình; không suy ra tràn buffer từ độ dài input.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-AUTH-19",
+          "YeuCauLienQuan": "REQ-AUTH-FUZZ-19",
+          "TieuDe": "Kiểm tra quy trình fuzzing: Phân biệt timeout với hang",
+          "DieuKienTienQuyet": "Có fixture đối chứng phản hồi sau 0,1 giây và fixture bị giữ chờ; có PID, log, bộ giám sát và giới hạn mỗi lượt T=2 giây.",
+          "CacBuoc": "1. Chạy fixture nhanh từ trạng thái sạch với T=2 giây.\n2. Chạy fixture bị giữ chờ cùng input ba lần, mỗi lần là tiến trình mới.\n3. Ghi PID, thời gian, mã thoát và phản hồi tiến trình sau timeout; kết thúc tiến trình thử còn sống.\n4. Loại trừ lỗi khởi động, cổng, kết nối và tải máy trước khi kết luận.",
+          "KetQuaMongDoi": "Fixture nhanh không bị đánh dấu hang. Fixture chờ được ghi TIMEOUT/SUSPECTED_HANG; không gọi là crash hoặc lỗi bộ nhớ. Chỉ nâng thành hang tái hiện khi có bằng chứng tiến trình và điều kiện kiểm soát; thiếu công cụ thì chưa đánh giá.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-AUTH-8",
+          "YeuCauLienQuan": "REQ-AUTH-FIX-parse_login_email",
+          "TieuDe": "Hàm sinh mã C: parse_login_email (buffer-overflow)",
+          "DieuKienTienQuyet": "Mẫu C parse_login_email, lỗi cấy buffer-overflow; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+          "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi parse_login_email, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy chuỗi ASCII dài B-1, B, B+1 với B=254 byte và đối chứng ngắn.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+          "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán buffer-overflow; mẫu lỗi cấy phải có chẩn đoán buffer-overflow tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-AUTH-11",
+          "YeuCauLienQuan": "REQ-AUTH-FIX-write_login_attempt_log",
+          "TieuDe": "Hàm sinh mã C: write_login_attempt_log (memory-leak)",
+          "DieuKienTienQuyet": "Mẫu C write_login_attempt_log, lỗi cấy memory-leak; có driver gọi hàm, compiler và LeakSanitizer hoặc công cụ kiểm tra leak tương đương hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+          "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi write_login_attempt_log, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+          "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán memory-leak; mẫu lỗi cấy phải có chẩn đoán memory-leak tại hàm mục tiêu từ LeakSanitizer hoặc công cụ phát hiện leak tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-AUTH-12",
+          "YeuCauLienQuan": "REQ-AUTH-FIX-close_login_session",
+          "TieuDe": "Hàm sinh mã C: close_login_session (double-free)",
+          "DieuKienTienQuyet": "Mẫu C close_login_session, lỗi cấy double-free; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+          "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi close_login_session, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+          "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán double-free; mẫu lỗi cấy phải có chẩn đoán double-free tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-AUTH-13",
+          "YeuCauLienQuan": "REQ-AUTH-FIX-release_token_cache_buffer",
+          "TieuDe": "Hàm sinh mã C: release_token_cache_buffer (use-after-free)",
+          "DieuKienTienQuyet": "Mẫu C release_token_cache_buffer, lỗi cấy use-after-free; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+          "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi release_token_cache_buffer, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+          "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán use-after-free; mẫu lỗi cấy phải có chẩn đoán use-after-free tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-AUTH-9",
+          "YeuCauLienQuan": "REQ-AUTH-FIX-failed_login_ratio",
+          "TieuDe": "Hàm Python: failed_login_ratio chia cho 0",
+          "DieuKienTienQuyet": "Đã sinh mã Python cho hàm failed_login_ratio Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy blackbox_fuzz() với total_attempts=0\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Mẫu lỗi cấy phát sinh ZeroDivisionError với input chia cho 0; lưu traceback, input và cách gọi. Đối chứng an toàn xử lý trường hợp này có kiểm soát. Ngoại lệ Python chưa chứng minh crash server hoặc lỗi bộ nhớ native; thiếu thực thi thì chưa xác minh.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "TC-AUTH-18",
+          "YeuCauLienQuan": "REQ-AUTH-4",
+          "TieuDe": "Bộ đếm tăng tương đối từ giá trị khác 0",
+          "DieuKienTienQuyet": "Seed failedLoginCount=7 trong datastore mô phỏng; tài khoản hợp lệ. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+          "CacBuoc": "1. Qua bước setup nội bộ của harness, đặt failedLoginCount=7. Gửi 50 login sai đồng thời; đọc bộ đếm nội bộ sau khi toàn bộ request hoàn tất. Không cần MongoDB.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: failedLoginCount ban đầu=7; 50 mật khẩu sai.",
+          "KetQuaMongDoi": "50 phản hồi 401; bộ đếm cuối=57, không reset hoặc mất cập nhật.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-AUTH-4",
+          "YeuCauLienQuan": "REQ-AUTH-4, NFR-AUTH-5",
+          "TieuDe": "Đăng nhập sai đồng thời (race trên bộ đếm)",
+          "DieuKienTienQuyet": "Có 1 tài khoản hợp lệ đã seed",
+          "CacBuoc": "Gửi 50 request login sai password ĐỒNG THỜI (không tuần tự) tới cùng 1 tài khoản\nĐọc lại bộ đếm thất bại sau khi hoàn tất",
+          "KetQuaMongDoi": "50 phản hồi HTTP 401; failedLoginCount cuối bằng 50 khi ban đầu bằng 0. Không kết luận rate limiting từ phép thử này.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "TC-AUTH-6",
+          "YeuCauLienQuan": "REQ-AUTH-6",
+          "TieuDe": "Đo chênh lệch thời gian 404 vs 401",
+          "DieuKienTienQuyet": "Có 1 tài khoản hợp lệ đã seed",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Đo thời gian trung bình 50 request 404 và 50 request 401, so sánh\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Ghi phân phối thời gian cho hai nhánh dưới cùng điều kiện đo và seed, cùng ngưỡng/kiểm định đã chốt trước chạy. Chỉ kết luận rò rỉ thời gian khi có phép đo lặp lại và kiểm soát nhiễu; không mặc định có lỗi từ việc một nhánh gọi bcrypt. Chưa chốt ngưỡng thì chưa kết luận PASS/FAIL.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "TC-AUTH-10",
+          "YeuCauLienQuan": "REQ-AUTH-SMT-total_login_attempt_counter",
+          "TieuDe": "Kiểm tra tràn số: total_login_attempt_counter",
+          "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+          "MucUuTien": "LOW"
+        },
+        {
+          "ID": "TC-AUTH-14",
+          "YeuCauLienQuan": "REQ-AUTH-SMT-daily_failed_login_counter",
+          "TieuDe": "Kiểm tra tràn số: daily_failed_login_counter",
+          "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'daily_failed_login_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'daily_failed_login_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+          "MucUuTien": "LOW"
+        },
+        {
+          "ID": "TC-AUTH-15",
+          "YeuCauLienQuan": "REQ-AUTH-SMT-concurrent_session_counter",
+          "TieuDe": "Kiểm tra tràn số: concurrent_session_counter",
+          "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'concurrent_session_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'concurrent_session_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+          "MucUuTien": "LOW"
+        },
+        {
+          "ID": "TC-AUTH-16",
+          "YeuCauLienQuan": "REQ-AUTH-SMT-token_issued_counter",
+          "TieuDe": "Kiểm tra tràn số: token_issued_counter",
+          "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'token_issued_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'token_issued_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+          "MucUuTien": "LOW"
+        },
+        {
+          "ID": "TC-AUTH-17",
+          "YeuCauLienQuan": "REQ-AUTH-SMT-account_lockout_counter",
+          "TieuDe": "Kiểm tra tràn số: account_lockout_counter",
+          "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'account_lockout_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'account_lockout_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+          "MucUuTien": "LOW"
+        }
+      ]
+    }
+  },
+  {
+    "file": "Module_Orders_Create_spec.xlsx",
+    "sha256": "8777a8bc5ea5e00079279097cc55b40f94ba78c9857bf079bb81feefbdab8f54",
+    "sheets": {
+      "ThongTin": [
+        {
+          "Truong": "name",
+          "GiaTri": "Orders_Create"
+        },
+        {
+          "Truong": "description",
+          "GiaTri": "Đặc tả yêu cầu module ORD của hệ thống bán hàng. API được kiểm thử trên node_harness với datastore trong bộ nhớ; các request có thể chạy đồng thời. Cụm khóa và hàm C/Python/SMT là mô hình kiểm chứng minh họa theo template, gồm lỗi cấy có chủ đích; không phải bằng chứng lỗi bộ nhớ của Node.js. Đây là hợp đồng mong đợi để xây dựng testcase; mức đáp ứng của code được đánh giá riêng, không khẳng định mọi yêu cầu đã triển khai."
+        },
+        {
+          "Truong": "pham_vi_chinh",
+          "GiaTri": "An toàn phần mềm: seed và trạng thái ban đầu → đột biến input → quan sát lỗi/ngoại lệ/tài nguyên → tái hiện và lưu bằng chứng. 29 testcase API có kịch bản hiện tại; điều kiện bổ sung trong Excel là mục tiêu cần kiểm tra, không tự coi đã được oracle hiện tại bao phủ đầy đủ."
+        },
+        {
+          "Truong": "pham_vi_bo_tro",
+          "GiaTri": "Giữ 104 testcase và 10 sheet cho toàn bộ tài liệu. Hàm C/Python là mẫu lỗi cấy độc lập; số học là mô hình theo giả định. 75 testcase ngoài campaign API chưa được chạy lại. Crash/hang/lỗi bộ nhớ cần bằng chứng riêng; không đồng nhất với HTTP 500."
+        },
+        {
+          "Truong": "thu_tu_testcase",
+          "GiaTri": "API an toàn đầu vào/quyền/trạng thái → tái hiện và phân loại bằng chứng → mẫu ngoại lệ/bộ nhớ độc lập → concurrency/timing/số học → seed đối chứng. Trong từng nhóm: HIGH, MEDIUM, LOW. ID không thay đổi; kết quả thực tế lưu ở report, không điền vào KetQuaMongDoi."
+        }
+      ],
+      "YeuCauChucNang": [
+        {
+          "ID": "REQ-ORD-1",
+          "MoTa": "products phải là một MẢNG khác rỗng; không được chỉ kiểm tra truthy và length != 0",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-ORD-2",
+          "MoTa": "shippingInfo và 3 trường con (fullName, phone, address) đều bắt buộc khác rỗng",
+          "DanhMuc": "functional",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-ORD-3",
+          "MoTa": "Thiếu totalAmount phải trả về HTTP 400, không được để rơi xuống HTTP 500",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-ORD-4",
+          "MoTa": "totalAmount/discountAmount/voucherDiscount/shippingFee sai kiểu dữ liệu không được gây phản hồi HTTP 500 do đầu vào không hợp lệ",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-ORD-5",
+          "MoTa": "totalAmount lưu vào hệ thống phải được SERVER tự tính lại từ giá thật trong catalog, không tin client",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-ORD-6",
+          "MoTa": "totalAmount không được là số âm",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-ORD-7",
+          "MoTa": "Một discountCode không được sử dụng 2 lần cho cùng 1 user, KỂ CẢ khi 2 request gửi ĐỒNG THỜI",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-ORD-8",
+          "MoTa": "Mỗi phần tử trong products phải có cấu trúc {productId, price:number, quantity:number} hợp lệ",
+          "DanhMuc": "safety",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-ORD-9",
+          "MoTa": "Mọi đơn hàng hợp lệ cuối cùng phải nhận được phản hồi (200/400/500), không được treo vô thời hạn",
+          "DanhMuc": "liveness",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-ORD-10",
+          "MoTa": "Việc ghi log giao dịch đơn hàng không được làm rò rỉ bộ nhớ (mô phỏng) Phạm vi: mô hình C minh họa sinh từ HamSinhMa, không phải quản lý bộ nhớ của API Node.js.",
+          "DanhMuc": "memory",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-ORD-FIX-parse_discount_code",
+          "MoTa": "Mô hình minh họa parse_discount_code phải sinh mã C theo Loai=buffer_copy; công cụ phải nhận diện lỗi cấy buffer-overflow.",
+          "DanhMuc": "memory",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-ORD-FIX-write_order_transaction_log",
+          "MoTa": "Mô hình minh họa write_order_transaction_log phải sinh mã C theo Loai=alloc_release; công cụ phải nhận diện lỗi cấy memory-leak.",
+          "DanhMuc": "memory",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-ORD-FIX-close_order_checkout_session",
+          "MoTa": "Mô hình minh họa close_order_checkout_session phải sinh mã C theo Loai=alloc_release; công cụ phải nhận diện lỗi cấy double-free.",
+          "DanhMuc": "memory",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-ORD-FIX-release_cart_cache_buffer",
+          "MoTa": "Mô hình minh họa release_cart_cache_buffer phải sinh mã C theo Loai=alloc_release; công cụ phải nhận diện lỗi cấy use-after-free.",
+          "DanhMuc": "memory",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-ORD-FIX-order_total_delta",
+          "MoTa": "Mô hình order_total_delta phải sinh hàm C số học theo tham số khai báo để phân tích AST/SMT.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-ORD-FIX-order_error_rate",
+          "MoTa": "Mô hình Python order_error_rate phải sinh đúng loại divide; fuzzing phải lưu input gây ngoại lệ khi tìm được. Không coi số lần chạy hữu hạn không có lỗi là chứng minh an toàn.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-ORD-FIX-voucher_stack_bypass_pair",
+          "MoTa": "Mô hình Python voucher_stack_bypass_pair phải sinh đúng loại magic_value; fuzzing phải lưu input gây ngoại lệ khi tìm được. Không coi số lần chạy hữu hạn không có lỗi là chứng minh an toàn.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-ORD-SMT-daily_order_counter",
+          "MoTa": "Mô hình số học daily_order_counter phải kiểm tra SAT của DieuKien và khả năng vượt int32 của BieuThucTran bằng hai phép kiểm tra riêng. Ngưỡng nghiệp vụ không phải ràng buộc tự động của phép kiểm tra overflow; không suy ra kiểu số Node.js từ mô hình này.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-ORD-SMT-concurrent_discount_redeem_counter",
+          "MoTa": "Mô hình số học concurrent_discount_redeem_counter phải kiểm tra SAT của DieuKien và khả năng vượt int32 của BieuThucTran bằng hai phép kiểm tra riêng. Ngưỡng nghiệp vụ không phải ràng buộc tự động của phép kiểm tra overflow; không suy ra kiểu số Node.js từ mô hình này.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-ORD-SMT-total_order_value_counter",
+          "MoTa": "Mô hình số học total_order_value_counter phải kiểm tra SAT của DieuKien và khả năng vượt int32 của BieuThucTran bằng hai phép kiểm tra riêng. Ngưỡng nghiệp vụ không phải ràng buộc tự động của phép kiểm tra overflow; không suy ra kiểu số Node.js từ mô hình này.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-ORD-SMT-active_discount_code_counter",
+          "MoTa": "Mô hình số học active_discount_code_counter phải kiểm tra SAT của DieuKien và khả năng vượt int32 của BieuThucTran bằng hai phép kiểm tra riêng. Ngưỡng nghiệp vụ không phải ràng buộc tự động của phép kiểm tra overflow; không suy ra kiểu số Node.js từ mô hình này.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-ORD-SMT-order_crash_counter",
+          "MoTa": "Mô hình số học order_crash_counter phải kiểm tra SAT của DieuKien và khả năng vượt int32 của BieuThucTran bằng hai phép kiểm tra riêng. Ngưỡng nghiệp vụ không phải ràng buộc tự động của phép kiểm tra overflow; không suy ra kiểu số Node.js từ mô hình này.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-CONC-ORD-1",
+          "MoTa": "Kiểm tra và ghi nhận mã giảm giá đã sử dụng phải nguyên tử theo cặp user/mã; hai request đồng thời chỉ được dùng mã thành công một lần.",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-ORD-FUZZ-20",
+          "MoTa": "Luồng chuyển giao phải giữ đúng target, JSON input và trạng thái xác thực; lượt đầu whitebox phải chạy lại nguyên input trước khi đột biến.",
+          "DanhMuc": "functional",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-ORD-FUZZ-21",
+          "MoTa": "Phép khảo sát phải lưu kết quả từng điểm lân cận và không suy ra toàn bộ khoảng lỗi từ một input hoặc vài mẫu.",
+          "DanhMuc": "functional",
+          "MucUuTien": "HIGH"
+        }
+      ],
+      "YeuCauPhiChucNang": [
+        {
+          "ID": "NFR-ORD-1",
+          "MoTa": "Trên 20 lần tiêm lỗi dịch vụ email, đơn hợp lệ vẫn phải được lưu và trả phản hồi thành công; không tạo thêm đơn do lỗi email. Chưa có fault injection thì ghi chưa đánh giá.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "NFR-ORD-2",
+          "MoTa": "Trên 100 input sai kiểu/thiếu trường, 100% phải trả HTTP 400 hoặc 422, không ghi đơn hàng; lỗi bộ chạy được thống kê riêng.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "NFR-ORD-3",
+          "MoTa": "Hệ thống phải xử lý tối thiểu 100 đơn hàng đồng thời/giây trên phần cứng tham chiếu Đo 60 giây sau 10 giây làm nóng; ghi mức đồng thời, CPU/RAM, runtime và tỷ lệ lỗi. Chưa có phép đo thì ghi chưa đánh giá.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "NFR-ORD-4",
+          "MoTa": "Tỷ lệ một mã giảm giá bị dùng 2 lần do race condition phải bằng 0% trên 100 cặp request đồng thời Đo trên 1000 request/module, seed=7, ghi riêng lỗi bộ chạy; báo cáo phân bố input và số HTTP 5xx.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "NFR-ORD-5",
+          "MoTa": "Tỷ lệ HTTP 500 trên tổng số request tạo đơn hàng phải dưới 5% Đo trên 1000 request/module, seed=7, ghi riêng lỗi bộ chạy; báo cáo phân bố input và số HTTP 5xx.",
+          "MucUuTien": "HIGH"
+        }
+      ],
+      "RangBuoc": [
+        {
+          "ID": "CON-ORD-1",
+          "MoTa": "Mỗi products[i] phải có productId tồn tại, price là số hữu hạn dương và quantity là số nguyên dương; boolean không được xem là số.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "CON-ORD-2",
+          "MoTa": "discountCode phải được trim và chuyển chữ hoa trước khi so khớp/lưu; các biến thể cùng mã được xem là một mã.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "CON-ORD-3",
+          "MoTa": "Các trường tiền phải là số hữu hạn; trường bắt buộc không được thiếu, trường phí/giảm giá tùy chọn mặc định bằng 0 khi vắng mặt, không dùng truthy để thay validation.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "CON-ORD-4",
+          "MoTa": "discountCode tối đa 32 ký tự; mô hình C minh họa dùng KichThuocBuffer=32 theo template. Kích thước cấp phát triển khai phải tính thêm ký tự kết thúc nếu dùng chuỗi C.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "CON-ORD-5",
+          "MoTa": "Kiểm tra và ghi nhận mã giảm giá đã sử dụng phải nguyên tử theo cặp user/mã; hai request đồng thời chỉ được dùng mã thành công một lần.",
+          "MucUuTien": "HIGH"
+        }
+      ],
+      "MoHinhTrangThai": [
+        {
+          "TrangThai": "start",
+          "KhoiTao": "x",
+          "Nhan": "begin",
+          "ChuyenDenCacTrangThai": "check_products"
+        },
+        {
+          "TrangThai": "check_products",
+          "KhoiTao": null,
+          "Nhan": "validate_cart",
+          "ChuyenDenCacTrangThai": "rejected_empty_cart, check_shippingInfo"
+        },
+        {
+          "TrangThai": "rejected_empty_cart",
+          "KhoiTao": null,
+          "Nhan": "rejected_400",
+          "ChuyenDenCacTrangThai": "rejected_empty_cart"
+        },
+        {
+          "TrangThai": "check_shippingInfo",
+          "KhoiTao": null,
+          "Nhan": "validate_shipping_obj",
+          "ChuyenDenCacTrangThai": "rejected_missing_shipping, check_fullName"
+        },
+        {
+          "TrangThai": "rejected_missing_shipping",
+          "KhoiTao": null,
+          "Nhan": "rejected_400",
+          "ChuyenDenCacTrangThai": "rejected_missing_shipping"
+        },
+        {
+          "TrangThai": "check_fullName",
+          "KhoiTao": null,
+          "Nhan": "validate_fullname",
+          "ChuyenDenCacTrangThai": "rejected_missing_fullname, check_phone"
+        },
+        {
+          "TrangThai": "rejected_missing_fullname",
+          "KhoiTao": null,
+          "Nhan": "rejected_400",
+          "ChuyenDenCacTrangThai": "rejected_missing_fullname"
+        },
+        {
+          "TrangThai": "check_phone",
+          "KhoiTao": null,
+          "Nhan": "validate_phone",
+          "ChuyenDenCacTrangThai": "rejected_missing_phone, check_address"
+        },
+        {
+          "TrangThai": "rejected_missing_phone",
+          "KhoiTao": null,
+          "Nhan": "rejected_400",
+          "ChuyenDenCacTrangThai": "rejected_missing_phone"
+        },
+        {
+          "TrangThai": "check_address",
+          "KhoiTao": null,
+          "Nhan": "validate_address",
+          "ChuyenDenCacTrangThai": "rejected_missing_address, check_discount"
+        },
+        {
+          "TrangThai": "rejected_missing_address",
+          "KhoiTao": null,
+          "Nhan": "rejected_400",
+          "ChuyenDenCacTrangThai": "rejected_missing_address"
+        },
+        {
+          "TrangThai": "check_discount",
+          "KhoiTao": null,
+          "Nhan": "validate_discount_reuse",
+          "ChuyenDenCacTrangThai": "rejected_discount_reused, saving_order"
+        },
+        {
+          "TrangThai": "rejected_discount_reused",
+          "KhoiTao": null,
+          "Nhan": "rejected_400",
+          "ChuyenDenCacTrangThai": "rejected_discount_reused"
+        },
+        {
+          "TrangThai": "saving_order",
+          "KhoiTao": null,
+          "Nhan": "save_attempt",
+          "ChuyenDenCacTrangThai": "crash_500, order_created"
+        },
+        {
+          "TrangThai": "crash_500",
+          "KhoiTao": null,
+          "Nhan": "rejected_500",
+          "ChuyenDenCacTrangThai": "crash_500"
+        },
+        {
+          "TrangThai": "order_created",
+          "KhoiTao": null,
+          "Nhan": "success_200",
+          "ChuyenDenCacTrangThai": "order_created"
+        },
+        {
+          "TrangThai": "discount_redeem_free",
+          "KhoiTao": "x",
+          "Nhan": "safe",
+          "ChuyenDenCacTrangThai": "discount_redeem_main_holds, discount_redeem_log_holds"
+        },
+        {
+          "TrangThai": "discount_redeem_main_holds",
+          "KhoiTao": null,
+          "Nhan": "main_locked",
+          "ChuyenDenCacTrangThai": "discount_redeem_free, discount_redeem_conflict"
+        },
+        {
+          "TrangThai": "discount_redeem_log_holds",
+          "KhoiTao": null,
+          "Nhan": "log_locked",
+          "ChuyenDenCacTrangThai": "discount_redeem_free"
+        },
+        {
+          "TrangThai": "discount_redeem_conflict",
+          "KhoiTao": null,
+          "Nhan": "main_locked, log_locked, violation",
+          "ChuyenDenCacTrangThai": "discount_redeem_free"
+        }
+      ],
+      "ThuocTinhAnToan": [
+        {
+          "CongThucCTL": "AG(!violation)"
+        },
+        {
+          "CongThucCTL": "EF(main_locked)"
+        },
+        {
+          "CongThucCTL": "AG(rejected_400 -> !EX(success_200))"
+        },
+        {
+          "CongThucCTL": "AG(save_attempt -> AF(rejected_500 | success_200))"
+        }
+      ],
+      "LoaiTruLanNhau": [
+        {
+          "MenhDe1": "main_locked",
+          "MenhDe2": "log_locked"
+        },
+        {
+          "MenhDe1": "violation",
+          "MenhDe2": "safe"
+        },
+        {
+          "MenhDe1": "rejected_400",
+          "MenhDe2": "success_200"
+        },
+        {
+          "MenhDe1": "rejected_500",
+          "MenhDe2": "success_200"
+        },
+        {
+          "MenhDe1": "save_attempt",
+          "MenhDe2": "success_200"
+        }
+      ],
+      "HamSinhMa": [
+        {
+          "Ten": "parse_discount_code",
+          "NgonNgu": "c",
+          "Loai": "buffer_copy",
+          "ThamSo": "discount_code_input",
+          "KichThuocBuffer": 32,
+          "Loi": "buffer-overflow",
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "write_order_transaction_log",
+          "NgonNgu": "c",
+          "Loai": "alloc_release",
+          "ThamSo": "order_record",
+          "KichThuocBuffer": 32,
+          "Loi": "memory-leak",
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "close_order_checkout_session",
+          "NgonNgu": "c",
+          "Loai": "alloc_release",
+          "ThamSo": "checkout_handle",
+          "KichThuocBuffer": 8,
+          "Loi": "double-free",
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "release_cart_cache_buffer",
+          "NgonNgu": "c",
+          "Loai": "alloc_release",
+          "ThamSo": "cart_cache",
+          "KichThuocBuffer": 16,
+          "Loi": "use-after-free",
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "order_total_delta",
+          "NgonNgu": "c",
+          "Loai": "arithmetic",
+          "ThamSo": "client_total, expected_total",
+          "KichThuocBuffer": null,
+          "Loi": null,
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "order_error_rate",
+          "NgonNgu": "python",
+          "Loai": "divide",
+          "ThamSo": "failed_orders, total_orders",
+          "KichThuocBuffer": null,
+          "Loi": null,
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "voucher_stack_bypass_pair",
+          "NgonNgu": "python",
+          "Loai": "magic_value",
+          "ThamSo": "code_x, code_y",
+          "KichThuocBuffer": null,
+          "Loi": null,
+          "GiaTriBiMat1": 4821,
+          "GiaTriBiMat2": 1907
+        }
+      ],
+      "KiemTraSoHoc": [
+        {
+          "Ten": "daily_order_counter",
+          "BienSoNguyen": "orders_today, orders_backlog",
+          "DieuKien": "orders_today >= 0 and orders_backlog >= 0 and orders_today + orders_backlog > 32767",
+          "BieuThucTran": "orders_today + orders_backlog"
+        },
+        {
+          "Ten": "concurrent_discount_redeem_counter",
+          "BienSoNguyen": "concurrent_main, concurrent_log",
+          "DieuKien": "concurrent_main >= 0 and concurrent_log >= 0 and concurrent_main + concurrent_log > 65535",
+          "BieuThucTran": "concurrent_main + concurrent_log"
+        },
+        {
+          "Ten": "total_order_value_counter",
+          "BienSoNguyen": "revenue_collected_vnd, revenue_pending_vnd",
+          "DieuKien": "revenue_collected_vnd >= 0 and revenue_pending_vnd >= 0 and revenue_collected_vnd + revenue_pending_vnd > 2000000000",
+          "BieuThucTran": "revenue_collected_vnd + revenue_pending_vnd"
+        },
+        {
+          "Ten": "active_discount_code_counter",
+          "BienSoNguyen": "active_codes, expired_codes",
+          "DieuKien": "active_codes >= 0 and expired_codes >= 0 and active_codes + expired_codes > 65535",
+          "BieuThucTran": "active_codes + expired_codes"
+        },
+        {
+          "Ten": "order_crash_counter",
+          "BienSoNguyen": "crash_today, crash_backlog",
+          "DieuKien": "crash_today >= 0 and crash_backlog >= 0 and crash_today + crash_backlog > 32767",
+          "BieuThucTran": "crash_today + crash_backlog"
+        }
+      ],
+      "TestCase": [
+        {
+          "ID": "TC-ORD-1",
+          "YeuCauLienQuan": "REQ-ORD-1, REQ-ORD-8",
+          "TieuDe": "Sai kiểu và cấu trúc giỏ hàng đi vào tầng xử lý đơn",
+          "DieuKienTienQuyet": "Đã đăng nhập, có token",
+          "CacBuoc": "Gửi products: {} (object rỗng)\nGửi products: 'abc' (chuỗi)\nLưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",
+          "KetQuaMongDoi": "HTTP 400/422 cho products sai cấu trúc hoặc số lượng âm; không coi đơn sai cấu trúc là đơn hợp lệ.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-ORD-2",
+          "YeuCauLienQuan": "REQ-ORD-2",
+          "TieuDe": "Thiếu cấu trúc lồng shippingInfo gây ngoại lệ",
+          "DieuKienTienQuyet": "Đã đăng nhập, có token",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Xóa lần lượt shippingInfo/fullName/phone/address\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.\nLưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",
+          "KetQuaMongDoi": "HTTP 400 khi thiếu shippingInfo hoặc trường bắt buộc; không phát sinh ngoại lệ chưa xử lý.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-ORD-3",
+          "YeuCauLienQuan": "REQ-ORD-3",
+          "TieuDe": "Thiếu totalAmount đi vào phép toán hoặc chuyển kiểu",
+          "DieuKienTienQuyet": "Đã đăng nhập, có token, cart/shipping hợp lệ",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Gửi đơn hàng, xóa trường totalAmount\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.\nLưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",
+          "KetQuaMongDoi": "HTTP 400 khi thiếu totalAmount; không để thiếu giá trị gây HTTP 500.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-ORD-4",
+          "YeuCauLienQuan": "REQ-ORD-4",
+          "TieuDe": "Sai kiểu và giá trị số bất thường tại totalAmount",
+          "DieuKienTienQuyet": "Đã đăng nhập, có token",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Gửi totalAmount là object/array/NaN, lặp lại bằng fuzzer\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.\nLưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",
+          "KetQuaMongDoi": "HTTP 400/422 cho object, array và chuỗi số không hợp lệ; không HTTP 5xx. Lưu input gây ngoại lệ để tái hiện, không gọi HTTP 500 là lỗi bộ nhớ.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-ORD-5",
+          "YeuCauLienQuan": "REQ-ORD-5",
+          "TieuDe": "Tin cậy giá từ client làm sai toàn vẹn đơn hàng",
+          "DieuKienTienQuyet": "Đã đăng nhập, có token, 1 sản phẩm giá 200000",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Gửi totalAmount=400000, sản phẩm thật giá 200000 x1\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.\nLưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",
+          "KetQuaMongDoi": "Server từ chối giá/tổng bị sửa hoặc tính lại từ catalog tin cậy; không lưu tổng bị giả mạo.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-ORD-6",
+          "YeuCauLienQuan": "REQ-ORD-6",
+          "TieuDe": "Giá trị âm vượt qua kiểm tra miền số tiền",
+          "DieuKienTienQuyet": "Đã đăng nhập, có token",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Gửi totalAmount = -999999999\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.\nLưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",
+          "KetQuaMongDoi": "HTTP 400/422; không chấp nhận tổng tiền âm.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-ORD-18",
+          "YeuCauLienQuan": "REQ-ORD-5",
+          "TieuDe": "Giả mạo đồng thời đơn giá và tổng tiền để vượt oracle",
+          "DieuKienTienQuyet": "Catalog productId=1 có giá 200000; actor hợp lệ. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+          "CacBuoc": "1. Gửi sản phẩm price=1, quantity=2, totalAmount=2; đọc giá trị đơn đã lưu nếu thành công.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: {\"products\":[{\"productId\":1,\"price\":1,\"quantity\":2}],\"totalAmount\":2}\nLưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",
+          "KetQuaMongDoi": "Từ chối 400/422 hoặc tính lại từ catalog thành 400000 trong seed không phí/giảm giá; không lưu tổng 2.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-ORD-20",
+          "YeuCauLienQuan": "REQ-ORD-FUZZ-20",
+          "TieuDe": "Kiểm tra quy trình fuzzing: Chuyển input blackbox sang whitebox",
+          "DieuKienTienQuyet": "Có report blackbox mới chứa target=orders, input, had_auth và bằng chứng; whitebox hỗ trợ target; harness được seed sạch.",
+          "CacBuoc": "1. Chọn một input blackbox có triệu chứng, lưu đường dẫn report và trạng thái ban đầu.\n2. Chạy whitebox với --blackbox-report và ngân sách 12.\n3. Đối chiếu target, input, had_auth ở lượt exact_replay với bản gốc.\n4. Kiểm tra log phân biệt exact_replay, neighbor_probe và coverage_mutation.\n5. Thử report thiếu had_auth để kiểm tra cách từ chối/bỏ qua.",
+          "KetQuaMongDoi": "Input và ngữ cảnh xác thực được giữ nguyên ở lượt đầu; có response, coverage và phân loại bằng chứng. Report thiếu ngữ cảnh không được đoán quyền. Không tái hiện trên dữ liệu sạch phải ghi khác biệt trạng thái, không tự bác bỏ phát hiện.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-ORD-21",
+          "YeuCauLienQuan": "REQ-ORD-FUZZ-21",
+          "TieuDe": "Kiểm tra quy trình fuzzing: Khảo sát giá trị số quanh input gây lỗi",
+          "DieuKienTienQuyet": "Có input orders bất thường với trường số hữu hạn x; cùng catalog, actor, phí/giảm giá và trạng thái seed ở mỗi lượt; công cụ khảo sát chạy độc lập.",
+          "CacBuoc": "1. Lưu input gốc x và triệu chứng.\n2. Giữ các trường khác, thử x-1, x, x+1 và 0 từ trạng thái sạch; đổi một trường mỗi lượt.\n3. Lặp lại ba lần từng điểm có triệu chứng.\n4. Lưu HTTP, dữ liệu cuối, timeout, coverage nếu có; đối chiếu oracle nghiệp vụ và lỗi tiến trình riêng.",
+          "KetQuaMongDoi": "Có bảng điểm đã thử và triệu chứng từng điểm. HTTP 500 chỉ ghi lỗi ứng dụng, không ghi memory crash. Chỉ báo miền đã khảo sát; chưa được nhận biên nhỏ nhất/lớn nhất hay tính đơn điệu nếu chưa chứng minh.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-ORD-8",
+          "YeuCauLienQuan": "REQ-ORD-FIX-parse_discount_code",
+          "TieuDe": "Hàm sinh mã C: parse_discount_code (buffer-overflow)",
+          "DieuKienTienQuyet": "Mẫu C parse_discount_code, lỗi cấy buffer-overflow; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+          "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi parse_discount_code, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy chuỗi ASCII dài B-1, B, B+1 với B=32 byte và đối chứng ngắn.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+          "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán buffer-overflow; mẫu lỗi cấy phải có chẩn đoán buffer-overflow tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-ORD-11",
+          "YeuCauLienQuan": "REQ-ORD-FIX-write_order_transaction_log",
+          "TieuDe": "Hàm sinh mã C: write_order_transaction_log (memory-leak)",
+          "DieuKienTienQuyet": "Mẫu C write_order_transaction_log, lỗi cấy memory-leak; có driver gọi hàm, compiler và LeakSanitizer hoặc công cụ kiểm tra leak tương đương hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+          "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi write_order_transaction_log, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+          "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán memory-leak; mẫu lỗi cấy phải có chẩn đoán memory-leak tại hàm mục tiêu từ LeakSanitizer hoặc công cụ phát hiện leak tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-ORD-12",
+          "YeuCauLienQuan": "REQ-ORD-FIX-close_order_checkout_session",
+          "TieuDe": "Hàm sinh mã C: close_order_checkout_session (double-free)",
+          "DieuKienTienQuyet": "Mẫu C close_order_checkout_session, lỗi cấy double-free; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+          "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi close_order_checkout_session, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+          "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán double-free; mẫu lỗi cấy phải có chẩn đoán double-free tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-ORD-13",
+          "YeuCauLienQuan": "REQ-ORD-FIX-release_cart_cache_buffer",
+          "TieuDe": "Hàm sinh mã C: release_cart_cache_buffer (use-after-free)",
+          "DieuKienTienQuyet": "Mẫu C release_cart_cache_buffer, lỗi cấy use-after-free; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+          "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi release_cart_cache_buffer, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+          "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán use-after-free; mẫu lỗi cấy phải có chẩn đoán use-after-free tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-ORD-9",
+          "YeuCauLienQuan": "REQ-ORD-FIX-order_error_rate",
+          "TieuDe": "Hàm Python: order_error_rate chia cho 0",
+          "DieuKienTienQuyet": "Đã sinh mã Python Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy blackbox_fuzz() với total_orders=0\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Mẫu lỗi cấy phát sinh ZeroDivisionError với input chia cho 0; lưu traceback, input và cách gọi. Đối chứng an toàn xử lý trường hợp này có kiểm soát. Ngoại lệ Python chưa chứng minh crash server hoặc lỗi bộ nhớ native; thiếu thực thi thì chưa xác minh.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "TC-ORD-7",
+          "YeuCauLienQuan": "REQ-ORD-7, NFR-ORD-4",
+          "TieuDe": "Sử dụng discountCode ĐỒNG THỜI (race)",
+          "DieuKienTienQuyet": "Đã đăng nhập, có token, mã SALE10 chưa dùng",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Gửi 2 request tạo đơn hàng CÙNG discountCode=SALE10 ĐỒNG THỜI (không tuần tự)\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Với discountCode dùng một lần và hai request thực sự đồng thời, chỉ một request áp dụng mã thành công; kiểm tra cả dữ liệu lưu. Lưu lịch gửi/nhận để xác nhận đồng thời; chạy tuần tự chưa chứng minh không có race.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-ORD-10",
+          "YeuCauLienQuan": "REQ-ORD-SMT-total_order_value_counter",
+          "TieuDe": "Kiểm tra tràn số: total_order_value_counter",
+          "DieuKienTienQuyet": "Đã khai báo biến SMT Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+          "MucUuTien": "LOW"
+        },
+        {
+          "ID": "TC-ORD-14",
+          "YeuCauLienQuan": "REQ-ORD-SMT-daily_order_counter",
+          "TieuDe": "Kiểm tra tràn số: daily_order_counter",
+          "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'daily_order_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'daily_order_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+          "MucUuTien": "LOW"
+        },
+        {
+          "ID": "TC-ORD-15",
+          "YeuCauLienQuan": "REQ-ORD-SMT-concurrent_discount_redeem_counter",
+          "TieuDe": "Kiểm tra tràn số: concurrent_discount_redeem_counter",
+          "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'concurrent_discount_redeem_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'concurrent_discount_redeem_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+          "MucUuTien": "LOW"
+        },
+        {
+          "ID": "TC-ORD-16",
+          "YeuCauLienQuan": "REQ-ORD-SMT-active_discount_code_counter",
+          "TieuDe": "Kiểm tra tràn số: active_discount_code_counter",
+          "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'active_discount_code_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'active_discount_code_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+          "MucUuTien": "LOW"
+        },
+        {
+          "ID": "TC-ORD-17",
+          "YeuCauLienQuan": "REQ-ORD-SMT-order_crash_counter",
+          "TieuDe": "Kiểm tra tràn số: order_crash_counter",
+          "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'order_crash_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'order_crash_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+          "MucUuTien": "LOW"
+        },
+        {
+          "ID": "TC-ORD-19",
+          "YeuCauLienQuan": "REQ-ORD-2, REQ-ORD-5, REQ-ORD-8",
+          "TieuDe": "Đối chứng seed hợp lệ trước khi đột biến đơn hàng",
+          "DieuKienTienQuyet": "User hợp lệ; sản phẩm còn hàng; giá catalog tin cậy. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+          "CacBuoc": "1. Gửi giỏ hàng và giao hàng hợp lệ; đọc đơn lưu và đối chiếu catalog.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: Seed order hợp lệ, không voucher/phí; quantity=2, giá catalog=200000.\nLưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",
+          "KetQuaMongDoi": "HTTP 200/201; đơn có đúng user, sản phẩm, số lượng và tổng 400000 của seed. Seed không chạy được thì không quy lỗi cho input đột biến.",
+          "MucUuTien": "MEDIUM"
+        }
+      ]
+    }
+  },
+  {
+    "file": "Module_OrderStatus_spec.xlsx",
+    "sha256": "146154be9e9978c951cf45d16988b409e62de48c07e2b42ec56986b7b8d7ed30",
+    "sheets": {
+      "ThongTin": [
+        {
+          "Truong": "name",
+          "GiaTri": "Orders_UpdateStatus"
+        },
+        {
+          "Truong": "description",
+          "GiaTri": "Đặc tả yêu cầu module OS của hệ thống bán hàng. API được kiểm thử trên node_harness với datastore trong bộ nhớ; các request có thể chạy đồng thời. Cụm khóa và hàm C/Python/SMT là mô hình kiểm chứng minh họa theo template, gồm lỗi cấy có chủ đích; không phải bằng chứng lỗi bộ nhớ của Node.js. Đây là hợp đồng mong đợi để xây dựng testcase; mức đáp ứng của code được đánh giá riêng, không khẳng định mọi yêu cầu đã triển khai."
+        },
+        {
+          "Truong": "pham_vi_chinh",
+          "GiaTri": "An toàn phần mềm: seed và trạng thái ban đầu → đột biến input → quan sát lỗi/ngoại lệ/tài nguyên → tái hiện và lưu bằng chứng. 29 testcase API có kịch bản hiện tại; điều kiện bổ sung trong Excel là mục tiêu cần kiểm tra, không tự coi đã được oracle hiện tại bao phủ đầy đủ."
+        },
+        {
+          "Truong": "pham_vi_bo_tro",
+          "GiaTri": "Giữ 104 testcase và 10 sheet cho toàn bộ tài liệu. Hàm C/Python là mẫu lỗi cấy độc lập; số học là mô hình theo giả định. 75 testcase ngoài campaign API chưa được chạy lại. Crash/hang/lỗi bộ nhớ cần bằng chứng riêng; không đồng nhất với HTTP 500."
+        },
+        {
+          "Truong": "thu_tu_testcase",
+          "GiaTri": "API an toàn đầu vào/quyền/trạng thái → tái hiện và phân loại bằng chứng → mẫu ngoại lệ/bộ nhớ độc lập → concurrency/timing/số học → seed đối chứng. Trong từng nhóm: HIGH, MEDIUM, LOW. ID không thay đổi; kết quả thực tế lưu ở report, không điền vào KetQuaMongDoi."
+        }
+      ],
+      "YeuCauChucNang": [
+        {
+          "ID": "REQ-OS-1",
+          "MoTa": "PUT /api/orders/:id phải yêu cầu authenticateToken ",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-OS-2",
+          "MoTa": "Chỉ chủ đơn hàng hoặc admin được phép đổi trạng thái đơn hàng (chống IDOR)",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-OS-3",
+          "MoTa": "status phải là chuỗi trong enum: Đang xử lý, Đang giao, Đã giao, Đã hủy; tên không dấu trong mô hình chỉ là định danh hình thức.",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-OS-4",
+          "MoTa": "Chuyển trạng thái phải tuân theo vòng đời hợp lệ: Da_giao không được quay lui, Da_huy không được tiếp tục",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-OS-5",
+          "MoTa": ":id sai định dạng hoặc status sai kiểu dữ liệu không được gây phản hồi HTTP 500 do đầu vào không hợp lệ",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-OS-6",
+          "MoTa": "Trong mô hình yêu cầu, khi các bước xử lý tiếp tục được thực hiện, đơn đang xử lý cuối cùng phải đạt đã giao hoặc đã hủy; không suy ra giới hạn thời gian giao hàng thực tế từ harness.",
+          "DanhMuc": "liveness",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-OS-7",
+          "MoTa": "Cập nhật trạng thái hợp lệ (đúng chủ sở hữu, đúng chuyển đổi) phải thành công và gửi thông báo cho user",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-OS-8",
+          "MoTa": "Việc ghi log thông báo khi đổi trạng thái không được làm rò rỉ bộ nhớ Phạm vi: mô hình C minh họa sinh từ HamSinhMa, không phải quản lý bộ nhớ của API Node.js.",
+          "DanhMuc": "memory",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-OS-FIX-parse_order_status_value",
+          "MoTa": "Mô hình minh họa parse_order_status_value phải sinh mã C theo Loai=buffer_copy; công cụ phải nhận diện lỗi cấy buffer-overflow.",
+          "DanhMuc": "memory",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-OS-FIX-write_order_status_notification_log",
+          "MoTa": "Mô hình minh họa write_order_status_notification_log phải sinh mã C theo Loai=alloc_release; công cụ phải nhận diện lỗi cấy memory-leak.",
+          "DanhMuc": "memory",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-OS-FIX-close_order_update_transaction",
+          "MoTa": "Mô hình minh họa close_order_update_transaction phải sinh mã C theo Loai=alloc_release; công cụ phải nhận diện lỗi cấy double-free.",
+          "DanhMuc": "memory",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-OS-FIX-release_order_cache_after_update",
+          "MoTa": "Mô hình minh họa release_order_cache_after_update phải sinh mã C theo Loai=alloc_release; công cụ phải nhận diện lỗi cấy use-after-free.",
+          "DanhMuc": "memory",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-OS-FIX-order_status_change_delta",
+          "MoTa": "Mô hình order_status_change_delta phải sinh hàm C số học theo tham số khai báo để phân tích AST/SMT.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-OS-FIX-order_delivery_success_ratio",
+          "MoTa": "Mô hình Python order_delivery_success_ratio phải sinh đúng loại divide; fuzzing phải lưu input gây ngoại lệ khi tìm được. Không coi số lần chạy hữu hạn không có lỗi là chứng minh an toàn.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-OS-FIX-order_status_override_code",
+          "MoTa": "Mô hình Python order_status_override_code phải sinh đúng loại magic_value; fuzzing phải lưu input gây ngoại lệ khi tìm được. Không coi số lần chạy hữu hạn không có lỗi là chứng minh an toàn.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-OS-SMT-daily_status_update_counter",
+          "MoTa": "Mô hình số học daily_status_update_counter phải kiểm tra SAT của DieuKien và khả năng vượt int32 của BieuThucTran bằng hai phép kiểm tra riêng. Ngưỡng nghiệp vụ không phải ràng buộc tự động của phép kiểm tra overflow; không suy ra kiểu số Node.js từ mô hình này.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-OS-SMT-concurrent_order_update_counter",
+          "MoTa": "Mô hình số học concurrent_order_update_counter phải kiểm tra SAT của DieuKien và khả năng vượt int32 của BieuThucTran bằng hai phép kiểm tra riêng. Ngưỡng nghiệp vụ không phải ràng buộc tự động của phép kiểm tra overflow; không suy ra kiểu số Node.js từ mô hình này.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-OS-SMT-total_status_update_counter",
+          "MoTa": "Mô hình số học total_status_update_counter phải kiểm tra SAT của DieuKien và khả năng vượt int32 của BieuThucTran bằng hai phép kiểm tra riêng. Ngưỡng nghiệp vụ không phải ràng buộc tự động của phép kiểm tra overflow; không suy ra kiểu số Node.js từ mô hình này.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-OS-SMT-delivered_order_counter",
+          "MoTa": "Mô hình số học delivered_order_counter phải kiểm tra SAT của DieuKien và khả năng vượt int32 của BieuThucTran bằng hai phép kiểm tra riêng. Ngưỡng nghiệp vụ không phải ràng buộc tự động của phép kiểm tra overflow; không suy ra kiểu số Node.js từ mô hình này.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-OS-SMT-cancelled_order_counter",
+          "MoTa": "Mô hình số học cancelled_order_counter phải kiểm tra SAT của DieuKien và khả năng vượt int32 của BieuThucTran bằng hai phép kiểm tra riêng. Ngưỡng nghiệp vụ không phải ràng buộc tự động của phép kiểm tra overflow; không suy ra kiểu số Node.js từ mô hình này.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-CONC-OS-1",
+          "MoTa": "Hai PUT cùng đơn hàng với __v=0 phải có một HTTP 200, một HTTP 409; version cuối bằng 1 và dữ liệu khớp request thành công. Version âm/sai kiểu trả 400; thiếu version giữ tương thích, không bảo đảm chống ghi đè.",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-OS-FUZZ-22",
+          "MoTa": "Luồng tái hiện phải ghi và thiết lập chuỗi trạng thái trước input; không coi khác kết quả giữa trạng thái sạch và trạng thái chiến dịch là báo lỗi nhầm.",
+          "DanhMuc": "functional",
+          "MucUuTien": "HIGH"
+        }
+      ],
+      "YeuCauPhiChucNang": [
+        {
+          "ID": "NFR-OS-1",
+          "MoTa": "Thời gian cập nhật trạng thái + gửi notification trung bình phải dưới 200ms Đo 100 request sau 10 request làm nóng, tuần tự trên loopback; ghi cấu hình CPU/RAM và phiên bản runtime. Chỉ đánh giá harness mô phỏng.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "NFR-OS-2",
+          "MoTa": "Tỷ lệ HTTP 500 trên tổng request cập nhật trạng thái phải dưới 1% Đo trên 1000 request/module, seed=7, ghi riêng lỗi bộ chạy; báo cáo phân bố input và số HTTP 5xx.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "NFR-OS-3",
+          "MoTa": "Hệ thống phải xử lý tối thiểu 100 cập nhật trạng thái đồng thời/giây Đo 60 giây sau 10 giây làm nóng; ghi mức đồng thời, CPU/RAM, runtime và tỷ lệ lỗi. Chưa có phép đo thì ghi chưa đánh giá.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "NFR-OS-4",
+          "MoTa": "Trên 20 cặp cập nhật đồng thời từ version sạch: mỗi cặp cùng __v phải có đúng một thành công, một HTTP 409; không mất dữ liệu của request thắng. Kiểm tra harness, không suy ra hiệu quả MongoDB thật.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "NFR-OS-5",
+          "MoTa": "Trên 20 lần tiêm lỗi notification, không được mất sự kiện cần gửi: phải có bản ghi chờ gửi lại và không gửi trùng khi retry. Đây là yêu cầu chưa được phép coi là đạt chỉ vì có try/catch.",
+          "MucUuTien": "LOW"
+        }
+      ],
+      "RangBuoc": [
+        {
+          "ID": "CON-OS-1",
+          "MoTa": "status phải là chuỗi trong enum: Đang xử lý, Đang giao, Đã giao, Đã hủy; tên không dấu trong mô hình chỉ là định danh hình thức.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "CON-OS-2",
+          "MoTa": "Thiếu status hoặc status sai kiểu/ngoài enum phải trả HTTP 400 hoặc 422 và giữ nguyên trạng thái.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "CON-OS-3",
+          "MoTa": "ID đơn không đúng định dạng phải bị từ chối HTTP 400; ID đúng định dạng nhưng không tồn tại phải trả HTTP 404.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "CON-OS-4",
+          "MoTa": "status tối đa 32 ký tự; mô hình C minh họa dùng KichThuocBuffer=32 theo template; không suy ra buffer C tồn tại trong Node.js.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "CON-OS-5",
+          "MoTa": "Chuyển trạng thái: xử lý→giao/hủy, giao→đã giao; gửi lại cùng trạng thái được phép nhưng không tạo tác dụng phụ trùng. Đã giao/hủy không được chuyển sang trạng thái khác.",
+          "MucUuTien": "MEDIUM"
+        }
+      ],
+      "MoHinhTrangThai": [
+        {
+          "TrangThai": "order_update_free",
+          "KhoiTao": "x",
+          "Nhan": "safe",
+          "ChuyenDenCacTrangThai": "order_update_main_holds, order_update_log_holds"
+        },
+        {
+          "TrangThai": "order_update_main_holds",
+          "KhoiTao": null,
+          "Nhan": "main_locked",
+          "ChuyenDenCacTrangThai": "order_update_free, order_update_conflict"
+        },
+        {
+          "TrangThai": "order_update_log_holds",
+          "KhoiTao": null,
+          "Nhan": "log_locked",
+          "ChuyenDenCacTrangThai": "order_update_free"
+        },
+        {
+          "TrangThai": "order_update_conflict",
+          "KhoiTao": null,
+          "Nhan": "main_locked, log_locked, violation",
+          "ChuyenDenCacTrangThai": "order_update_free"
+        },
+        {
+          "TrangThai": "spec_Dang_xu_ly",
+          "KhoiTao": "x",
+          "Nhan": "spec_initial",
+          "ChuyenDenCacTrangThai": "spec_Dang_giao, spec_Da_huy"
+        },
+        {
+          "TrangThai": "spec_Dang_giao",
+          "KhoiTao": null,
+          "Nhan": "spec_active",
+          "ChuyenDenCacTrangThai": "spec_Da_giao"
+        },
+        {
+          "TrangThai": "spec_Da_giao",
+          "KhoiTao": null,
+          "Nhan": "spec_completed",
+          "ChuyenDenCacTrangThai": "spec_Da_giao"
+        },
+        {
+          "TrangThai": "spec_Da_huy",
+          "KhoiTao": null,
+          "Nhan": "spec_cancelled",
+          "ChuyenDenCacTrangThai": "spec_Da_huy"
+        },
+        {
+          "TrangThai": "actual_Dang_xu_ly",
+          "KhoiTao": "x",
+          "Nhan": "actual_initial",
+          "ChuyenDenCacTrangThai": "actual_Dang_giao, actual_Da_giao, actual_Da_huy, actual_Dang_xu_ly"
+        },
+        {
+          "TrangThai": "actual_Dang_giao",
+          "KhoiTao": null,
+          "Nhan": "actual_active",
+          "ChuyenDenCacTrangThai": "actual_Dang_xu_ly, actual_Da_giao, actual_Da_huy, actual_Dang_giao"
+        },
+        {
+          "TrangThai": "actual_Da_giao",
+          "KhoiTao": null,
+          "Nhan": "actual_completed",
+          "ChuyenDenCacTrangThai": "actual_Dang_xu_ly, actual_Dang_giao, actual_Da_huy, actual_Da_giao"
+        },
+        {
+          "TrangThai": "actual_Da_huy",
+          "KhoiTao": null,
+          "Nhan": "actual_cancelled",
+          "ChuyenDenCacTrangThai": "actual_Dang_xu_ly, actual_Dang_giao, actual_Da_giao, actual_Da_huy"
+        }
+      ],
+      "ThuocTinhAnToan": [
+        {
+          "CongThucCTL": "AG(!violation)",
+          "null": null
+        },
+        {
+          "CongThucCTL": "EF(main_locked)",
+          "null": null
+        },
+        {
+          "CongThucCTL": "AG(spec_completed -> AX(spec_completed))",
+          "null": null
+        },
+        {
+          "CongThucCTL": "AG(spec_cancelled -> AX(spec_cancelled))",
+          "null": null
+        },
+        {
+          "CongThucCTL": "AG(actual_completed -> AX(actual_completed))",
+          "null": null
+        },
+        {
+          "CongThucCTL": "AG(spec_initial -> AF(spec_completed | spec_cancelled))",
+          "null": null
+        }
+      ],
+      "LoaiTruLanNhau": [
+        {
+          "MenhDe1": "main_locked",
+          "MenhDe2": "log_locked",
+          "null": null
+        },
+        {
+          "MenhDe1": "violation",
+          "MenhDe2": "safe",
+          "null": null
+        },
+        {
+          "MenhDe1": "spec_completed",
+          "MenhDe2": "spec_cancelled",
+          "null": null
+        },
+        {
+          "MenhDe1": "spec_active",
+          "MenhDe2": "spec_completed",
+          "null": null
+        },
+        {
+          "MenhDe1": "spec_active",
+          "MenhDe2": "spec_cancelled",
+          "null": null
+        }
+      ],
+      "HamSinhMa": [
+        {
+          "Ten": "parse_order_status_value",
+          "NgonNgu": "c",
+          "Loai": "buffer_copy",
+          "ThamSo": "status_input",
+          "KichThuocBuffer": 32,
+          "Loi": "buffer-overflow",
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "write_order_status_notification_log",
+          "NgonNgu": "c",
+          "Loai": "alloc_release",
+          "ThamSo": "notif_record",
+          "KichThuocBuffer": 32,
+          "Loi": "memory-leak",
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "close_order_update_transaction",
+          "NgonNgu": "c",
+          "Loai": "alloc_release",
+          "ThamSo": "update_handle",
+          "KichThuocBuffer": 8,
+          "Loi": "double-free",
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "release_order_cache_after_update",
+          "NgonNgu": "c",
+          "Loai": "alloc_release",
+          "ThamSo": "order_cache",
+          "KichThuocBuffer": 16,
+          "Loi": "use-after-free",
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "order_status_change_delta",
+          "NgonNgu": "c",
+          "Loai": "arithmetic",
+          "ThamSo": "new_status_code, old_status_code",
+          "KichThuocBuffer": null,
+          "Loi": null,
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "order_delivery_success_ratio",
+          "NgonNgu": "python",
+          "Loai": "divide",
+          "ThamSo": "delivered_count, total_orders_updated",
+          "KichThuocBuffer": null,
+          "Loi": null,
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "order_status_override_code",
+          "NgonNgu": "python",
+          "Loai": "magic_value",
+          "ThamSo": "code_x, code_y",
+          "KichThuocBuffer": null,
+          "Loi": null,
+          "GiaTriBiMat1": 4821,
+          "GiaTriBiMat2": 1907
+        }
+      ],
+      "KiemTraSoHoc": [
+        {
+          "Ten": "daily_status_update_counter",
+          "BienSoNguyen": "updates_today, updates_backlog",
+          "DieuKien": "updates_today >= 0 and updates_backlog >= 0 and updates_today + updates_backlog > 32767",
+          "BieuThucTran": "updates_today + updates_backlog"
+        },
+        {
+          "Ten": "concurrent_order_update_counter",
+          "BienSoNguyen": "concurrent_main, concurrent_log",
+          "DieuKien": "concurrent_main >= 0 and concurrent_log >= 0 and concurrent_main + concurrent_log > 65535",
+          "BieuThucTran": "concurrent_main + concurrent_log"
+        },
+        {
+          "Ten": "total_status_update_counter",
+          "BienSoNguyen": "updates_total_today, updates_total_backlog",
+          "DieuKien": "updates_total_today >= 0 and updates_total_backlog >= 0 and updates_total_today + updates_total_backlog > 2000000000",
+          "BieuThucTran": "updates_total_today + updates_total_backlog"
+        },
+        {
+          "Ten": "delivered_order_counter",
+          "BienSoNguyen": "delivered_today, delivered_backlog",
+          "DieuKien": "delivered_today >= 0 and delivered_backlog >= 0 and delivered_today + delivered_backlog > 32767",
+          "BieuThucTran": "delivered_today + delivered_backlog"
+        },
+        {
+          "Ten": "cancelled_order_counter",
+          "BienSoNguyen": "cancelled_today, cancelled_backlog",
+          "DieuKien": "cancelled_today >= 0 and cancelled_backlog >= 0 and cancelled_today + cancelled_backlog > 32767",
+          "BieuThucTran": "cancelled_today + cancelled_backlog"
+        }
+      ],
+      "TestCase": [
+        {
+          "ID": "TC-OS-1",
+          "YeuCauLienQuan": "REQ-OS-1, REQ-OS-2",
+          "TieuDe": "Vượt quyền cập nhật tài nguyên đơn hàng",
+          "DieuKienTienQuyet": "Có 1 đơn hàng đã tạo, có 1 token user khác (không phải chủ đơn)",
+          "CacBuoc": "Gọi PUT /api/orders/:id không header Authorization\nGọi lại với token của user khác\nLưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",
+          "KetQuaMongDoi": "HTTP 401/403 khi thiếu token hoặc dùng tài khoản khác; request không được coi là cập nhật hợp lệ.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-OS-2",
+          "YeuCauLienQuan": "REQ-OS-3",
+          "TieuDe": "Giá trị enum bất thường đi vào xử lý trạng thái",
+          "DieuKienTienQuyet": "Có 1 đơn hàng đã tạo",
+          "CacBuoc": "Gửi status='' (rỗng)\nGửi status='0000000000'\nLưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",
+          "KetQuaMongDoi": "HTTP 400/422 khi status ngoài tập hợp cho phép; không chấp nhận trạng thái tùy ý.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-OS-3",
+          "YeuCauLienQuan": "REQ-OS-4",
+          "TieuDe": "Phá vỡ bất biến sau trạng thái đã giao",
+          "DieuKienTienQuyet": "Đơn hàng đã ở trạng thái Da_giao",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Gửi PUT status='Dang xu ly' cho đơn đã ở trạng thái Da_giao\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.\nLưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",
+          "KetQuaMongDoi": "Sau khi các bước chuẩn bị thành công, request chuyển ngược bị từ chối HTTP 400/409/422.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-OS-4",
+          "YeuCauLienQuan": "REQ-OS-5",
+          "TieuDe": "ID hoặc status sai kiểu gây lỗi tầng xử lý",
+          "DieuKienTienQuyet": "Server đang chạy",
+          "CacBuoc": "Gọi PUT /api/orders/abc\nGọi PUT với status={\"a\":1}\nLưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",
+          "KetQuaMongDoi": "HTTP 400/404/422 có kiểm soát, không HTTP 500 do lỗi chuyển kiểu hoặc truy cập dữ liệu.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-OS-21",
+          "YeuCauLienQuan": "REQ-OS-4",
+          "TieuDe": "Phá vỡ trạng thái kết thúc sau khi hủy đơn",
+          "DieuKienTienQuyet": "Đơn mới hợp lệ và đúng quyền thao tác. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+          "CacBuoc": "1. Tạo đơn; chuyển đã hủy; yêu cầu chuyển đang giao; đọc lại đơn.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: Dùng chính xác chuỗi status của hệ thống, không tự thay bằng alias.\nLưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",
+          "KetQuaMongDoi": "Sau khi hủy thành công, từ chối tiếp tục giao bằng HTTP 400/409/422; trạng thái lưu vẫn là đã hủy.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-OS-22",
+          "YeuCauLienQuan": "REQ-OS-FUZZ-22",
+          "TieuDe": "Kiểm tra quy trình fuzzing: Tái hiện input phụ thuộc trạng thái đơn",
+          "DieuKienTienQuyet": "Có input cập nhật trạng thái do blackbox tìm thấy và bản ghi chuỗi thao tác, phiên bản, actor của đơn; có thể tạo đơn mới và chạy lại chuỗi.",
+          "CacBuoc": "1. Tạo đơn sạch và chạy nguyên input, lưu kết quả.\n2. Tạo đơn sạch khác, chạy chuỗi chuẩn bị đã ghi rồi gửi cùng input.\n3. Giữ nguyên auth và version tương ứng ở từng lượt; chạy lại hai lần.\n4. Đối chiếu trạng thái trước/sau, response, coverage và lý do khác biệt.",
+          "KetQuaMongDoi": "Bằng chứng phân biệt tái hiện độc lập với tái hiện phụ thuộc chuỗi. Nếu không có đủ trạng thái chuẩn bị phải ghi INCONCLUSIVE, không ghi phát hiện sai và không tự coi lỗi version là crash.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-OS-7",
+          "YeuCauLienQuan": "REQ-OS-FIX-parse_order_status_value",
+          "TieuDe": "Hàm sinh mã C: parse_order_status_value (buffer-overflow)",
+          "DieuKienTienQuyet": "Mẫu C parse_order_status_value, lỗi cấy buffer-overflow; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+          "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi parse_order_status_value, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy chuỗi ASCII dài B-1, B, B+1 với B=32 byte và đối chứng ngắn.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+          "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán buffer-overflow; mẫu lỗi cấy phải có chẩn đoán buffer-overflow tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-OS-10",
+          "YeuCauLienQuan": "REQ-OS-FIX-write_order_status_notification_log",
+          "TieuDe": "Hàm sinh mã C: write_order_status_notification_log (memory-leak)",
+          "DieuKienTienQuyet": "Mẫu C write_order_status_notification_log, lỗi cấy memory-leak; có driver gọi hàm, compiler và LeakSanitizer hoặc công cụ kiểm tra leak tương đương hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+          "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi write_order_status_notification_log, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+          "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán memory-leak; mẫu lỗi cấy phải có chẩn đoán memory-leak tại hàm mục tiêu từ LeakSanitizer hoặc công cụ phát hiện leak tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-OS-11",
+          "YeuCauLienQuan": "REQ-OS-FIX-close_order_update_transaction",
+          "TieuDe": "Hàm sinh mã C: close_order_update_transaction (double-free)",
+          "DieuKienTienQuyet": "Mẫu C close_order_update_transaction, lỗi cấy double-free; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+          "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi close_order_update_transaction, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+          "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán double-free; mẫu lỗi cấy phải có chẩn đoán double-free tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-OS-12",
+          "YeuCauLienQuan": "REQ-OS-FIX-release_order_cache_after_update",
+          "TieuDe": "Hàm sinh mã C: release_order_cache_after_update (use-after-free)",
+          "DieuKienTienQuyet": "Mẫu C release_order_cache_after_update, lỗi cấy use-after-free; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+          "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi release_order_cache_after_update, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+          "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán use-after-free; mẫu lỗi cấy phải có chẩn đoán use-after-free tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-OS-8",
+          "YeuCauLienQuan": "REQ-OS-FIX-order_delivery_success_ratio",
+          "TieuDe": "Hàm Python: order_delivery_success_ratio chia cho 0",
+          "DieuKienTienQuyet": "Đã sinh mã Python Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy blackbox_fuzz() với total_orders_updated=0\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Mẫu lỗi cấy phát sinh ZeroDivisionError với input chia cho 0; lưu traceback, input và cách gọi. Đối chứng an toàn xử lý trường hợp này có kiểm soát. Ngoại lệ Python chưa chứng minh crash server hoặc lỗi bộ nhớ native; thiếu thực thi thì chưa xác minh.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "TC-OS-17",
+          "YeuCauLienQuan": "REQ-CONC-OS-1",
+          "TieuDe": "Version cũ sau cập nhật thành công",
+          "DieuKienTienQuyet": "Tài nguyên v=0, actor được phép sửa. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+          "CacBuoc": "1. PUT /api/orders/{order_id} với __v=0; gửi PUT lần hai vẫn __v=0; đọc lại dữ liệu.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: {\"status\":\"Đang giao\",\"__v\":0}",
+          "KetQuaMongDoi": "Lần đầu 200/v=1; lần hai 409; dữ liệu và version không đổi sau lần bị từ chối.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-OS-18",
+          "YeuCauLienQuan": "REQ-CONC-OS-1",
+          "TieuDe": "Version sai kiểu hoặc ngoài miền",
+          "DieuKienTienQuyet": "Tài nguyên tồn tại trong harness. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+          "CacBuoc": "1. PUT /api/orders/{order_id} với lần lượt các giá trị __v; kiểm tra dữ liệu sau mỗi lần.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: __v: -1, 0.5, \"0\", null, true, {}, []",
+          "KetQuaMongDoi": "Mỗi request trả 400; dữ liệu/version không thay đổi.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-OS-19",
+          "YeuCauLienQuan": "REQ-CONC-OS-1",
+          "TieuDe": "Cập nhật tuần tự với version mới nhất",
+          "DieuKienTienQuyet": "Tài nguyên v=0, actor được phép sửa. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+          "CacBuoc": "1. PUT __v=0; đọc __v=1; PUT giá trị khác với __v=1; đọc lại.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: [{\"status\":\"Đang giao\",\"__v\":0},{\"status\":\"Đã giao\",\"__v\":1}]",
+          "KetQuaMongDoi": "Cả hai trả 200; version cuối bằng 2; dữ liệu khớp lần thứ hai.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-OS-20",
+          "YeuCauLienQuan": "REQ-CONC-OS-1",
+          "TieuDe": "Client cũ không gửi version",
+          "DieuKienTienQuyet": "Tài nguyên tồn tại trong harness; giao thức tương thích hiện tại. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+          "CacBuoc": "1. PUT /api/orders/{order_id} với dữ liệu hợp lệ, không có trường __v; đọc lại.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: {\"status\":\"Đang giao\"}",
+          "KetQuaMongDoi": "Theo hành vi tương thích hiện tại: 200 và version tăng 1. Không kết luận chống stale-write cho client bỏ version.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-OS-6",
+          "YeuCauLienQuan": "REQ-OS-2, NFR-OS-4, REQ-CONC-OS-1",
+          "TieuDe": "2 request PUT đồng thời cùng 1 đơn hàng",
+          "DieuKienTienQuyet": "Có 1 đơn hàng đã tạo",
+          "CacBuoc": "1. Seed đối tượng __v=0; dùng actor có quyền theo kịch bản.\n2. Gửi đồng thời hai PUT dữ liệu khác nhau, cùng __v=0.\n3. Đọc phản hồi, version và dữ liệu cuối.",
+          "KetQuaMongDoi": "Một HTTP 200 và một HTTP 409; __v cuối bằng 1; dữ liệu cuối khớp request thành công.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "TC-OS-9",
+          "YeuCauLienQuan": "REQ-OS-SMT-total_status_update_counter",
+          "TieuDe": "Kiểm tra tràn số: total_status_update_counter",
+          "DieuKienTienQuyet": "Đã khai báo biến SMT Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+          "MucUuTien": "LOW"
+        },
+        {
+          "ID": "TC-OS-13",
+          "YeuCauLienQuan": "REQ-OS-SMT-daily_status_update_counter",
+          "TieuDe": "Kiểm tra tràn số: daily_status_update_counter",
+          "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'daily_status_update_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'daily_status_update_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+          "MucUuTien": "LOW"
+        },
+        {
+          "ID": "TC-OS-14",
+          "YeuCauLienQuan": "REQ-OS-SMT-concurrent_order_update_counter",
+          "TieuDe": "Kiểm tra tràn số: concurrent_order_update_counter",
+          "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'concurrent_order_update_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'concurrent_order_update_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+          "MucUuTien": "LOW"
+        },
+        {
+          "ID": "TC-OS-15",
+          "YeuCauLienQuan": "REQ-OS-SMT-delivered_order_counter",
+          "TieuDe": "Kiểm tra tràn số: delivered_order_counter",
+          "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'delivered_order_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'delivered_order_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+          "MucUuTien": "LOW"
+        },
+        {
+          "ID": "TC-OS-16",
+          "YeuCauLienQuan": "REQ-OS-SMT-cancelled_order_counter",
+          "TieuDe": "Kiểm tra tràn số: cancelled_order_counter",
+          "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'cancelled_order_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'cancelled_order_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+          "MucUuTien": "LOW"
+        },
+        {
+          "ID": "TC-OS-5",
+          "YeuCauLienQuan": "REQ-OS-7",
+          "TieuDe": "Đối chứng luồng và tác dụng phụ thông báo",
+          "DieuKienTienQuyet": "Có 1 đơn hàng mới tạo, đúng token chủ đơn",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Gửi PUT status='Dang giao' với token chủ sở hữu\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.\nLưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",
+          "KetQuaMongDoi": "Cập nhật trạng thái hợp lệ thành công; nội dung thông báo khớp đơn và trạng thái mới, không dùng lỗi setup làm bằng chứng fuzzing.",
+          "MucUuTien": "MEDIUM"
+        }
+      ]
+    }
+  },
+  {
+    "file": "Module_Products_Manage_spec.xlsx",
+    "sha256": "f7a55d76baf9296d9cef5ad31ef8cc9b806bf80fd6a2ebd24076056164922009",
+    "sheets": {
+      "ThongTin": [
+        {
+          "Truong": "name",
+          "GiaTri": "Products_Manage"
+        },
+        {
+          "Truong": "description",
+          "GiaTri": "Đặc tả yêu cầu module PRD của hệ thống bán hàng. API được kiểm thử trên node_harness với datastore trong bộ nhớ; các request có thể chạy đồng thời. Cụm khóa và hàm C/Python/SMT là mô hình kiểm chứng minh họa theo template, gồm lỗi cấy có chủ đích; không phải bằng chứng lỗi bộ nhớ của Node.js. Đây là hợp đồng mong đợi để xây dựng testcase; mức đáp ứng của code được đánh giá riêng, không khẳng định mọi yêu cầu đã triển khai."
+        },
+        {
+          "Truong": "pham_vi_chinh",
+          "GiaTri": "An toàn phần mềm: seed và trạng thái ban đầu → đột biến input → quan sát lỗi/ngoại lệ/tài nguyên → tái hiện và lưu bằng chứng. 29 testcase API có kịch bản hiện tại; điều kiện bổ sung trong Excel là mục tiêu cần kiểm tra, không tự coi đã được oracle hiện tại bao phủ đầy đủ."
+        },
+        {
+          "Truong": "pham_vi_bo_tro",
+          "GiaTri": "Giữ 104 testcase và 10 sheet cho toàn bộ tài liệu. Hàm C/Python là mẫu lỗi cấy độc lập; số học là mô hình theo giả định. 75 testcase ngoài campaign API chưa được chạy lại. Crash/hang/lỗi bộ nhớ cần bằng chứng riêng; không đồng nhất với HTTP 500."
+        },
+        {
+          "Truong": "thu_tu_testcase",
+          "GiaTri": "API an toàn đầu vào/quyền/trạng thái → tái hiện và phân loại bằng chứng → mẫu ngoại lệ/bộ nhớ độc lập → concurrency/timing/số học → seed đối chứng. Trong từng nhóm: HIGH, MEDIUM, LOW. ID không thay đổi; kết quả thực tế lưu ở report, không điền vào KetQuaMongDoi."
+        }
+      ],
+      "YeuCauChucNang": [
+        {
+          "ID": "REQ-PRD-1",
+          "MoTa": "POST/PUT /api/products phải yêu cầu authenticateToken + requireAdmin",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-PRD-2",
+          "MoTa": "price không được là số âm",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-PRD-3",
+          "MoTa": "price/stock sai kiểu dữ liệu không được gây phản hồi HTTP 500 do đầu vào không hợp lệ",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-PRD-4",
+          "MoTa": "id sản phẩm (numeric) do client tự chọn khi POST không được trùng/ghi đè sản phẩm đã có",
+          "DanhMuc": "safety",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-PRD-5",
+          "MoTa": "Mọi yêu cầu tạo/sửa sản phẩm hợp lệ cuối cùng phải nhận được phản hồi (200/404/500), không treo",
+          "DanhMuc": "liveness",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-PRD-6",
+          "MoTa": "PUT với id không tồn tại phải trả về 404",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-PRD-7",
+          "MoTa": "Việc phân tích trường name đầu vào không được vượt qua vùng đệm cố định (mô phỏng) Phạm vi: mô hình C minh họa sinh từ HamSinhMa, không phải quản lý bộ nhớ của API Node.js.",
+          "DanhMuc": "memory",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-PRD-FIX-parse_product_name",
+          "MoTa": "Mô hình minh họa parse_product_name phải sinh mã C theo Loai=buffer_copy; công cụ phải nhận diện lỗi cấy buffer-overflow.",
+          "DanhMuc": "memory",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-PRD-FIX-write_product_update_log",
+          "MoTa": "Mô hình minh họa write_product_update_log phải sinh mã C theo Loai=alloc_release; công cụ phải nhận diện lỗi cấy memory-leak.",
+          "DanhMuc": "memory",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-PRD-FIX-close_product_edit_session",
+          "MoTa": "Mô hình minh họa close_product_edit_session phải sinh mã C theo Loai=alloc_release; công cụ phải nhận diện lỗi cấy double-free.",
+          "DanhMuc": "memory",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-PRD-FIX-release_product_list_cache",
+          "MoTa": "Mô hình minh họa release_product_list_cache phải sinh mã C theo Loai=alloc_release; công cụ phải nhận diện lỗi cấy use-after-free.",
+          "DanhMuc": "memory",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-PRD-FIX-stock_delta",
+          "MoTa": "Mô hình stock_delta phải sinh hàm C số học theo tham số khai báo để phân tích AST/SMT.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-PRD-FIX-out_of_stock_ratio",
+          "MoTa": "Mô hình Python out_of_stock_ratio phải sinh đúng loại divide; fuzzing phải lưu input gây ngoại lệ khi tìm được. Không coi số lần chạy hữu hạn không có lỗi là chứng minh an toàn.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-PRD-FIX-product_internal_sku_pair",
+          "MoTa": "Mô hình Python product_internal_sku_pair phải sinh đúng loại magic_value; fuzzing phải lưu input gây ngoại lệ khi tìm được. Không coi số lần chạy hữu hạn không có lỗi là chứng minh an toàn.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-PRD-SMT-daily_product_update_counter",
+          "MoTa": "Mô hình số học daily_product_update_counter phải kiểm tra SAT của DieuKien và khả năng vượt int32 của BieuThucTran bằng hai phép kiểm tra riêng. Ngưỡng nghiệp vụ không phải ràng buộc tự động của phép kiểm tra overflow; không suy ra kiểu số Node.js từ mô hình này.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-PRD-SMT-concurrent_stock_update_counter",
+          "MoTa": "Mô hình số học concurrent_stock_update_counter phải kiểm tra SAT của DieuKien và khả năng vượt int32 của BieuThucTran bằng hai phép kiểm tra riêng. Ngưỡng nghiệp vụ không phải ràng buộc tự động của phép kiểm tra overflow; không suy ra kiểu số Node.js từ mô hình này.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-PRD-SMT-total_product_create_counter",
+          "MoTa": "Mô hình số học total_product_create_counter phải kiểm tra SAT của DieuKien và khả năng vượt int32 của BieuThucTran bằng hai phép kiểm tra riêng. Ngưỡng nghiệp vụ không phải ràng buộc tự động của phép kiểm tra overflow; không suy ra kiểu số Node.js từ mô hình này.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-PRD-SMT-total_stock_movement_counter",
+          "MoTa": "Mô hình số học total_stock_movement_counter phải kiểm tra SAT của DieuKien và khả năng vượt int32 của BieuThucTran bằng hai phép kiểm tra riêng. Ngưỡng nghiệp vụ không phải ràng buộc tự động của phép kiểm tra overflow; không suy ra kiểu số Node.js từ mô hình này.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-PRD-SMT-out_of_stock_event_counter",
+          "MoTa": "Mô hình số học out_of_stock_event_counter phải kiểm tra SAT của DieuKien và khả năng vượt int32 của BieuThucTran bằng hai phép kiểm tra riêng. Ngưỡng nghiệp vụ không phải ràng buộc tự động của phép kiểm tra overflow; không suy ra kiểu số Node.js từ mô hình này.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-CONC-PRD-1",
+          "MoTa": "Cập nhật có __v phải dùng compare-and-swap nguyên tử; version cũ trả 409, version sai kiểu/âm trả 400. Thiếu __v được giữ tương thích nhưng không bảo đảm chống ghi đè.",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-PRD-FUZZ-21",
+          "MoTa": "Phải phân biệt giới hạn độ dài API với kích thước buffer C; khảo sát lân cận không tự chứng minh memory corruption trong API Node.js.",
+          "DanhMuc": "functional",
+          "MucUuTien": "HIGH"
+        }
+      ],
+      "YeuCauPhiChucNang": [
+        {
+          "ID": "NFR-PRD-1",
+          "MoTa": "Thời gian phản hồi POST/PUT sản phẩm trung bình phải dưới 150ms Đo 100 request sau 10 request làm nóng, tuần tự trên loopback; ghi cấu hình CPU/RAM và phiên bản runtime. Chỉ đánh giá harness mô phỏng.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "NFR-PRD-2",
+          "MoTa": "Tỷ lệ HTTP 500 trên tổng request phải dưới 2%  Đo trên 1000 request/module, seed=7, ghi riêng lỗi bộ chạy; báo cáo phân bố input và số HTTP 5xx.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "NFR-PRD-3",
+          "MoTa": "Hệ thống phải hỗ trợ tối thiểu 50 cập nhật giá/kho đồng thời/giây Đo 60 giây sau 10 giây làm nóng; ghi mức đồng thời, CPU/RAM, runtime và tỷ lệ lỗi. Chưa có phép đo thì ghi chưa đánh giá.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "NFR-PRD-4",
+          "MoTa": "Trên 20 cặp cập nhật đồng thời từ version sạch: mỗi cặp cùng __v phải có đúng một thành công, một HTTP 409; không mất dữ liệu của request thắng. Kiểm tra harness, không suy ra hiệu quả MongoDB thật.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "NFR-PRD-5",
+          "MoTa": "Không được để giá trị stock âm xuất hiện trong CSDL (định lượng: 0 bản ghi)",
+          "MucUuTien": "MEDIUM"
+        }
+      ],
+      "RangBuoc": [
+        {
+          "ID": "CON-PRD-1",
+          "MoTa": "Tạo/sửa sản phẩm chỉ cho admin; chỉ cập nhật trường cho phép, không chuyển toàn bộ request body vào datastore.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "CON-PRD-2",
+          "MoTa": "name tối đa 200 ký tự; mô hình C minh họa dùng KichThuocBuffer=200 theo template; không suy ra Node.js dùng vùng đệm C này.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "CON-PRD-3",
+          "MoTa": "ID sản phẩm phải là số nguyên dương và duy nhất; khi không gửi ID thì server cấp ID mới không trùng, ID sai kiểu phải bị từ chối.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "CON-PRD-4",
+          "MoTa": "Cập nhật/xóa sản phẩm có ID đúng định dạng nhưng không tồn tại phải trả HTTP 404; request thất bại không được tạo sản phẩm mới.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "CON-PRD-5",
+          "MoTa": "Cập nhật có __v phải dùng compare-and-swap nguyên tử; version cũ trả 409, version sai kiểu/âm trả 400. Thiếu __v được giữ tương thích nhưng không bảo đảm chống ghi đè.",
+          "MucUuTien": "HIGH"
+        }
+      ],
+      "MoHinhTrangThai": [
+        {
+          "TrangThai": "stock_update_free",
+          "KhoiTao": "x",
+          "Nhan": "safe",
+          "ChuyenDenCacTrangThai": "stock_update_main_holds, stock_update_log_holds"
+        },
+        {
+          "TrangThai": "stock_update_main_holds",
+          "KhoiTao": null,
+          "Nhan": "main_locked",
+          "ChuyenDenCacTrangThai": "stock_update_free, stock_update_conflict"
+        },
+        {
+          "TrangThai": "stock_update_log_holds",
+          "KhoiTao": null,
+          "Nhan": "log_locked",
+          "ChuyenDenCacTrangThai": "stock_update_free"
+        },
+        {
+          "TrangThai": "stock_update_conflict",
+          "KhoiTao": null,
+          "Nhan": "main_locked, log_locked, violation",
+          "ChuyenDenCacTrangThai": "stock_update_free"
+        },
+        {
+          "TrangThai": "product_start",
+          "KhoiTao": "x",
+          "Nhan": "begin",
+          "ChuyenDenCacTrangThai": "product_updating"
+        },
+        {
+          "TrangThai": "product_updating",
+          "KhoiTao": null,
+          "Nhan": "processing",
+          "ChuyenDenCacTrangThai": "product_not_found, product_saved"
+        },
+        {
+          "TrangThai": "product_not_found",
+          "KhoiTao": null,
+          "Nhan": "rejected_404",
+          "ChuyenDenCacTrangThai": "product_not_found"
+        },
+        {
+          "TrangThai": "product_saved",
+          "KhoiTao": null,
+          "Nhan": "success_200",
+          "ChuyenDenCacTrangThai": "product_saved"
+        }
+      ],
+      "ThuocTinhAnToan": [
+        {
+          "CongThucCTL": "AG(!violation)"
+        },
+        {
+          "CongThucCTL": "EF(main_locked)"
+        },
+        {
+          "CongThucCTL": "AG(processing -> AF(rejected_404 | success_200))"
+        },
+        {
+          "CongThucCTL": "AG(rejected_404 -> !EX(success_200))"
+        }
+      ],
+      "LoaiTruLanNhau": [
+        {
+          "MenhDe1": "main_locked",
+          "MenhDe2": "log_locked"
+        },
+        {
+          "MenhDe1": "violation",
+          "MenhDe2": "safe"
+        },
+        {
+          "MenhDe1": "rejected_404",
+          "MenhDe2": "success_200"
+        },
+        {
+          "MenhDe1": "processing",
+          "MenhDe2": "success_200"
+        },
+        {
+          "MenhDe1": "processing",
+          "MenhDe2": "rejected_404"
+        }
+      ],
+      "HamSinhMa": [
+        {
+          "Ten": "parse_product_name",
+          "NgonNgu": "c",
+          "Loai": "buffer_copy",
+          "ThamSo": "name_input",
+          "KichThuocBuffer": 200,
+          "Loi": "buffer-overflow",
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "write_product_update_log",
+          "NgonNgu": "c",
+          "Loai": "alloc_release",
+          "ThamSo": "product_record",
+          "KichThuocBuffer": 32,
+          "Loi": "memory-leak",
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "close_product_edit_session",
+          "NgonNgu": "c",
+          "Loai": "alloc_release",
+          "ThamSo": "edit_handle",
+          "KichThuocBuffer": 8,
+          "Loi": "double-free",
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "release_product_list_cache",
+          "NgonNgu": "c",
+          "Loai": "alloc_release",
+          "ThamSo": "list_cache",
+          "KichThuocBuffer": 16,
+          "Loi": "use-after-free",
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "stock_delta",
+          "NgonNgu": "c",
+          "Loai": "arithmetic",
+          "ThamSo": "new_stock, old_stock",
+          "KichThuocBuffer": null,
+          "Loi": null,
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "out_of_stock_ratio",
+          "NgonNgu": "python",
+          "Loai": "divide",
+          "ThamSo": "sold_count, initial_stock",
+          "KichThuocBuffer": null,
+          "Loi": null,
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "product_internal_sku_pair",
+          "NgonNgu": "python",
+          "Loai": "magic_value",
+          "ThamSo": "sku_a, sku_b",
+          "KichThuocBuffer": null,
+          "Loi": null,
+          "GiaTriBiMat1": 5501,
+          "GiaTriBiMat2": 8802
+        }
+      ],
+      "KiemTraSoHoc": [
+        {
+          "Ten": "daily_product_update_counter",
+          "BienSoNguyen": "updates_today, updates_backlog",
+          "DieuKien": "updates_today >= 0 and updates_backlog >= 0 and updates_today + updates_backlog > 32767",
+          "BieuThucTran": "updates_today + updates_backlog"
+        },
+        {
+          "Ten": "concurrent_stock_update_counter",
+          "BienSoNguyen": "concurrent_main, concurrent_log",
+          "DieuKien": "concurrent_main >= 0 and concurrent_log >= 0 and concurrent_main + concurrent_log > 65535",
+          "BieuThucTran": "concurrent_main + concurrent_log"
+        },
+        {
+          "Ten": "total_product_create_counter",
+          "BienSoNguyen": "created_today, created_backlog",
+          "DieuKien": "created_today >= 0 and created_backlog >= 0 and created_today + created_backlog > 2000000000",
+          "BieuThucTran": "created_today + created_backlog"
+        },
+        {
+          "Ten": "total_stock_movement_counter",
+          "BienSoNguyen": "stock_in, stock_out",
+          "DieuKien": "stock_in >= 0 and stock_out >= 0 and stock_in + stock_out > 2000000000",
+          "BieuThucTran": "stock_in + stock_out"
+        },
+        {
+          "Ten": "out_of_stock_event_counter",
+          "BienSoNguyen": "oos_today, oos_backlog",
+          "DieuKien": "oos_today >= 0 and oos_backlog >= 0 and oos_today + oos_backlog > 32767",
+          "BieuThucTran": "oos_today + oos_backlog"
+        }
+      ],
+      "TestCase": [
+        {
+          "ID": "TC-PRD-1",
+          "YeuCauLienQuan": "REQ-PRD-1",
+          "TieuDe": "Vượt quyền tạo hoặc sửa dữ liệu sản phẩm",
+          "DieuKienTienQuyet": "Server đang chạy",
+          "CacBuoc": "POST /api/products không token\nPUT /api/products/1 không token\nLưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",
+          "KetQuaMongDoi": "HTTP 401/403 khi thiếu token hoặc dùng tài khoản thường cho thao tác quản trị.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-PRD-2",
+          "YeuCauLienQuan": "REQ-PRD-2",
+          "TieuDe": "Giá âm vượt qua ràng buộc miền dữ liệu",
+          "DieuKienTienQuyet": "Server đang chạy",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. PUT /api/products/1 với body {\"price\":-500}\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.\nLưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",
+          "KetQuaMongDoi": "HTTP 400/422 cho giá âm; không coi cập nhật là hợp lệ.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-PRD-3",
+          "YeuCauLienQuan": "REQ-PRD-3",
+          "TieuDe": "Giá sản phẩm sai kiểu gây ngoại lệ xử lý",
+          "DieuKienTienQuyet": "Server đang chạy",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. PUT /api/products/1 với body {\"price\":{\"a\":1}}\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.\nLưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",
+          "KetQuaMongDoi": "HTTP 400/422 cho object thay vì số; không để lỗi chuyển kiểu gây HTTP 500.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-PRD-5",
+          "YeuCauLienQuan": "REQ-PRD-4",
+          "TieuDe": "ID trùng gây ghi đè hoặc mơ hồ định danh sản phẩm",
+          "DieuKienTienQuyet": "Đã có sản phẩm id=1",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. POST /api/products với body {\"id\":1,...}\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.\nLưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",
+          "KetQuaMongDoi": "Từ chối ID trùng hoặc cấp ID mới duy nhất; không tạo hai sản phẩm cùng định danh hoặc ghi đè trái phép.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-PRD-21",
+          "YeuCauLienQuan": "REQ-PRD-FUZZ-21",
+          "TieuDe": "Kiểm tra quy trình fuzzing: Khảo sát chiều dài name và buffer mẫu C",
+          "DieuKienTienQuyet": "name API có giới hạn 200 ký tự theo đặc tả; mẫu parse_product_name có buffer B=200 byte, có native driver và AddressSanitizer hoạt động; bắt đầu bằng ASCII để đồng nhất byte/ký tự.",
+          "CacBuoc": "1. Gửi name ASCII dài 199, 200, 201 ký tự tới API từ trạng thái sạch và lưu response.\n2. Gửi riêng chuỗi ASCII dài B-1, B, B+1 tới driver C với sanitizer, kể cả ký tự kết thúc chuỗi.\n3. Lưu từng input, lệnh biên dịch, stderr, exit code và stack trace.\n4. Chạy lại điểm lỗi và đối chứng ngắn; thử UTF-8 riêng, ghi cả byte và số ký tự.",
+          "KetQuaMongDoi": "Có hai bảng kết quả riêng API và native C. Với strcpy vào buffer B, chuỗi B ký tự còn cần byte kết thúc; chỉ xác nhận overflow bằng sanitizer ở binary C. API trả 500 hoặc từ chối name không đủ để kết luận lỗi bộ nhớ. Không có công cụ thì chưa đánh giá.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-PRD-7",
+          "YeuCauLienQuan": "REQ-PRD-FIX-parse_product_name",
+          "TieuDe": "Hàm sinh mã C: parse_product_name (buffer-overflow)",
+          "DieuKienTienQuyet": "Mẫu C parse_product_name, lỗi cấy buffer-overflow; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+          "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi parse_product_name, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy chuỗi ASCII dài B-1, B, B+1 với B=200 byte và đối chứng ngắn.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+          "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán buffer-overflow; mẫu lỗi cấy phải có chẩn đoán buffer-overflow tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-PRD-10",
+          "YeuCauLienQuan": "REQ-PRD-FIX-write_product_update_log",
+          "TieuDe": "Hàm sinh mã C: write_product_update_log (memory-leak)",
+          "DieuKienTienQuyet": "Mẫu C write_product_update_log, lỗi cấy memory-leak; có driver gọi hàm, compiler và LeakSanitizer hoặc công cụ kiểm tra leak tương đương hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+          "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi write_product_update_log, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+          "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán memory-leak; mẫu lỗi cấy phải có chẩn đoán memory-leak tại hàm mục tiêu từ LeakSanitizer hoặc công cụ phát hiện leak tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-PRD-11",
+          "YeuCauLienQuan": "REQ-PRD-FIX-close_product_edit_session",
+          "TieuDe": "Hàm sinh mã C: close_product_edit_session (double-free)",
+          "DieuKienTienQuyet": "Mẫu C close_product_edit_session, lỗi cấy double-free; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+          "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi close_product_edit_session, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+          "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán double-free; mẫu lỗi cấy phải có chẩn đoán double-free tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-PRD-12",
+          "YeuCauLienQuan": "REQ-PRD-FIX-release_product_list_cache",
+          "TieuDe": "Hàm sinh mã C: release_product_list_cache (use-after-free)",
+          "DieuKienTienQuyet": "Mẫu C release_product_list_cache, lỗi cấy use-after-free; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+          "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi release_product_list_cache, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+          "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán use-after-free; mẫu lỗi cấy phải có chẩn đoán use-after-free tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-PRD-8",
+          "YeuCauLienQuan": "REQ-PRD-FIX-out_of_stock_ratio",
+          "TieuDe": "Hàm Python: out_of_stock_ratio chia cho 0",
+          "DieuKienTienQuyet": "Đã sinh mã Python Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy blackbox_fuzz() với initial_stock=0\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Mẫu lỗi cấy phát sinh ZeroDivisionError với input chia cho 0; lưu traceback, input và cách gọi. Đối chứng an toàn xử lý trường hợp này có kiểm soát. Ngoại lệ Python chưa chứng minh crash server hoặc lỗi bộ nhớ native; thiếu thực thi thì chưa xác minh.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "TC-PRD-6",
+          "YeuCauLienQuan": "REQ-PRD-1, NFR-PRD-4, REQ-CONC-PRD-1",
+          "TieuDe": "2 request PUT đồng thời cùng 1 sản phẩm (race tồn kho)",
+          "DieuKienTienQuyet": "Đã có sản phẩm id=1, stock=10",
+          "CacBuoc": "1. Seed đối tượng __v=0; dùng actor có quyền theo kịch bản.\n2. Gửi đồng thời hai PUT dữ liệu khác nhau, cùng __v=0.\n3. Đọc phản hồi, version và dữ liệu cuối.",
+          "KetQuaMongDoi": "Một HTTP 200 và một HTTP 409; __v cuối bằng 1; dữ liệu cuối khớp request thành công.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-PRD-17",
+          "YeuCauLienQuan": "REQ-CONC-PRD-1",
+          "TieuDe": "Version cũ sau cập nhật thành công",
+          "DieuKienTienQuyet": "Tài nguyên v=0, actor được phép sửa. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+          "CacBuoc": "1. PUT /api/products/{product_id} với __v=0; gửi PUT lần hai vẫn __v=0; đọc lại dữ liệu.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: {\"stock\":11,\"__v\":0}",
+          "KetQuaMongDoi": "Lần đầu 200/v=1; lần hai 409; dữ liệu và version không đổi sau lần bị từ chối.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-PRD-18",
+          "YeuCauLienQuan": "REQ-CONC-PRD-1",
+          "TieuDe": "Version sai kiểu hoặc ngoài miền",
+          "DieuKienTienQuyet": "Tài nguyên tồn tại trong harness. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+          "CacBuoc": "1. PUT /api/products/{product_id} với lần lượt các giá trị __v; kiểm tra dữ liệu sau mỗi lần.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: __v: -1, 0.5, \"0\", null, true, {}, []",
+          "KetQuaMongDoi": "Mỗi request trả 400; dữ liệu/version không thay đổi.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-PRD-19",
+          "YeuCauLienQuan": "REQ-CONC-PRD-1",
+          "TieuDe": "Cập nhật tuần tự với version mới nhất",
+          "DieuKienTienQuyet": "Tài nguyên v=0, actor được phép sửa. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+          "CacBuoc": "1. PUT __v=0; đọc __v=1; PUT giá trị khác với __v=1; đọc lại.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: [{\"stock\":11,\"__v\":0},{\"stock\":12,\"__v\":1}]",
+          "KetQuaMongDoi": "Cả hai trả 200; version cuối bằng 2; dữ liệu khớp lần thứ hai.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-PRD-20",
+          "YeuCauLienQuan": "CON-PRD-5",
+          "TieuDe": "Client cũ không gửi version",
+          "DieuKienTienQuyet": "Tài nguyên tồn tại trong harness; giao thức tương thích hiện tại. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+          "CacBuoc": "1. PUT /api/products/{product_id} với dữ liệu hợp lệ, không có trường __v; đọc lại.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: {\"stock\":11}",
+          "KetQuaMongDoi": "Theo hành vi tương thích hiện tại: 200 và version tăng 1. Không kết luận chống stale-write cho client bỏ version.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-PRD-9",
+          "YeuCauLienQuan": "REQ-PRD-SMT-total_stock_movement_counter",
+          "TieuDe": "Kiểm tra tràn số: total_stock_movement_counter",
+          "DieuKienTienQuyet": "Đã khai báo biến SMT Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+          "MucUuTien": "LOW"
+        },
+        {
+          "ID": "TC-PRD-13",
+          "YeuCauLienQuan": "REQ-PRD-SMT-daily_product_update_counter",
+          "TieuDe": "Kiểm tra tràn số: daily_product_update_counter",
+          "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'daily_product_update_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'daily_product_update_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+          "MucUuTien": "LOW"
+        },
+        {
+          "ID": "TC-PRD-14",
+          "YeuCauLienQuan": "REQ-PRD-SMT-concurrent_stock_update_counter",
+          "TieuDe": "Kiểm tra tràn số: concurrent_stock_update_counter",
+          "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'concurrent_stock_update_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'concurrent_stock_update_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+          "MucUuTien": "LOW"
+        },
+        {
+          "ID": "TC-PRD-15",
+          "YeuCauLienQuan": "REQ-PRD-SMT-total_product_create_counter",
+          "TieuDe": "Kiểm tra tràn số: total_product_create_counter",
+          "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'total_product_create_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'total_product_create_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+          "MucUuTien": "LOW"
+        },
+        {
+          "ID": "TC-PRD-16",
+          "YeuCauLienQuan": "REQ-PRD-SMT-out_of_stock_event_counter",
+          "TieuDe": "Kiểm tra tràn số: out_of_stock_event_counter",
+          "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'out_of_stock_event_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'out_of_stock_event_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+          "MucUuTien": "LOW"
+        },
+        {
+          "ID": "TC-PRD-4",
+          "YeuCauLienQuan": "REQ-PRD-6",
+          "TieuDe": "Đối chứng lỗi truy cập sản phẩm không tồn tại",
+          "DieuKienTienQuyet": "Server đang chạy",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. PUT /api/products/999999 (id không tồn tại)\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.\nLưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",
+          "KetQuaMongDoi": "HTTP 404 có kiểm soát; không báo lỗi tiến trình khi tài nguyên không tồn tại.",
+          "MucUuTien": "MEDIUM"
+        }
+      ]
+    }
+  },
+  {
+    "file": "Module_Users_Admin_spec.xlsx",
+    "sha256": "cf88315b8c784ed47061b6ba2934f56e529ec1d2e842edd6660e0b44ad718a2c",
+    "sheets": {
+      "ThongTin": [
+        {
+          "Truong": "name",
+          "GiaTri": "Users_Admin"
+        },
+        {
+          "Truong": "description",
+          "GiaTri": "Đặc tả yêu cầu module USR của hệ thống bán hàng. API được kiểm thử trên node_harness với datastore trong bộ nhớ; các request có thể chạy đồng thời. Cụm khóa và hàm C/Python/SMT là mô hình kiểm chứng minh họa theo template, gồm lỗi cấy có chủ đích; không phải bằng chứng lỗi bộ nhớ của Node.js. Đây là hợp đồng mong đợi để xây dựng testcase; mức đáp ứng của code được đánh giá riêng, không khẳng định mọi yêu cầu đã triển khai."
+        },
+        {
+          "Truong": "pham_vi_chinh",
+          "GiaTri": "An toàn phần mềm: seed và trạng thái ban đầu → đột biến input → quan sát lỗi/ngoại lệ/tài nguyên → tái hiện và lưu bằng chứng. 29 testcase API có kịch bản hiện tại; điều kiện bổ sung trong Excel là mục tiêu cần kiểm tra, không tự coi đã được oracle hiện tại bao phủ đầy đủ."
+        },
+        {
+          "Truong": "pham_vi_bo_tro",
+          "GiaTri": "Giữ 104 testcase và 10 sheet cho toàn bộ tài liệu. Hàm C/Python là mẫu lỗi cấy độc lập; số học là mô hình theo giả định. 75 testcase ngoài campaign API chưa được chạy lại. Crash/hang/lỗi bộ nhớ cần bằng chứng riêng; không đồng nhất với HTTP 500."
+        },
+        {
+          "Truong": "thu_tu_testcase",
+          "GiaTri": "API an toàn đầu vào/quyền/trạng thái → tái hiện và phân loại bằng chứng → mẫu ngoại lệ/bộ nhớ độc lập → concurrency/timing/số học → seed đối chứng. Trong từng nhóm: HIGH, MEDIUM, LOW. ID không thay đổi; kết quả thực tế lưu ở report, không điền vào KetQuaMongDoi."
+        }
+      ],
+      "YeuCauChucNang": [
+        {
+          "ID": "REQ-USR-1",
+          "MoTa": "PUT /api/users/:id phải yêu cầu authenticateToken",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-USR-2",
+          "MoTa": "Chỉ chủ tài khoản hoặc admin được phép sửa hồ sơ (chống IDOR/BOLA)",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-USR-3",
+          "MoTa": "Trường role KHÔNG được client tự đặt qua PUT sửa hồ sơ thông thường (chống mass assignment)",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-USR-4",
+          "MoTa": "PUT với :id sai định dạng không được gây phản hồi HTTP 500 do đầu vào không hợp lệ",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-USR-5",
+          "MoTa": "Password khi được cập nhật qua PUT /api/users/:id phải được bcrypt.hash trước khi lưu",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-USR-6",
+          "MoTa": "create-admin: secretKey không được hardcode trong source code và phải so sánh constant-time",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-USR-7",
+          "MoTa": "create-admin với email đã tồn tại cuối cùng phải hoàn tất nâng quyền hoặc trả lời thất bại rõ ràng, không treo",
+          "DanhMuc": "liveness",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-USR-8",
+          "MoTa": "create-admin với secretKey đúng phải tạo/cập nhật được tài khoản admin thành công",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-USR-9",
+          "MoTa": "Việc phân tích fullName đầu vào khi ghi hồ sơ không được vượt qua vùng đệm cố định (mô phỏng) Phạm vi: mô hình C minh họa sinh từ HamSinhMa, không phải quản lý bộ nhớ của API Node.js.",
+          "DanhMuc": "memory",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-USR-FIX-parse_user_fullname",
+          "MoTa": "Mô hình minh họa parse_user_fullname phải sinh mã C theo Loai=buffer_copy; công cụ phải nhận diện lỗi cấy buffer-overflow.",
+          "DanhMuc": "memory",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-USR-FIX-write_profile_update_log",
+          "MoTa": "Mô hình minh họa write_profile_update_log phải sinh mã C theo Loai=alloc_release; công cụ phải nhận diện lỗi cấy memory-leak.",
+          "DanhMuc": "memory",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-USR-FIX-close_admin_setup_session",
+          "MoTa": "Mô hình minh họa close_admin_setup_session phải sinh mã C theo Loai=alloc_release; công cụ phải nhận diện lỗi cấy double-free.",
+          "DanhMuc": "memory",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-USR-FIX-release_user_profile_cache",
+          "MoTa": "Mô hình minh họa release_user_profile_cache phải sinh mã C theo Loai=alloc_release; công cụ phải nhận diện lỗi cấy use-after-free.",
+          "DanhMuc": "memory",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-USR-FIX-role_privilege_delta",
+          "MoTa": "Mô hình role_privilege_delta phải sinh hàm C số học theo tham số khai báo để phân tích AST/SMT.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-USR-FIX-admin_promotion_ratio",
+          "MoTa": "Mô hình Python admin_promotion_ratio phải sinh đúng loại divide; fuzzing phải lưu input gây ngoại lệ khi tìm được. Không coi số lần chạy hữu hạn không có lỗi là chứng minh an toàn.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-USR-FIX-admin_setup_secret_pair",
+          "MoTa": "Mô hình Python admin_setup_secret_pair phải sinh đúng loại magic_value; fuzzing phải lưu input gây ngoại lệ khi tìm được. Không coi số lần chạy hữu hạn không có lỗi là chứng minh an toàn.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-USR-SMT-daily_profile_update_counter",
+          "MoTa": "Mô hình số học daily_profile_update_counter phải kiểm tra SAT của DieuKien và khả năng vượt int32 của BieuThucTran bằng hai phép kiểm tra riêng. Ngưỡng nghiệp vụ không phải ràng buộc tự động của phép kiểm tra overflow; không suy ra kiểu số Node.js từ mô hình này.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-USR-SMT-concurrent_profile_update_counter",
+          "MoTa": "Mô hình số học concurrent_profile_update_counter phải kiểm tra SAT của DieuKien và khả năng vượt int32 của BieuThucTran bằng hai phép kiểm tra riêng. Ngưỡng nghiệp vụ không phải ràng buộc tự động của phép kiểm tra overflow; không suy ra kiểu số Node.js từ mô hình này.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-USR-SMT-total_create_admin_attempt_counter",
+          "MoTa": "Mô hình số học total_create_admin_attempt_counter phải kiểm tra SAT của DieuKien và khả năng vượt int32 của BieuThucTran bằng hai phép kiểm tra riêng. Ngưỡng nghiệp vụ không phải ràng buộc tự động của phép kiểm tra overflow; không suy ra kiểu số Node.js từ mô hình này.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-USR-SMT-active_user_counter",
+          "MoTa": "Mô hình số học active_user_counter phải kiểm tra SAT của DieuKien và khả năng vượt int32 của BieuThucTran bằng hai phép kiểm tra riêng. Ngưỡng nghiệp vụ không phải ràng buộc tự động của phép kiểm tra overflow; không suy ra kiểu số Node.js từ mô hình này.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-USR-SMT-role_escalation_attempt_counter",
+          "MoTa": "Mô hình số học role_escalation_attempt_counter phải kiểm tra SAT của DieuKien và khả năng vượt int32 của BieuThucTran bằng hai phép kiểm tra riêng. Ngưỡng nghiệp vụ không phải ràng buộc tự động của phép kiểm tra overflow; không suy ra kiểu số Node.js từ mô hình này.",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-CONC-USR-1",
+          "MoTa": "Cập nhật có __v phải dùng compare-and-swap nguyên tử; version cũ trả 409, sai kiểu/âm trả 400; không tìm thấy đối tượng trả 404. Thiếu __v được giữ tương thích nhưng không bảo đảm phát hiện ghi đè.",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-USR-FUZZ-21",
+          "MoTa": "Bộ điều phối phải phân biệt phản hồi HTTP 500, ngoại lệ đã bắt và tiến trình mục tiêu kết thúc bất thường bằng mã thoát/signal và log.",
+          "DanhMuc": "functional",
+          "MucUuTien": "HIGH"
+        }
+      ],
+      "YeuCauPhiChucNang": [
+        {
+          "ID": "NFR-USR-1",
+          "MoTa": "create-admin phải giới hạn tối đa 5 lần thử sai secretKey mỗi phút trên mỗi IP",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "NFR-USR-2",
+          "MoTa": "Thời gian phản hồi PUT /api/users/:id trung bình phải dưới 100ms Đo 100 request sau 10 request làm nóng, tuần tự trên loopback; ghi cấu hình CPU/RAM và phiên bản runtime. Chỉ đánh giá harness mô phỏng.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "NFR-USR-3",
+          "MoTa": "Tỷ lệ HTTP 500 trên PUT /api/users/:id phải dưới 1% Đo trên 1000 request/module, seed=7, ghi riêng lỗi bộ chạy; báo cáo phân bố input và số HTTP 5xx.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "NFR-USR-4",
+          "MoTa": "Trên 20 cặp cập nhật đồng thời từ version sạch: mỗi cặp cùng __v phải có đúng một thành công, một HTTP 409; không mất dữ liệu của request thắng. Kiểm tra harness, không suy ra hiệu quả MongoDB thật.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "NFR-USR-5",
+          "MoTa": "Không được lưu bất kỳ trường password nào ở dạng plaintext trong CSDL (định lượng: 0 bản ghi)",
+          "MucUuTien": "HIGH"
+        }
+      ],
+      "RangBuoc": [
+        {
+          "ID": "CON-USR-1",
+          "MoTa": "Cập nhật hồ sơ phải dùng danh sách trường cho phép; không cho client sửa role, _id, failedLoginCount hoặc tự gán version lưu trữ.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "CON-USR-2",
+          "MoTa": "fullName tối đa 100 ký tự; mô hình C minh họa dùng KichThuocBuffer=100 theo template và phải xét riêng byte/ký tự kết thúc khi triển khai C.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "CON-USR-3",
+          "MoTa": "Bí mật create-admin phải lấy từ cấu hình ngoài mã nguồn, không được ghi vào response/log; kiểm tra bí mật phải tránh so sánh làm lộ nội dung.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "CON-USR-4",
+          "MoTa": "role chỉ nhận user/admin và chỉ được đổi qua thao tác quản trị được cấp quyền; cập nhật hồ sơ thông thường không được nâng quyền.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "CON-USR-5",
+          "MoTa": "Cập nhật có __v phải dùng compare-and-swap nguyên tử; version cũ trả 409, sai kiểu/âm trả 400; không tìm thấy đối tượng trả 404. Thiếu __v được giữ tương thích nhưng không bảo đảm phát hiện ghi đè.",
+          "MucUuTien": "MEDIUM"
+        }
+      ],
+      "MoHinhTrangThai": [
+        {
+          "TrangThai": "profile_update_free",
+          "KhoiTao": "x",
+          "Nhan": "safe",
+          "ChuyenDenCacTrangThai": "profile_update_main_holds, profile_update_log_holds"
+        },
+        {
+          "TrangThai": "profile_update_main_holds",
+          "KhoiTao": null,
+          "Nhan": "main_locked",
+          "ChuyenDenCacTrangThai": "profile_update_free, profile_update_conflict"
+        },
+        {
+          "TrangThai": "profile_update_log_holds",
+          "KhoiTao": null,
+          "Nhan": "log_locked",
+          "ChuyenDenCacTrangThai": "profile_update_free"
+        },
+        {
+          "TrangThai": "profile_update_conflict",
+          "KhoiTao": null,
+          "Nhan": "main_locked, log_locked, violation",
+          "ChuyenDenCacTrangThai": "profile_update_free"
+        },
+        {
+          "TrangThai": "profile_start",
+          "KhoiTao": "x",
+          "Nhan": "begin",
+          "ChuyenDenCacTrangThai": "profile_updating"
+        },
+        {
+          "TrangThai": "profile_updating",
+          "KhoiTao": null,
+          "Nhan": "processing",
+          "ChuyenDenCacTrangThai": "profile_not_found, profile_updated"
+        },
+        {
+          "TrangThai": "profile_not_found",
+          "KhoiTao": null,
+          "Nhan": "rejected_id_not_found",
+          "ChuyenDenCacTrangThai": "profile_not_found"
+        },
+        {
+          "TrangThai": "profile_updated",
+          "KhoiTao": null,
+          "Nhan": "success_200",
+          "ChuyenDenCacTrangThai": "profile_updated"
+        },
+        {
+          "TrangThai": "admin_start",
+          "KhoiTao": "x",
+          "Nhan": "begin",
+          "ChuyenDenCacTrangThai": "admin_rejected_secret, admin_checking_email"
+        },
+        {
+          "TrangThai": "admin_rejected_secret",
+          "KhoiTao": null,
+          "Nhan": "rejected_403",
+          "ChuyenDenCacTrangThai": "admin_rejected_secret"
+        },
+        {
+          "TrangThai": "admin_checking_email",
+          "KhoiTao": null,
+          "Nhan": "checking",
+          "ChuyenDenCacTrangThai": "admin_existing_promoted, admin_new_created"
+        },
+        {
+          "TrangThai": "admin_existing_promoted",
+          "KhoiTao": null,
+          "Nhan": "promoted_200",
+          "ChuyenDenCacTrangThai": "admin_existing_promoted"
+        },
+        {
+          "TrangThai": "admin_new_created",
+          "KhoiTao": null,
+          "Nhan": "created_200",
+          "ChuyenDenCacTrangThai": "admin_new_created"
+        }
+      ],
+      "ThuocTinhAnToan": [
+        {
+          "CongThucCTL": "AG(!violation)"
+        },
+        {
+          "CongThucCTL": "EF(main_locked)"
+        },
+        {
+          "CongThucCTL": "AG(rejected_403 -> !EX(checking))"
+        },
+        {
+          "CongThucCTL": "AG(processing -> AF(rejected_id_not_found | success_200))"
+        },
+        {
+          "CongThucCTL": "EF(created_200)"
+        },
+        {
+          "CongThucCTL": "AG(checking -> AF(promoted_200 | created_200))"
+        }
+      ],
+      "LoaiTruLanNhau": [
+        {
+          "MenhDe1": "main_locked",
+          "MenhDe2": "log_locked"
+        },
+        {
+          "MenhDe1": "violation",
+          "MenhDe2": "safe"
+        },
+        {
+          "MenhDe1": "rejected_403",
+          "MenhDe2": "checking"
+        },
+        {
+          "MenhDe1": "promoted_200",
+          "MenhDe2": "created_200"
+        },
+        {
+          "MenhDe1": "rejected_id_not_found",
+          "MenhDe2": "success_200"
+        }
+      ],
+      "HamSinhMa": [
+        {
+          "Ten": "parse_user_fullname",
+          "NgonNgu": "c",
+          "Loai": "buffer_copy",
+          "ThamSo": "fullname_input",
+          "KichThuocBuffer": 100,
+          "Loi": "buffer-overflow",
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "write_profile_update_log",
+          "NgonNgu": "c",
+          "Loai": "alloc_release",
+          "ThamSo": "profile_record",
+          "KichThuocBuffer": 32,
+          "Loi": "memory-leak",
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "close_admin_setup_session",
+          "NgonNgu": "c",
+          "Loai": "alloc_release",
+          "ThamSo": "setup_handle",
+          "KichThuocBuffer": 8,
+          "Loi": "double-free",
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "release_user_profile_cache",
+          "NgonNgu": "c",
+          "Loai": "alloc_release",
+          "ThamSo": "profile_cache",
+          "KichThuocBuffer": 16,
+          "Loi": "use-after-free",
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "role_privilege_delta",
+          "NgonNgu": "c",
+          "Loai": "arithmetic",
+          "ThamSo": "new_role_level, old_role_level",
+          "KichThuocBuffer": null,
+          "Loi": null,
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "admin_promotion_ratio",
+          "NgonNgu": "python",
+          "Loai": "divide",
+          "ThamSo": "promoted_count, total_create_admin_calls",
+          "KichThuocBuffer": null,
+          "Loi": null,
+          "GiaTriBiMat1": null,
+          "GiaTriBiMat2": null
+        },
+        {
+          "Ten": "admin_setup_secret_pair",
+          "NgonNgu": "python",
+          "Loai": "magic_value",
+          "ThamSo": "secret_part_a, secret_part_b",
+          "KichThuocBuffer": null,
+          "Loi": null,
+          "GiaTriBiMat1": 2024,
+          "GiaTriBiMat2": 9024
+        }
+      ],
+      "KiemTraSoHoc": [
+        {
+          "Ten": "daily_profile_update_counter",
+          "BienSoNguyen": "updates_today, updates_backlog",
+          "DieuKien": "updates_today >= 0 and updates_backlog >= 0 and updates_today + updates_backlog > 32767",
+          "BieuThucTran": "updates_today + updates_backlog"
+        },
+        {
+          "Ten": "concurrent_profile_update_counter",
+          "BienSoNguyen": "concurrent_main, concurrent_log",
+          "DieuKien": "concurrent_main >= 0 and concurrent_log >= 0 and concurrent_main + concurrent_log > 65535",
+          "BieuThucTran": "concurrent_main + concurrent_log"
+        },
+        {
+          "Ten": "total_create_admin_attempt_counter",
+          "BienSoNguyen": "attempts_today, attempts_backlog",
+          "DieuKien": "attempts_today >= 0 and attempts_backlog >= 0 and attempts_today + attempts_backlog > 2000000000",
+          "BieuThucTran": "attempts_today + attempts_backlog"
+        },
+        {
+          "Ten": "active_user_counter",
+          "BienSoNguyen": "active_users, suspended_users",
+          "DieuKien": "active_users >= 0 and suspended_users >= 0 and active_users + suspended_users > 65535",
+          "BieuThucTran": "active_users + suspended_users"
+        },
+        {
+          "Ten": "role_escalation_attempt_counter",
+          "BienSoNguyen": "escalation_today, escalation_backlog",
+          "DieuKien": "escalation_today >= 0 and escalation_backlog >= 0 and escalation_today + escalation_backlog > 32767",
+          "BieuThucTran": "escalation_today + escalation_backlog"
+        }
+      ],
+      "TestCase": [
+        {
+          "ID": "TC-USR-1",
+          "YeuCauLienQuan": "REQ-USR-1, REQ-USR-2",
+          "TieuDe": "Truy cập trái phép hồ sơ tài khoản khác",
+          "DieuKienTienQuyet": "Có 2 user đã seed (fuzzuser, victim)",
+          "CacBuoc": "PUT /api/users/:victim_id không token\nPUT /api/users/:victim_id với token của fuzzuser\nLưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",
+          "KetQuaMongDoi": "HTTP 401/403 khi thiếu token hoặc sửa hồ sơ người khác; không coi request là cập nhật hợp lệ.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-USR-2",
+          "YeuCauLienQuan": "REQ-USR-3",
+          "TieuDe": "Mass assignment làm thay đổi quyền tài khoản",
+          "DieuKienTienQuyet": "Có 1 user thường đã seed",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Gửi PUT với body {\"role\":\"admin\"}\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.\nLưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",
+          "KetQuaMongDoi": "Role lưu trong dữ liệu vẫn giữ nguyên khi người dùng thường gửi role=admin; không nâng quyền theo body.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-USR-4",
+          "YeuCauLienQuan": "REQ-USR-5, NFR-USR-5",
+          "TieuDe": "Dữ liệu mật khẩu nhạy cảm bị lưu dạng rõ",
+          "DieuKienTienQuyet": "Có 1 user đã seed (victim)",
+          "CacBuoc": "Gửi PUT với body {\"password\":\"plaintext_hack\"}\nThử đăng nhập lại bằng password mới 'plaintext_hack'\nLưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",
+          "KetQuaMongDoi": "Sau cập nhật hợp lệ, mật khẩu không được lưu bằng chuỗi plaintext đầu vào; phải kiểm tra dữ liệu lưu, không suy ra từ đăng nhập thành công.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-USR-3",
+          "YeuCauLienQuan": "REQ-USR-4",
+          "TieuDe": "ID sai định dạng gây ngoại lệ truy vấn hồ sơ",
+          "DieuKienTienQuyet": "Server đang chạy",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Gửi PUT /api/users/abc\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.\nLưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",
+          "KetQuaMongDoi": "HTTP 400/404 có kiểm soát; không HTTP 500 do ID sai định dạng.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-USR-5",
+          "YeuCauLienQuan": "REQ-USR-6",
+          "TieuDe": "Vượt cơ chế bảo vệ khởi tạo tài khoản admin",
+          "DieuKienTienQuyet": "Server đang chạy",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Gửi POST /api/auth/create-admin với secretKey='wrong'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.\nLưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",
+          "KetQuaMongDoi": "HTTP 403 khi secretKey sai; không tạo tài khoản admin từ request này.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-USR-21",
+          "YeuCauLienQuan": "REQ-USR-FUZZ-21",
+          "TieuDe": "Kiểm tra quy trình fuzzing: Phân biệt ngoại lệ, HTTP 500 và crash tiến trình",
+          "DieuKienTienQuyet": "Có ba đối chứng: HTTP trả 500 nhưng server còn sống; Python ném ngoại lệ được bắt; binary C đóng phiên có double-free được biên dịch với sanitizer hỗ trợ và chạy trong tiến trình con.",
+          "CacBuoc": "1. Gửi đối chứng HTTP 500, kiểm tra PID và request kiểm tra sống tiếp theo.\n2. Chạy đối chứng ngoại lệ Python đã bắt, ghi mã thoát.\n3. Thực thi close_admin_setup_session trong binary instrumented; lưu stderr, exit code/signal, input và stack trace.\n4. Chạy lại binary từ trạng thái sạch để đối chiếu cùng chẩn đoán.",
+          "KetQuaMongDoi": "HTTP 500 với server còn sống là APPLICATION_HTTP_ERROR; exception được bắt không là process crash. Chỉ báo target kết thúc bất thường khi có mã thoát/signal và log; double-free chỉ xác nhận khi có chẩn đoán công cụ tại hàm mục tiêu. Thiếu sanitizer thì chưa đánh giá.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-USR-7",
+          "YeuCauLienQuan": "REQ-USR-FIX-parse_user_fullname",
+          "TieuDe": "Hàm sinh mã C: parse_user_fullname (buffer-overflow)",
+          "DieuKienTienQuyet": "Mẫu C parse_user_fullname, lỗi cấy buffer-overflow; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+          "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi parse_user_fullname, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy chuỗi ASCII dài B-1, B, B+1 với B=100 byte và đối chứng ngắn.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+          "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán buffer-overflow; mẫu lỗi cấy phải có chẩn đoán buffer-overflow tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-USR-10",
+          "YeuCauLienQuan": "REQ-USR-FIX-write_profile_update_log",
+          "TieuDe": "Hàm sinh mã C: write_profile_update_log (memory-leak)",
+          "DieuKienTienQuyet": "Mẫu C write_profile_update_log, lỗi cấy memory-leak; có driver gọi hàm, compiler và LeakSanitizer hoặc công cụ kiểm tra leak tương đương hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+          "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi write_profile_update_log, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+          "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán memory-leak; mẫu lỗi cấy phải có chẩn đoán memory-leak tại hàm mục tiêu từ LeakSanitizer hoặc công cụ phát hiện leak tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-USR-11",
+          "YeuCauLienQuan": "REQ-USR-FIX-close_admin_setup_session",
+          "TieuDe": "Hàm sinh mã C: close_admin_setup_session (double-free)",
+          "DieuKienTienQuyet": "Mẫu C close_admin_setup_session, lỗi cấy double-free; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+          "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi close_admin_setup_session, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+          "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán double-free; mẫu lỗi cấy phải có chẩn đoán double-free tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-USR-12",
+          "YeuCauLienQuan": "REQ-USR-FIX-release_user_profile_cache",
+          "TieuDe": "Hàm sinh mã C: release_user_profile_cache (use-after-free)",
+          "DieuKienTienQuyet": "Mẫu C release_user_profile_cache, lỗi cấy use-after-free; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+          "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi release_user_profile_cache, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+          "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán use-after-free; mẫu lỗi cấy phải có chẩn đoán use-after-free tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-USR-8",
+          "YeuCauLienQuan": "REQ-USR-FIX-admin_promotion_ratio",
+          "TieuDe": "Hàm Python: admin_promotion_ratio chia cho 0",
+          "DieuKienTienQuyet": "Đã sinh mã Python Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy blackbox_fuzz() với total_create_admin_calls=0\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Mẫu lỗi cấy phát sinh ZeroDivisionError với input chia cho 0; lưu traceback, input và cách gọi. Đối chứng an toàn xử lý trường hợp này có kiểm soát. Ngoại lệ Python chưa chứng minh crash server hoặc lỗi bộ nhớ native; thiếu thực thi thì chưa xác minh.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "TC-USR-17",
+          "YeuCauLienQuan": "REQ-CONC-USR-1",
+          "TieuDe": "Version cũ sau cập nhật thành công",
+          "DieuKienTienQuyet": "Tài nguyên v=0, actor được phép sửa. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+          "CacBuoc": "1. PUT /api/users/{user_id} với __v=0; gửi PUT lần hai vẫn __v=0; đọc lại dữ liệu.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: {\"fullName\":\"Fuzz Updated\",\"__v\":0}",
+          "KetQuaMongDoi": "Lần đầu 200/v=1; lần hai 409; dữ liệu và version không đổi sau lần bị từ chối.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-USR-18",
+          "YeuCauLienQuan": "REQ-CONC-USR-1",
+          "TieuDe": "Version sai kiểu hoặc ngoài miền",
+          "DieuKienTienQuyet": "Tài nguyên tồn tại trong harness. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+          "CacBuoc": "1. PUT /api/users/{user_id} với lần lượt các giá trị __v; kiểm tra dữ liệu sau mỗi lần.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: __v: -1, 0.5, \"0\", null, true, {}, []",
+          "KetQuaMongDoi": "Mỗi request trả 400; dữ liệu/version không thay đổi.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-USR-19",
+          "YeuCauLienQuan": "REQ-CONC-USR-1",
+          "TieuDe": "Cập nhật tuần tự với version mới nhất",
+          "DieuKienTienQuyet": "Tài nguyên v=0, actor được phép sửa. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+          "CacBuoc": "1. PUT __v=0; đọc __v=1; PUT giá trị khác với __v=1; đọc lại.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: [{\"fullName\":\"Fuzz Updated\",\"__v\":0},{\"fullName\":\"Fuzz Updated Again\",\"__v\":1}]",
+          "KetQuaMongDoi": "Cả hai trả 200; version cuối bằng 2; dữ liệu khớp lần thứ hai.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-USR-20",
+          "YeuCauLienQuan": "CON-USR-5",
+          "TieuDe": "Client cũ không gửi version",
+          "DieuKienTienQuyet": "Tài nguyên tồn tại trong harness; giao thức tương thích hiện tại. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+          "CacBuoc": "1. PUT /api/users/{user_id} với dữ liệu hợp lệ, không có trường __v; đọc lại.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: {\"fullName\":\"Fuzz Updated\"}",
+          "KetQuaMongDoi": "Theo hành vi tương thích hiện tại: 200 và version tăng 1. Không kết luận chống stale-write cho client bỏ version.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-USR-6",
+          "YeuCauLienQuan": "REQ-USR-2, NFR-USR-4, REQ-CONC-USR-1",
+          "TieuDe": "2 request PUT đồng thời cùng 1 user",
+          "DieuKienTienQuyet": "Có 1 user đã seed",
+          "CacBuoc": "1. Seed đối tượng __v=0; dùng actor có quyền theo kịch bản.\n2. Gửi đồng thời hai PUT dữ liệu khác nhau, cùng __v=0.\n3. Đọc phản hồi, version và dữ liệu cuối.",
+          "KetQuaMongDoi": "Một HTTP 200 và một HTTP 409; __v cuối bằng 1; dữ liệu cuối khớp request thành công.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "TC-USR-9",
+          "YeuCauLienQuan": "REQ-USR-SMT-total_create_admin_attempt_counter",
+          "TieuDe": "Kiểm tra tràn số: total_create_admin_attempt_counter",
+          "DieuKienTienQuyet": "Đã khai báo biến SMT Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+          "MucUuTien": "LOW"
+        },
+        {
+          "ID": "TC-USR-13",
+          "YeuCauLienQuan": "REQ-USR-SMT-daily_profile_update_counter",
+          "TieuDe": "Kiểm tra tràn số: daily_profile_update_counter",
+          "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'daily_profile_update_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'daily_profile_update_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+          "MucUuTien": "LOW"
+        },
+        {
+          "ID": "TC-USR-14",
+          "YeuCauLienQuan": "REQ-USR-SMT-concurrent_profile_update_counter",
+          "TieuDe": "Kiểm tra tràn số: concurrent_profile_update_counter",
+          "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'concurrent_profile_update_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'concurrent_profile_update_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+          "MucUuTien": "LOW"
+        },
+        {
+          "ID": "TC-USR-15",
+          "YeuCauLienQuan": "REQ-USR-SMT-active_user_counter",
+          "TieuDe": "Kiểm tra tràn số: active_user_counter",
+          "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'active_user_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'active_user_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+          "MucUuTien": "LOW"
+        },
+        {
+          "ID": "TC-USR-16",
+          "YeuCauLienQuan": "REQ-USR-SMT-role_escalation_attempt_counter",
+          "TieuDe": "Kiểm tra tràn số: role_escalation_attempt_counter",
+          "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'role_escalation_attempt_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'role_escalation_attempt_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+          "MucUuTien": "LOW"
+        }
+      ]
+    }
+  }
+]

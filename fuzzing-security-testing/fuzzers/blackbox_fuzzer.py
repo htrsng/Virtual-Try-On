@@ -1,9 +1,4 @@
-"""Kiểm thử fuzzing hộp đen qua HTTP trên ứng dụng bán hàng mô phỏng.
 
-Bộ kiểm thử quan sát phản hồi HTTP. Dữ liệu được giữ trong suốt lần chạy.
-Có thể dùng harness đã mở hoặc tự khởi động harness.
-Dùng bộ so sánh riêng để đánh giá hai chiến lược trong cùng điều kiện cô lập.
-"""
 import argparse
 from contextlib import nullcontext
 import os
@@ -15,6 +10,7 @@ import time
 import uuid
 
 import requests
+from finding_types import summarize_evidence
 
 from fuzzer_common import (
     check_order_response, check_order_status_response, check_product_response,
@@ -117,7 +113,7 @@ def run_campaign(session, base_url, iterations, seed, output):
                  "target": target,
                  "input": candidate,
                  "type": kind,
-                 "detail": str(error)}
+                 "detail": str(error), "had_auth": use_auth}
             path = write_json(output / "errors" / f"error_{len(errors):04d}.json", record)
             errors.append({**record, "saved_to": str(path)})
             continue
@@ -128,7 +124,7 @@ def run_campaign(session, base_url, iterations, seed, output):
             except ValueError:
                 body = response.text[:1000]
             record = {"iteration": iteration, "target": target, "input": candidate,
-                "type": "HTTP_5XX", "status": response.status_code, "body": body}
+                "type": "HTTP_5XX", "status": response.status_code, "body": body, "had_auth": use_auth}
             path = write_json(output / "errors" / f"error_{len(errors):04d}.json", record)
             errors.append({**record, "saved_to": str(path)})
 
@@ -152,6 +148,7 @@ def run_campaign(session, base_url, iterations, seed, output):
     return {"environment": ENVIRONMENT, "seed": seed, "iterations": iterations,
         "status_counter": dict(statuses), "errors": errors, "vuln_findings": findings,
         "catalog_observations": catalog_observations,
+        "evidence_summary": summarize_evidence(errors, findings),
         "limitations": ["Simulated HTTP app; state is shared within the campaign.",
             "HTTP errors and finding occurrences are not unique vulnerabilities."]}
 
@@ -193,6 +190,70 @@ def main():
     print(f"Inputs: {result['iterations']}; errors: {len(result['errors'])}; findings: {len(result['vuln_findings'])}")
     print(path)
     return 2 if any(e["type"] != "HTTP_5XX" for e in result["errors"]) else 0
+
+
+def investigate_boundaries(report, output, max_cases=6, budget=16):
+    """Blackbox: mỗi phép đo qua HTTP trên dữ liệu seed mới, không đọc coverage."""
+    from boundaries import discover, signature
+    from whitebox_fuzzer import TARGETS, check_finding, error_type
+
+    investigations, seen = [], set()
+    for record in report['errors'] + report['vuln_findings']:
+        key = (record.get('target'), repr(record.get('input')), record.get('had_auth'))
+        if (key in seen or record.get('target') not in TARGETS
+                or type(record.get('had_auth')) is not bool
+                or not isinstance(record.get('input'), dict)):
+            continue
+        seen.add(key)
+        if len(investigations) >= max_cases:
+            break
+        observations = []
+
+        def probe(body):
+            # Không dùng lại state đã bị mutation trước đó làm thay đổi.
+            with simulated_http_server(Path(output) / 'boundary_harness.log') as url, requests.Session() as session:
+                session.trust_env = False
+                login = setup_request(session, 'POST', url + '/api/auth/login', json=load_seed('seed_login_valid.json'))
+                headers = {'Authorization': 'Bearer ' + login['token']}
+                target = record['target']
+                initial = None
+                if target == 'orders':
+                    method, route = 'POST', '/api/orders'
+                elif target == 'order_status':
+                    order = setup_request(session, 'POST', url + '/api/orders', json=load_seed('seed_order_valid.json'), headers=headers)['order']
+                    initial = order['status']
+                    method, route = 'PUT', '/api/orders/' + order['_id']
+                elif target.startswith('user_update'):
+                    users = setup_request(session, 'GET', url + '/api/users')
+                    email = 'victim@test.com' if target.endswith('victim') else 'fuzzuser@test.com'
+                    user = next(u for u in users if u['email'] == email)
+                    method, route = 'PUT', '/api/users/' + user['_id']
+                else:
+                    products = setup_request(session, 'GET', url + '/api/products')
+                    method, route = ('POST', '/api/products') if target == 'product_create' else ('PUT', '/api/products/' + str(products[0]['id']))
+                catalog = read_catalog_snapshot(setup_request(session, 'GET', url + '/api/products')) if target == 'orders' else None
+                response = session.request(method, url + route, json=body,
+                                           headers=headers if record['had_auth'] else {}, timeout=5)
+                try:
+                    payload = response.json()
+                except ValueError:
+                    payload = {}
+                measured = {'ok': True, 'status': response.status_code, 'body': payload,
+                            'catalog': catalog, 'initial_status': initial}
+                symptom = signature(error_type(measured), check_finding(target, body, measured, record['had_auth']))
+                observations.append({'input': body, 'status': response.status_code,
+                                     'body': payload, 'signature': symptom})
+                return symptom
+
+        try:
+            investigation = discover(record, probe, budget)
+        except (HarnessError, requests.RequestException) as error:
+            investigation = {'target': record['target'], 'status': 'INCONCLUSIVE_INFRASTRUCTURE',
+                             'detail': str(error), 'regions': []}
+        evidence = write_json(Path(output) / 'boundary_evidence' / f'case_{len(investigations):03d}.json', observations)
+        investigation['evidence_path'] = str(evidence)
+        investigations.append(investigation)
+    return investigations
 
 
 if __name__ == "__main__":

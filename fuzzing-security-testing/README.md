@@ -1,193 +1,118 @@
-# Fuzzing cho hệ thống bán hàng trong môi trường mô phỏng
+﻿# Fuzzing cho hệ thống bán hàng mô phỏng
 
-Trước khi đưa dự án lên GitHub, xem [CHUAN_BI_GITHUB.md](CHUAN_BI_GITHUB.md)
-về cấu hình cục bộ, bằng chứng cần giữ và phiên bản mã băm kết quả.
+## Mục tiêu và luồng chính
 
-Đối tượng thực nghiệm là ứng dụng Express trong `node_harness/`, với datastore
-trong bộ nhớ và dịch vụ mô phỏng. Bộ chạy chính không khởi động server thật,
-không kết nối MongoDB và không dùng dữ liệu người dùng thật. Request được thực
-thi qua Supertest; kết quả có giá trị trong phạm vi hành vi mà harness mô phỏng.
+Tìm hành vi bất thường bằng input sinh từ seed, sau đó chạy lại và khảo sát chi tiết:
 
-## Luồng chính
+```text
+Trạng thái ban đầu + seed
+          ↓
+Blackbox: đột biến → gửi HTTP → lưu input bất thường
+          ↓
+Khảo sát coverage: chạy lại → thử lân cận → giữ input mở dòng mới
+          ↓
+Whitebox có giới hạn: trace totalAmount → phủ định nhánh → Z3 → xác nhận API
+          ↓
+Bằng chứng: input, response, loại lỗi, coverage và giới hạn
+```
 
-Đặc tả/ràng buộc Excel → testcase và mutation → node_harness → oracle → báo cáo.
+Đối tượng là `node_harness/`: Express với datastore trong bộ nhớ và dịch vụ mô phỏng.
+Request thực sự được xử lý; không cần MongoDB hoặc server production.
 
-| File trong `fuzzers/` | Vai trò |
-|---|---|
-| `run_ch4.py` | Một lệnh chạy campaign và tạo báo cáo |
-| `spec_campaign.py` | Đọc đặc tả, điều phối scenario, lưu bằng chứng |
-| `testcases.py` | Seed, kịch bản API, giá trị biên và dữ liệu sinh thêm |
-| `oracles.py` | Đánh giá đúng/sai từ response và dữ liệu trong harness |
-| `fuzzer_common.py` | Mutation JSON và oracle dùng chung cho các fuzzer |
-| `runtime.py` | Gọi Node, kiểm tra giao thức kết quả, ghi JSON và quản lý tiến trình |
-| `blackbox_fuzzer.py` | Tự mở HTTP harness riêng trên loopback rồi fuzz response |
-| `whitebox_fuzzer.py` | Chọn input theo coverage dòng của harness |
-| `controlled_comparison.py` | So sánh baseline và coverage feedback cùng điều kiện |
-
-Phần hỗ trợ được đặt ngoài `fuzzers/`:
-
-- `supporting-analysis/tools/build_report.py`: tạo bản thảo từ kết quả được chọn.
-- `tests/test_campaign.py`: kiểm tra hồi quy bộ công cụ.
-
-File sinh báo cáo không phải thuật toán fuzzing. Giữ nó ngoài thư mục chính
-để tiện tổng hợp kết quả khi viết báo cáo; `run_ch4.py` vẫn gọi được công cụ này.
-
-## Cài đặt và chạy
-
-Yêu cầu Python 3.10+, Node.js 20+.
+## Cài đặt
 
 ```powershell
 python -m pip install -r fuzzing-security-testing/requirements.txt
 npm ci --prefix fuzzing-security-testing/node_harness
+```
 
-# Xem kế hoạch, không gửi request
-python fuzzing-security-testing/fuzzers/run_ch4.py --audit-only
+## Chạy một lệnh để demo luồng chính
 
-# Chạy các kịch bản API trong harness mô phỏng
+Mở PowerShell tại thư mục gốc dự án:
+
+```powershell
+python fuzzing-security-testing/fuzzers/run_fuzzing.py --iterations 42 --iterations-per-case 8 --max-cases 2 --seed 7 --concolic
+```
+
+Mặc định mỗi lần chạy có thư mục riêng `results/fuzzing/<ID>/`:
+
+- `blackbox/report.json`: các điểm input có triệu chứng.
+- `whitebox/report.json` và `whitebox/evidence/`: chạy lại, lân cận, coverage.
+- `report.json`: tổng hợp các bước đã chọn. Nếu không có ứng viên phù hợp cho khảo sát coverage, mục whitebox_status ghi SKIPPED_NO_CANDIDATE; không suy ra hệ thống an toàn. Concolic là bước tùy chọn riêng.
+- Khi có `--concolic`: `concolic/report.md`, `report.json` và `evidence/` lưu trace nhánh totalAmount, công thức Z3, model, input xác nhận và replay. Đây là bước whitebox có giới hạn, chạy riêng từ seed đơn hợp lệ; không tự chuyển toàn bộ trạng thái blackbox sang symbolic executor.
+
+Phân biệt kỹ thuật: chế độ cũ trong `whitebox_fuzzer.py` là coverage-guided/greybox. Whitebox theo bài giảng dùng `--concolic`: mô hình kiểu thủ công, trace nhánh thực trong `OrderModel.save`/`castNumberOrThrow`, phủ định tiền tố và Z3. Không tự symbolic JavaScript, không có sanitizer và không tuyên bố toàn bộ hệ thống đã được kiểm chứng. Hướng dẫn trình bày và giới hạn chi tiết: [TRINH_BAY_TIEN_DO.md](TRINH_BAY_TIEN_DO.md).
+
+Chạy riêng whitebox Z3:
+
+```powershell
+python fuzzing-security-testing/fuzzers/whitebox_fuzzer.py --concolic --iterations-per-target 12
+```
+
+Có thể thêm `--output <thư_mục_mới>` để chọn nơi lưu. Input login chưa thuộc các target khảo sát whitebox; danh sách chuyển giao bị giới hạn bởi target được hỗ trợ và max-cases.
+
+## Chạy riêng để quan sát hai giai đoạn
+
+```powershell
+python fuzzing-security-testing/fuzzers/blackbox_fuzzer.py --iterations 100 --seed 7 --output fuzzing-security-testing/results/demo/blackbox
+python fuzzing-security-testing/fuzzers/whitebox_fuzzer.py --blackbox-report fuzzing-security-testing/results/demo/blackbox/report.json --iterations-per-target 12 --max-cases 6 --seed 7 --output fuzzing-security-testing/results/demo/whitebox
+```
+
+Muốn mở môi trường ở PowerShell riêng, chạy `node fuzzing-security-testing/node_harness/http_server.js`, rồi thêm `--base-url http://127.0.0.1:5050` vào lệnh blackbox hoặc run_fuzzing. Không chỉ định URL thì tự mở/đóng harness.
+
+## Những file cần trình bày
+
+Chuẩn bị phần hỏi đáp theo từng testcase: [Sổ tay testcase và nghiệp vụ](SO_TAY_TESTCASE_VA_NGHIEP_VU.md). Tài liệu này giải thích luồng, nhóm lỗi và giới hạn bằng chứng; không gán kết quả đã chạy cho các testcase ngoài campaign.
+
+| File trong fuzzers/ | Vai trò |
+|---|---|
+| run_fuzzing.py | Điều phối luồng chính bằng một lệnh |
+| blackbox_fuzzer.py | Khám phá input bất thường qua HTTP |
+| whitebox_fuzzer.py | Khảo sát coverage; CLI whitebox Z3 bằng --concolic |
+| concolic.py | Trace → tiền tố điều kiện → Z3 → xác nhận nhánh API |
+| fuzzer_common.py | Mutation và oracle response dùng chung |
+| finding_types.py | Phân loại bằng chứng và mẫu lân cận |
+| runtime.py | Tiến trình, timeout và file kết quả |
+
+## Đặc tả và kiểm tra bổ trợ
+
+Năm Excel trong `BaoCaoATPM/` giữ đủ 10 sheet theo cấu trúc cũ và 104 testcase: login 19, tạo đơn 21, trạng thái đơn 22, người dùng 21, sản phẩm 21. Giữ nguyên ID và các cột; nội dung testcase đã được chỉnh về an toàn phần mềm. Thứ tự trình bày: API an toàn đầu vào/quyền/trạng thái → tái hiện và phân loại bằng chứng → mẫu ngoại lệ/bộ nhớ độc lập → concurrency/timing/số học → seed đối chứng; trong mỗi nhóm ưu tiên HIGH → MEDIUM → LOW. Các sheet mô hình được giữ nguyên, không đồng nghĩa đã được kiểm chứng lại.
+
+`KetQuaMongDoi` mô tả điều kiện an toàn, không chứa kết luận thực nghiệm cũ. HTTP 500 không tự chứng minh crash; timeout chưa chứng minh hang; mẫu lỗi bộ nhớ cần chẩn đoán công cụ. Mô hình số học không mặc định SAT. Các điều kiện bổ sung trong Excel là mục tiêu kiểm tra, chưa được oracle hiện tại tự động bao phủ đầy đủ. Report Word/PDF và dữ liệu đã lưu trước lần chỉnh này cần được đọc theo snapshot tại thời điểm chạy, không coi là kết quả xác minh toàn bộ nội dung mới.
+
+Code hiện có kịch bản cho 29 testcase API: login 5, tạo đơn 8, trạng thái đơn 6, người dùng 5, sản phẩm 5. Campaign ghi riêng 75 testcase còn lại trong `excluded_testcases.json` với lý do chưa thực thi ở campaign API; không gán PASS/FAIL cho chúng. Việc khôi phục Excel không khôi phục các công cụ CTL/SMT hoặc bộ chạy bổ sung đã bỏ trước đó.
+
+`testcases.py`, `oracles.py`, `spec_campaign.py` dùng để đối chiếu yêu cầu và kiểm tra oracle, không phải luồng demo chính. Khi cần kiểm thử theo đặc tả:
+
+```powershell
 python fuzzing-security-testing/fuzzers/run_ch4.py --seed 7 --fuzz-cases 8
-
-# Thêm so sánh chiến lược chọn input (tốn thời gian hơn)
-python fuzzing-security-testing/fuzzers/run_ch4.py --compare --iterations-per-target 8
-
-# Tái hiện riêng một testcase; giữ kết quả lần chạy chính
-python fuzzing-security-testing/fuzzers/spec_campaign.py --testcase TC-OS-3 --output fuzzing-security-testing/results/replay_order
-
-python -m unittest discover -s fuzzing-security-testing/tests -p test_campaign.py
-```
-
-Chạy riêng từng phương pháp, với ngân sách nhỏ để kiểm tra:
-
-```powershell
-python fuzzing-security-testing/fuzzers/blackbox_fuzzer.py --iterations 21 --output fuzzing-security-testing/results/blackbox_check
-python fuzzing-security-testing/fuzzers/whitebox_fuzzer.py --iterations-per-target 7 --output fuzzing-security-testing/results/whitebox_check
-```
-
-### Chạy bằng hai PowerShell như trước
-
-Mở cả hai terminal tại thư mục gốc dự án. PowerShell 1 chạy môi trường mô phỏng:
-
-```powershell
-node fuzzing-security-testing/node_harness/http_server.js
-```
-
-PowerShell 2 chạy blackbox vào môi trường đó:
-
-```powershell
-python fuzzing-security-testing/fuzzers/blackbox_fuzzer.py --base-url http://127.0.0.1:5050 --iterations 100 --seed 7
-```
-
-Có thể dùng biến `TARGET_URL` thay cho `--base-url` như bản cũ. Blackbox kiểm tra
-định danh harness trước khi fuzz và không đóng server do bạn mở. Nhấn Ctrl+C ở
-PowerShell 1 để dừng; khởi động lại để đặt lại dữ liệu trong bộ nhớ.
-
-Whitebox chạy như kiến trúc bản cũ: tự mở một tiến trình Node mới cho mỗi input
-để đo coverage và cô lập dữ liệu; không gửi vào HTTP server của PowerShell 1:
-
-```powershell
-python fuzzing-security-testing/fuzzers/whitebox_fuzzer.py --iterations-per-target 20 --seed 7
-```
-
-### Khác biệt so với bản cũ trong Git
-
-| Nội dung | Bản cũ | Bản hiện tại |
-|---|---|---|
-| Blackbox | Kết nối server qua `TARGET_URL` | Giữ cách chạy này qua `--base-url`/`TARGET_URL`; thêm tùy chọn tự mở harness khi không chỉ định URL |
-| Whitebox | Node mới mỗi input, coverage, LIFO, energy=6 | Giữ cơ chế đó; dùng đúng ngân sách input |
-| Setup | Một số bước dùng kết quả ngay dù setup có thể thất bại | Kiểm tra HTTP setup và token trước khi fuzz |
-| Phân loại lỗi | Gom HTTP 500 và lỗi tiến trình vào crash | Tách HTTP 5xx, timeout và lỗi bộ chạy |
-| Giá đơn hàng | Đối chiếu dữ liệu giá do client gửi | Có đối chiếu với giá danh mục trong harness |
-| Lưu kết quả | Tên file cố định, có thể ghi đè lần trước | Mặc định mỗi lần chạy có thư mục riêng; ghi JSON qua file tạm |
-
-Hai terminal giúp quan sát HTTP server và dữ liệu tồn tại qua nhiều request.
-Độ thực tế của phép thử phụ thuộc hành vi được mô phỏng; số terminal không làm
-datastore trong bộ nhớ trở thành MongoDB thật. `--audit-only` chỉ lập kế hoạch,
-không khởi động môi trường và không thực thi request.
-
-Khi không chỉ định `--base-url` hoặc `TARGET_URL`, blackbox tự khởi động
-`node_harness/http_server.js` ở cổng ngẫu nhiên trên
-`127.0.0.1`, giữ dữ liệu trong lần chạy rồi đóng tiến trình. Không cần tự mở
-server hay cấu hình `TARGET_URL`. Whitebox mở một tiến trình mới cho mỗi input.
-Hai kiểu cô lập khác nhau; không so sánh trực tiếp số lỗi giữa hai lần chạy này.
-Dùng `--compare` để so sánh chiến lược chọn input trong cùng điều kiện cô lập.
-
-Kết quả mặc định ở `results/sales_campaign/`: `spec_snapshot.json`,
-`generated_cases.json`, `report.json`, `report.md` và `BaoCao_Fuzzing.md`.
-Chọn `--output` khác để lưu riêng từng lần chạy. Khi chạy audit, các testcase
-chưa thực thi ghi `NOT_RUN`; mới chạy một phần scenario thì ghi `PARTIAL`
-(nếu chưa có FAIL/ERROR). Khi bộ chạy lỗi, ghi `ERROR`, không mặc định là lỗi
-ứng dụng. Mã thoát 0 là chạy hoàn tất (vẫn có thể phát hiện FAIL); 2 là lỗi bộ chạy.
-
-File tạm nằm trong `.runtime/`, được xóa sau mỗi job. JSON được ghi đầy đủ vào
-file tạm trước khi thay file đích; không xóa kết quả cũ trước khi ghi. Chạy riêng
-blackbox/whitebox không chỉ định output sẽ tạo thư mục kết quả có ID riêng.
-Các fuzzer dùng `errors` để lưu HTTP 5xx, timeout và lỗi runner với loại riêng;
-không gọi tất cả là crash. Kết quả được lưu riêng cho từng lần chạy.
-
-## Phạm vi số liệu
-
-### Bằng chứng cho 48 testcase
-
-- `results/spec_completed_48/report.md`: tổng hợp 48 testcase/96 kịch bản.
-- `results/spec_completed_48/KetQuaKiemThu.xlsx`: bảng kết quả riêng, không sửa đặc tả.
-- `results/reproduced_48/report.md`: chạy lại hai lần một kịch bản FAIL đại diện mỗi testcase.
-- `results/reproduced_48/PhanNhom_PhatHien.md`: nhóm dấu hiệu để điều tra, chưa phải số lỗi gốc.
-
-Tái hiện từ đúng phiên bản code/workbook của campaign:
-
-```powershell
-python fuzzing-security-testing/supporting-analysis/tools/replay_failures.py --campaign fuzzing-security-testing/results/spec_completed_48/report.json --output fuzzing-security-testing/results/replay_new --repeats 2
-```
-
-Công cụ từ chối tái hiện nếu mã băm nguồn hoặc đặc tả đã đổi. Khi đó cần chạy
-campaign mới trước, không dùng lại bằng chứng của phiên bản khác.
-
-### Giới hạn kết luận
-
-### Xác minh mô hình CTL/SMT và mã minh họa
-
-Đây là bộ xác minh riêng của dự án theo quy tắc PDF, không phải `core.spec_pipeline`
-gốc. Giữ kết quả mô hình tách khỏi campaign API:
-
-```powershell
-python -m pip install -r fuzzing-security-testing/supporting-analysis/requirements.txt
 python -m unittest discover -s fuzzing-security-testing/tests -p "test_*.py"
-python fuzzing-security-testing/supporting-analysis/tools/verify_spec_workbooks.py
 ```
 
-Cần GCC có `-fanalyzer`. Kết quả ở `results/formal_verification/report.md` và
-`report.json`, có phản ví dụ CTL, witness SMT, mã sinh và log compiler.
-VALID nghĩa là cấu trúc đọc được, không có nghĩa mọi công thức CTL đều đúng.
-Các workbook có nhiều trạng thái khởi tạo rời nhau: EF được kiểm tra tại tất cả
-trạng thái khởi tạo nên có thể sai ở nhánh không nối tới cụm khóa.
+`controlled_comparison.py` là thực nghiệm bổ trợ so sánh chiến lược với cùng điều kiện. `supporting-analysis/tools/` chỉ giữ công cụ tạo báo cáo API và tái hiện FAIL. Đã bỏ bộ kiểm chứng mô hình, mẫu native và các công cụ thêm testcase phụ.
 
-### Phạm vi campaign API
+## Cách đọc kết quả
 
-- Luồng chính đối chiếu đủ 48 testcase API trong 5 workbook đặc tả. Có thể sinh nhiều
-  scenario/input cho một testcase. PASS chỉ áp dụng các mẫu đã chạy.
-- 50 testcase sinh mã C/Python/SMT được liệt kê trong `excluded_testcases.json`,
-  không đưa vào số test đạt hay lỗi của hệ thống bán hàng mô phỏng.
-- HTTP 500, timeout và lỗi tiến trình là các hiện tượng khác nhau. Không đếm
-  từng input gây cùng lỗi thành một lỗ hổng độc lập.
-- Coverage chỉ thuộc `node_harness/index.js`, có cả setup/khởi tạo; không phải
-  coverage toàn ứng dụng thật. So sánh ngân sách nhỏ chỉ có tính thăm dò.
-- Kết quả không chứng minh MongoDB thật, email, rate limiting, hiệu năng triển
-  khai hoặc mọi thuộc tính CTL. Kết quả mô hình CTL/SMT được lưu riêng.
+- Finding: vi phạm oracle nghiệp vụ/bảo mật, chưa phải số lỗi gốc độc lập.
+- HTTP 5xx: lỗi phản hồi ứng dụng, không tự chứng minh process crash.
+- TIMEOUT: nghi vấn hang; cần loại trừ setup/kết nối và kiểm tra tiến trình.
+- Coverage mới giúp chọn input, không đồng nghĩa có lỗi.
+- Lân cận chỉ là các điểm khảo sát, chưa chứng minh biên đầy đủ.
+- Chưa có sanitizer xác nhận memory corruption runtime của ứng dụng Node.js.
+- Blackbox giữ trạng thái; whitebox dùng Node mới. Chưa tự khôi phục mọi chuỗi thao tác trước đó.
 
-## Phần hỗ trợ ngoài luồng chính
+Bằng chứng theo từng phiên bản (snapshot và mã băm thuộc lần chạy tương ứng):
 
-`supporting-analysis/tools/` chứa công cụ tạo báo cáo, tái hiện FAIL và xác minh
-workbook; `verification/ctl_checker.py` đánh giá CTL. `simulation_campaign.py`
-cung cấp bộ dựng biểu thức Z3 và mẫu mã C dùng bởi bộ xác minh. Các công cụ lab,
-mô hình JSON và báo cáo lịch sử không còn dùng đã được bỏ.
-Không được tự cộng kết quả mô hình minh họa vào campaign API chính.
-Z3 chỉ cần cho công cụ hỗ trợ, cài bằng `supporting-analysis/requirements.txt`.
+- `results/api_core_29/`: 29 testcase, 9 PASS và 20 FAIL; 59 lượt thực thi, không có ERROR.
+- `results/api_fuzz_29/`: luồng blackbox → whitebox với 21 và 16 input; đây là lượt demo nhỏ, không dùng để kết luận chiến lược nào tốt hơn.
+- Bộ kiểm tra hồi quy hiện tại: 28 test đều đạt, gồm xác nhận mô hình với 8 đại diện input qua API.
 
-Testcase được quản lý trong sheet `TestCase` của 5 workbook đặc tả tại `BaoCaoATPM/`.
-Hai bộ Excel testcase riêng đã được gộp; `TestCases/` và `CapNhat_TestCase/`
-đã được xóa. Nội dung bổ sung dùng định dạng của workbook gốc.
-`results/` chỉ giữ 6 nhóm bằng chứng đang dùng: blackbox, whitebox,
-spec_completed_48, reproduced_48, comparison_3seeds và formal_verification.
-16 testcase bổ sung đã có kịch bản thực thi: version cũ/sai/mới nhất/không gửi,
-bộ đếm từ giá trị khác 0, kiểm tra giá danh mục và trạng thái sau hủy. Mặc định
-`--fuzz-cases 8` tạo 96 kịch bản cho 48 testcase API. Khi viết báo cáo, ghi rõ mô hình/harness và
-giới hạn mô phỏng, kèm input và bằng chứng thực thi.
+Bằng chứng demo mới: `results/demo_chuong4_final/` gồm blackbox, khảo sát coverage và concolic; đọc riêng số liệu từng giai đoạn, không cộng thành số lỗi gốc. `results/spec_safety_current/` là campaign theo Excel hiện tại, tách 29 testcase API có kịch bản và 75 testcase ngoài campaign.
+
+Sau lần đồng bộ Excel với concolic, snapshot và kết quả tương ứng nằm tại `results/spec_excel_aligned/`; `spec_safety_current/` giữ bằng chứng của phiên bản đặc tả trước đó. Trong Excel, `ThongTin` ghi phạm vi tự động hóa từng module; TC-ORD-3/4 mô tả riêng phần API và concolic, còn TC-ORD-20 phân biệt khảo sát coverage với symbolic execution. Các sheet mô hình hình thức giữ nguyên; không suy ra chúng đã được công cụ hiện tại kiểm chứng.
+
+Kết quả cũ đã chuyển vào bản sao lưu `BaoCaoATPM/SaoLuu_TruocLamRo/`. Các kết quả là bằng chứng theo phiên bản có mã băm ghi kèm. Không gán các số liệu lịch sử cho lần chạy hoặc cấu hình mới. Báo cáo Word cần đọc cùng giới hạn này.
+# Bổ sung khoanh biên thực nghiệm
+
+Luồng `run_fuzzing.py` đã bổ sung khảo sát biên qua HTTP và kiểm tra chi tiết trong miền tìm được. Xem [hướng dẫn chạy và đọc kết quả](HUONG_DAN_KHOANH_BIEN.md). Phạm vi: số nguyên, độ dài ký tự Unicode; các điểm chưa đo không được coi là đã xác nhận. Concolic Z3 vẫn là bước riêng.
+

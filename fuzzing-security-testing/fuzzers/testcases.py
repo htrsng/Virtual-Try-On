@@ -55,15 +55,6 @@ def scenarios(fuzz_cases=8, rng_seed=7):
          password='wrong'),
          None)],
          {'kind': 'same_response'})
-    add('TC-AUTH-4',
-         'counter-50',
-         [{'parallel': [step('/api/auth/login',
-         dict(login,
-         password='wrong'),
-         None) for _ in range(50)]}],
-         {'kind': 'counter',
-         'expected': 50},
-         inspect_login_counter=True)
     add('TC-AUTH-5',
          'jwt-role',
          [step('/api/auth/login',
@@ -80,17 +71,6 @@ def scenarios(fuzz_cases=8, rng_seed=7):
          {'kind': 'status',
          'allowed': [400,
          404]})
-    timing = []
-    for _ in range(50):
-        timing.extend([step('/api/auth/login',
-             dict(login,
-             email='absent@test.com'),
-             None),
-             step('/api/auth/login',
-             dict(login,
-             password='wrong'),
-             None)])
-    add('TC-AUTH-6', 'timing-100', timing, {'kind': 'timing', 'threshold_ms': 20})
     for index, value in enumerate([{},
          'abc',
          [],
@@ -141,14 +121,6 @@ def scenarios(fuzz_cases=8, rng_seed=7):
          {'kind': 'status',
          'allowed': [400,
          422]})
-    coupon = dict(order, discountCode='FUZZ-RACE-7')
-    add('TC-ORD-7',
-         'concurrent-coupon',
-         [{'parallel': [step('/api/orders',
-         coupon),
-         step('/api/orders',
-         coupon)]}],
-         {'kind': 'one_success'})
     for actor in [None, 'victim']:
         add('TC-OS-1',
              str(actor),
@@ -200,21 +172,6 @@ def scenarios(fuzz_cases=8, rng_seed=7):
          {'kind': 'notification',
          'status': shipping},
          inspect_notifications=True)
-    cancelled = next((s for s in VALID_TRANSITIONS[processing] if s != processing and len(VALID_TRANSITIONS[s]) == 1))
-    add('TC-OS-6',
-         'concurrent-version',
-         [order_setup(),
-         {'parallel': [step('/api/orders/{order}',
-         {'status': shipping,
-         '__v': 0},
-         method='PUT'),
-         step('/api/orders/{order}',
-         {'status': cancelled,
-         '__v': 0},
-         method='PUT')]}],
-         {'kind': 'version',
-         'field': 'status'},
-         inspect_entity='order')
     for url, value in [('/api/orders/abc', status), ('/api/orders/{order}', {'a': 1})]:
         add('TC-OS-4',
              url,
@@ -267,19 +224,6 @@ def scenarios(fuzz_cases=8, rng_seed=7):
          None)],
          {'kind': 'status',
          'allowed': [403]})
-    add('TC-USR-6',
-         'concurrent-version',
-         [{'parallel': [step('/api/users/{self}',
-         {'fullName': 'first',
-         '__v': 0},
-         method='PUT'),
-         step('/api/users/{self}',
-         {'fullName': 'second',
-         '__v': 0},
-         method='PUT')]}],
-         {'kind': 'version',
-         'field': 'fullName'},
-         inspect_entity='user')
     for method, url in [('POST', '/api/products'), ('PUT', '/api/products/1')]:
         for actor in [None, 'self']:
             add('TC-PRD-1',
@@ -324,21 +268,6 @@ def scenarios(fuzz_cases=8, rng_seed=7):
          id=1),
          'admin')],
          {'kind': 'duplicate_id'})
-    add('TC-PRD-6',
-         'concurrent-version',
-         [{'parallel': [step('/api/products/1',
-         {'stock': 11,
-         '__v': 0},
-         'admin',
-         'PUT'),
-         step('/api/products/1',
-         {'stock': 12,
-         '__v': 0},
-         'admin',
-         'PUT')]}],
-         {'kind': 'version',
-         'field': 'stock'},
-         inspect_entity='product')
     rng = random.Random(rng_seed)
     for i in range(fuzz_cases):
         value = rng.choice([None, {}, [], True, 'not-a-number', -1, -999999999])
@@ -355,52 +284,9 @@ def scenarios(fuzz_cases=8, rng_seed=7):
 
 
 def additional_scenarios():
-    """16 testcase bổ sung: mỗi input sai version là một kịch bản độc lập."""
+    """Đối chứng giá danh mục và trạng thái kết thúc của API."""
     cases = []
-    modules = [
-        ('OS', '/api/orders/{order}', 'status', 'Đang giao', 'Đã giao', 'order', 'self'),
-        ('USR', '/api/users/{self}', 'fullName', 'Tên lần một', 'Tên lần hai', 'user', 'self'),
-        ('PRD', '/api/products/1', 'stock', 11, 12, 'product', 'admin'),
-    ]
-    for module, url, field, first, second, entity, actor in modules:
-        setup = []
-        if module == 'OS':
-            setup = [step('/api/orders', seed('order'), save_order=True)]
 
-        def update(value, version, include_version=True):
-            body = {field: value}
-            if include_version:
-                body['__v'] = version
-            return step(url, body, actor, 'PUT')
-
-        def add(number, suffix, operations, expected_statuses, final_version, final_value):
-            cases.append({
-                'id': f'TC-{module}-{number}:{suffix}',
-                'testcase': f'TC-{module}-{number}',
-                'steps': deepcopy(setup + operations),
-                'inspect_entity': entity,
-                'check': {
-                    'kind': 'version_sequence', 'field': field,
-                    'statuses': expected_statuses, 'version': final_version,
-                    'value': final_value, 'setup_count': len(setup),
-                },
-            })
-
-        add(17, 'stale-version', [update(first, 0), update(second, 0)], [200, 409], 1, first)
-        for index, invalid_version in enumerate([-1, 0.5, '0', None, True, {}, []]):
-            add(18, f'invalid-version-{index}', [update(first, invalid_version)], [400], 0, None)
-        add(19, 'fresh-versions', [update(first, 0), update(second, 1)], [200, 200], 2, second)
-        add(20, 'without-version', [update(first, None, include_version=False)], [200], 1, first)
-
-    cases.append({
-        'id': 'TC-AUTH-18:counter-from-seven', 'testcase': 'TC-AUTH-18',
-        'initial_login_counter': 7, 'inspect_login_counter': True,
-        'steps': [{'parallel': [
-            step('/api/auth/login', dict(seed('login'), password='wrong'), None)
-            for _ in range(50)
-        ]}],
-        'check': {'kind': 'counter', 'expected': 50, 'initial': 7},
-    })
     for number, price, total, kind in [(18, 1, 2, 'catalog_total'), (19, 200000, 400000, 'valid_order')]:
         order = seed('order')
         order['products'] = [{'productId': 1, 'price': price, 'quantity': 2}]

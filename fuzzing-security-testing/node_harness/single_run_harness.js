@@ -6,6 +6,7 @@ const { fileURLToPath } = require("url");
 const inspector = require("inspector");
 const v8toIstanbul = require("v8-to-istanbul");
 const { createEnvironment } = require("./test_environment");
+const branchTrace = require("./branch_trace");
 const { emitResult, fail, readInput, send, setupError } = require("./harness_common");
 const ORDER_SEED = require("../seed_corpus/seed_order_valid.json");
 
@@ -25,7 +26,10 @@ async function dispatch(environment, input) {
     response = await send(app, "POST", "/api/auth/login", body);
   } else if (target === "orders") {
     extra.catalog = Object.fromEntries((await models.ProductModel.find({})).map(product => [product.id, product.price]));
+    const before = await models.OrderModel.find({});
     response = await send(app, "POST", "/api/orders", body, requestToken);
+    const after = await models.OrderModel.find({});
+    extra.orders_created = after.length - before.length;
   } else if (target === "order_status") {
     const setup = await send(app, "POST", "/api/orders", ORDER_SEED, token);
     if (![200, 201].includes(setup.status) || !setup.body.order?._id) {
@@ -77,11 +81,13 @@ async function main() {
     await post(session, "Profiler.enable");
     await post(session, "Profiler.startPreciseCoverage", { callCount: true, detailed: true });
     environment = await createEnvironment();
+    if (input.trace_branches) branchTrace.start();
     const result = await dispatch(environment, input);
     const coverage = await post(session, "Profiler.takePreciseCoverage");
     await post(session, "Profiler.stopPreciseCoverage");
     return { ...result, environment: environment.name, coverage_file: environment.indexPath,
-      covered_lines: await coveredLines(coverage, environment.indexPath) };
+      covered_lines: await coveredLines(coverage, environment.indexPath),
+      ...(input.trace_branches ? { branch_trace: branchTrace.snapshot() } : {}) };
   } finally {
     session.disconnect();
     if (environment) await environment.close();

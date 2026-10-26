@@ -1,0 +1,177 @@
+{
+  "environment": "node_harness_stub",
+  "seed": 7,
+  "elapsed_seconds": 15.327202399999805,
+  "blackbox_inputs": 14,
+  "blackbox_evidence": {
+    "error_categories": {
+      "APPLICATION_HTTP_ERROR": 1
+    },
+    "business_or_security_observations": 8,
+    "confirmed_memory_errors": null,
+    "confirmed_process_crashes": null,
+    "note": "Memory errors/process crashes are not measured by these HTTP oracles; timeout is not a confirmed hang."
+  },
+  "whitebox_status": "EXECUTED",
+  "boundary_cases": [
+    {
+      "target": "orders",
+      "input": {
+        "products": [
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          }
+        ],
+        "totalAmount": 400000,
+        "shippingInfo": {
+          "fullName": "Nguyen Van A",
+          "phone": "0900000000",
+          "address": "123 Duong ABC"
+        },
+        "paymentMethod": "COD",
+        "discountCode": "",
+        "discountAmount": 0,
+        "shippingFee": "\u0000\u0001"
+      },
+      "had_auth": true,
+      "expected_signature": "HTTP_5XX",
+      "status": "SAMPLED",
+      "regions": [
+        {
+          "input": {
+            "products": [
+              {
+                "productId": 1,
+                "name": "Ao thun",
+                "price": 200000,
+                "quantity": 2
+              }
+            ],
+            "totalAmount": 400000,
+            "shippingInfo": {
+              "fullName": "Nguyen Van A",
+              "phone": "0900000000",
+              "address": "123 Duong ABC"
+            },
+            "paymentMethod": "COD",
+            "discountCode": "",
+            "discountAmount": 0,
+            "shippingFee": "\u0000\u0001"
+          },
+          "path": [
+            "products",
+            0,
+            "productId"
+          ],
+          "original_value": 1,
+          "axis": "integer",
+          "representatives": null,
+          "lower": 0,
+          "upper": 16,
+          "samples": [
+            {
+              "value": 0,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 1,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 2,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 16,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            }
+          ],
+          "transitions": [],
+          "complete": false
+        },
+        {
+          "input": {
+            "products": [
+              {
+                "productId": 1,
+                "name": "Ao thun",
+                "price": 200000,
+                "quantity": 2
+              }
+            ],
+            "totalAmount": 400000,
+            "shippingInfo": {
+              "fullName": "Nguyen Van A",
+              "phone": "0900000000",
+              "address": "123 Duong ABC"
+            },
+            "paymentMethod": "COD",
+            "discountCode": "",
+            "discountAmount": 0,
+            "shippingFee": "\u0000\u0001"
+          },
+          "path": [
+            "products",
+            0,
+            "name"
+          ],
+          "original_value": "Ao thun",
+          "axis": "unicode_length",
+          "representatives": null,
+          "lower": 0,
+          "upper": 16,
+          "samples": [
+            {
+              "value": 0,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 6,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 7,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 16,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            }
+          ],
+          "transitions": [],
+          "complete": false
+        }
+      ],
+      "probes_used": 8,
+      "state_scope": "fresh seeded HTTP harness for every probe",
+      "evidence_path": "fuzzing-security-testing\\results\\boundary_smoke_final\\blackbox\\boundary_evidence\\case_000.json"
+    }
+  ],
+  "whitebox_inputs": 4,
+  "whitebox_evidence": {
+    "error_categories": {
+      "APPLICATION_HTTP_ERROR": 4
+    },
+    "business_or_security_observations": 0,
+    "confirmed_memory_errors": null,
+    "confirmed_process_crashes": null,
+    "note": "Memory errors/process crashes are not measured by these HTTP oracles; timeout is not a confirmed hang."
+  },
+  "limitations": [
+    "Không có ứng viên không chứng minh hệ thống an toàn.",
+    "Khảo sát lân cận không chứng minh vùng biên đầy đủ.",
+    "HTTP 5xx không là crash; timeout chỉ là nghi vấn hang.",
+    "Chưa đo lỗi bộ nhớ bằng sanitizer trong luồng API."
+  ]
+}

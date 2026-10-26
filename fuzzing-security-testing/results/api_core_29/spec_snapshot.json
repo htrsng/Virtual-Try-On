@@ -1,0 +1,767 @@
+[
+  {
+    "file": "Module_Auth_Login_spec.xlsx",
+    "sha256": "97b1a4acb72b026d52400b7f091be53f4ad4690a6f544d9d87a242a5e985ccc5",
+    "sheets": {
+      "ThongTin": [
+        {
+          "Truong": "name",
+          "GiaTri": "Auth_Login"
+        },
+        {
+          "Truong": "description",
+          "GiaTri": "Đặc tả kiểm thử fuzzing API bán hàng trên harness mô phỏng. Trọng tâm: input bất thường, validation, quyền, dữ liệu và trạng thái đơn; không kiểm chứng CTL/SMT, mẫu native, timing hoặc concurrency trong bộ chính."
+        },
+        {
+          "Truong": "pham_vi_chinh",
+          "GiaTri": "Trạng thái chuẩn bị + seed → blackbox khám phá → whitebox chạy lại/lân cận/coverage → bằng chứng. Testcase API là oracle hỗ trợ."
+        },
+        {
+          "Truong": "pham_vi_bo_tro",
+          "GiaTri": "Nội dung CTL/SMT, mẫu C/Python, bộ đếm, timing, concurrency/version và đối chứng công cụ đã được bỏ khỏi bộ chính. Bản đầy đủ chỉ giữ trong sao lưu cục bộ."
+        },
+        {
+          "Truong": "thu_tu_testcase",
+          "GiaTri": "Chỉ giữ testcase API trong phạm vi mới; giữ ID để truy vết, không đánh số lại. Bản này có 5 sheet và không còn tuyên bố tuân thủ đầy đủ template 10 sheet."
+        }
+      ],
+      "YeuCauChucNang": [
+        {
+          "ID": "REQ-AUTH-1",
+          "MoTa": "Thiếu email hoặc password (rỗng sau khi trim) phải bị từ chối với HTTP 400, không được xử lý tiếp",
+          "DanhMuc": "functional",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-AUTH-2",
+          "MoTa": "Input email/password sai kiểu dữ liệu (object, array, number...) không được gây phản hồi HTTP 500 do đầu vào không hợp lệ",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-AUTH-3",
+          "MoTa": "Phản hồi khi tài khoản không tồn tại và sai mật khẩu không được phân biệt được từ bên ngoài (chống user enumeration)",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-AUTH-5",
+          "MoTa": "Trường role gán vào JWT token phải đúng bằng role lưu trong hệ thống, không được đọc từ dữ liệu client gửi lên",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-AUTH-8",
+          "MoTa": "Email dài bất thường phải được xử lý có kiểm soát bằng phản hồi từ chối; không phát sinh HTTP 500 do kiểu/độ dài đầu vào. Phép thử API không kết luận lỗi bộ nhớ.",
+          "DanhMuc": "safety",
+          "MucUuTien": "MEDIUM"
+        }
+      ],
+      "YeuCauPhiChucNang": [
+        {
+          "ID": "NFR-AUTH-2",
+          "MoTa": "Token JWT phát hành phải có thời hạn <= 7 ngày (hiện tại: 7d, cấu hình expiresIn)",
+          "MucUuTien": "LOW"
+        },
+        {
+          "ID": "NFR-AUTH-4",
+          "MoTa": "Tỷ lệ HTTP 500 trên tổng số request đăng nhập phải bằng 0% Đo trên 1000 request/module, seed=7, ghi riêng lỗi bộ chạy; báo cáo phân bố input và số HTTP 5xx.",
+          "MucUuTien": "HIGH"
+        }
+      ],
+      "RangBuoc": [
+        {
+          "ID": "CON-AUTH-1",
+          "MoTa": "email và password phải là chuỗi khác rỗng sau khi trim; thiếu hoặc sai kiểu phải bị từ chối HTTP 400.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "CON-AUTH-2",
+          "MoTa": "Email phải được chuẩn hóa nhất quán khi tra cứu; phải có testcase cho chữ hoa/thường và khoảng trắng.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "CON-AUTH-3",
+          "MoTa": "JWT phải được ký bằng bí mật cấu hình ngoài mã nguồn; thời hạn dương và không quá 7 ngày.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "CON-AUTH-4",
+          "MoTa": "Giới hạn email là 254 ký tự trong hợp đồng API.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "CON-AUTH-5",
+          "MoTa": "Mật khẩu dùng UTF-8; đầu vào bcrypt không vượt 72 byte, vượt giới hạn phải bị từ chối HTTP 400, không được cắt ngầm.",
+          "MucUuTien": "MEDIUM"
+        }
+      ],
+      "TestCase": [
+        {
+          "ID": "TC-AUTH-1",
+          "YeuCauLienQuan": "REQ-AUTH-1",
+          "TieuDe": "Thiếu email hoặc password",
+          "DieuKienTienQuyet": "Server đang chạy",
+          "CacBuoc": "Gửi POST /api/auth/login với body rỗng\nGửi với chỉ có email, thiếu password",
+          "KetQuaMongDoi": "Cả 2 trường hợp trả về HTTP 400",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-AUTH-2",
+          "YeuCauLienQuan": "REQ-AUTH-2",
+          "TieuDe": "email/password sai kiểu dữ liệu",
+          "DieuKienTienQuyet": "Server đang chạy",
+          "CacBuoc": "1. Gửi email/password là object, array, number hoặc null.\n2. Chạy thêm input đột biến từ seed đăng nhập hợp lệ.\n3. Lưu phản hồi và đối chiếu từng input.",
+          "KetQuaMongDoi": "Không phát sinh HTTP 500 do input sai kiểu; lưu mã HTTP và nội dung từ chối.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-AUTH-3",
+          "YeuCauLienQuan": "REQ-AUTH-3",
+          "TieuDe": "Phân biệt tài khoản không tồn tại vs sai mật khẩu",
+          "DieuKienTienQuyet": "Có 1 tài khoản hợp lệ đã seed",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. So sánh mã HTTP và message giữa email sai vs password sai\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Hai trường hợp không được tiết lộ sự tồn tại tài khoản qua mã HTTP hoặc thông báo lỗi; đối chiếu phản hồi thực tế sau khi chạy.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-AUTH-5",
+          "YeuCauLienQuan": "REQ-AUTH-5",
+          "TieuDe": "Token phát hành đúng role từ DB",
+          "DieuKienTienQuyet": "Có tài khoản role=user và role=admin",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Đăng nhập bằng tài khoản role=user, decode token, kiểm tra role\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "role trong token = 'user', không thể bị ghi đè bởi client",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-AUTH-7",
+          "YeuCauLienQuan": "REQ-AUTH-8",
+          "TieuDe": "email dài bất thường (5000 ký tự)",
+          "DieuKienTienQuyet": "Server đang chạy",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Gửi email = chuỗi 5000 ký tự 'A'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Request email 5000 ký tự được từ chối có kiểm soát bằng HTTP 400 hoặc 404; không có HTTP 500. Không kết luận tràn bộ nhớ hoặc đã kiểm tra đầy đủ giới hạn 254 ký tự từ phép thử này.",
+          "MucUuTien": "MEDIUM"
+        }
+      ]
+    }
+  },
+  {
+    "file": "Module_Orders_Create_spec.xlsx",
+    "sha256": "0c6b4189cc45d87cb63fbf81e583a9d74a3b44bdab304c6c6cfcab71fa5de635",
+    "sheets": {
+      "ThongTin": [
+        {
+          "Truong": "name",
+          "GiaTri": "Orders_Create"
+        },
+        {
+          "Truong": "description",
+          "GiaTri": "Đặc tả kiểm thử fuzzing API bán hàng trên harness mô phỏng. Trọng tâm: input bất thường, validation, quyền, dữ liệu và trạng thái đơn; không kiểm chứng CTL/SMT, mẫu native, timing hoặc concurrency trong bộ chính."
+        },
+        {
+          "Truong": "pham_vi_chinh",
+          "GiaTri": "Trạng thái chuẩn bị + seed → blackbox khám phá → whitebox chạy lại/lân cận/coverage → bằng chứng. Testcase API là oracle hỗ trợ."
+        },
+        {
+          "Truong": "pham_vi_bo_tro",
+          "GiaTri": "Nội dung CTL/SMT, mẫu C/Python, bộ đếm, timing, concurrency/version và đối chứng công cụ đã được bỏ khỏi bộ chính. Bản đầy đủ chỉ giữ trong sao lưu cục bộ."
+        },
+        {
+          "Truong": "thu_tu_testcase",
+          "GiaTri": "Chỉ giữ testcase API trong phạm vi mới; giữ ID để truy vết, không đánh số lại. Bản này có 5 sheet và không còn tuyên bố tuân thủ đầy đủ template 10 sheet."
+        }
+      ],
+      "YeuCauChucNang": [
+        {
+          "ID": "REQ-ORD-1",
+          "MoTa": "products phải là một MẢNG khác rỗng; không được chỉ kiểm tra truthy và length != 0",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-ORD-2",
+          "MoTa": "shippingInfo và 3 trường con (fullName, phone, address) đều bắt buộc khác rỗng",
+          "DanhMuc": "functional",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-ORD-3",
+          "MoTa": "Thiếu totalAmount phải trả về HTTP 400, không được để rơi xuống HTTP 500",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-ORD-4",
+          "MoTa": "totalAmount/discountAmount/voucherDiscount/shippingFee sai kiểu dữ liệu không được gây phản hồi HTTP 500 do đầu vào không hợp lệ",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-ORD-5",
+          "MoTa": "totalAmount lưu vào hệ thống phải được SERVER tự tính lại từ giá thật trong catalog, không tin client",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-ORD-6",
+          "MoTa": "totalAmount không được là số âm",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-ORD-8",
+          "MoTa": "Mỗi phần tử trong products phải có cấu trúc {productId, price:number, quantity:number} hợp lệ",
+          "DanhMuc": "safety",
+          "MucUuTien": "MEDIUM"
+        }
+      ],
+      "YeuCauPhiChucNang": [
+        {
+          "ID": "NFR-ORD-2",
+          "MoTa": "Trên 100 input sai kiểu/thiếu trường, 100% phải trả HTTP 400 hoặc 422, không ghi đơn hàng; lỗi bộ chạy được thống kê riêng.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "NFR-ORD-5",
+          "MoTa": "Tỷ lệ HTTP 500 trên tổng số request tạo đơn hàng phải dưới 5% Đo trên 1000 request/module, seed=7, ghi riêng lỗi bộ chạy; báo cáo phân bố input và số HTTP 5xx.",
+          "MucUuTien": "HIGH"
+        }
+      ],
+      "RangBuoc": [
+        {
+          "ID": "CON-ORD-1",
+          "MoTa": "Mỗi products[i] phải có productId tồn tại, price là số hữu hạn dương và quantity là số nguyên dương; boolean không được xem là số.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "CON-ORD-2",
+          "MoTa": "discountCode phải được trim và chuyển chữ hoa trước khi so khớp/lưu; các biến thể cùng mã được xem là một mã.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "CON-ORD-3",
+          "MoTa": "Các trường tiền phải là số hữu hạn; trường bắt buộc không được thiếu, trường phí/giảm giá tùy chọn mặc định bằng 0 khi vắng mặt, không dùng truthy để thay validation.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "CON-ORD-4",
+          "MoTa": "discountCode tối đa 32 ký tự.",
+          "MucUuTien": "MEDIUM"
+        }
+      ],
+      "TestCase": [
+        {
+          "ID": "TC-ORD-1",
+          "YeuCauLienQuan": "REQ-ORD-1, REQ-ORD-8",
+          "TieuDe": "products sai kiểu dữ liệu vẫn được chấp nhận",
+          "DieuKienTienQuyet": "Đã đăng nhập, có token",
+          "CacBuoc": "Gửi products: {} (object rỗng)\nGửi products: 'abc' (chuỗi)",
+          "KetQuaMongDoi": "ĐÃ XÁC NHẬN THỰC NGHIỆM: cả 2 trả về 200 - VI PHẠM. Oracle fuzzer hiện CHƯA phát hiện được lỗi này",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-ORD-2",
+          "YeuCauLienQuan": "REQ-ORD-2",
+          "TieuDe": "Thiếu từng trường trong shippingInfo",
+          "DieuKienTienQuyet": "Đã đăng nhập, có token",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Xóa lần lượt shippingInfo/fullName/phone/address\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Cả 4 trường hợp trả về 400",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-ORD-3",
+          "YeuCauLienQuan": "REQ-ORD-3",
+          "TieuDe": "Thiếu totalAmount",
+          "DieuKienTienQuyet": "Đã đăng nhập, có token, cart/shipping hợp lệ",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Gửi đơn hàng, xóa trường totalAmount\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "ĐÃ XÁC NHẬN: trả về 500 (không phải 400) - VI PHẠM",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-ORD-4",
+          "YeuCauLienQuan": "REQ-ORD-4",
+          "TieuDe": "totalAmount sai kiểu dữ liệu",
+          "DieuKienTienQuyet": "Đã đăng nhập, có token",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Gửi totalAmount là object/array/NaN, lặp lại bằng fuzzer\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Phần lớn trả về 500 - VI PHẠM. Ghi nhận 120-240 crash trên 1400-3500 lần thử",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-ORD-5",
+          "YeuCauLienQuan": "REQ-ORD-5",
+          "TieuDe": "totalAmount lệch giá thật",
+          "DieuKienTienQuyet": "Đã đăng nhập, có token, 1 sản phẩm giá 200000",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Gửi totalAmount=400000, sản phẩm thật giá 200000 x1\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Server lưu nguyên 400000, trả 200 - VI PHẠM. 239/245 vi phạm lần chạy đầu là loại này",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-ORD-6",
+          "YeuCauLienQuan": "REQ-ORD-6",
+          "TieuDe": "totalAmount âm",
+          "DieuKienTienQuyet": "Đã đăng nhập, có token",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Gửi totalAmount = -999999999\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Chấp nhận với totalAmount âm (200) - VI PHẠM, đã được white-box fuzzer xác nhận",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-ORD-18",
+          "YeuCauLienQuan": "REQ-ORD-5",
+          "TieuDe": "Giá và tổng tiền giả nhưng tự khớp nhau",
+          "DieuKienTienQuyet": "Catalog productId=1 có giá 200000; actor hợp lệ. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+          "CacBuoc": "1. Gửi sản phẩm price=1, quantity=2, totalAmount=2; đọc giá trị đơn đã lưu nếu thành công.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: {\"products\":[{\"productId\":1,\"price\":1,\"quantity\":2}],\"totalAmount\":2}",
+          "KetQuaMongDoi": "Từ chối 400/422 hoặc tính lại 400000 khi không có phí/giảm giá. Không lưu tổng 2.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-ORD-19",
+          "YeuCauLienQuan": "REQ-ORD-2, REQ-ORD-5, REQ-ORD-8",
+          "TieuDe": "Tạo đơn hợp lệ làm mẫu đối chứng",
+          "DieuKienTienQuyet": "User hợp lệ; sản phẩm còn hàng; giá catalog tin cậy. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+          "CacBuoc": "1. Gửi giỏ hàng và giao hàng hợp lệ; đọc đơn lưu và đối chiếu catalog.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: Seed order hợp lệ, không voucher/phí; quantity=2, giá catalog=200000.",
+          "KetQuaMongDoi": "200/201; đơn lưu đúng user/sản phẩm/số lượng; tổng 400000.",
+          "MucUuTien": "HIGH"
+        }
+      ]
+    }
+  },
+  {
+    "file": "Module_OrderStatus_spec.xlsx",
+    "sha256": "8dc1af1c5f003662d64da23b5093457d3d6b5f45f5dd9f048ecdbd99b702cd93",
+    "sheets": {
+      "ThongTin": [
+        {
+          "Truong": "name",
+          "GiaTri": "Orders_UpdateStatus"
+        },
+        {
+          "Truong": "description",
+          "GiaTri": "Đặc tả kiểm thử fuzzing API bán hàng trên harness mô phỏng. Trọng tâm: input bất thường, validation, quyền, dữ liệu và trạng thái đơn; không kiểm chứng CTL/SMT, mẫu native, timing hoặc concurrency trong bộ chính."
+        },
+        {
+          "Truong": "pham_vi_chinh",
+          "GiaTri": "Trạng thái chuẩn bị + seed → blackbox khám phá → whitebox chạy lại/lân cận/coverage → bằng chứng. Testcase API là oracle hỗ trợ."
+        },
+        {
+          "Truong": "pham_vi_bo_tro",
+          "GiaTri": "Nội dung CTL/SMT, mẫu C/Python, bộ đếm, timing, concurrency/version và đối chứng công cụ đã được bỏ khỏi bộ chính. Bản đầy đủ chỉ giữ trong sao lưu cục bộ."
+        },
+        {
+          "Truong": "thu_tu_testcase",
+          "GiaTri": "Chỉ giữ testcase API trong phạm vi mới; giữ ID để truy vết, không đánh số lại. Bản này có 5 sheet và không còn tuyên bố tuân thủ đầy đủ template 10 sheet."
+        }
+      ],
+      "YeuCauChucNang": [
+        {
+          "ID": "REQ-OS-1",
+          "MoTa": "PUT /api/orders/:id phải yêu cầu authenticateToken ",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-OS-2",
+          "MoTa": "Chỉ chủ đơn hàng hoặc admin được phép đổi trạng thái đơn hàng (chống IDOR)",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-OS-3",
+          "MoTa": "status phải là chuỗi trong enum: Đang xử lý, Đang giao, Đã giao, Đã hủy; tên không dấu trong mô hình chỉ là định danh hình thức.",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-OS-4",
+          "MoTa": "Chuyển trạng thái phải tuân theo vòng đời hợp lệ: Da_giao không được quay lui, Da_huy không được tiếp tục",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-OS-5",
+          "MoTa": ":id sai định dạng hoặc status sai kiểu dữ liệu không được gây phản hồi HTTP 500 do đầu vào không hợp lệ",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-OS-7",
+          "MoTa": "Cập nhật trạng thái hợp lệ (đúng chủ sở hữu, đúng chuyển đổi) phải thành công và gửi thông báo cho user",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        }
+      ],
+      "YeuCauPhiChucNang": [
+        {
+          "ID": "NFR-OS-2",
+          "MoTa": "Tỷ lệ HTTP 500 trên tổng request cập nhật trạng thái phải dưới 1% Đo trên 1000 request/module, seed=7, ghi riêng lỗi bộ chạy; báo cáo phân bố input và số HTTP 5xx.",
+          "MucUuTien": "HIGH"
+        }
+      ],
+      "RangBuoc": [
+        {
+          "ID": "CON-OS-1",
+          "MoTa": "status phải là chuỗi trong enum: Đang xử lý, Đang giao, Đã giao, Đã hủy; tên không dấu trong mô hình chỉ là định danh hình thức.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "CON-OS-2",
+          "MoTa": "Thiếu status hoặc status sai kiểu/ngoài enum phải trả HTTP 400 hoặc 422 và giữ nguyên trạng thái.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "CON-OS-3",
+          "MoTa": "ID đơn không đúng định dạng phải bị từ chối HTTP 400; ID đúng định dạng nhưng không tồn tại phải trả HTTP 404.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "CON-OS-4",
+          "MoTa": "status tối đa 32 ký tự.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "CON-OS-5",
+          "MoTa": "Chuyển trạng thái: xử lý→giao/hủy, giao→đã giao; gửi lại cùng trạng thái được phép nhưng không tạo tác dụng phụ trùng. Đã giao/hủy không được chuyển sang trạng thái khác.",
+          "MucUuTien": "MEDIUM"
+        }
+      ],
+      "TestCase": [
+        {
+          "ID": "TC-OS-1",
+          "YeuCauLienQuan": "REQ-OS-1, REQ-OS-2",
+          "TieuDe": "Đổi trạng thái không token / với token người khác",
+          "DieuKienTienQuyet": "Có 1 đơn hàng đã tạo, có 1 token user khác (không phải chủ đơn)",
+          "CacBuoc": "Gọi PUT /api/orders/:id không header Authorization\nGọi lại với token của user khác",
+          "KetQuaMongDoi": "ĐÃ XÁC NHẬN THỰC NGHIỆM: cả 2 trường hợp trả 200 thành công - VI PHẠM",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-OS-2",
+          "YeuCauLienQuan": "REQ-OS-3",
+          "TieuDe": "status ngoài tập giá trị hợp lệ",
+          "DieuKienTienQuyet": "Có 1 đơn hàng đã tạo",
+          "CacBuoc": "Gửi status='' (rỗng)\nGửi status='0000000000'",
+          "KetQuaMongDoi": "ĐÃ XÁC NHẬN (white-box, lần thử 8 và 22): cả 2 vẫn được chấp nhận (200) - VI PHẠM",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-OS-3",
+          "YeuCauLienQuan": "REQ-OS-4",
+          "TieuDe": "Chuyển trạng thái ngược sau khi đã giao",
+          "DieuKienTienQuyet": "Đơn hàng đã ở trạng thái Da_giao",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Gửi PUT status='Dang xu ly' cho đơn đã ở trạng thái Da_giao\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "MONG ĐỢI bị từ chối; ACTUAL cho phép (xem CTL: EF(actual_Da_giao & EX(actual_Dang_xu_ly)) = SAT) - VI PHẠM",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-OS-4",
+          "YeuCauLienQuan": "REQ-OS-5",
+          "TieuDe": ":id sai định dạng / status sai kiểu",
+          "DieuKienTienQuyet": "Server đang chạy",
+          "CacBuoc": "Gọi PUT /api/orders/abc\nGọi PUT với status={\"a\":1}",
+          "KetQuaMongDoi": "ĐÃ XÁC NHẬN THỰC NGHIỆM: cả 2 trả về 500 - VI PHẠM",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-OS-5",
+          "YeuCauLienQuan": "REQ-OS-7",
+          "TieuDe": "Cập nhật hợp lệ (positive control)",
+          "DieuKienTienQuyet": "Có 1 đơn hàng mới tạo, đúng token chủ đơn",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Gửi PUT status='Dang giao' với token chủ sở hữu\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "Trả về 200, dữ liệu status được cập nhật đúng, notification được tạo",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "TC-OS-21",
+          "YeuCauLienQuan": "REQ-OS-4",
+          "TieuDe": "Đơn đã hủy không được tiếp tục giao",
+          "DieuKienTienQuyet": "Đơn mới hợp lệ và đúng quyền thao tác. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+          "CacBuoc": "1. Tạo đơn; chuyển đã hủy; yêu cầu chuyển đang giao; đọc lại đơn.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: Dùng chính xác chuỗi status của hệ thống, không tự thay bằng alias.",
+          "KetQuaMongDoi": "Bước setup thành công; chuyển sau hủy bị từ chối 400/409/422; đơn vẫn đã hủy.",
+          "MucUuTien": "HIGH"
+        }
+      ]
+    }
+  },
+  {
+    "file": "Module_Products_Manage_spec.xlsx",
+    "sha256": "80cc92ed3f1f0d4b3243d2cef39c10d9e8d01cbfd5c300e0264396b48a5fdbf6",
+    "sheets": {
+      "ThongTin": [
+        {
+          "Truong": "name",
+          "GiaTri": "Products_Manage"
+        },
+        {
+          "Truong": "description",
+          "GiaTri": "Đặc tả kiểm thử fuzzing API bán hàng trên harness mô phỏng. Trọng tâm: input bất thường, validation, quyền, dữ liệu và trạng thái đơn; không kiểm chứng CTL/SMT, mẫu native, timing hoặc concurrency trong bộ chính."
+        },
+        {
+          "Truong": "pham_vi_chinh",
+          "GiaTri": "Trạng thái chuẩn bị + seed → blackbox khám phá → whitebox chạy lại/lân cận/coverage → bằng chứng. Testcase API là oracle hỗ trợ."
+        },
+        {
+          "Truong": "pham_vi_bo_tro",
+          "GiaTri": "Nội dung CTL/SMT, mẫu C/Python, bộ đếm, timing, concurrency/version và đối chứng công cụ đã được bỏ khỏi bộ chính. Bản đầy đủ chỉ giữ trong sao lưu cục bộ."
+        },
+        {
+          "Truong": "thu_tu_testcase",
+          "GiaTri": "Chỉ giữ testcase API trong phạm vi mới; giữ ID để truy vết, không đánh số lại. Bản này có 5 sheet và không còn tuyên bố tuân thủ đầy đủ template 10 sheet."
+        }
+      ],
+      "YeuCauChucNang": [
+        {
+          "ID": "REQ-PRD-1",
+          "MoTa": "POST/PUT /api/products phải yêu cầu authenticateToken + requireAdmin",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-PRD-2",
+          "MoTa": "price không được là số âm",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-PRD-3",
+          "MoTa": "price/stock sai kiểu dữ liệu không được gây phản hồi HTTP 500 do đầu vào không hợp lệ",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-PRD-4",
+          "MoTa": "id sản phẩm (numeric) do client tự chọn khi POST không được trùng/ghi đè sản phẩm đã có",
+          "DanhMuc": "safety",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "REQ-PRD-6",
+          "MoTa": "PUT với id không tồn tại phải trả về 404",
+          "DanhMuc": "functional",
+          "MucUuTien": "MEDIUM"
+        }
+      ],
+      "YeuCauPhiChucNang": [
+        {
+          "ID": "NFR-PRD-2",
+          "MoTa": "Tỷ lệ HTTP 500 trên tổng request phải dưới 2%  Đo trên 1000 request/module, seed=7, ghi riêng lỗi bộ chạy; báo cáo phân bố input và số HTTP 5xx.",
+          "MucUuTien": "HIGH"
+        }
+      ],
+      "RangBuoc": [
+        {
+          "ID": "CON-PRD-1",
+          "MoTa": "Tạo/sửa sản phẩm chỉ cho admin; chỉ cập nhật trường cho phép, không chuyển toàn bộ request body vào datastore.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "CON-PRD-2",
+          "MoTa": "name tối đa 200 ký tự.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "CON-PRD-3",
+          "MoTa": "ID sản phẩm phải là số nguyên dương và duy nhất; khi không gửi ID thì server cấp ID mới không trùng, ID sai kiểu phải bị từ chối.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "CON-PRD-4",
+          "MoTa": "Cập nhật/xóa sản phẩm có ID đúng định dạng nhưng không tồn tại phải trả HTTP 404; request thất bại không được tạo sản phẩm mới.",
+          "MucUuTien": "MEDIUM"
+        }
+      ],
+      "TestCase": [
+        {
+          "ID": "TC-PRD-1",
+          "YeuCauLienQuan": "REQ-PRD-1",
+          "TieuDe": "Tạo/sửa sản phẩm không token",
+          "DieuKienTienQuyet": "Server đang chạy",
+          "CacBuoc": "POST /api/products không token\nPUT /api/products/1 không token",
+          "KetQuaMongDoi": "ĐÃ XÁC NHẬN THỰC NGHIỆM: cả 2 trả 200 thành công - VI PHẠM",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-PRD-2",
+          "YeuCauLienQuan": "REQ-PRD-2",
+          "TieuDe": "Giá sản phẩm âm",
+          "DieuKienTienQuyet": "Server đang chạy",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. PUT /api/products/1 với body {\"price\":-500}\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "ĐÃ XÁC NHẬN THỰC NGHIỆM: trả về 200 với price âm - VI PHẠM",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-PRD-3",
+          "YeuCauLienQuan": "REQ-PRD-3",
+          "TieuDe": "price sai kiểu dữ liệu",
+          "DieuKienTienQuyet": "Server đang chạy",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. PUT /api/products/1 với body {\"price\":{\"a\":1}}\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "ĐÃ XÁC NHẬN THỰC NGHIỆM: trả về 500 - VI PHẠM",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-PRD-4",
+          "YeuCauLienQuan": "REQ-PRD-6",
+          "TieuDe": "PUT sản phẩm không tồn tại",
+          "DieuKienTienQuyet": "Server đang chạy",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. PUT /api/products/999999 (id không tồn tại)\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "MONG ĐỢI trả về 404 - cần đối chiếu kết quả fuzz thực tế",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "TC-PRD-5",
+          "YeuCauLienQuan": "REQ-PRD-4",
+          "TieuDe": "POST với id trùng sản phẩm đã có",
+          "DieuKienTienQuyet": "Đã có sản phẩm id=1",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. POST /api/products với body {\"id\":1,...}\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "MONG ĐỢI từ chối hoặc tự động cấp id khác; cần kiểm chứng code hiện tại có ghi đè hay không",
+          "MucUuTien": "MEDIUM"
+        }
+      ]
+    }
+  },
+  {
+    "file": "Module_Users_Admin_spec.xlsx",
+    "sha256": "a7c344c14ed81ad3ce0832282e5542c8c07353ad2c1b6af89c8521574d256b54",
+    "sheets": {
+      "ThongTin": [
+        {
+          "Truong": "name",
+          "GiaTri": "Users_Admin"
+        },
+        {
+          "Truong": "description",
+          "GiaTri": "Đặc tả kiểm thử fuzzing API bán hàng trên harness mô phỏng. Trọng tâm: input bất thường, validation, quyền, dữ liệu và trạng thái đơn; không kiểm chứng CTL/SMT, mẫu native, timing hoặc concurrency trong bộ chính."
+        },
+        {
+          "Truong": "pham_vi_chinh",
+          "GiaTri": "Trạng thái chuẩn bị + seed → blackbox khám phá → whitebox chạy lại/lân cận/coverage → bằng chứng. Testcase API là oracle hỗ trợ."
+        },
+        {
+          "Truong": "pham_vi_bo_tro",
+          "GiaTri": "Nội dung CTL/SMT, mẫu C/Python, bộ đếm, timing, concurrency/version và đối chứng công cụ đã được bỏ khỏi bộ chính. Bản đầy đủ chỉ giữ trong sao lưu cục bộ."
+        },
+        {
+          "Truong": "thu_tu_testcase",
+          "GiaTri": "Chỉ giữ testcase API trong phạm vi mới; giữ ID để truy vết, không đánh số lại. Bản này có 5 sheet và không còn tuyên bố tuân thủ đầy đủ template 10 sheet."
+        }
+      ],
+      "YeuCauChucNang": [
+        {
+          "ID": "REQ-USR-1",
+          "MoTa": "PUT /api/users/:id phải yêu cầu authenticateToken",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-USR-2",
+          "MoTa": "Chỉ chủ tài khoản hoặc admin được phép sửa hồ sơ (chống IDOR/BOLA)",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-USR-3",
+          "MoTa": "Trường role KHÔNG được client tự đặt qua PUT sửa hồ sơ thông thường (chống mass assignment)",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-USR-4",
+          "MoTa": "PUT với :id sai định dạng không được gây phản hồi HTTP 500 do đầu vào không hợp lệ",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-USR-5",
+          "MoTa": "Password khi được cập nhật qua PUT /api/users/:id phải được bcrypt.hash trước khi lưu",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "REQ-USR-6",
+          "MoTa": "create-admin: secretKey không được hardcode trong source code và phải so sánh constant-time",
+          "DanhMuc": "safety",
+          "MucUuTien": "HIGH"
+        }
+      ],
+      "YeuCauPhiChucNang": [
+        {
+          "ID": "NFR-USR-3",
+          "MoTa": "Tỷ lệ HTTP 500 trên PUT /api/users/:id phải dưới 1% Đo trên 1000 request/module, seed=7, ghi riêng lỗi bộ chạy; báo cáo phân bố input và số HTTP 5xx.",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "NFR-USR-5",
+          "MoTa": "Không được lưu bất kỳ trường password nào ở dạng plaintext trong CSDL (định lượng: 0 bản ghi)",
+          "MucUuTien": "HIGH"
+        }
+      ],
+      "RangBuoc": [
+        {
+          "ID": "CON-USR-1",
+          "MoTa": "Cập nhật hồ sơ phải dùng danh sách trường cho phép; không cho client sửa role, _id, failedLoginCount hoặc tự gán version lưu trữ.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "CON-USR-2",
+          "MoTa": "fullName tối đa 100 ký tự.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "CON-USR-3",
+          "MoTa": "Bí mật create-admin phải lấy từ cấu hình ngoài mã nguồn, không được ghi vào response/log; kiểm tra bí mật phải tránh so sánh làm lộ nội dung.",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "CON-USR-4",
+          "MoTa": "role chỉ nhận user/admin và chỉ được đổi qua thao tác quản trị được cấp quyền; cập nhật hồ sơ thông thường không được nâng quyền.",
+          "MucUuTien": "MEDIUM"
+        }
+      ],
+      "TestCase": [
+        {
+          "ID": "TC-USR-1",
+          "YeuCauLienQuan": "REQ-USR-1, REQ-USR-2",
+          "TieuDe": "Sửa hồ sơ không token / hồ sơ người khác",
+          "DieuKienTienQuyet": "Có 2 user đã seed (fuzzuser, victim)",
+          "CacBuoc": "PUT /api/users/:victim_id không token\nPUT /api/users/:victim_id với token của fuzzuser",
+          "KetQuaMongDoi": "ĐÃ XÁC NHẬN THỰC NGHIỆM: cả 2 trả 200 thành công - VI PHẠM",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-USR-2",
+          "YeuCauLienQuan": "REQ-USR-3",
+          "TieuDe": "Tự đặt role=admin qua PUT thông thường",
+          "DieuKienTienQuyet": "Có 1 user thường đã seed",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Gửi PUT với body {\"role\":\"admin\"}\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "role trả về trong response = 'admin' - VI PHẠM mass assignment (BUG-08)",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-USR-3",
+          "YeuCauLienQuan": "REQ-USR-4",
+          "TieuDe": ":id sai định dạng",
+          "DieuKienTienQuyet": "Server đang chạy",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Gửi PUT /api/users/abc\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "MONG ĐỢI 400/404, KHÔNG được 500 - cần kiểm chứng bởi CastError tầng dưới",
+          "MucUuTien": "MEDIUM"
+        },
+        {
+          "ID": "TC-USR-4",
+          "YeuCauLienQuan": "REQ-USR-5, NFR-USR-5",
+          "TieuDe": "password bị lưu plaintext",
+          "DieuKienTienQuyet": "Có 1 user đã seed (victim)",
+          "CacBuoc": "Gửi PUT với body {\"password\":\"plaintext_hack\"}\nThử đăng nhập lại bằng password mới 'plaintext_hack'",
+          "KetQuaMongDoi": "ĐÃ XÁC NHẬN THỰC NGHIỆM (thiết kế, chưa chạy lại do server bị gián đoạn): đăng nhập thành công với chuỗi plaintext - VI PHẠM nghiêm trọng",
+          "MucUuTien": "HIGH"
+        },
+        {
+          "ID": "TC-USR-5",
+          "YeuCauLienQuan": "REQ-USR-6",
+          "TieuDe": "create-admin với secretKey sai",
+          "DieuKienTienQuyet": "Server đang chạy",
+          "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Gửi POST /api/auth/create-admin với secretKey='wrong'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+          "KetQuaMongDoi": "ĐÃ XÁC NHẬN: trả về 403 - ĐẠT",
+          "MucUuTien": "MEDIUM"
+        }
+      ]
+    }
+  }
+]

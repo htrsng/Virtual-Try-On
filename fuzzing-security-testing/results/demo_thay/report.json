@@ -1,0 +1,736 @@
+{
+  "environment": "node_harness_stub",
+  "seed": 7,
+  "elapsed_seconds": 139.1950715999992,
+  "blackbox_inputs": 100,
+  "blackbox_evidence": {
+    "error_categories": {
+      "APPLICATION_HTTP_ERROR": 6
+    },
+    "business_or_security_observations": 52,
+    "confirmed_memory_errors": null,
+    "confirmed_process_crashes": null,
+    "note": "Memory errors/process crashes are not measured by these HTTP oracles; timeout is not a confirmed hang."
+  },
+  "whitebox_status": "EXECUTED",
+  "boundary_cases": [
+    {
+      "target": "orders",
+      "input": {
+        "products": [
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          }
+        ],
+        "totalAmount": 400000,
+        "shippingInfo": {
+          "fullName": "Nguyen Van A",
+          "phone": "0900000000",
+          "address": "123 Duong ABC"
+        },
+        "paymentMethod": "COD",
+        "discountCode": "",
+        "discountAmount": 0,
+        "shippingFee": "\u0000\u0001"
+      },
+      "had_auth": true,
+      "expected_signature": "HTTP_5XX",
+      "status": "SAMPLED",
+      "regions": [
+        {
+          "input": {
+            "products": [
+              {
+                "productId": 1,
+                "name": "Ao thun",
+                "price": 200000,
+                "quantity": 2
+              }
+            ],
+            "totalAmount": 400000,
+            "shippingInfo": {
+              "fullName": "Nguyen Van A",
+              "phone": "0900000000",
+              "address": "123 Duong ABC"
+            },
+            "paymentMethod": "COD",
+            "discountCode": "",
+            "discountAmount": 0,
+            "shippingFee": "\u0000\u0001"
+          },
+          "path": [
+            "products",
+            0,
+            "productId"
+          ],
+          "original_value": 1,
+          "axis": "integer",
+          "representatives": null,
+          "lower": 0,
+          "upper": 16,
+          "samples": [
+            {
+              "value": 0,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 1,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 2,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 16,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            }
+          ],
+          "transitions": [],
+          "complete": false
+        },
+        {
+          "input": {
+            "products": [
+              {
+                "productId": 1,
+                "name": "Ao thun",
+                "price": 200000,
+                "quantity": 2
+              }
+            ],
+            "totalAmount": 400000,
+            "shippingInfo": {
+              "fullName": "Nguyen Van A",
+              "phone": "0900000000",
+              "address": "123 Duong ABC"
+            },
+            "paymentMethod": "COD",
+            "discountCode": "",
+            "discountAmount": 0,
+            "shippingFee": "\u0000\u0001"
+          },
+          "path": [
+            "products",
+            0,
+            "name"
+          ],
+          "original_value": "Ao thun",
+          "axis": "unicode_length",
+          "representatives": null,
+          "lower": 0,
+          "upper": 16,
+          "samples": [
+            {
+              "value": 0,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 6,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 7,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 8,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 16,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            }
+          ],
+          "transitions": [],
+          "complete": false
+        },
+        {
+          "input": {
+            "products": [
+              {
+                "productId": 1,
+                "name": "Ao thun",
+                "price": 200000,
+                "quantity": 2
+              }
+            ],
+            "totalAmount": 400000,
+            "shippingInfo": {
+              "fullName": "Nguyen Van A",
+              "phone": "0900000000",
+              "address": "123 Duong ABC"
+            },
+            "paymentMethod": "COD",
+            "discountCode": "",
+            "discountAmount": 0,
+            "shippingFee": "\u0000\u0001"
+          },
+          "path": [
+            "products",
+            0,
+            "price"
+          ],
+          "original_value": 200000,
+          "axis": "integer",
+          "representatives": null,
+          "lower": 0,
+          "upper": 400002,
+          "samples": [
+            {
+              "value": 0,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 199999,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 200000,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 200001,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 400002,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            }
+          ],
+          "transitions": [],
+          "complete": false
+        },
+        {
+          "input": {
+            "products": [
+              {
+                "productId": 1,
+                "name": "Ao thun",
+                "price": 200000,
+                "quantity": 2
+              }
+            ],
+            "totalAmount": 400000,
+            "shippingInfo": {
+              "fullName": "Nguyen Van A",
+              "phone": "0900000000",
+              "address": "123 Duong ABC"
+            },
+            "paymentMethod": "COD",
+            "discountCode": "",
+            "discountAmount": 0,
+            "shippingFee": "\u0000\u0001"
+          },
+          "path": [
+            "products",
+            0,
+            "quantity"
+          ],
+          "original_value": 2,
+          "axis": "integer",
+          "representatives": null,
+          "lower": 0,
+          "upper": 16,
+          "samples": [
+            {
+              "value": 0,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 1,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 2,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 16,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            }
+          ],
+          "transitions": [],
+          "complete": false
+        }
+      ],
+      "probes_used": 16,
+      "state_scope": "fresh seeded HTTP harness for every probe",
+      "evidence_path": "fuzzing-security-testing\\results\\demo_thay\\blackbox\\boundary_evidence\\case_000.json"
+    },
+    {
+      "target": "product_update",
+      "input": {
+        "name": "Quan jean",
+        "price": "not_an_object",
+        "stock": 5,
+        "totalStock": 5,
+        "category": "Quan"
+      },
+      "had_auth": true,
+      "expected_signature": "HTTP_5XX",
+      "status": "SAMPLED",
+      "regions": [
+        {
+          "input": {
+            "name": "Quan jean",
+            "price": "not_an_object",
+            "stock": 5,
+            "totalStock": 5,
+            "category": "Quan"
+          },
+          "path": [
+            "name"
+          ],
+          "original_value": "Quan jean",
+          "axis": "unicode_length",
+          "representatives": null,
+          "lower": 0,
+          "upper": 18,
+          "samples": [
+            {
+              "value": 0,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 8,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 9,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 10,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 18,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            }
+          ],
+          "transitions": [],
+          "complete": false
+        },
+        {
+          "input": {
+            "name": "Quan jean",
+            "price": "not_an_object",
+            "stock": 5,
+            "totalStock": 5,
+            "category": "Quan"
+          },
+          "path": [
+            "price"
+          ],
+          "original_value": "not_an_object",
+          "axis": "unicode_length",
+          "representatives": null,
+          "lower": 0,
+          "upper": 26,
+          "samples": [
+            {
+              "value": 0,
+              "signature": null,
+              "same_failure": false
+            },
+            {
+              "value": 1,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 3,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 6,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 12,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 13,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 14,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 26,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            }
+          ],
+          "transitions": [
+            {
+              "left": 0,
+              "right": 1,
+              "adjacent": true
+            }
+          ],
+          "complete": false
+        },
+        {
+          "input": {
+            "name": "Quan jean",
+            "price": "not_an_object",
+            "stock": 5,
+            "totalStock": 5,
+            "category": "Quan"
+          },
+          "path": [
+            "stock"
+          ],
+          "original_value": 5,
+          "axis": "integer",
+          "representatives": null,
+          "lower": 0,
+          "upper": 16,
+          "samples": [
+            {
+              "value": 0,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 4,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 5,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 16,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            }
+          ],
+          "transitions": [],
+          "complete": false
+        }
+      ],
+      "probes_used": 16,
+      "state_scope": "fresh seeded HTTP harness for every probe",
+      "evidence_path": "fuzzing-security-testing\\results\\demo_thay\\blackbox\\boundary_evidence\\case_001.json"
+    },
+    {
+      "target": "orders",
+      "input": {
+        "products": [
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          }
+        ],
+        "totalAmount": "<script>alert(1)</script>",
+        "shippingInfo": {
+          "fullName": "Nguyen Van A",
+          "phone": "0900000000",
+          "address": "123 Duong ABC"
+        },
+        "paymentMethod": "COD",
+        "discountCode": "",
+        "discountAmount": 0,
+        "shippingFee": 0
+      },
+      "had_auth": true,
+      "expected_signature": "HTTP_5XX",
+      "status": "SAMPLED",
+      "regions": [
+        {
+          "input": {
+            "products": [
+              {
+                "productId": 1,
+                "name": "Ao thun",
+                "price": 200000,
+                "quantity": 2
+              }
+            ],
+            "totalAmount": "<script>alert(1)</script>",
+            "shippingInfo": {
+              "fullName": "Nguyen Van A",
+              "phone": "0900000000",
+              "address": "123 Duong ABC"
+            },
+            "paymentMethod": "COD",
+            "discountCode": "",
+            "discountAmount": 0,
+            "shippingFee": 0
+          },
+          "path": [
+            "products",
+            0,
+            "productId"
+          ],
+          "original_value": 1,
+          "axis": "integer",
+          "representatives": null,
+          "lower": 0,
+          "upper": 16,
+          "samples": [
+            {
+              "value": 0,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 1,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 2,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 16,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            }
+          ],
+          "transitions": [],
+          "complete": false
+        },
+        {
+          "input": {
+            "products": [
+              {
+                "productId": 1,
+                "name": "Ao thun",
+                "price": 200000,
+                "quantity": 2
+              }
+            ],
+            "totalAmount": "<script>alert(1)</script>",
+            "shippingInfo": {
+              "fullName": "Nguyen Van A",
+              "phone": "0900000000",
+              "address": "123 Duong ABC"
+            },
+            "paymentMethod": "COD",
+            "discountCode": "",
+            "discountAmount": 0,
+            "shippingFee": 0
+          },
+          "path": [
+            "products",
+            0,
+            "name"
+          ],
+          "original_value": "Ao thun",
+          "axis": "unicode_length",
+          "representatives": null,
+          "lower": 0,
+          "upper": 16,
+          "samples": [
+            {
+              "value": 0,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 6,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 7,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 8,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 16,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            }
+          ],
+          "transitions": [],
+          "complete": false
+        },
+        {
+          "input": {
+            "products": [
+              {
+                "productId": 1,
+                "name": "Ao thun",
+                "price": 200000,
+                "quantity": 2
+              }
+            ],
+            "totalAmount": "<script>alert(1)</script>",
+            "shippingInfo": {
+              "fullName": "Nguyen Van A",
+              "phone": "0900000000",
+              "address": "123 Duong ABC"
+            },
+            "paymentMethod": "COD",
+            "discountCode": "",
+            "discountAmount": 0,
+            "shippingFee": 0
+          },
+          "path": [
+            "products",
+            0,
+            "price"
+          ],
+          "original_value": 200000,
+          "axis": "integer",
+          "representatives": null,
+          "lower": 0,
+          "upper": 400002,
+          "samples": [
+            {
+              "value": 0,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 199999,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 200000,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 200001,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 400002,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            }
+          ],
+          "transitions": [],
+          "complete": false
+        },
+        {
+          "input": {
+            "products": [
+              {
+                "productId": 1,
+                "name": "Ao thun",
+                "price": 200000,
+                "quantity": 2
+              }
+            ],
+            "totalAmount": "<script>alert(1)</script>",
+            "shippingInfo": {
+              "fullName": "Nguyen Van A",
+              "phone": "0900000000",
+              "address": "123 Duong ABC"
+            },
+            "paymentMethod": "COD",
+            "discountCode": "",
+            "discountAmount": 0,
+            "shippingFee": 0
+          },
+          "path": [
+            "products",
+            0,
+            "quantity"
+          ],
+          "original_value": 2,
+          "axis": "integer",
+          "representatives": null,
+          "lower": 0,
+          "upper": 16,
+          "samples": [
+            {
+              "value": 0,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 1,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 2,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 16,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            }
+          ],
+          "transitions": [],
+          "complete": false
+        }
+      ],
+      "probes_used": 16,
+      "state_scope": "fresh seeded HTTP harness for every probe",
+      "evidence_path": "fuzzing-security-testing\\results\\demo_thay\\blackbox\\boundary_evidence\\case_002.json"
+    }
+  ],
+  "whitebox_inputs": 36,
+  "whitebox_evidence": {
+    "error_categories": {
+      "APPLICATION_HTTP_ERROR": 31
+    },
+    "business_or_security_observations": 0,
+    "confirmed_memory_errors": null,
+    "confirmed_process_crashes": null,
+    "note": "Memory errors/process crashes are not measured by these HTTP oracles; timeout is not a confirmed hang."
+  },
+  "limitations": [
+    "Không có ứng viên không chứng minh hệ thống an toàn.",
+    "Khảo sát lân cận không chứng minh vùng biên đầy đủ.",
+    "HTTP 5xx không là crash; timeout chỉ là nghi vấn hang.",
+    "Chưa đo lỗi bộ nhớ bằng sanitizer trong luồng API."
+  ]
+}

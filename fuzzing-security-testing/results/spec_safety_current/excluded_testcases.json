@@ -1,0 +1,977 @@
+[
+  {
+    "spec": "Module_Auth_Login_spec.xlsx",
+    "testcase": {
+      "ID": "TC-AUTH-19",
+      "YeuCauLienQuan": "REQ-AUTH-FUZZ-19",
+      "TieuDe": "Kiểm tra quy trình fuzzing: Phân biệt timeout với hang",
+      "DieuKienTienQuyet": "Có fixture đối chứng phản hồi sau 0,1 giây và fixture bị giữ chờ; có PID, log, bộ giám sát và giới hạn mỗi lượt T=2 giây.",
+      "CacBuoc": "1. Chạy fixture nhanh từ trạng thái sạch với T=2 giây.\n2. Chạy fixture bị giữ chờ cùng input ba lần, mỗi lần là tiến trình mới.\n3. Ghi PID, thời gian, mã thoát và phản hồi tiến trình sau timeout; kết thúc tiến trình thử còn sống.\n4. Loại trừ lỗi khởi động, cổng, kết nối và tải máy trước khi kết luận.",
+      "KetQuaMongDoi": "Fixture nhanh không bị đánh dấu hang. Fixture chờ được ghi TIMEOUT/SUSPECTED_HANG; không gọi là crash hoặc lỗi bộ nhớ. Chỉ nâng thành hang tái hiện khi có bằng chứng tiến trình và điều kiện kiểm soát; thiếu công cụ thì chưa đánh giá.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Auth_Login_spec.xlsx",
+    "testcase": {
+      "ID": "TC-AUTH-8",
+      "YeuCauLienQuan": "REQ-AUTH-FIX-parse_login_email",
+      "TieuDe": "Hàm sinh mã C: parse_login_email (buffer-overflow)",
+      "DieuKienTienQuyet": "Mẫu C parse_login_email, lỗi cấy buffer-overflow; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+      "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi parse_login_email, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy chuỗi ASCII dài B-1, B, B+1 với B=254 byte và đối chứng ngắn.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+      "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán buffer-overflow; mẫu lỗi cấy phải có chẩn đoán buffer-overflow tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Auth_Login_spec.xlsx",
+    "testcase": {
+      "ID": "TC-AUTH-11",
+      "YeuCauLienQuan": "REQ-AUTH-FIX-write_login_attempt_log",
+      "TieuDe": "Hàm sinh mã C: write_login_attempt_log (memory-leak)",
+      "DieuKienTienQuyet": "Mẫu C write_login_attempt_log, lỗi cấy memory-leak; có driver gọi hàm, compiler và LeakSanitizer hoặc công cụ kiểm tra leak tương đương hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+      "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi write_login_attempt_log, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+      "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán memory-leak; mẫu lỗi cấy phải có chẩn đoán memory-leak tại hàm mục tiêu từ LeakSanitizer hoặc công cụ phát hiện leak tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Auth_Login_spec.xlsx",
+    "testcase": {
+      "ID": "TC-AUTH-12",
+      "YeuCauLienQuan": "REQ-AUTH-FIX-close_login_session",
+      "TieuDe": "Hàm sinh mã C: close_login_session (double-free)",
+      "DieuKienTienQuyet": "Mẫu C close_login_session, lỗi cấy double-free; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+      "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi close_login_session, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+      "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán double-free; mẫu lỗi cấy phải có chẩn đoán double-free tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Auth_Login_spec.xlsx",
+    "testcase": {
+      "ID": "TC-AUTH-13",
+      "YeuCauLienQuan": "REQ-AUTH-FIX-release_token_cache_buffer",
+      "TieuDe": "Hàm sinh mã C: release_token_cache_buffer (use-after-free)",
+      "DieuKienTienQuyet": "Mẫu C release_token_cache_buffer, lỗi cấy use-after-free; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+      "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi release_token_cache_buffer, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+      "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán use-after-free; mẫu lỗi cấy phải có chẩn đoán use-after-free tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Auth_Login_spec.xlsx",
+    "testcase": {
+      "ID": "TC-AUTH-9",
+      "YeuCauLienQuan": "REQ-AUTH-FIX-failed_login_ratio",
+      "TieuDe": "Hàm Python: failed_login_ratio chia cho 0",
+      "DieuKienTienQuyet": "Đã sinh mã Python cho hàm failed_login_ratio Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy blackbox_fuzz() với total_attempts=0\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Mẫu lỗi cấy phát sinh ZeroDivisionError với input chia cho 0; lưu traceback, input và cách gọi. Đối chứng an toàn xử lý trường hợp này có kiểm soát. Ngoại lệ Python chưa chứng minh crash server hoặc lỗi bộ nhớ native; thiếu thực thi thì chưa xác minh.",
+      "MucUuTien": "MEDIUM"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Auth_Login_spec.xlsx",
+    "testcase": {
+      "ID": "TC-AUTH-18",
+      "YeuCauLienQuan": "REQ-AUTH-4",
+      "TieuDe": "Bộ đếm tăng tương đối từ giá trị khác 0",
+      "DieuKienTienQuyet": "Seed failedLoginCount=7 trong datastore mô phỏng; tài khoản hợp lệ. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+      "CacBuoc": "1. Qua bước setup nội bộ của harness, đặt failedLoginCount=7. Gửi 50 login sai đồng thời; đọc bộ đếm nội bộ sau khi toàn bộ request hoàn tất. Không cần MongoDB.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: failedLoginCount ban đầu=7; 50 mật khẩu sai.",
+      "KetQuaMongDoi": "50 phản hồi 401; bộ đếm cuối=57, không reset hoặc mất cập nhật.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Auth_Login_spec.xlsx",
+    "testcase": {
+      "ID": "TC-AUTH-4",
+      "YeuCauLienQuan": "REQ-AUTH-4, NFR-AUTH-5",
+      "TieuDe": "Đăng nhập sai đồng thời (race trên bộ đếm)",
+      "DieuKienTienQuyet": "Có 1 tài khoản hợp lệ đã seed",
+      "CacBuoc": "Gửi 50 request login sai password ĐỒNG THỜI (không tuần tự) tới cùng 1 tài khoản\nĐọc lại bộ đếm thất bại sau khi hoàn tất",
+      "KetQuaMongDoi": "50 phản hồi HTTP 401; failedLoginCount cuối bằng 50 khi ban đầu bằng 0. Không kết luận rate limiting từ phép thử này.",
+      "MucUuTien": "MEDIUM"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Auth_Login_spec.xlsx",
+    "testcase": {
+      "ID": "TC-AUTH-6",
+      "YeuCauLienQuan": "REQ-AUTH-6",
+      "TieuDe": "Đo chênh lệch thời gian 404 vs 401",
+      "DieuKienTienQuyet": "Có 1 tài khoản hợp lệ đã seed",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Đo thời gian trung bình 50 request 404 và 50 request 401, so sánh\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Ghi phân phối thời gian cho hai nhánh dưới cùng điều kiện đo và seed, cùng ngưỡng/kiểm định đã chốt trước chạy. Chỉ kết luận rò rỉ thời gian khi có phép đo lặp lại và kiểm soát nhiễu; không mặc định có lỗi từ việc một nhánh gọi bcrypt. Chưa chốt ngưỡng thì chưa kết luận PASS/FAIL.",
+      "MucUuTien": "MEDIUM"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Auth_Login_spec.xlsx",
+    "testcase": {
+      "ID": "TC-AUTH-10",
+      "YeuCauLienQuan": "REQ-AUTH-SMT-total_login_attempt_counter",
+      "TieuDe": "Kiểm tra tràn số: total_login_attempt_counter",
+      "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+      "MucUuTien": "LOW"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Auth_Login_spec.xlsx",
+    "testcase": {
+      "ID": "TC-AUTH-14",
+      "YeuCauLienQuan": "REQ-AUTH-SMT-daily_failed_login_counter",
+      "TieuDe": "Kiểm tra tràn số: daily_failed_login_counter",
+      "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'daily_failed_login_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'daily_failed_login_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+      "MucUuTien": "LOW"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Auth_Login_spec.xlsx",
+    "testcase": {
+      "ID": "TC-AUTH-15",
+      "YeuCauLienQuan": "REQ-AUTH-SMT-concurrent_session_counter",
+      "TieuDe": "Kiểm tra tràn số: concurrent_session_counter",
+      "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'concurrent_session_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'concurrent_session_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+      "MucUuTien": "LOW"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Auth_Login_spec.xlsx",
+    "testcase": {
+      "ID": "TC-AUTH-16",
+      "YeuCauLienQuan": "REQ-AUTH-SMT-token_issued_counter",
+      "TieuDe": "Kiểm tra tràn số: token_issued_counter",
+      "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'token_issued_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'token_issued_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+      "MucUuTien": "LOW"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Auth_Login_spec.xlsx",
+    "testcase": {
+      "ID": "TC-AUTH-17",
+      "YeuCauLienQuan": "REQ-AUTH-SMT-account_lockout_counter",
+      "TieuDe": "Kiểm tra tràn số: account_lockout_counter",
+      "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'account_lockout_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'account_lockout_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+      "MucUuTien": "LOW"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Orders_Create_spec.xlsx",
+    "testcase": {
+      "ID": "TC-ORD-20",
+      "YeuCauLienQuan": "REQ-ORD-FUZZ-20",
+      "TieuDe": "Kiểm tra quy trình fuzzing: Chuyển input blackbox sang whitebox",
+      "DieuKienTienQuyet": "Có report blackbox mới chứa target=orders, input, had_auth và bằng chứng; whitebox hỗ trợ target; harness được seed sạch.",
+      "CacBuoc": "1. Chọn một input blackbox có triệu chứng, lưu đường dẫn report và trạng thái ban đầu.\n2. Chạy whitebox với --blackbox-report và ngân sách 12.\n3. Đối chiếu target, input, had_auth ở lượt exact_replay với bản gốc.\n4. Kiểm tra log phân biệt exact_replay, neighbor_probe và coverage_mutation.\n5. Thử report thiếu had_auth để kiểm tra cách từ chối/bỏ qua.",
+      "KetQuaMongDoi": "Input và ngữ cảnh xác thực được giữ nguyên ở lượt đầu; có response, coverage và phân loại bằng chứng. Report thiếu ngữ cảnh không được đoán quyền. Không tái hiện trên dữ liệu sạch phải ghi khác biệt trạng thái, không tự bác bỏ phát hiện.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Orders_Create_spec.xlsx",
+    "testcase": {
+      "ID": "TC-ORD-21",
+      "YeuCauLienQuan": "REQ-ORD-FUZZ-21",
+      "TieuDe": "Kiểm tra quy trình fuzzing: Khảo sát giá trị số quanh input gây lỗi",
+      "DieuKienTienQuyet": "Có input orders bất thường với trường số hữu hạn x; cùng catalog, actor, phí/giảm giá và trạng thái seed ở mỗi lượt; công cụ khảo sát chạy độc lập.",
+      "CacBuoc": "1. Lưu input gốc x và triệu chứng.\n2. Giữ các trường khác, thử x-1, x, x+1 và 0 từ trạng thái sạch; đổi một trường mỗi lượt.\n3. Lặp lại ba lần từng điểm có triệu chứng.\n4. Lưu HTTP, dữ liệu cuối, timeout, coverage nếu có; đối chiếu oracle nghiệp vụ và lỗi tiến trình riêng.",
+      "KetQuaMongDoi": "Có bảng điểm đã thử và triệu chứng từng điểm. HTTP 500 chỉ ghi lỗi ứng dụng, không ghi memory crash. Chỉ báo miền đã khảo sát; chưa được nhận biên nhỏ nhất/lớn nhất hay tính đơn điệu nếu chưa chứng minh.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Orders_Create_spec.xlsx",
+    "testcase": {
+      "ID": "TC-ORD-8",
+      "YeuCauLienQuan": "REQ-ORD-FIX-parse_discount_code",
+      "TieuDe": "Hàm sinh mã C: parse_discount_code (buffer-overflow)",
+      "DieuKienTienQuyet": "Mẫu C parse_discount_code, lỗi cấy buffer-overflow; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+      "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi parse_discount_code, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy chuỗi ASCII dài B-1, B, B+1 với B=32 byte và đối chứng ngắn.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+      "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán buffer-overflow; mẫu lỗi cấy phải có chẩn đoán buffer-overflow tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Orders_Create_spec.xlsx",
+    "testcase": {
+      "ID": "TC-ORD-11",
+      "YeuCauLienQuan": "REQ-ORD-FIX-write_order_transaction_log",
+      "TieuDe": "Hàm sinh mã C: write_order_transaction_log (memory-leak)",
+      "DieuKienTienQuyet": "Mẫu C write_order_transaction_log, lỗi cấy memory-leak; có driver gọi hàm, compiler và LeakSanitizer hoặc công cụ kiểm tra leak tương đương hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+      "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi write_order_transaction_log, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+      "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán memory-leak; mẫu lỗi cấy phải có chẩn đoán memory-leak tại hàm mục tiêu từ LeakSanitizer hoặc công cụ phát hiện leak tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Orders_Create_spec.xlsx",
+    "testcase": {
+      "ID": "TC-ORD-12",
+      "YeuCauLienQuan": "REQ-ORD-FIX-close_order_checkout_session",
+      "TieuDe": "Hàm sinh mã C: close_order_checkout_session (double-free)",
+      "DieuKienTienQuyet": "Mẫu C close_order_checkout_session, lỗi cấy double-free; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+      "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi close_order_checkout_session, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+      "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán double-free; mẫu lỗi cấy phải có chẩn đoán double-free tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Orders_Create_spec.xlsx",
+    "testcase": {
+      "ID": "TC-ORD-13",
+      "YeuCauLienQuan": "REQ-ORD-FIX-release_cart_cache_buffer",
+      "TieuDe": "Hàm sinh mã C: release_cart_cache_buffer (use-after-free)",
+      "DieuKienTienQuyet": "Mẫu C release_cart_cache_buffer, lỗi cấy use-after-free; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+      "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi release_cart_cache_buffer, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+      "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán use-after-free; mẫu lỗi cấy phải có chẩn đoán use-after-free tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Orders_Create_spec.xlsx",
+    "testcase": {
+      "ID": "TC-ORD-9",
+      "YeuCauLienQuan": "REQ-ORD-FIX-order_error_rate",
+      "TieuDe": "Hàm Python: order_error_rate chia cho 0",
+      "DieuKienTienQuyet": "Đã sinh mã Python Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy blackbox_fuzz() với total_orders=0\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Mẫu lỗi cấy phát sinh ZeroDivisionError với input chia cho 0; lưu traceback, input và cách gọi. Đối chứng an toàn xử lý trường hợp này có kiểm soát. Ngoại lệ Python chưa chứng minh crash server hoặc lỗi bộ nhớ native; thiếu thực thi thì chưa xác minh.",
+      "MucUuTien": "MEDIUM"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Orders_Create_spec.xlsx",
+    "testcase": {
+      "ID": "TC-ORD-7",
+      "YeuCauLienQuan": "REQ-ORD-7, NFR-ORD-4",
+      "TieuDe": "Sử dụng discountCode ĐỒNG THỜI (race)",
+      "DieuKienTienQuyet": "Đã đăng nhập, có token, mã SALE10 chưa dùng",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Gửi 2 request tạo đơn hàng CÙNG discountCode=SALE10 ĐỒNG THỜI (không tuần tự)\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Với discountCode dùng một lần và hai request thực sự đồng thời, chỉ một request áp dụng mã thành công; kiểm tra cả dữ liệu lưu. Lưu lịch gửi/nhận để xác nhận đồng thời; chạy tuần tự chưa chứng minh không có race.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Orders_Create_spec.xlsx",
+    "testcase": {
+      "ID": "TC-ORD-10",
+      "YeuCauLienQuan": "REQ-ORD-SMT-total_order_value_counter",
+      "TieuDe": "Kiểm tra tràn số: total_order_value_counter",
+      "DieuKienTienQuyet": "Đã khai báo biến SMT Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+      "MucUuTien": "LOW"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Orders_Create_spec.xlsx",
+    "testcase": {
+      "ID": "TC-ORD-14",
+      "YeuCauLienQuan": "REQ-ORD-SMT-daily_order_counter",
+      "TieuDe": "Kiểm tra tràn số: daily_order_counter",
+      "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'daily_order_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'daily_order_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+      "MucUuTien": "LOW"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Orders_Create_spec.xlsx",
+    "testcase": {
+      "ID": "TC-ORD-15",
+      "YeuCauLienQuan": "REQ-ORD-SMT-concurrent_discount_redeem_counter",
+      "TieuDe": "Kiểm tra tràn số: concurrent_discount_redeem_counter",
+      "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'concurrent_discount_redeem_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'concurrent_discount_redeem_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+      "MucUuTien": "LOW"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Orders_Create_spec.xlsx",
+    "testcase": {
+      "ID": "TC-ORD-16",
+      "YeuCauLienQuan": "REQ-ORD-SMT-active_discount_code_counter",
+      "TieuDe": "Kiểm tra tràn số: active_discount_code_counter",
+      "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'active_discount_code_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'active_discount_code_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+      "MucUuTien": "LOW"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Orders_Create_spec.xlsx",
+    "testcase": {
+      "ID": "TC-ORD-17",
+      "YeuCauLienQuan": "REQ-ORD-SMT-order_crash_counter",
+      "TieuDe": "Kiểm tra tràn số: order_crash_counter",
+      "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'order_crash_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'order_crash_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+      "MucUuTien": "LOW"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_OrderStatus_spec.xlsx",
+    "testcase": {
+      "ID": "TC-OS-22",
+      "YeuCauLienQuan": "REQ-OS-FUZZ-22",
+      "TieuDe": "Kiểm tra quy trình fuzzing: Tái hiện input phụ thuộc trạng thái đơn",
+      "DieuKienTienQuyet": "Có input cập nhật trạng thái do blackbox tìm thấy và bản ghi chuỗi thao tác, phiên bản, actor của đơn; có thể tạo đơn mới và chạy lại chuỗi.",
+      "CacBuoc": "1. Tạo đơn sạch và chạy nguyên input, lưu kết quả.\n2. Tạo đơn sạch khác, chạy chuỗi chuẩn bị đã ghi rồi gửi cùng input.\n3. Giữ nguyên auth và version tương ứng ở từng lượt; chạy lại hai lần.\n4. Đối chiếu trạng thái trước/sau, response, coverage và lý do khác biệt.",
+      "KetQuaMongDoi": "Bằng chứng phân biệt tái hiện độc lập với tái hiện phụ thuộc chuỗi. Nếu không có đủ trạng thái chuẩn bị phải ghi INCONCLUSIVE, không ghi phát hiện sai và không tự coi lỗi version là crash.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_OrderStatus_spec.xlsx",
+    "testcase": {
+      "ID": "TC-OS-7",
+      "YeuCauLienQuan": "REQ-OS-FIX-parse_order_status_value",
+      "TieuDe": "Hàm sinh mã C: parse_order_status_value (buffer-overflow)",
+      "DieuKienTienQuyet": "Mẫu C parse_order_status_value, lỗi cấy buffer-overflow; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+      "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi parse_order_status_value, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy chuỗi ASCII dài B-1, B, B+1 với B=32 byte và đối chứng ngắn.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+      "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán buffer-overflow; mẫu lỗi cấy phải có chẩn đoán buffer-overflow tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_OrderStatus_spec.xlsx",
+    "testcase": {
+      "ID": "TC-OS-10",
+      "YeuCauLienQuan": "REQ-OS-FIX-write_order_status_notification_log",
+      "TieuDe": "Hàm sinh mã C: write_order_status_notification_log (memory-leak)",
+      "DieuKienTienQuyet": "Mẫu C write_order_status_notification_log, lỗi cấy memory-leak; có driver gọi hàm, compiler và LeakSanitizer hoặc công cụ kiểm tra leak tương đương hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+      "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi write_order_status_notification_log, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+      "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán memory-leak; mẫu lỗi cấy phải có chẩn đoán memory-leak tại hàm mục tiêu từ LeakSanitizer hoặc công cụ phát hiện leak tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_OrderStatus_spec.xlsx",
+    "testcase": {
+      "ID": "TC-OS-11",
+      "YeuCauLienQuan": "REQ-OS-FIX-close_order_update_transaction",
+      "TieuDe": "Hàm sinh mã C: close_order_update_transaction (double-free)",
+      "DieuKienTienQuyet": "Mẫu C close_order_update_transaction, lỗi cấy double-free; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+      "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi close_order_update_transaction, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+      "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán double-free; mẫu lỗi cấy phải có chẩn đoán double-free tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_OrderStatus_spec.xlsx",
+    "testcase": {
+      "ID": "TC-OS-12",
+      "YeuCauLienQuan": "REQ-OS-FIX-release_order_cache_after_update",
+      "TieuDe": "Hàm sinh mã C: release_order_cache_after_update (use-after-free)",
+      "DieuKienTienQuyet": "Mẫu C release_order_cache_after_update, lỗi cấy use-after-free; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+      "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi release_order_cache_after_update, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+      "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán use-after-free; mẫu lỗi cấy phải có chẩn đoán use-after-free tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_OrderStatus_spec.xlsx",
+    "testcase": {
+      "ID": "TC-OS-8",
+      "YeuCauLienQuan": "REQ-OS-FIX-order_delivery_success_ratio",
+      "TieuDe": "Hàm Python: order_delivery_success_ratio chia cho 0",
+      "DieuKienTienQuyet": "Đã sinh mã Python Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy blackbox_fuzz() với total_orders_updated=0\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Mẫu lỗi cấy phát sinh ZeroDivisionError với input chia cho 0; lưu traceback, input và cách gọi. Đối chứng an toàn xử lý trường hợp này có kiểm soát. Ngoại lệ Python chưa chứng minh crash server hoặc lỗi bộ nhớ native; thiếu thực thi thì chưa xác minh.",
+      "MucUuTien": "MEDIUM"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_OrderStatus_spec.xlsx",
+    "testcase": {
+      "ID": "TC-OS-17",
+      "YeuCauLienQuan": "REQ-CONC-OS-1",
+      "TieuDe": "Version cũ sau cập nhật thành công",
+      "DieuKienTienQuyet": "Tài nguyên v=0, actor được phép sửa. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+      "CacBuoc": "1. PUT /api/orders/{order_id} với __v=0; gửi PUT lần hai vẫn __v=0; đọc lại dữ liệu.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: {\"status\":\"Đang giao\",\"__v\":0}",
+      "KetQuaMongDoi": "Lần đầu 200/v=1; lần hai 409; dữ liệu và version không đổi sau lần bị từ chối.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_OrderStatus_spec.xlsx",
+    "testcase": {
+      "ID": "TC-OS-18",
+      "YeuCauLienQuan": "REQ-CONC-OS-1",
+      "TieuDe": "Version sai kiểu hoặc ngoài miền",
+      "DieuKienTienQuyet": "Tài nguyên tồn tại trong harness. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+      "CacBuoc": "1. PUT /api/orders/{order_id} với lần lượt các giá trị __v; kiểm tra dữ liệu sau mỗi lần.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: __v: -1, 0.5, \"0\", null, true, {}, []",
+      "KetQuaMongDoi": "Mỗi request trả 400; dữ liệu/version không thay đổi.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_OrderStatus_spec.xlsx",
+    "testcase": {
+      "ID": "TC-OS-19",
+      "YeuCauLienQuan": "REQ-CONC-OS-1",
+      "TieuDe": "Cập nhật tuần tự với version mới nhất",
+      "DieuKienTienQuyet": "Tài nguyên v=0, actor được phép sửa. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+      "CacBuoc": "1. PUT __v=0; đọc __v=1; PUT giá trị khác với __v=1; đọc lại.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: [{\"status\":\"Đang giao\",\"__v\":0},{\"status\":\"Đã giao\",\"__v\":1}]",
+      "KetQuaMongDoi": "Cả hai trả 200; version cuối bằng 2; dữ liệu khớp lần thứ hai.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_OrderStatus_spec.xlsx",
+    "testcase": {
+      "ID": "TC-OS-20",
+      "YeuCauLienQuan": "REQ-CONC-OS-1",
+      "TieuDe": "Client cũ không gửi version",
+      "DieuKienTienQuyet": "Tài nguyên tồn tại trong harness; giao thức tương thích hiện tại. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+      "CacBuoc": "1. PUT /api/orders/{order_id} với dữ liệu hợp lệ, không có trường __v; đọc lại.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: {\"status\":\"Đang giao\"}",
+      "KetQuaMongDoi": "Theo hành vi tương thích hiện tại: 200 và version tăng 1. Không kết luận chống stale-write cho client bỏ version.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_OrderStatus_spec.xlsx",
+    "testcase": {
+      "ID": "TC-OS-6",
+      "YeuCauLienQuan": "REQ-OS-2, NFR-OS-4, REQ-CONC-OS-1",
+      "TieuDe": "2 request PUT đồng thời cùng 1 đơn hàng",
+      "DieuKienTienQuyet": "Có 1 đơn hàng đã tạo",
+      "CacBuoc": "1. Seed đối tượng __v=0; dùng actor có quyền theo kịch bản.\n2. Gửi đồng thời hai PUT dữ liệu khác nhau, cùng __v=0.\n3. Đọc phản hồi, version và dữ liệu cuối.",
+      "KetQuaMongDoi": "Một HTTP 200 và một HTTP 409; __v cuối bằng 1; dữ liệu cuối khớp request thành công.",
+      "MucUuTien": "MEDIUM"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_OrderStatus_spec.xlsx",
+    "testcase": {
+      "ID": "TC-OS-9",
+      "YeuCauLienQuan": "REQ-OS-SMT-total_status_update_counter",
+      "TieuDe": "Kiểm tra tràn số: total_status_update_counter",
+      "DieuKienTienQuyet": "Đã khai báo biến SMT Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+      "MucUuTien": "LOW"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_OrderStatus_spec.xlsx",
+    "testcase": {
+      "ID": "TC-OS-13",
+      "YeuCauLienQuan": "REQ-OS-SMT-daily_status_update_counter",
+      "TieuDe": "Kiểm tra tràn số: daily_status_update_counter",
+      "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'daily_status_update_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'daily_status_update_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+      "MucUuTien": "LOW"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_OrderStatus_spec.xlsx",
+    "testcase": {
+      "ID": "TC-OS-14",
+      "YeuCauLienQuan": "REQ-OS-SMT-concurrent_order_update_counter",
+      "TieuDe": "Kiểm tra tràn số: concurrent_order_update_counter",
+      "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'concurrent_order_update_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'concurrent_order_update_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+      "MucUuTien": "LOW"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_OrderStatus_spec.xlsx",
+    "testcase": {
+      "ID": "TC-OS-15",
+      "YeuCauLienQuan": "REQ-OS-SMT-delivered_order_counter",
+      "TieuDe": "Kiểm tra tràn số: delivered_order_counter",
+      "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'delivered_order_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'delivered_order_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+      "MucUuTien": "LOW"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_OrderStatus_spec.xlsx",
+    "testcase": {
+      "ID": "TC-OS-16",
+      "YeuCauLienQuan": "REQ-OS-SMT-cancelled_order_counter",
+      "TieuDe": "Kiểm tra tràn số: cancelled_order_counter",
+      "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'cancelled_order_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'cancelled_order_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+      "MucUuTien": "LOW"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Products_Manage_spec.xlsx",
+    "testcase": {
+      "ID": "TC-PRD-21",
+      "YeuCauLienQuan": "REQ-PRD-FUZZ-21",
+      "TieuDe": "Kiểm tra quy trình fuzzing: Khảo sát chiều dài name và buffer mẫu C",
+      "DieuKienTienQuyet": "name API có giới hạn 200 ký tự theo đặc tả; mẫu parse_product_name có buffer B=200 byte, có native driver và AddressSanitizer hoạt động; bắt đầu bằng ASCII để đồng nhất byte/ký tự.",
+      "CacBuoc": "1. Gửi name ASCII dài 199, 200, 201 ký tự tới API từ trạng thái sạch và lưu response.\n2. Gửi riêng chuỗi ASCII dài B-1, B, B+1 tới driver C với sanitizer, kể cả ký tự kết thúc chuỗi.\n3. Lưu từng input, lệnh biên dịch, stderr, exit code và stack trace.\n4. Chạy lại điểm lỗi và đối chứng ngắn; thử UTF-8 riêng, ghi cả byte và số ký tự.",
+      "KetQuaMongDoi": "Có hai bảng kết quả riêng API và native C. Với strcpy vào buffer B, chuỗi B ký tự còn cần byte kết thúc; chỉ xác nhận overflow bằng sanitizer ở binary C. API trả 500 hoặc từ chối name không đủ để kết luận lỗi bộ nhớ. Không có công cụ thì chưa đánh giá.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Products_Manage_spec.xlsx",
+    "testcase": {
+      "ID": "TC-PRD-7",
+      "YeuCauLienQuan": "REQ-PRD-FIX-parse_product_name",
+      "TieuDe": "Hàm sinh mã C: parse_product_name (buffer-overflow)",
+      "DieuKienTienQuyet": "Mẫu C parse_product_name, lỗi cấy buffer-overflow; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+      "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi parse_product_name, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy chuỗi ASCII dài B-1, B, B+1 với B=200 byte và đối chứng ngắn.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+      "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán buffer-overflow; mẫu lỗi cấy phải có chẩn đoán buffer-overflow tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Products_Manage_spec.xlsx",
+    "testcase": {
+      "ID": "TC-PRD-10",
+      "YeuCauLienQuan": "REQ-PRD-FIX-write_product_update_log",
+      "TieuDe": "Hàm sinh mã C: write_product_update_log (memory-leak)",
+      "DieuKienTienQuyet": "Mẫu C write_product_update_log, lỗi cấy memory-leak; có driver gọi hàm, compiler và LeakSanitizer hoặc công cụ kiểm tra leak tương đương hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+      "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi write_product_update_log, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+      "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán memory-leak; mẫu lỗi cấy phải có chẩn đoán memory-leak tại hàm mục tiêu từ LeakSanitizer hoặc công cụ phát hiện leak tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Products_Manage_spec.xlsx",
+    "testcase": {
+      "ID": "TC-PRD-11",
+      "YeuCauLienQuan": "REQ-PRD-FIX-close_product_edit_session",
+      "TieuDe": "Hàm sinh mã C: close_product_edit_session (double-free)",
+      "DieuKienTienQuyet": "Mẫu C close_product_edit_session, lỗi cấy double-free; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+      "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi close_product_edit_session, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+      "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán double-free; mẫu lỗi cấy phải có chẩn đoán double-free tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Products_Manage_spec.xlsx",
+    "testcase": {
+      "ID": "TC-PRD-12",
+      "YeuCauLienQuan": "REQ-PRD-FIX-release_product_list_cache",
+      "TieuDe": "Hàm sinh mã C: release_product_list_cache (use-after-free)",
+      "DieuKienTienQuyet": "Mẫu C release_product_list_cache, lỗi cấy use-after-free; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+      "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi release_product_list_cache, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+      "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán use-after-free; mẫu lỗi cấy phải có chẩn đoán use-after-free tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Products_Manage_spec.xlsx",
+    "testcase": {
+      "ID": "TC-PRD-8",
+      "YeuCauLienQuan": "REQ-PRD-FIX-out_of_stock_ratio",
+      "TieuDe": "Hàm Python: out_of_stock_ratio chia cho 0",
+      "DieuKienTienQuyet": "Đã sinh mã Python Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy blackbox_fuzz() với initial_stock=0\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Mẫu lỗi cấy phát sinh ZeroDivisionError với input chia cho 0; lưu traceback, input và cách gọi. Đối chứng an toàn xử lý trường hợp này có kiểm soát. Ngoại lệ Python chưa chứng minh crash server hoặc lỗi bộ nhớ native; thiếu thực thi thì chưa xác minh.",
+      "MucUuTien": "MEDIUM"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Products_Manage_spec.xlsx",
+    "testcase": {
+      "ID": "TC-PRD-6",
+      "YeuCauLienQuan": "REQ-PRD-1, NFR-PRD-4, REQ-CONC-PRD-1",
+      "TieuDe": "2 request PUT đồng thời cùng 1 sản phẩm (race tồn kho)",
+      "DieuKienTienQuyet": "Đã có sản phẩm id=1, stock=10",
+      "CacBuoc": "1. Seed đối tượng __v=0; dùng actor có quyền theo kịch bản.\n2. Gửi đồng thời hai PUT dữ liệu khác nhau, cùng __v=0.\n3. Đọc phản hồi, version và dữ liệu cuối.",
+      "KetQuaMongDoi": "Một HTTP 200 và một HTTP 409; __v cuối bằng 1; dữ liệu cuối khớp request thành công.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Products_Manage_spec.xlsx",
+    "testcase": {
+      "ID": "TC-PRD-17",
+      "YeuCauLienQuan": "REQ-CONC-PRD-1",
+      "TieuDe": "Version cũ sau cập nhật thành công",
+      "DieuKienTienQuyet": "Tài nguyên v=0, actor được phép sửa. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+      "CacBuoc": "1. PUT /api/products/{product_id} với __v=0; gửi PUT lần hai vẫn __v=0; đọc lại dữ liệu.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: {\"stock\":11,\"__v\":0}",
+      "KetQuaMongDoi": "Lần đầu 200/v=1; lần hai 409; dữ liệu và version không đổi sau lần bị từ chối.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Products_Manage_spec.xlsx",
+    "testcase": {
+      "ID": "TC-PRD-18",
+      "YeuCauLienQuan": "REQ-CONC-PRD-1",
+      "TieuDe": "Version sai kiểu hoặc ngoài miền",
+      "DieuKienTienQuyet": "Tài nguyên tồn tại trong harness. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+      "CacBuoc": "1. PUT /api/products/{product_id} với lần lượt các giá trị __v; kiểm tra dữ liệu sau mỗi lần.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: __v: -1, 0.5, \"0\", null, true, {}, []",
+      "KetQuaMongDoi": "Mỗi request trả 400; dữ liệu/version không thay đổi.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Products_Manage_spec.xlsx",
+    "testcase": {
+      "ID": "TC-PRD-19",
+      "YeuCauLienQuan": "REQ-CONC-PRD-1",
+      "TieuDe": "Cập nhật tuần tự với version mới nhất",
+      "DieuKienTienQuyet": "Tài nguyên v=0, actor được phép sửa. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+      "CacBuoc": "1. PUT __v=0; đọc __v=1; PUT giá trị khác với __v=1; đọc lại.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: [{\"stock\":11,\"__v\":0},{\"stock\":12,\"__v\":1}]",
+      "KetQuaMongDoi": "Cả hai trả 200; version cuối bằng 2; dữ liệu khớp lần thứ hai.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Products_Manage_spec.xlsx",
+    "testcase": {
+      "ID": "TC-PRD-20",
+      "YeuCauLienQuan": "CON-PRD-5",
+      "TieuDe": "Client cũ không gửi version",
+      "DieuKienTienQuyet": "Tài nguyên tồn tại trong harness; giao thức tương thích hiện tại. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+      "CacBuoc": "1. PUT /api/products/{product_id} với dữ liệu hợp lệ, không có trường __v; đọc lại.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: {\"stock\":11}",
+      "KetQuaMongDoi": "Theo hành vi tương thích hiện tại: 200 và version tăng 1. Không kết luận chống stale-write cho client bỏ version.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Products_Manage_spec.xlsx",
+    "testcase": {
+      "ID": "TC-PRD-9",
+      "YeuCauLienQuan": "REQ-PRD-SMT-total_stock_movement_counter",
+      "TieuDe": "Kiểm tra tràn số: total_stock_movement_counter",
+      "DieuKienTienQuyet": "Đã khai báo biến SMT Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+      "MucUuTien": "LOW"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Products_Manage_spec.xlsx",
+    "testcase": {
+      "ID": "TC-PRD-13",
+      "YeuCauLienQuan": "REQ-PRD-SMT-daily_product_update_counter",
+      "TieuDe": "Kiểm tra tràn số: daily_product_update_counter",
+      "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'daily_product_update_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'daily_product_update_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+      "MucUuTien": "LOW"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Products_Manage_spec.xlsx",
+    "testcase": {
+      "ID": "TC-PRD-14",
+      "YeuCauLienQuan": "REQ-PRD-SMT-concurrent_stock_update_counter",
+      "TieuDe": "Kiểm tra tràn số: concurrent_stock_update_counter",
+      "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'concurrent_stock_update_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'concurrent_stock_update_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+      "MucUuTien": "LOW"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Products_Manage_spec.xlsx",
+    "testcase": {
+      "ID": "TC-PRD-15",
+      "YeuCauLienQuan": "REQ-PRD-SMT-total_product_create_counter",
+      "TieuDe": "Kiểm tra tràn số: total_product_create_counter",
+      "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'total_product_create_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'total_product_create_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+      "MucUuTien": "LOW"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Products_Manage_spec.xlsx",
+    "testcase": {
+      "ID": "TC-PRD-16",
+      "YeuCauLienQuan": "REQ-PRD-SMT-out_of_stock_event_counter",
+      "TieuDe": "Kiểm tra tràn số: out_of_stock_event_counter",
+      "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'out_of_stock_event_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'out_of_stock_event_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+      "MucUuTien": "LOW"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Users_Admin_spec.xlsx",
+    "testcase": {
+      "ID": "TC-USR-21",
+      "YeuCauLienQuan": "REQ-USR-FUZZ-21",
+      "TieuDe": "Kiểm tra quy trình fuzzing: Phân biệt ngoại lệ, HTTP 500 và crash tiến trình",
+      "DieuKienTienQuyet": "Có ba đối chứng: HTTP trả 500 nhưng server còn sống; Python ném ngoại lệ được bắt; binary C đóng phiên có double-free được biên dịch với sanitizer hỗ trợ và chạy trong tiến trình con.",
+      "CacBuoc": "1. Gửi đối chứng HTTP 500, kiểm tra PID và request kiểm tra sống tiếp theo.\n2. Chạy đối chứng ngoại lệ Python đã bắt, ghi mã thoát.\n3. Thực thi close_admin_setup_session trong binary instrumented; lưu stderr, exit code/signal, input và stack trace.\n4. Chạy lại binary từ trạng thái sạch để đối chiếu cùng chẩn đoán.",
+      "KetQuaMongDoi": "HTTP 500 với server còn sống là APPLICATION_HTTP_ERROR; exception được bắt không là process crash. Chỉ báo target kết thúc bất thường khi có mã thoát/signal và log; double-free chỉ xác nhận khi có chẩn đoán công cụ tại hàm mục tiêu. Thiếu sanitizer thì chưa đánh giá.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Users_Admin_spec.xlsx",
+    "testcase": {
+      "ID": "TC-USR-7",
+      "YeuCauLienQuan": "REQ-USR-FIX-parse_user_fullname",
+      "TieuDe": "Hàm sinh mã C: parse_user_fullname (buffer-overflow)",
+      "DieuKienTienQuyet": "Mẫu C parse_user_fullname, lỗi cấy buffer-overflow; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+      "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi parse_user_fullname, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy chuỗi ASCII dài B-1, B, B+1 với B=100 byte và đối chứng ngắn.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+      "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán buffer-overflow; mẫu lỗi cấy phải có chẩn đoán buffer-overflow tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Users_Admin_spec.xlsx",
+    "testcase": {
+      "ID": "TC-USR-10",
+      "YeuCauLienQuan": "REQ-USR-FIX-write_profile_update_log",
+      "TieuDe": "Hàm sinh mã C: write_profile_update_log (memory-leak)",
+      "DieuKienTienQuyet": "Mẫu C write_profile_update_log, lỗi cấy memory-leak; có driver gọi hàm, compiler và LeakSanitizer hoặc công cụ kiểm tra leak tương đương hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+      "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi write_profile_update_log, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+      "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán memory-leak; mẫu lỗi cấy phải có chẩn đoán memory-leak tại hàm mục tiêu từ LeakSanitizer hoặc công cụ phát hiện leak tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Users_Admin_spec.xlsx",
+    "testcase": {
+      "ID": "TC-USR-11",
+      "YeuCauLienQuan": "REQ-USR-FIX-close_admin_setup_session",
+      "TieuDe": "Hàm sinh mã C: close_admin_setup_session (double-free)",
+      "DieuKienTienQuyet": "Mẫu C close_admin_setup_session, lỗi cấy double-free; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+      "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi close_admin_setup_session, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+      "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán double-free; mẫu lỗi cấy phải có chẩn đoán double-free tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Users_Admin_spec.xlsx",
+    "testcase": {
+      "ID": "TC-USR-12",
+      "YeuCauLienQuan": "REQ-USR-FIX-release_user_profile_cache",
+      "TieuDe": "Hàm sinh mã C: release_user_profile_cache (use-after-free)",
+      "DieuKienTienQuyet": "Mẫu C release_user_profile_cache, lỗi cấy use-after-free; có driver gọi hàm, compiler và AddressSanitizer hoạt động. Phạm vi native fixture, không phải API Node.js.\nChỉ chạy trên hàm C minh họa độc lập; cần compiler và instrumentation phù hợp. Không phải đường thực thi native đã xác nhận của API Node.js.",
+      "CacBuoc": "1. Sinh mã C và chạy kiểm tra tĩnh như testcase gốc.\n2. Tạo driver gọi release_user_profile_cache, biên dịch -g -O0 và instrumentation phù hợp; kiểm tra đối chứng công cụ.\n3. Chạy đường thực thi hàm một lần trên mỗi tiến trình mới; có đối chứng đã sửa tương ứng.\n4. Lưu input, binary/source hash, stderr, exit code/signal và vị trí chẩn đoán.\n5. Tái hiện từ tiến trình sạch; chạy đối chứng an toàn cùng input.\nChạy cả mẫu lỗi cấy và đối chứng an toàn trên cùng input; lưu input, build flags, stderr, mã thoát và vị trí lỗi; lặp lại input gây lỗi.",
+      "KetQuaMongDoi": "Đối chứng an toàn không có chẩn đoán use-after-free; mẫu lỗi cấy phải có chẩn đoán use-after-free tại hàm mục tiêu từ AddressSanitizer hoặc công cụ phát hiện lỗi bộ nhớ tương đương. Mẫu lỗi bị phát hiện là xác nhận đối chứng công cụ, không phải ứng dụng đã an toàn. Thiếu công cụ/bằng chứng: chưa xác minh. Không dùng HTTP 500 làm bằng chứng; leak không bắt buộc làm tiến trình crash.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Users_Admin_spec.xlsx",
+    "testcase": {
+      "ID": "TC-USR-8",
+      "YeuCauLienQuan": "REQ-USR-FIX-admin_promotion_ratio",
+      "TieuDe": "Hàm Python: admin_promotion_ratio chia cho 0",
+      "DieuKienTienQuyet": "Đã sinh mã Python Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy blackbox_fuzz() với total_create_admin_calls=0\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Mẫu lỗi cấy phát sinh ZeroDivisionError với input chia cho 0; lưu traceback, input và cách gọi. Đối chứng an toàn xử lý trường hợp này có kiểm soát. Ngoại lệ Python chưa chứng minh crash server hoặc lỗi bộ nhớ native; thiếu thực thi thì chưa xác minh.",
+      "MucUuTien": "MEDIUM"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Users_Admin_spec.xlsx",
+    "testcase": {
+      "ID": "TC-USR-17",
+      "YeuCauLienQuan": "REQ-CONC-USR-1",
+      "TieuDe": "Version cũ sau cập nhật thành công",
+      "DieuKienTienQuyet": "Tài nguyên v=0, actor được phép sửa. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+      "CacBuoc": "1. PUT /api/users/{user_id} với __v=0; gửi PUT lần hai vẫn __v=0; đọc lại dữ liệu.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: {\"fullName\":\"Fuzz Updated\",\"__v\":0}",
+      "KetQuaMongDoi": "Lần đầu 200/v=1; lần hai 409; dữ liệu và version không đổi sau lần bị từ chối.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Users_Admin_spec.xlsx",
+    "testcase": {
+      "ID": "TC-USR-18",
+      "YeuCauLienQuan": "REQ-CONC-USR-1",
+      "TieuDe": "Version sai kiểu hoặc ngoài miền",
+      "DieuKienTienQuyet": "Tài nguyên tồn tại trong harness. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+      "CacBuoc": "1. PUT /api/users/{user_id} với lần lượt các giá trị __v; kiểm tra dữ liệu sau mỗi lần.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: __v: -1, 0.5, \"0\", null, true, {}, []",
+      "KetQuaMongDoi": "Mỗi request trả 400; dữ liệu/version không thay đổi.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Users_Admin_spec.xlsx",
+    "testcase": {
+      "ID": "TC-USR-19",
+      "YeuCauLienQuan": "REQ-CONC-USR-1",
+      "TieuDe": "Cập nhật tuần tự với version mới nhất",
+      "DieuKienTienQuyet": "Tài nguyên v=0, actor được phép sửa. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+      "CacBuoc": "1. PUT __v=0; đọc __v=1; PUT giá trị khác với __v=1; đọc lại.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: [{\"fullName\":\"Fuzz Updated\",\"__v\":0},{\"fullName\":\"Fuzz Updated Again\",\"__v\":1}]",
+      "KetQuaMongDoi": "Cả hai trả 200; version cuối bằng 2; dữ liệu khớp lần thứ hai.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Users_Admin_spec.xlsx",
+    "testcase": {
+      "ID": "TC-USR-20",
+      "YeuCauLienQuan": "CON-USR-5",
+      "TieuDe": "Client cũ không gửi version",
+      "DieuKienTienQuyet": "Tài nguyên tồn tại trong harness; giao thức tương thích hiện tại. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.",
+      "CacBuoc": "1. PUT /api/users/{user_id} với dữ liệu hợp lệ, không có trường __v; đọc lại.\n2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.\nDữ liệu thử: {\"fullName\":\"Fuzz Updated\"}",
+      "KetQuaMongDoi": "Theo hành vi tương thích hiện tại: 200 và version tăng 1. Không kết luận chống stale-write cho client bỏ version.",
+      "MucUuTien": "HIGH"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Users_Admin_spec.xlsx",
+    "testcase": {
+      "ID": "TC-USR-6",
+      "YeuCauLienQuan": "REQ-USR-2, NFR-USR-4, REQ-CONC-USR-1",
+      "TieuDe": "2 request PUT đồng thời cùng 1 user",
+      "DieuKienTienQuyet": "Có 1 user đã seed",
+      "CacBuoc": "1. Seed đối tượng __v=0; dùng actor có quyền theo kịch bản.\n2. Gửi đồng thời hai PUT dữ liệu khác nhau, cùng __v=0.\n3. Đọc phản hồi, version và dữ liệu cuối.",
+      "KetQuaMongDoi": "Một HTTP 200 và một HTTP 409; __v cuối bằng 1; dữ liệu cuối khớp request thành công.",
+      "MucUuTien": "MEDIUM"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Users_Admin_spec.xlsx",
+    "testcase": {
+      "ID": "TC-USR-9",
+      "YeuCauLienQuan": "REQ-USR-SMT-total_create_admin_attempt_counter",
+      "TieuDe": "Kiểm tra tràn số: total_create_admin_attempt_counter",
+      "DieuKienTienQuyet": "Đã khai báo biến SMT Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+      "MucUuTien": "LOW"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Users_Admin_spec.xlsx",
+    "testcase": {
+      "ID": "TC-USR-13",
+      "YeuCauLienQuan": "REQ-USR-SMT-daily_profile_update_counter",
+      "TieuDe": "Kiểm tra tràn số: daily_profile_update_counter",
+      "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'daily_profile_update_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'daily_profile_update_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+      "MucUuTien": "LOW"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Users_Admin_spec.xlsx",
+    "testcase": {
+      "ID": "TC-USR-14",
+      "YeuCauLienQuan": "REQ-USR-SMT-concurrent_profile_update_counter",
+      "TieuDe": "Kiểm tra tràn số: concurrent_profile_update_counter",
+      "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'concurrent_profile_update_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'concurrent_profile_update_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+      "MucUuTien": "LOW"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Users_Admin_spec.xlsx",
+    "testcase": {
+      "ID": "TC-USR-15",
+      "YeuCauLienQuan": "REQ-USR-SMT-active_user_counter",
+      "TieuDe": "Kiểm tra tràn số: active_user_counter",
+      "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'active_user_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'active_user_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+      "MucUuTien": "LOW"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  },
+  {
+    "spec": "Module_Users_Admin_spec.xlsx",
+    "testcase": {
+      "ID": "TC-USR-16",
+      "YeuCauLienQuan": "REQ-USR-SMT-role_escalation_attempt_counter",
+      "TieuDe": "Kiểm tra tràn số: role_escalation_attempt_counter",
+      "DieuKienTienQuyet": "Đã khai báo biến SMT tương ứng cho dòng 'role_escalation_attempt_counter' Phạm vi mô hình minh họa theo template, không phải lỗi API Node.js.",
+      "CacBuoc": "1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.\n2. Chạy check_int32_overflow() bằng Z3 trên BieuThucTran của dòng 'role_escalation_attempt_counter'\n3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.",
+      "KetQuaMongDoi": "Đánh giá công thức theo đúng miền, signedness và độ rộng bit trong sheet KiemTraSoHoc. Nếu SAT, lưu giá trị chứng minh và phép toán gây vượt miền; nếu UNSAT, lưu giả định và phạm vi đã kiểm tra. Không mặc định SAT và không suy ra tràn số runtime Node.js từ mô hình số nguyên hữu hạn. Chưa chạy solver: chưa xác minh.",
+      "MucUuTien": "LOW"
+    },
+    "reason": "Chưa thực thi trong campaign API hiện tại; giữ trong Excel, không suy ra PASS/FAIL."
+  }
+]

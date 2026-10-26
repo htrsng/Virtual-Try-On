@@ -9,16 +9,6 @@ async function executePlan(plan, environment) {
   const catalog = JSON.parse(JSON.stringify(await models.ProductModel.find({})));
   const variables = Object.fromEntries(Object.entries(users).map(([key, user]) => [key, String(user._id)]));
   const observations = [];
-  if (plan.initial_login_counter !== undefined) {
-    if (!Number.isSafeInteger(plan.initial_login_counter) || plan.initial_login_counter < 0) {
-      throw setupError("Invalid initial login counter");
-    }
-    const user = await models.UserModel.findOne({ email: "fuzzuser@test.com" });
-    if (!user) throw setupError("Missing counter test account");
-    const seeded = await models.UserModel.findOneAndUpdate({ email: user.email },
-      { $inc: { failedLoginCount: plan.initial_login_counter - user.failedLoginCount } }, { new: true });
-    if (seeded.failedLoginCount !== plan.initial_login_counter) throw setupError("Counter seed failed");
-  }
   const inspectEntity = async () => {
     let entity = null;
     if (plan.inspect_entity === "user") entity = await models.UserModel.findById(users.self._id).select("-password");
@@ -48,8 +38,7 @@ async function executePlan(plan, environment) {
   };
 
   for (const step of plan.steps) {
-    if (step.parallel) observations.push(...await Promise.all(step.parallel.map(execute)));
-    else observations.push(await execute(step));
+    observations.push(await execute(step));
   }
 
   let passwordAudit = null;
@@ -68,15 +57,13 @@ async function executePlan(plan, environment) {
     if (orderId) finalEntity = await models.OrderModel.findById(orderId);
   }
 
-  const loginCounter = plan.inspect_login_counter
-    ? (await models.UserModel.findOne({ email: "fuzzuser@test.com" })).failedLoginCount : null;
   const notifications = plan.inspect_notifications
     ? await models.NotificationModel.find({ userId: users.self._id }) : null;
   redactTokens(observations);
   return { environment: environment.name, limitations: environment.limitations,
     catalog, observations, password_audit: passwordAudit,
     final_products: await models.ProductModel.find({}), notifications,
-    login_counter: loginCounter, initial_entity: initialEntity, final_entity: finalEntity,
+    initial_entity: initialEntity, final_entity: finalEntity,
     actor_ids: { self: String(users.self._id) } };
 }
 

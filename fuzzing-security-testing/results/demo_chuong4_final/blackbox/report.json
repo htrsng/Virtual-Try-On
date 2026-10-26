@@ -1,0 +1,622 @@
+{
+  "environment": "node_harness_stub",
+  "seed": 7,
+  "iterations": 42,
+  "status_counter": {
+    "login:400": 2,
+    "orders:200": 4,
+    "order_status:200": 6,
+    "user_update_self:200": 6,
+    "user_update_victim:200": 6,
+    "product_create:200": 6,
+    "product_update:200": 6,
+    "login:200": 2,
+    "orders:500": 1,
+    "login:404": 1,
+    "login:401": 1,
+    "orders:400": 1
+  },
+  "errors": [
+    {
+      "iteration": 8,
+      "target": "orders",
+      "input": {
+        "products": [
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          }
+        ],
+        "totalAmount": 400000,
+        "shippingInfo": {
+          "fullName": "Nguyen Van A",
+          "phone": "0900000000",
+          "address": "123 Duong ABC"
+        },
+        "paymentMethod": "COD",
+        "discountCode": "",
+        "discountAmount": 0,
+        "shippingFee": "\u0000\u0001"
+      },
+      "type": "HTTP_5XX",
+      "status": 500,
+      "body": {
+        "message": "Lỗi server khi tạo đơn hàng",
+        "error": "Cast to Number failed for value \"\"\\u0000\\u0001\"\" at path \"shippingFee\"",
+        "details": "CastError: Cast to Number failed for value \"\"\\u0000\\u0001\"\" at path \"shippingFee\""
+      },
+      "had_auth": true,
+      "saved_to": "fuzzing-security-testing\\results\\demo_chuong4_final\\blackbox\\errors\\error_0000.json"
+    }
+  ],
+  "vuln_findings": [
+    {
+      "iteration": 1,
+      "target": "orders",
+      "input": {
+        "products": "🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂",
+        "totalAmount": 400000,
+        "shippingInfo": {
+          "fullName": "Nguyen Van A",
+          "phone": "0900000000",
+          "address": "123 Duong ABC"
+        },
+        "paymentMethod": "COD",
+        "discountCode": "",
+        "discountAmount": 0,
+        "shippingFee": 0
+      },
+      "finding": "Invalid cart structure accepted (REQ-ORD-1)",
+      "had_auth": true,
+      "response_status": 200
+    },
+    {
+      "iteration": 2,
+      "target": "order_status",
+      "input": {
+        "status": "\u0000\u0001"
+      },
+      "finding": "status '\u0000\u0001' ngoai tap gia tri hop le nhung van duoc chap nhan",
+      "had_auth": true,
+      "response_status": 200
+    },
+    {
+      "iteration": 3,
+      "target": "user_update_self",
+      "input": {
+        "fullName": "",
+        "phone": "0911111111"
+      },
+      "finding": "Sua thong tin user THANH CONG ma KHONG can token xac thuc",
+      "had_auth": false,
+      "response_status": 200
+    },
+    {
+      "iteration": 4,
+      "target": "user_update_victim",
+      "input": {
+        "fullName": "Nguyen Van B",
+        "phone": true
+      },
+      "finding": "Sua thong tin user KHAC (khong phai chinh minh) THANH CONG du dung token user thuong",
+      "had_auth": true,
+      "response_status": 200
+    },
+    {
+      "iteration": 5,
+      "target": "product_create",
+      "input": {
+        "name": "Quan jean",
+        "price": 0,
+        "stock": 5,
+        "totalStock": 5,
+        "category": "Quan"
+      },
+      "finding": "Tao/sua san pham THANH CONG ma KHONG can token xac thuc",
+      "had_auth": false,
+      "response_status": 200
+    },
+    {
+      "iteration": 9,
+      "target": "order_status",
+      "input": {
+        "status": "0000000000"
+      },
+      "finding": "Cap nhat trang thai don hang THANH CONG ma KHONG can token xac thuc",
+      "had_auth": false,
+      "response_status": 200
+    },
+    {
+      "iteration": 11,
+      "target": "user_update_victim",
+      "input": {
+        "fullName": "Nguyen Van B",
+        "phone": ""
+      },
+      "finding": "Sua thong tin user THANH CONG ma KHONG can token xac thuc",
+      "had_auth": false,
+      "response_status": 200
+    },
+    {
+      "iteration": 13,
+      "target": "product_update",
+      "input": {
+        "name": "Quan jean",
+        "price": 350000,
+        "stock": 5,
+        "totalStock": 5,
+        "category": "Quan"
+      },
+      "finding": "Tao/sua san pham THANH CONG ma KHONG can token xac thuc",
+      "had_auth": false,
+      "response_status": 200
+    },
+    {
+      "iteration": 15,
+      "target": "orders",
+      "input": {
+        "products": [
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": "🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂",
+            "quantity": 2
+          }
+        ],
+        "totalAmount": 400000,
+        "shippingInfo": {
+          "fullName": "Nguyen Van A",
+          "phone": "0900000000",
+          "address": "123 Duong ABC"
+        },
+        "paymentMethod": "COD",
+        "discountCode": "",
+        "discountAmount": 0,
+        "shippingFee": 0
+      },
+      "finding": "Invalid unit price accepted (REQ-ORD-8)",
+      "had_auth": true,
+      "response_status": 200
+    },
+    {
+      "iteration": 17,
+      "target": "user_update_self",
+      "input": {
+        "fullName": "Nguyen Van B",
+        "phone": "0911111111"
+      },
+      "finding": "Sua thong tin user THANH CONG ma KHONG can token xac thuc",
+      "had_auth": false,
+      "response_status": 200
+    },
+    {
+      "iteration": 18,
+      "target": "user_update_victim",
+      "input": {
+        "fullName": "Nguyen Van B",
+        "phone": "0911111111"
+      },
+      "finding": "Sua thong tin user KHAC (khong phai chinh minh) THANH CONG du dung token user thuong",
+      "had_auth": true,
+      "response_status": 200
+    },
+    {
+      "iteration": 19,
+      "target": "product_create",
+      "input": {
+        "name": "Quan jean",
+        "price": 350000,
+        "totalStock": 5,
+        "category": "Quan"
+      },
+      "finding": "Tao/sua san pham THANH CONG ma KHONG can token xac thuc",
+      "had_auth": false,
+      "response_status": 200
+    },
+    {
+      "iteration": 23,
+      "target": "order_status",
+      "input": {
+        "status": "Đang xử lý"
+      },
+      "finding": "Cap nhat trang thai don hang THANH CONG ma KHONG can token xac thuc",
+      "had_auth": false,
+      "response_status": 200
+    },
+    {
+      "iteration": 25,
+      "target": "user_update_victim",
+      "input": {
+        "fullName": "Nguyen Van B",
+        "phone": null
+      },
+      "finding": "Sua thong tin user THANH CONG ma KHONG can token xac thuc",
+      "had_auth": false,
+      "response_status": 200
+    },
+    {
+      "iteration": 27,
+      "target": "product_update",
+      "input": {
+        "name": "Quan jean",
+        "stock": 5,
+        "totalStock": 5,
+        "category": "Quan"
+      },
+      "finding": "Tao/sua san pham THANH CONG ma KHONG can token xac thuc",
+      "had_auth": false,
+      "response_status": 200
+    },
+    {
+      "iteration": 30,
+      "target": "order_status",
+      "input": {
+        "status": "not_an_object"
+      },
+      "finding": "status 'not_an_object' ngoai tap gia tri hop le nhung van duoc chap nhan",
+      "had_auth": true,
+      "response_status": 200
+    },
+    {
+      "iteration": 31,
+      "target": "user_update_self",
+      "input": {
+        "fullName": "Nguyen Van B",
+        "phone": "0911111111"
+      },
+      "finding": "Sua thong tin user THANH CONG ma KHONG can token xac thuc",
+      "had_auth": false,
+      "response_status": 200
+    },
+    {
+      "iteration": 32,
+      "target": "user_update_victim",
+      "input": {
+        "fullName": "Nguyen Van B",
+        "phone": "0911111111"
+      },
+      "finding": "Sua thong tin user KHAC (khong phai chinh minh) THANH CONG du dung token user thuong",
+      "had_auth": true,
+      "response_status": 200
+    },
+    {
+      "iteration": 33,
+      "target": "product_create",
+      "input": {
+        "name": "Quan jean",
+        "price": 350000,
+        "totalStock": 5,
+        "category": "Quan"
+      },
+      "finding": "Tao/sua san pham THANH CONG ma KHONG can token xac thuc",
+      "had_auth": false,
+      "response_status": 200
+    },
+    {
+      "iteration": 37,
+      "target": "order_status",
+      "input": {
+        "status": "Đang xử lý"
+      },
+      "finding": "Cap nhat trang thai don hang THANH CONG ma KHONG can token xac thuc",
+      "had_auth": false,
+      "response_status": 200
+    },
+    {
+      "iteration": 39,
+      "target": "user_update_victim",
+      "input": {
+        "fullName": "Nguyen Van B",
+        "phone": [
+          1,
+          2,
+          3
+        ]
+      },
+      "finding": "Sua thong tin user THANH CONG ma KHONG can token xac thuc",
+      "had_auth": false,
+      "response_status": 200
+    },
+    {
+      "iteration": 41,
+      "target": "product_update",
+      "input": {
+        "name": "Quan jean",
+        "price": 350000,
+        "stock": 5,
+        "totalStock": 5,
+        "category": "Quan"
+      },
+      "finding": "Tao/sua san pham THANH CONG ma KHONG can token xac thuc",
+      "had_auth": false,
+      "response_status": 200
+    }
+  ],
+  "catalog_observations": [
+    {
+      "iteration": 8,
+      "type": "INVALID_CATALOG",
+      "catalog": [
+        {
+          "__v": 1,
+          "id": 1,
+          "name": "Quan jean",
+          "price": 350000,
+          "stock": 5,
+          "totalStock": 5,
+          "category": "Quan",
+          "_id": "6adb7bcd7c2fcda530ec0430",
+          "createdAt": "2026-10-23T15:22:53.467Z"
+        },
+        {
+          "__v": 0,
+          "id": 2,
+          "name": "Quan jean",
+          "price": 0,
+          "stock": 5,
+          "totalStock": 5,
+          "category": "Quan",
+          "ai_attributes": {},
+          "_id": "6adb7bcd7c2fcda530ec0434",
+          "createdAt": "2026-10-23T15:22:53.606Z"
+        }
+      ],
+      "skipped_check": "Catalog membership and catalog-based order total; other order checks still run.",
+      "saved_to": "fuzzing-security-testing\\results\\demo_chuong4_final\\blackbox\\catalog_observations\\catalog_0008.json"
+    },
+    {
+      "iteration": 15,
+      "type": "INVALID_CATALOG",
+      "catalog": [
+        {
+          "__v": 2,
+          "id": 1,
+          "name": "Quan jean",
+          "price": 350000,
+          "stock": 5,
+          "totalStock": 5,
+          "category": "Quan",
+          "_id": "6adb7bcd7c2fcda530ec0430",
+          "createdAt": "2026-10-23T15:22:53.467Z"
+        },
+        {
+          "__v": 0,
+          "id": 2,
+          "name": "Quan jean",
+          "price": 0,
+          "stock": 5,
+          "totalStock": 5,
+          "category": "Quan",
+          "ai_attributes": {},
+          "_id": "6adb7bcd7c2fcda530ec0434",
+          "createdAt": "2026-10-23T15:22:53.606Z"
+        },
+        {
+          "__v": 0,
+          "id": 3,
+          "price": 350000,
+          "stock": 5,
+          "totalStock": 5,
+          "category": "Quan",
+          "ai_attributes": {},
+          "_id": "6adb7bcd7c2fcda530ec0437",
+          "createdAt": "2026-10-23T15:22:53.676Z"
+        }
+      ],
+      "skipped_check": "Catalog membership and catalog-based order total; other order checks still run.",
+      "saved_to": "fuzzing-security-testing\\results\\demo_chuong4_final\\blackbox\\catalog_observations\\catalog_0015.json"
+    },
+    {
+      "iteration": 22,
+      "type": "INVALID_CATALOG",
+      "catalog": [
+        {
+          "__v": 3,
+          "id": 1,
+          "name": "Quan jean",
+          "price": 350000,
+          "stock": 5,
+          "totalStock": 5,
+          "category": "admin",
+          "_id": "6adb7bcd7c2fcda530ec0430",
+          "createdAt": "2026-10-23T15:22:53.467Z"
+        },
+        {
+          "__v": 0,
+          "id": 2,
+          "name": "Quan jean",
+          "price": 0,
+          "stock": 5,
+          "totalStock": 5,
+          "category": "Quan",
+          "ai_attributes": {},
+          "_id": "6adb7bcd7c2fcda530ec0434",
+          "createdAt": "2026-10-23T15:22:53.606Z"
+        },
+        {
+          "__v": 0,
+          "id": 3,
+          "price": 350000,
+          "stock": 5,
+          "totalStock": 5,
+          "category": "Quan",
+          "ai_attributes": {},
+          "_id": "6adb7bcd7c2fcda530ec0437",
+          "createdAt": "2026-10-23T15:22:53.676Z"
+        },
+        {
+          "__v": 0,
+          "id": 4,
+          "name": "Quan jean",
+          "price": 350000,
+          "totalStock": 5,
+          "category": "Quan",
+          "ai_attributes": {},
+          "_id": "6adb7bcd7c2fcda530ec043a",
+          "createdAt": "2026-10-23T15:22:53.685Z"
+        }
+      ],
+      "skipped_check": "Catalog membership and catalog-based order total; other order checks still run.",
+      "saved_to": "fuzzing-security-testing\\results\\demo_chuong4_final\\blackbox\\catalog_observations\\catalog_0022.json"
+    },
+    {
+      "iteration": 29,
+      "type": "INVALID_CATALOG",
+      "catalog": [
+        {
+          "__v": 4,
+          "id": 1,
+          "name": "Quan jean",
+          "price": 350000,
+          "stock": 5,
+          "totalStock": 5,
+          "category": "Quan",
+          "_id": "6adb7bcd7c2fcda530ec0430",
+          "createdAt": "2026-10-23T15:22:53.467Z"
+        },
+        {
+          "__v": 0,
+          "id": 2,
+          "name": "Quan jean",
+          "price": 0,
+          "stock": 5,
+          "totalStock": 5,
+          "category": "Quan",
+          "ai_attributes": {},
+          "_id": "6adb7bcd7c2fcda530ec0434",
+          "createdAt": "2026-10-23T15:22:53.606Z"
+        },
+        {
+          "__v": 0,
+          "id": 3,
+          "price": 350000,
+          "stock": 5,
+          "totalStock": 5,
+          "category": "Quan",
+          "ai_attributes": {},
+          "_id": "6adb7bcd7c2fcda530ec0437",
+          "createdAt": "2026-10-23T15:22:53.676Z"
+        },
+        {
+          "__v": 0,
+          "id": 4,
+          "name": "Quan jean",
+          "price": 350000,
+          "totalStock": 5,
+          "category": "Quan",
+          "ai_attributes": {},
+          "_id": "6adb7bcd7c2fcda530ec043a",
+          "createdAt": "2026-10-23T15:22:53.685Z"
+        },
+        {
+          "__v": 0,
+          "id": 5,
+          "name": "Quan jean",
+          "price": 350000,
+          "stock": 12345,
+          "totalStock": 5,
+          "category": "Quan",
+          "ai_attributes": {},
+          "_id": "6adb7bcd7c2fcda530ec043d",
+          "createdAt": "2026-10-23T15:22:53.694Z"
+        }
+      ],
+      "skipped_check": "Catalog membership and catalog-based order total; other order checks still run.",
+      "saved_to": "fuzzing-security-testing\\results\\demo_chuong4_final\\blackbox\\catalog_observations\\catalog_0029.json"
+    },
+    {
+      "iteration": 36,
+      "type": "INVALID_CATALOG",
+      "catalog": [
+        {
+          "__v": 5,
+          "id": 1,
+          "name": "Quan jean",
+          "price": 350000,
+          "stock": 5,
+          "totalStock": 5,
+          "category": "Quan",
+          "_id": "6adb7bcd7c2fcda530ec0430",
+          "createdAt": "2026-10-23T15:22:53.467Z"
+        },
+        {
+          "__v": 0,
+          "id": 2,
+          "name": "Quan jean",
+          "price": 0,
+          "stock": 5,
+          "totalStock": 5,
+          "category": "Quan",
+          "ai_attributes": {},
+          "_id": "6adb7bcd7c2fcda530ec0434",
+          "createdAt": "2026-10-23T15:22:53.606Z"
+        },
+        {
+          "__v": 0,
+          "id": 3,
+          "price": 350000,
+          "stock": 5,
+          "totalStock": 5,
+          "category": "Quan",
+          "ai_attributes": {},
+          "_id": "6adb7bcd7c2fcda530ec0437",
+          "createdAt": "2026-10-23T15:22:53.676Z"
+        },
+        {
+          "__v": 0,
+          "id": 4,
+          "name": "Quan jean",
+          "price": 350000,
+          "totalStock": 5,
+          "category": "Quan",
+          "ai_attributes": {},
+          "_id": "6adb7bcd7c2fcda530ec043a",
+          "createdAt": "2026-10-23T15:22:53.685Z"
+        },
+        {
+          "__v": 0,
+          "id": 5,
+          "name": "Quan jean",
+          "price": 350000,
+          "stock": 12345,
+          "totalStock": 5,
+          "category": "Quan",
+          "ai_attributes": {},
+          "_id": "6adb7bcd7c2fcda530ec043d",
+          "createdAt": "2026-10-23T15:22:53.694Z"
+        },
+        {
+          "__v": 0,
+          "id": 6,
+          "name": "Quan jean",
+          "price": 350000,
+          "totalStock": 5,
+          "category": "Quan",
+          "ai_attributes": {},
+          "_id": "6adb7bcd7c2fcda530ec043f",
+          "createdAt": "2026-10-23T15:22:53.759Z"
+        }
+      ],
+      "skipped_check": "Catalog membership and catalog-based order total; other order checks still run.",
+      "saved_to": "fuzzing-security-testing\\results\\demo_chuong4_final\\blackbox\\catalog_observations\\catalog_0036.json"
+    }
+  ],
+  "evidence_summary": {
+    "error_categories": {
+      "APPLICATION_HTTP_ERROR": 1
+    },
+    "business_or_security_observations": 22,
+    "confirmed_memory_errors": null,
+    "confirmed_process_crashes": null,
+    "note": "Memory errors/process crashes are not measured by these HTTP oracles; timeout is not a confirmed hang."
+  },
+  "limitations": [
+    "Simulated HTTP app; state is shared within the campaign.",
+    "HTTP errors and finding occurrences are not unique vulnerabilities."
+  ],
+  "base_url": "http://127.0.0.1:59410",
+  "server_lifecycle": "automatic",
+  "artifact_dir": "fuzzing-security-testing\\results\\demo_chuong4_final\\blackbox"
+}

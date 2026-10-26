@@ -1,0 +1,466 @@
+[
+  {
+    "input": {
+      "products": [
+        {
+          "productId": 1,
+          "name": "Ao thun",
+          "price": 200000,
+          "quantity": 2
+        }
+      ],
+      "totalAmount": "<script>alert(1)</script>",
+      "shippingInfo": {
+        "fullName": "Nguyen Van A",
+        "phone": "0900000000",
+        "address": "123 Duong ABC"
+      },
+      "paymentMethod": "COD",
+      "discountCode": "",
+      "discountAmount": 0,
+      "shippingFee": 0
+    },
+    "status": 500,
+    "body": {
+      "message": "Lỗi server khi tạo đơn hàng",
+      "error": "Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\"",
+      "details": "CastError: Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\""
+    },
+    "signature": "HTTP_5XX"
+  },
+  {
+    "input": {
+      "products": [
+        {
+          "productId": 1,
+          "name": "Ao thun",
+          "price": 200000,
+          "quantity": 2
+        }
+      ],
+      "totalAmount": "<script>alert(1)</script>",
+      "shippingInfo": {
+        "fullName": "Nguyen Van A",
+        "phone": "0900000000",
+        "address": "123 Duong ABC"
+      },
+      "paymentMethod": "COD",
+      "discountCode": "",
+      "discountAmount": 0,
+      "shippingFee": 0
+    },
+    "status": 500,
+    "body": {
+      "message": "Lỗi server khi tạo đơn hàng",
+      "error": "Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\"",
+      "details": "CastError: Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\""
+    },
+    "signature": "HTTP_5XX"
+  },
+  {
+    "input": {
+      "products": [
+        {
+          "productId": 0,
+          "name": "Ao thun",
+          "price": 200000,
+          "quantity": 2
+        }
+      ],
+      "totalAmount": "<script>alert(1)</script>",
+      "shippingInfo": {
+        "fullName": "Nguyen Van A",
+        "phone": "0900000000",
+        "address": "123 Duong ABC"
+      },
+      "paymentMethod": "COD",
+      "discountCode": "",
+      "discountAmount": 0,
+      "shippingFee": 0
+    },
+    "status": 500,
+    "body": {
+      "message": "Lỗi server khi tạo đơn hàng",
+      "error": "Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\"",
+      "details": "CastError: Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\""
+    },
+    "signature": "HTTP_5XX"
+  },
+  {
+    "input": {
+      "products": [
+        {
+          "productId": 16,
+          "name": "Ao thun",
+          "price": 200000,
+          "quantity": 2
+        }
+      ],
+      "totalAmount": "<script>alert(1)</script>",
+      "shippingInfo": {
+        "fullName": "Nguyen Van A",
+        "phone": "0900000000",
+        "address": "123 Duong ABC"
+      },
+      "paymentMethod": "COD",
+      "discountCode": "",
+      "discountAmount": 0,
+      "shippingFee": 0
+    },
+    "status": 500,
+    "body": {
+      "message": "Lỗi server khi tạo đơn hàng",
+      "error": "Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\"",
+      "details": "CastError: Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\""
+    },
+    "signature": "HTTP_5XX"
+  },
+  {
+    "input": {
+      "products": [
+        {
+          "productId": 2,
+          "name": "Ao thun",
+          "price": 200000,
+          "quantity": 2
+        }
+      ],
+      "totalAmount": "<script>alert(1)</script>",
+      "shippingInfo": {
+        "fullName": "Nguyen Van A",
+        "phone": "0900000000",
+        "address": "123 Duong ABC"
+      },
+      "paymentMethod": "COD",
+      "discountCode": "",
+      "discountAmount": 0,
+      "shippingFee": 0
+    },
+    "status": 500,
+    "body": {
+      "message": "Lỗi server khi tạo đơn hàng",
+      "error": "Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\"",
+      "details": "CastError: Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\""
+    },
+    "signature": "HTTP_5XX"
+  },
+  {
+    "input": {
+      "products": [
+        {
+          "productId": 1,
+          "name": "",
+          "price": 200000,
+          "quantity": 2
+        }
+      ],
+      "totalAmount": "<script>alert(1)</script>",
+      "shippingInfo": {
+        "fullName": "Nguyen Van A",
+        "phone": "0900000000",
+        "address": "123 Duong ABC"
+      },
+      "paymentMethod": "COD",
+      "discountCode": "",
+      "discountAmount": 0,
+      "shippingFee": 0
+    },
+    "status": 500,
+    "body": {
+      "message": "Lỗi server khi tạo đơn hàng",
+      "error": "Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\"",
+      "details": "CastError: Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\""
+    },
+    "signature": "HTTP_5XX"
+  },
+  {
+    "input": {
+      "products": [
+        {
+          "productId": 1,
+          "name": "Ao thunAAAAAAAAA",
+          "price": 200000,
+          "quantity": 2
+        }
+      ],
+      "totalAmount": "<script>alert(1)</script>",
+      "shippingInfo": {
+        "fullName": "Nguyen Van A",
+        "phone": "0900000000",
+        "address": "123 Duong ABC"
+      },
+      "paymentMethod": "COD",
+      "discountCode": "",
+      "discountAmount": 0,
+      "shippingFee": 0
+    },
+    "status": 500,
+    "body": {
+      "message": "Lỗi server khi tạo đơn hàng",
+      "error": "Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\"",
+      "details": "CastError: Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\""
+    },
+    "signature": "HTTP_5XX"
+  },
+  {
+    "input": {
+      "products": [
+        {
+          "productId": 1,
+          "name": "Ao thu",
+          "price": 200000,
+          "quantity": 2
+        }
+      ],
+      "totalAmount": "<script>alert(1)</script>",
+      "shippingInfo": {
+        "fullName": "Nguyen Van A",
+        "phone": "0900000000",
+        "address": "123 Duong ABC"
+      },
+      "paymentMethod": "COD",
+      "discountCode": "",
+      "discountAmount": 0,
+      "shippingFee": 0
+    },
+    "status": 500,
+    "body": {
+      "message": "Lỗi server khi tạo đơn hàng",
+      "error": "Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\"",
+      "details": "CastError: Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\""
+    },
+    "signature": "HTTP_5XX"
+  },
+  {
+    "input": {
+      "products": [
+        {
+          "productId": 1,
+          "name": "Ao thunA",
+          "price": 200000,
+          "quantity": 2
+        }
+      ],
+      "totalAmount": "<script>alert(1)</script>",
+      "shippingInfo": {
+        "fullName": "Nguyen Van A",
+        "phone": "0900000000",
+        "address": "123 Duong ABC"
+      },
+      "paymentMethod": "COD",
+      "discountCode": "",
+      "discountAmount": 0,
+      "shippingFee": 0
+    },
+    "status": 500,
+    "body": {
+      "message": "Lỗi server khi tạo đơn hàng",
+      "error": "Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\"",
+      "details": "CastError: Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\""
+    },
+    "signature": "HTTP_5XX"
+  },
+  {
+    "input": {
+      "products": [
+        {
+          "productId": 1,
+          "name": "Ao thun",
+          "price": 0,
+          "quantity": 2
+        }
+      ],
+      "totalAmount": "<script>alert(1)</script>",
+      "shippingInfo": {
+        "fullName": "Nguyen Van A",
+        "phone": "0900000000",
+        "address": "123 Duong ABC"
+      },
+      "paymentMethod": "COD",
+      "discountCode": "",
+      "discountAmount": 0,
+      "shippingFee": 0
+    },
+    "status": 500,
+    "body": {
+      "message": "Lỗi server khi tạo đơn hàng",
+      "error": "Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\"",
+      "details": "CastError: Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\""
+    },
+    "signature": "HTTP_5XX"
+  },
+  {
+    "input": {
+      "products": [
+        {
+          "productId": 1,
+          "name": "Ao thun",
+          "price": 400002,
+          "quantity": 2
+        }
+      ],
+      "totalAmount": "<script>alert(1)</script>",
+      "shippingInfo": {
+        "fullName": "Nguyen Van A",
+        "phone": "0900000000",
+        "address": "123 Duong ABC"
+      },
+      "paymentMethod": "COD",
+      "discountCode": "",
+      "discountAmount": 0,
+      "shippingFee": 0
+    },
+    "status": 500,
+    "body": {
+      "message": "Lỗi server khi tạo đơn hàng",
+      "error": "Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\"",
+      "details": "CastError: Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\""
+    },
+    "signature": "HTTP_5XX"
+  },
+  {
+    "input": {
+      "products": [
+        {
+          "productId": 1,
+          "name": "Ao thun",
+          "price": 199999,
+          "quantity": 2
+        }
+      ],
+      "totalAmount": "<script>alert(1)</script>",
+      "shippingInfo": {
+        "fullName": "Nguyen Van A",
+        "phone": "0900000000",
+        "address": "123 Duong ABC"
+      },
+      "paymentMethod": "COD",
+      "discountCode": "",
+      "discountAmount": 0,
+      "shippingFee": 0
+    },
+    "status": 500,
+    "body": {
+      "message": "Lỗi server khi tạo đơn hàng",
+      "error": "Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\"",
+      "details": "CastError: Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\""
+    },
+    "signature": "HTTP_5XX"
+  },
+  {
+    "input": {
+      "products": [
+        {
+          "productId": 1,
+          "name": "Ao thun",
+          "price": 200001,
+          "quantity": 2
+        }
+      ],
+      "totalAmount": "<script>alert(1)</script>",
+      "shippingInfo": {
+        "fullName": "Nguyen Van A",
+        "phone": "0900000000",
+        "address": "123 Duong ABC"
+      },
+      "paymentMethod": "COD",
+      "discountCode": "",
+      "discountAmount": 0,
+      "shippingFee": 0
+    },
+    "status": 500,
+    "body": {
+      "message": "Lỗi server khi tạo đơn hàng",
+      "error": "Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\"",
+      "details": "CastError: Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\""
+    },
+    "signature": "HTTP_5XX"
+  },
+  {
+    "input": {
+      "products": [
+        {
+          "productId": 1,
+          "name": "Ao thun",
+          "price": 200000,
+          "quantity": 0
+        }
+      ],
+      "totalAmount": "<script>alert(1)</script>",
+      "shippingInfo": {
+        "fullName": "Nguyen Van A",
+        "phone": "0900000000",
+        "address": "123 Duong ABC"
+      },
+      "paymentMethod": "COD",
+      "discountCode": "",
+      "discountAmount": 0,
+      "shippingFee": 0
+    },
+    "status": 500,
+    "body": {
+      "message": "Lỗi server khi tạo đơn hàng",
+      "error": "Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\"",
+      "details": "CastError: Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\""
+    },
+    "signature": "HTTP_5XX"
+  },
+  {
+    "input": {
+      "products": [
+        {
+          "productId": 1,
+          "name": "Ao thun",
+          "price": 200000,
+          "quantity": 16
+        }
+      ],
+      "totalAmount": "<script>alert(1)</script>",
+      "shippingInfo": {
+        "fullName": "Nguyen Van A",
+        "phone": "0900000000",
+        "address": "123 Duong ABC"
+      },
+      "paymentMethod": "COD",
+      "discountCode": "",
+      "discountAmount": 0,
+      "shippingFee": 0
+    },
+    "status": 500,
+    "body": {
+      "message": "Lỗi server khi tạo đơn hàng",
+      "error": "Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\"",
+      "details": "CastError: Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\""
+    },
+    "signature": "HTTP_5XX"
+  },
+  {
+    "input": {
+      "products": [
+        {
+          "productId": 1,
+          "name": "Ao thun",
+          "price": 200000,
+          "quantity": 1
+        }
+      ],
+      "totalAmount": "<script>alert(1)</script>",
+      "shippingInfo": {
+        "fullName": "Nguyen Van A",
+        "phone": "0900000000",
+        "address": "123 Duong ABC"
+      },
+      "paymentMethod": "COD",
+      "discountCode": "",
+      "discountAmount": 0,
+      "shippingFee": 0
+    },
+    "status": 500,
+    "body": {
+      "message": "Lỗi server khi tạo đơn hàng",
+      "error": "Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\"",
+      "details": "CastError: Cast to Number failed for value \"\"<script>alert(1)</script>\"\" at path \"totalAmount\""
+    },
+    "signature": "HTTP_5XX"
+  }
+]

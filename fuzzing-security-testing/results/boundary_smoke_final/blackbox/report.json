@@ -1,0 +1,348 @@
+{
+  "environment": "node_harness_stub",
+  "seed": 7,
+  "iterations": 14,
+  "status_counter": {
+    "login:400": 1,
+    "orders:200": 1,
+    "order_status:200": 2,
+    "user_update_self:200": 2,
+    "user_update_victim:200": 2,
+    "product_create:200": 2,
+    "product_update:200": 2,
+    "login:200": 1,
+    "orders:500": 1
+  },
+  "errors": [
+    {
+      "iteration": 8,
+      "target": "orders",
+      "input": {
+        "products": [
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          }
+        ],
+        "totalAmount": 400000,
+        "shippingInfo": {
+          "fullName": "Nguyen Van A",
+          "phone": "0900000000",
+          "address": "123 Duong ABC"
+        },
+        "paymentMethod": "COD",
+        "discountCode": "",
+        "discountAmount": 0,
+        "shippingFee": "\u0000\u0001"
+      },
+      "type": "HTTP_5XX",
+      "status": 500,
+      "body": {
+        "message": "Lỗi server khi tạo đơn hàng",
+        "error": "Cast to Number failed for value \"\"\\u0000\\u0001\"\" at path \"shippingFee\"",
+        "details": "CastError: Cast to Number failed for value \"\"\\u0000\\u0001\"\" at path \"shippingFee\""
+      },
+      "had_auth": true,
+      "saved_to": "fuzzing-security-testing\\results\\boundary_smoke_final\\blackbox\\errors\\error_0000.json"
+    }
+  ],
+  "vuln_findings": [
+    {
+      "iteration": 1,
+      "target": "orders",
+      "input": {
+        "products": "🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂",
+        "totalAmount": 400000,
+        "shippingInfo": {
+          "fullName": "Nguyen Van A",
+          "phone": "0900000000",
+          "address": "123 Duong ABC"
+        },
+        "paymentMethod": "COD",
+        "discountCode": "",
+        "discountAmount": 0,
+        "shippingFee": 0
+      },
+      "finding": "Invalid cart structure accepted (REQ-ORD-1)",
+      "had_auth": true,
+      "response_status": 200
+    },
+    {
+      "iteration": 2,
+      "target": "order_status",
+      "input": {
+        "status": "\u0000\u0001"
+      },
+      "finding": "status '\u0000\u0001' ngoai tap gia tri hop le nhung van duoc chap nhan",
+      "had_auth": true,
+      "response_status": 200
+    },
+    {
+      "iteration": 3,
+      "target": "user_update_self",
+      "input": {
+        "fullName": "",
+        "phone": "0911111111"
+      },
+      "finding": "Sua thong tin user THANH CONG ma KHONG can token xac thuc",
+      "had_auth": false,
+      "response_status": 200
+    },
+    {
+      "iteration": 4,
+      "target": "user_update_victim",
+      "input": {
+        "fullName": "Nguyen Van B",
+        "phone": true
+      },
+      "finding": "Sua thong tin user KHAC (khong phai chinh minh) THANH CONG du dung token user thuong",
+      "had_auth": true,
+      "response_status": 200
+    },
+    {
+      "iteration": 5,
+      "target": "product_create",
+      "input": {
+        "name": "Quan jean",
+        "price": 0,
+        "stock": 5,
+        "totalStock": 5,
+        "category": "Quan"
+      },
+      "finding": "Tao/sua san pham THANH CONG ma KHONG can token xac thuc",
+      "had_auth": false,
+      "response_status": 200
+    },
+    {
+      "iteration": 9,
+      "target": "order_status",
+      "input": {
+        "status": "0000000000"
+      },
+      "finding": "Cap nhat trang thai don hang THANH CONG ma KHONG can token xac thuc",
+      "had_auth": false,
+      "response_status": 200
+    },
+    {
+      "iteration": 11,
+      "target": "user_update_victim",
+      "input": {
+        "fullName": "Nguyen Van B",
+        "phone": ""
+      },
+      "finding": "Sua thong tin user THANH CONG ma KHONG can token xac thuc",
+      "had_auth": false,
+      "response_status": 200
+    },
+    {
+      "iteration": 13,
+      "target": "product_update",
+      "input": {
+        "name": "Quan jean",
+        "price": 350000,
+        "stock": 5,
+        "totalStock": 5,
+        "category": "Quan"
+      },
+      "finding": "Tao/sua san pham THANH CONG ma KHONG can token xac thuc",
+      "had_auth": false,
+      "response_status": 200
+    }
+  ],
+  "catalog_observations": [
+    {
+      "iteration": 8,
+      "type": "INVALID_CATALOG",
+      "catalog": [
+        {
+          "__v": 1,
+          "id": 1,
+          "name": "Quan jean",
+          "price": 350000,
+          "stock": 5,
+          "totalStock": 5,
+          "category": "Quan",
+          "_id": "6adc3965560d46de87d3ba5e",
+          "createdAt": "2026-10-24T04:51:49.947Z"
+        },
+        {
+          "__v": 0,
+          "id": 2,
+          "name": "Quan jean",
+          "price": 0,
+          "stock": 5,
+          "totalStock": 5,
+          "category": "Quan",
+          "ai_attributes": {},
+          "_id": "6adc3966560d46de87d3ba62",
+          "createdAt": "2026-10-24T04:51:50.126Z"
+        }
+      ],
+      "skipped_check": "Catalog membership and catalog-based order total; other order checks still run.",
+      "saved_to": "fuzzing-security-testing\\results\\boundary_smoke_final\\blackbox\\catalog_observations\\catalog_0008.json"
+    }
+  ],
+  "evidence_summary": {
+    "error_categories": {
+      "APPLICATION_HTTP_ERROR": 1
+    },
+    "business_or_security_observations": 8,
+    "confirmed_memory_errors": null,
+    "confirmed_process_crashes": null,
+    "note": "Memory errors/process crashes are not measured by these HTTP oracles; timeout is not a confirmed hang."
+  },
+  "limitations": [
+    "Simulated HTTP app; state is shared within the campaign.",
+    "HTTP errors and finding occurrences are not unique vulnerabilities."
+  ],
+  "base_url": "http://127.0.0.1:56117",
+  "server_lifecycle": "automatic",
+  "artifact_dir": "fuzzing-security-testing\\results\\boundary_smoke_final\\blackbox",
+  "boundaries": [
+    {
+      "target": "orders",
+      "input": {
+        "products": [
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          }
+        ],
+        "totalAmount": 400000,
+        "shippingInfo": {
+          "fullName": "Nguyen Van A",
+          "phone": "0900000000",
+          "address": "123 Duong ABC"
+        },
+        "paymentMethod": "COD",
+        "discountCode": "",
+        "discountAmount": 0,
+        "shippingFee": "\u0000\u0001"
+      },
+      "had_auth": true,
+      "expected_signature": "HTTP_5XX",
+      "status": "SAMPLED",
+      "regions": [
+        {
+          "input": {
+            "products": [
+              {
+                "productId": 1,
+                "name": "Ao thun",
+                "price": 200000,
+                "quantity": 2
+              }
+            ],
+            "totalAmount": 400000,
+            "shippingInfo": {
+              "fullName": "Nguyen Van A",
+              "phone": "0900000000",
+              "address": "123 Duong ABC"
+            },
+            "paymentMethod": "COD",
+            "discountCode": "",
+            "discountAmount": 0,
+            "shippingFee": "\u0000\u0001"
+          },
+          "path": [
+            "products",
+            0,
+            "productId"
+          ],
+          "original_value": 1,
+          "axis": "integer",
+          "representatives": null,
+          "lower": 0,
+          "upper": 16,
+          "samples": [
+            {
+              "value": 0,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 1,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 2,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 16,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            }
+          ],
+          "transitions": [],
+          "complete": false
+        },
+        {
+          "input": {
+            "products": [
+              {
+                "productId": 1,
+                "name": "Ao thun",
+                "price": 200000,
+                "quantity": 2
+              }
+            ],
+            "totalAmount": 400000,
+            "shippingInfo": {
+              "fullName": "Nguyen Van A",
+              "phone": "0900000000",
+              "address": "123 Duong ABC"
+            },
+            "paymentMethod": "COD",
+            "discountCode": "",
+            "discountAmount": 0,
+            "shippingFee": "\u0000\u0001"
+          },
+          "path": [
+            "products",
+            0,
+            "name"
+          ],
+          "original_value": "Ao thun",
+          "axis": "unicode_length",
+          "representatives": null,
+          "lower": 0,
+          "upper": 16,
+          "samples": [
+            {
+              "value": 0,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 6,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 7,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            },
+            {
+              "value": 16,
+              "signature": "HTTP_5XX",
+              "same_failure": true
+            }
+          ],
+          "transitions": [],
+          "complete": false
+        }
+      ],
+      "probes_used": 8,
+      "state_scope": "fresh seeded HTTP harness for every probe",
+      "evidence_path": "fuzzing-security-testing\\results\\boundary_smoke_final\\blackbox\\boundary_evidence\\case_000.json"
+    }
+  ]
+}

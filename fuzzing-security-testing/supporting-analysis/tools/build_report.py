@@ -19,15 +19,15 @@ def render_report(data, comparison=None):
         f"Môi trường lần chạy: `{data['environment']}`. Thời điểm UTC: `{data['created_utc']}`. Seed: `{data['random_seed']}`.",
              "",
         "Mỗi scenario chạy trong tiến trình cô lập và có dữ liệu test riêng. "
-        "Các bước trong cùng scenario giữ trạng thái, nhóm parallel gửi đồng thời. "
-        "Oracle kiểm tra mã HTTP, catalog, dữ liệu lưu, quyền, vòng đời đơn, version và bộ đếm. "
+        "Các bước trong cùng scenario giữ trạng thái. "
+        "Oracle kiểm tra mã HTTP, catalog, dữ liệu lưu, quyền và vòng đời đơn. "
         "FAIL là vi phạm oracle trên mẫu đã thử; ERROR là lỗi chuẩn bị/chạy/đánh giá, không tự coi là lỗi ứng dụng.",
              "",
         "## 3. Kết quả", "",
         f"Scenario đã chạy: {len(data['executions'])}. Theo testcase API: " +
         ", ".join(f"{k}={v}" for k, v in data['counts'].items()) + ".", "",
         f"Có {data.get('excluded_testcase_count',
-             0)} testcase minh họa sinh mã/bộ nhớ/SMT ngoài phạm vi API, "
+             0)} testcase ngoài phạm vi API, "
         "được ghi riêng trong excluded_testcases.json; không tính vào số test đạt hoặc lỗi bán hàng.",
              "",
         "| Testcase | Nội dung | Kết quả | Scenario |", "|---|---|---|---|"]
