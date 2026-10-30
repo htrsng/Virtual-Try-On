@@ -1,0 +1,18 @@
+{
+  "date_local": "2026-10-28",
+  "command": "python fuzzing-security-testing/fuzzers/run_fuzzing.py --iterations 42 --iterations-per-case 8 --max-cases 2 --seed 7 --concolic",
+  "attempts": [
+    {
+      "output": "results/trang_report_20261028",
+      "status": "SETUP_ERROR",
+      "context": "sandbox"
+    },
+    {
+      "output": "results/trang_report_20261028_verified",
+      "status": "SETUP_ERROR",
+      "context": "outside sandbox"
+    }
+  ],
+  "detail": "HTTP harness did not become ready within startup_timeout=15 seconds; no completed campaign report. Root cause not established.",
+  "passed": false
+}

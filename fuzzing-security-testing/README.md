@@ -103,15 +103,22 @@ python -m unittest discover -s fuzzing-security-testing/tests -p "test_*.py"
 
 Bằng chứng theo từng phiên bản (snapshot và mã băm thuộc lần chạy tương ứng):
 
-- `results/api_core_29/`: 29 testcase, 9 PASS và 20 FAIL; 59 lượt thực thi, không có ERROR.
-- `results/api_fuzz_29/`: luồng blackbox → whitebox với 21 và 16 input; đây là lượt demo nhỏ, không dùng để kết luận chiến lược nào tốt hơn.
-- Bộ kiểm tra hồi quy hiện tại: 28 test đều đạt, gồm xác nhận mô hình với 8 đại diện input qua API.
+- `results/spec_excel_aligned/`: 29 testcase, 9 PASS và 20 FAIL; 59 lượt thực thi; 75 testcase ngoài campaign. Đây là snapshot dùng đối chiếu Excel trong báo cáo.
+- `results/blackbox/e97d715116e3/`: campaign 3.500 input, seed 42; 240 HTTP 5xx và 1.669 lượt finding, không phải số lỗi gốc độc lập.
+- `results/demo_chuong4_final/`: demo blackbox, coverage-guided và concolic; đọc riêng số liệu từng giai đoạn, không cộng thành số lỗi gốc.
+- `results/boundary_smoke_final/`: bằng chứng kiểm tra biên cuối cùng đã lưu.
+- `results/trang_report_20261028/` và `results/trang_report_20261028_verified/`: log hai lần chạy bị lỗi setup; không phải campaign hoàn tất.
 
-Bằng chứng demo mới: `results/demo_chuong4_final/` gồm blackbox, khảo sát coverage và concolic; đọc riêng số liệu từng giai đoạn, không cộng thành số lỗi gốc. `results/spec_safety_current/` là campaign theo Excel hiện tại, tách 29 testcase API có kịch bản và 75 testcase ngoài campaign.
+Trong Excel, `ThongTin` ghi phạm vi tự động hóa từng module; TC-ORD-3/4 mô tả riêng phần API và concolic, còn TC-ORD-20 phân biệt khảo sát coverage với symbolic execution. Các sheet mô hình hình thức giữ nguyên; không suy ra chúng đã được công cụ hiện tại kiểm chứng. Các kết quả là bằng chứng theo snapshot, không gán cho cấu hình hoặc lần chạy mới.
 
-Sau lần đồng bộ Excel với concolic, snapshot và kết quả tương ứng nằm tại `results/spec_excel_aligned/`; `spec_safety_current/` giữ bằng chứng của phiên bản đặc tả trước đó. Trong Excel, `ThongTin` ghi phạm vi tự động hóa từng module; TC-ORD-3/4 mô tả riêng phần API và concolic, còn TC-ORD-20 phân biệt khảo sát coverage với symbolic execution. Các sheet mô hình hình thức giữ nguyên; không suy ra chúng đã được công cụ hiện tại kiểm chứng.
+## Báo cáo và dữ liệu tổng hợp hiện giữ
 
-Kết quả cũ đã chuyển vào bản sao lưu `BaoCaoATPM/SaoLuu_TruocLamRo/`. Các kết quả là bằng chứng theo phiên bản có mã băm ghi kèm. Không gán các số liệu lịch sử cho lần chạy hoặc cấu hình mới. Báo cáo Word cần đọc cùng giới hạn này.
+- `BaoCaoATPM/Module_*_spec.xlsx`: năm workbook đặc tả chính.
+- `BaoCaoATPM/BaoCao_Trang/BaoCao_Fuzzing_Trang_MucLuc_v5.docx`: bản Word mới nhất trong workspace, có mục lục, danh mục bảng/hình và chỗ điền GitHub. Sau khi chỉnh nội dung, cập nhật các trường trong Word bằng Ctrl+A → F9.
+- `BaoCaoATPM/BaoCao_Trang/So_do/`: ảnh PNG, SVG và nguồn `.drawio`; `build_diagrams.py` tạo lại các sơ đồ.
+- `BaoCaoATPM/BaoCao_Trang/`: bảng finding, chỉ mục JSON, CSV đối chiếu testcase và thông tin nguồn/runtime.
+
+Đã xóa các bản báo cáo cũ, Excel bổ sung trùng, thư mục sao lưu và campaign phát triển bị thay thế. Nhật ký dọn nằm tại `BaoCaoATPM/BaoCao_Trang/Cleanup_manifest.json`. Các chỉnh sửa riêng trong Downloads hoặc Word Online không tự đồng bộ vào bản workspace này.
 # Bổ sung khoanh biên thực nghiệm
 
 Luồng `run_fuzzing.py` đã bổ sung khảo sát biên qua HTTP và kiểm tra chi tiết trong miền tìm được. Xem [hướng dẫn chạy và đọc kết quả](HUONG_DAN_KHOANH_BIEN.md). Phạm vi: số nguyên, độ dài ký tự Unicode; các điểm chưa đo không được coi là đã xác nhận. Concolic Z3 vẫn là bước riêng.

@@ -1,0 +1,197 @@
+﻿[
+    {
+        "value":  [
+                      {
+                          "path":  "BaoCaoATPM/SaoLuu_TruocBoSungRuntime",
+                          "bytes":  137868,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "BaoCaoATPM/SaoLuu_TruocGhiDeRuntime",
+                          "bytes":  115425,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "BaoCaoATPM/SaoLuu_TruocLamRo",
+                          "bytes":  398325741,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "BaoCaoATPM/BoSung_Runtime",
+                          "bytes":  140534,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "results/api_core_29",
+                          "bytes":  369006,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "results/api_fuzz_29",
+                          "bytes":  289624,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "results/boundary_smoke_v1",
+                          "bytes":  0,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "results/boundary_smoke_v2",
+                          "bytes":  300719,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "results/concolic_class_demo",
+                          "bytes":  171433,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "results/demo_thay",
+                          "bytes":  3893036,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "results/spec_safety_current",
+                          "bytes":  658612,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "results/blackbox/3e4023cce926",
+                          "bytes":  0,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "BaoCaoATPM/BaoCao_Fuzzing_DuThao.docx",
+                          "bytes":  41758,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "BaoCaoATPM/BaoCao_Fuzzing_DuThao.md",
+                          "bytes":  16219,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "BaoCaoATPM/BaoCao_Fuzzing_DuThao.pdf",
+                          "bytes":  394993,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "BaoCaoATPM/BaoCao_Fuzzing_HoanChinh.docx",
+                          "bytes":  518880,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "BaoCaoATPM/BaoCao_Fuzzing_HoanChinh.md",
+                          "bytes":  37004,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "BaoCaoATPM/BaoCao_Fuzzing_HoanChinh.pdf",
+                          "bytes":  525373,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "BaoCaoATPM/BaoCao_Trang/add_contents.py",
+                          "bytes":  4244,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "BaoCaoATPM/BaoCao_Trang/A_trich_xuat.txt",
+                          "bytes":  17749,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "BaoCaoATPM/BaoCao_Trang/BaoCao_Fuzzing_Trang_CoSoDo_v3.docx",
+                          "bytes":  1232840,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "BaoCaoATPM/BaoCao_Trang/BaoCao_Fuzzing_Trang_CoSoDo_v3.md",
+                          "bytes":  33022,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "BaoCaoATPM/BaoCao_Trang/BaoCao_Fuzzing_Trang_CoSoDo_v3.pdf",
+                          "bytes":  1440521,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "BaoCaoATPM/BaoCao_Trang/BaoCao_Fuzzing_Trang_HoanChinh_v4.docx",
+                          "bytes":  1232578,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "BaoCaoATPM/BaoCao_Trang/BaoCao_Fuzzing_Trang_HoanChinh_v4.md",
+                          "bytes":  32971,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "BaoCaoATPM/BaoCao_Trang/BaoCao_Fuzzing_Trang_HoanChinh_v4.pdf",
+                          "bytes":  1439236,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "BaoCaoATPM/BaoCao_Trang/BaoCao_Fuzzing_Trang_PhanCong_v2.docx",
+                          "bytes":  501772,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "BaoCaoATPM/BaoCao_Trang/BaoCao_Fuzzing_Trang_PhanCong_v2.md",
+                          "bytes":  32437,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "BaoCaoATPM/BaoCao_Trang/BaoCao_Fuzzing_Trang_PhanCong_v2.pdf",
+                          "bytes":  632970,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "BaoCaoATPM/BaoCao_Trang/BaoCao_KyThuat_Fuzzing_Trang.docx",
+                          "bytes":  48861,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "BaoCaoATPM/BaoCao_Trang/BaoCao_KyThuat_Fuzzing_Trang.md",
+                          "bytes":  28649,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "BaoCaoATPM/BaoCao_Trang/BaoCao_KyThuat_Fuzzing_Trang.pdf",
+                          "bytes":  128783,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "BaoCaoATPM/BaoCao_Trang/build_trang_report.py",
+                          "bytes":  41265,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "BaoCaoATPM/BaoCao_Trang/B_trich_xuat.txt",
+                          "bytes":  11644,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "BaoCaoATPM/BaoCao_Trang/update_contents.ps1",
+                          "bytes":  1023,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "fuzzers/__pycache__",
+                          "bytes":  125879,
+                          "status":  "deleted"
+                      },
+                      {
+                          "path":  "tests/__pycache__",
+                          "bytes":  40429,
+                          "status":  "deleted"
+                      }
+                  ],
+        "Count":  37
+    },
+    {
+        "path":  ".runtime",
+        "status":  "deleted",
+        "detail":  "Temporary helper scripts, dependencies and runtime files"
+    }
+]

@@ -1,0 +1,74 @@
+[
+  {
+    "path": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\results\\blackbox\\e97d715116e3\\report.json",
+    "sha256": "ce275dae533b07c7766879539be28c081eebc83640823b33ec84ba17a410a8de"
+  },
+  {
+    "path": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\results\\demo_chuong4_final\\report.json",
+    "sha256": "14338773937a48c3f0e7ec57710d7ee17a1759c9b35fa2417fb4e87d5080d6d7"
+  },
+  {
+    "path": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\results\\demo_chuong4_final\\blackbox\\report.json",
+    "sha256": "0e1c2c25a9e0ee3556f1fb0f2e0d9c1685f4342427a7ab12e60f6630177569e6"
+  },
+  {
+    "path": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\results\\demo_chuong4_final\\whitebox\\report.json",
+    "sha256": "451ffb921717cba235a996096f17de5fa84904af640fef456dd288bda7063d30"
+  },
+  {
+    "path": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\results\\demo_chuong4_final\\concolic\\report.json",
+    "sha256": "f13e6943f502ffc8212f3d5ab978ef41160fcf98f278fac409dffef8e267db77"
+  },
+  {
+    "path": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\results\\spec_excel_aligned\\report.json",
+    "sha256": "4d0ab7a2cce025f0144da621de9af56803feadcac35b80b4933fee324e38dea8"
+  },
+  {
+    "path": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\fuzzers\\blackbox_fuzzer.py",
+    "sha256": "eb132da8d1faf3ef8b6d009c5cec8498a23ee43c41d8a4d0eaa7e9ea44619f4d"
+  },
+  {
+    "path": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\fuzzers\\whitebox_fuzzer.py",
+    "sha256": "a5d3437cb091c0a115727f709c085fe662ba696008219eca2b11b45543221456"
+  },
+  {
+    "path": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\fuzzers\\concolic.py",
+    "sha256": "171bc0c4dde44573766bb5c069b164412a773658eb800e7abfe9beb5645548d9"
+  },
+  {
+    "path": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\fuzzers\\run_fuzzing.py",
+    "sha256": "0523b3e4fcbee32808191e9db9f2c976912d13433884d6bba1bd091757d93056"
+  },
+  {
+    "path": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\fuzzers\\runtime.py",
+    "sha256": "0df097e633b40b1181fe5f8f730c8a119c18cb30bfb67e0b15e0ca7078e5f72a"
+  },
+  {
+    "path": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\BaoCaoATPM\\Module_Auth_Login_spec.xlsx",
+    "sha256": "0911ac90a0c86ce7afa5d20d1337a1f96bbed61945fa0790a0e0235cb9485e6f"
+  },
+  {
+    "path": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\BaoCaoATPM\\Module_OrderStatus_spec.xlsx",
+    "sha256": "def734a752a43c9c21064ee9e00918282c147b058bf7d0a2177413032f39944b"
+  },
+  {
+    "path": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\BaoCaoATPM\\Module_Orders_Create_spec.xlsx",
+    "sha256": "e012313461b5fd75c1e153e02c862a43e588567b6e4f5a6e2b531de87748cbce"
+  },
+  {
+    "path": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\BaoCaoATPM\\Module_Products_Manage_spec.xlsx",
+    "sha256": "659d7990fbd69a36bef7a73b0e19612917e907e4081fc62a59bce2d93715c5e8"
+  },
+  {
+    "path": "D:\\Virtual-Try-On-sync\\fuzzing-security-testing\\BaoCaoATPM\\Module_Users_Admin_spec.xlsx",
+    "sha256": "e1d890ac77a57337f675fe2b7f45a65d511897246458b4d7d0b8cc122b676551"
+  },
+  {
+    "path": "C:\\Users\\TRANG\\Downloads\\bf3777aeb57add10559ee0b9fc750253e5d236c7.pdf",
+    "sha256": "b07136783c9531172a5cf7aa733b97e14f450fab2fbe6473de7d2fe7e3d48ab5"
+  },
+  {
+    "path": "C:\\Users\\TRANG\\Downloads\\2a961597e3fec080231d617fe326dfcd9015b86b.pdf",
+    "sha256": "fc123d0bd751fe528d9ff66631397b42bc1ebfe53bdc47bb7234dd19d32628e9"
+  }
+]

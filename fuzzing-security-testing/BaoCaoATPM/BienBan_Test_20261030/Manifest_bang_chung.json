@@ -1,0 +1,139 @@
+[
+  {
+    "path": "BaoCaoATPM\\Module_Auth_Login_spec.xlsx",
+    "sha256": "0911ac90a0c86ce7afa5d20d1337a1f96bbed61945fa0790a0e0235cb9485e6f",
+    "snapshot_sha256": "df6dc549b5eadcf501c81b536ef92fa3c59e1bd26ccb1950b8f948d63c4f5c72",
+    "sheet_rows": {
+      "ThongTin": 11,
+      "YeuCauChucNang": 28,
+      "YeuCauPhiChucNang": 5,
+      "RangBuoc": 5,
+      "MoHinhTrangThai": 10,
+      "ThuocTinhAnToan": 4,
+      "LoaiTruLanNhau": 5,
+      "HamSinhMa": 7,
+      "KiemTraSoHoc": 5,
+      "TestCase": 25
+    }
+  },
+  {
+    "path": "BaoCaoATPM\\Module_Orders_Create_spec.xlsx",
+    "sha256": "e012313461b5fd75c1e153e02c862a43e588567b6e4f5a6e2b531de87748cbce",
+    "snapshot_sha256": "9cda949a68957c08d7db21bc75493b9b8f50e9822371bf211f7c3b1d704b10d2",
+    "sheet_rows": {
+      "ThongTin": 11,
+      "YeuCauChucNang": 31,
+      "YeuCauPhiChucNang": 5,
+      "RangBuoc": 5,
+      "MoHinhTrangThai": 20,
+      "ThuocTinhAnToan": 4,
+      "LoaiTruLanNhau": 5,
+      "HamSinhMa": 7,
+      "KiemTraSoHoc": 5,
+      "TestCase": 27
+    }
+  },
+  {
+    "path": "BaoCaoATPM\\Module_OrderStatus_spec.xlsx",
+    "sha256": "def734a752a43c9c21064ee9e00918282c147b058bf7d0a2177413032f39944b",
+    "snapshot_sha256": "85037339eef3f0777aa8d59cb4a194fc29c034dceeaadcca0ba48d7d28670352",
+    "sheet_rows": {
+      "ThongTin": 11,
+      "YeuCauChucNang": 28,
+      "YeuCauPhiChucNang": 5,
+      "RangBuoc": 5,
+      "MoHinhTrangThai": 12,
+      "ThuocTinhAnToan": 6,
+      "LoaiTruLanNhau": 5,
+      "HamSinhMa": 7,
+      "KiemTraSoHoc": 5,
+      "TestCase": 28
+    }
+  },
+  {
+    "path": "BaoCaoATPM\\Module_Products_Manage_spec.xlsx",
+    "sha256": "659d7990fbd69a36bef7a73b0e19612917e907e4081fc62a59bce2d93715c5e8",
+    "snapshot_sha256": "8552eb799070a6be49a91a63b0376cf2e6bf6856f9665db26f063fe06234ea72",
+    "sheet_rows": {
+      "ThongTin": 11,
+      "YeuCauChucNang": 27,
+      "YeuCauPhiChucNang": 5,
+      "RangBuoc": 5,
+      "MoHinhTrangThai": 8,
+      "ThuocTinhAnToan": 4,
+      "LoaiTruLanNhau": 5,
+      "HamSinhMa": 7,
+      "KiemTraSoHoc": 5,
+      "TestCase": 27
+    }
+  },
+  {
+    "path": "BaoCaoATPM\\Module_Users_Admin_spec.xlsx",
+    "sha256": "e1d890ac77a57337f675fe2b7f45a65d511897246458b4d7d0b8cc122b676551",
+    "snapshot_sha256": "76b54790420b3f37836c3259ca0bdd89c76193b86c3f5d545a41385de0cfea4e",
+    "sheet_rows": {
+      "ThongTin": 11,
+      "YeuCauChucNang": 29,
+      "YeuCauPhiChucNang": 5,
+      "RangBuoc": 5,
+      "MoHinhTrangThai": 13,
+      "ThuocTinhAnToan": 6,
+      "LoaiTruLanNhau": 5,
+      "HamSinhMa": 7,
+      "KiemTraSoHoc": 5,
+      "TestCase": 27
+    }
+  },
+  {
+    "path": "results/spec_excel_aligned/report.json",
+    "sha256": "4d0ab7a2cce025f0144da621de9af56803feadcac35b80b4933fee324e38dea8"
+  },
+  {
+    "path": "results/spec_excel_aligned/spec_snapshot.json",
+    "sha256": "0262bd6c507f33932b753b529fbc66263f917dbfb6ebed4f7eb47d4ffd335f79"
+  },
+  {
+    "path": "results/spec_excel_aligned/excluded_testcases.json",
+    "sha256": "6c27560506e67f168a6774a52bd85bbebd8bd6c85063c15edd86cbc3e9f8e4db"
+  },
+  {
+    "path": "results/blackbox/e97d715116e3/report.json",
+    "sha256": "ce275dae533b07c7766879539be28c081eebc83640823b33ec84ba17a410a8de"
+  },
+  {
+    "path": "results/demo_chuong4_final/report.json",
+    "sha256": "14338773937a48c3f0e7ec57710d7ee17a1759c9b35fa2417fb4e87d5080d6d7"
+  },
+  {
+    "path": "results/demo_chuong4_final/concolic/report.json",
+    "sha256": "f13e6943f502ffc8212f3d5ab978ef41160fcf98f278fac409dffef8e267db77"
+  },
+  {
+    "path": "results/boundary_smoke_final/report.json",
+    "sha256": "8fe4d3129e5b6bb37221393b5c2de8c025bf79040f1932ecc80fcae3b49a2e07"
+  },
+  {
+    "path": "results/boundary_smoke_final/whitebox/bounded_analysis.json",
+    "sha256": "2f44242b7750baece07cbb77c5cc0c0cf92edb02d0048bf66965bf3bba3bce3b"
+  },
+  {
+    "path": "BaoCaoATPM/BaoCao_Trang/Kiem_tra_runtime.json",
+    "sha256": "f0cafb96933e6d38d8a3048b919d0a764caf2070298b51bc50385c4695cef845"
+  },
+  {
+    "path": "fuzzers/oracles.py",
+    "sha256": "4c28fd65eb4e1bf253ae78ffc8a25b9e5d84e712ec701bf8bd796663d8ed2037"
+  },
+  {
+    "path": "fuzzers/spec_campaign.py",
+    "sha256": "74cc54e1194ed44968bf8f682765524642057c3e906b47c7e65b3bda8d357e77"
+  },
+  {
+    "path": "README.md",
+    "sha256": "6f66b7d3f5a58af79376320645b8aab0a50f954a98aa0e2f73e04bcb34e57e03"
+  },
+  {
+    "path": "requirements.txt",
+    "sha256": "d3c9294fcfa8376fce72157e55ee47443a1658ba4af33437f6d8d6fa2585a4cb"
+  }
+]
