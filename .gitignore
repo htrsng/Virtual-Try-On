@@ -49,3 +49,6 @@ fuzzing-security-testing/results/blackbox/*/
 !fuzzing-security-testing/results/blackbox/c90c27c8ba83/
 fuzzing-security-testing/results/whitebox/*/
 !fuzzing-security-testing/results/whitebox/98522cd13f6b/
+
+# Locally installed report-generation dependencies
+.codex-report-deps/
