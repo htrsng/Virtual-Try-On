@@ -3,7 +3,7 @@ from copy import deepcopy
 import random
 from runtime import load_seed
 
-# Đọc dữ liệu hợp lệ ban đầu từ seed_corpus.
+# Đọc dữ liệu hợp lệ ban đầu từ data/seeds.
 def seed(name):
     return load_seed(f'seed_{name}_valid.json')
 

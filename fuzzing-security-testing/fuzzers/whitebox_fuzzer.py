@@ -40,7 +40,7 @@ ENERGY = 6
 # Chạy một input trong tiến trình Node mới để cô lập dữ liệu.
 def run_single(target, body, token=None, use_auth=True, timeout=35):
     try:
-        return run_node("single_run_harness.js", {
+        return run_node("single-run-harness.js", {
             "target": target, "body": body, "token": token, "use_auth": use_auth,
         }, timeout)
     except HarnessError as error:
@@ -146,7 +146,7 @@ def fuzz_target(target, seed_body, token, rng, iterations, errors, vuln_findings
 def fuzz(iterations_per_target=45, seed=7, output=None):
     if iterations_per_target < 0:
         raise ValueError("Iteration budget must be nonnegative")
-    output = Path(output) if output else ROOT / "results/whitebox" / uuid.uuid4().hex[:12]
+    output = Path(output) if output else ROOT / "artifacts/whitebox" / uuid.uuid4().hex[:12]
     rng = random.Random(seed)
     token = get_valid_token()
     errors, findings = [], []
@@ -160,7 +160,7 @@ def fuzz(iterations_per_target=45, seed=7, output=None):
         "per_target": per_target,
              "line_target_pairs": sum(s["lines_covered"] for s in per_target.values()),
         "unique_index_lines_covered": len(set().union(*(set(s["covered_lines"]) for s in per_target.values()))),
-        "coverage_scope": "node_harness/index.js including initialization/setup; line feedback only",
+        "coverage_scope": "target/index.js including initialization/setup; line feedback only",
         "errors": errors, "vuln_findings": findings,
         "evidence_summary": summarize_evidence(errors, findings)}
 
@@ -170,7 +170,7 @@ def focus_blackbox(report_path, iterations=12, seed=7, output=None, max_cases=6)
     source = read_json(report_path)
     if source.get('environment') != ENVIRONMENT:
         raise ValueError('Expected a simulated blackbox report')
-    output = Path(output) if output else ROOT / 'results/whitebox' / uuid.uuid4().hex[:12]
+    output = Path(output) if output else ROOT / 'artifacts/whitebox' / uuid.uuid4().hex[:12]
     selected, skipped, seen = [], [], set()
     for record in source.get('errors', []) + source.get('vuln_findings', []):
         if record.get('target') not in TARGETS or not isinstance(record.get('input'), dict):
@@ -244,7 +244,7 @@ def focus_boundaries(investigations, budget, output):
             for value in bounded_values(region, budget):
                 body = materialize(region, value)
                 try:
-                    measured = run_node('single_run_harness.js', {
+                    measured = run_node('single-run-harness.js', {
                         'target': case['target'], 'body': body, 'token': token,
                         'use_auth': case['had_auth'], 'trace_branches': True})
                 except HarnessError as error:
@@ -288,7 +288,7 @@ def main():
         if args.blackbox_report:
             parser.error('--concolic uses the valid order seed; run --blackbox-report separately')
         from concolic import run_concolic
-        output = args.output or ROOT / 'results/concolic' / uuid.uuid4().hex[:12]
+        output = args.output or ROOT / 'artifacts/concolic' / uuid.uuid4().hex[:12]
         report = run_concolic(output, args.iterations_per_target)
         print(f"Concolic: {report['counts']}")
         print(output / 'report.md')

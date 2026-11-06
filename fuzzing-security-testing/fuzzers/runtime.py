@@ -9,7 +9,7 @@ import time
 import uuid
 
 ROOT = Path(__file__).resolve().parents[1]
-HARNESS_DIR = ROOT / "node_harness"
+HARNESS_DIR = ROOT / "target"
 ENVIRONMENT = "node_harness_stub"
 RESULT_MARKER = "===RESULT==="
 WORK_DIR = ROOT / ".runtime"
@@ -50,7 +50,7 @@ def write_json(path, value):
 
 
 def load_seed(filename):
-    return read_json(ROOT / "seed_corpus" / filename)
+    return read_json(ROOT / "data/seeds" / filename)
 
 
 @contextmanager
@@ -110,7 +110,7 @@ def simulated_http_server(log_path, startup_timeout=15):
     log_path.parent.mkdir(parents=True, exist_ok=True)
     with job_file({}) as ready_path, log_path.open("w", encoding="utf-8") as log:
         process = subprocess.Popen(
-            ["node", "http_server.js", str(ready_path)], cwd=HARNESS_DIR,
+            ["node", "http-server.js", str(ready_path)], cwd=HARNESS_DIR,
             stdout=log, stderr=subprocess.STDOUT, **HIDDEN_PROCESS,
         )
         try:

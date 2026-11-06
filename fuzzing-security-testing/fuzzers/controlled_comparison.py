@@ -79,7 +79,7 @@ def main():
     args = parser.parse_args()
     if args.iterations_per_target <= ENERGY:
         parser.error(f"Budget must exceed energy={ENERGY} to exercise parent selection")
-    output = args.output or ROOT / "results/comparisons" / uuid.uuid4().hex[:12]
+    output = args.output or ROOT / "artifacts/comparisons" / uuid.uuid4().hex[:12]
     token = get_valid_token()
     runs = []
     for index, seed in enumerate(args.seeds):
@@ -99,7 +99,7 @@ def main():
             "Small exploratory experiment; no statistical superiority claim.",
             "Both modes measure coverage; baseline ignores it when selecting inputs.",
             "Separate from the stateful HTTP blackbox; no deployment/network comparison is claimed.",
-            "Coverage includes initialization/setup and only measures node_harness/index.js.",
+            "Coverage includes initialization/setup and only measures target/index.js.",
             "Datastore and integrations are simulated; conclusions apply to the harness only.",
             "Finding occurrences and HTTP errors are not unique vulnerabilities.",
         ],

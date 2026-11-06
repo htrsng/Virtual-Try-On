@@ -9,7 +9,7 @@ import sys
 # Các mô-đun chính và công cụ báo cáo được đặt riêng khỏi bài kiểm tra.
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / 'fuzzers'))
-sys.path.insert(0, str(PROJECT_ROOT / 'supporting-analysis/tools'))
+sys.path.insert(0, str(PROJECT_ROOT / 'tools'))
 import tempfile
 from blackbox_fuzzer import read_catalog_snapshot, run_campaign
 from fuzzer_common import check_order_response
@@ -107,7 +107,10 @@ class CampaignTests(unittest.TestCase):
 
     def test_full_workbooks_are_separate_from_executable_api_scope(self):
         included, excluded = application_cases(read_specs())
-        self.assertEqual((len(included), len(excluded)), (29, 75))
+        # The checked-in workbooks now contain 134 cases, including 29 API cases.
+        self.assertEqual((len(included), len(excluded)), (29, 105))
+        all_ids = {tc['ID'] for spec in read_specs() for tc in spec['sheets']['TestCase']}
+        self.assertEqual({entry['testcase']['ID'] for entry in included + excluded}, all_ids)
         self.assertTrue(all(len(spec['sheets']) == 10 for spec in read_specs()))
         self.assertTrue(all(entry.get('reason') for entry in excluded))
         self.assertTrue(all(e['testcase']['TieuDe'].startswith(('Hàm sinh mã C', 'Hàm Python', 'Kiểm tra tràn số', 'Kiểm tra quy trình fuzzing:')) is False for e in included))
@@ -157,7 +160,7 @@ class CampaignTests(unittest.TestCase):
             raise subprocess.TimeoutExpired('node', 1)
         with patch('runtime.subprocess.run', side_effect=timeout):
             with self.assertRaises(HarnessError) as failure:
-                run_node('scenario_runner.js', {}, timeout=1)
+                run_node('scenario-runner.js', {}, timeout=1)
         self.assertEqual(failure.exception.kind, 'TIMEOUT')
         self.assertTrue(paths)
         self.assertTrue(all((not path.exists() for path in paths)))

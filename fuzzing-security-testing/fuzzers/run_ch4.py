@@ -12,7 +12,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--seed', type=int, default=7)
     parser.add_argument('--fuzz-cases', type=int, default=8)
-    parser.add_argument('--output', type=Path, default=HERE.parent / 'results/sales_campaign')
+    parser.add_argument('--output', type=Path, default=HERE.parent / 'artifacts/sales_campaign')
     parser.add_argument('--audit-only', action='store_true')
     parser.add_argument('--compare',
          action='store_true',
@@ -34,7 +34,7 @@ def main():
     if result.returncode:
         return result.returncode
     report_command = [sys.executable,
-         str(HERE.parent / 'supporting-analysis/tools/build_report.py'),
+         str(HERE.parent / 'tools/build_report.py'),
          '--campaign',
          str(args.output / 'report.json')]
     if args.compare and not args.audit_only:
