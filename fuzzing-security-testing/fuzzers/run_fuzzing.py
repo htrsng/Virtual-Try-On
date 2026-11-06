@@ -28,7 +28,7 @@ def main():
         parser.error('Ngân sách phải lớn hơn 0')
     if args.boundary_budget < 2:
         parser.error('--boundary-budget phải ít nhất 2')
-    output = args.output or ROOT / 'results/fuzzing' / uuid.uuid4().hex[:12]
+    output = args.output or ROOT / 'artifacts/fuzzing' / uuid.uuid4().hex[:12]
     start = time.monotonic()
 
     print('Bước 1: blackbox khám phá input bất thường', flush=True)

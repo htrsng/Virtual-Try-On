@@ -1,5 +1,5 @@
 const express = require("express");
-const { versionedUpdate } = require("../../server/concurrency");
+const { versionedUpdate } = require("./concurrency");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
@@ -609,7 +609,7 @@ app.get("/api/users/:id/stats", async (req, res) => {
   try {
     const userId = req.params.id;
     const orders = await OrderModel.find({ userId });
-    
+
     const totalOrders = orders.length;
     const totalSpent = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
     const usedCouponsCount = await UsedCouponModel.countDocuments({ userId });
@@ -1200,14 +1200,14 @@ app.post("/api/tryon/session", async (req, res) => {
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ success: false, error: "Missing or invalid items" });
     }
-    
+
     // Create new temporary session
     const session = await TryonSessionModel.create({ items });
-    
-    res.status(201).json({ 
-      success: true, 
+
+    res.status(201).json({
+      success: true,
       session_id: session._id,
-      session_url: `/virtual-try-on?session_id=${session._id}` 
+      session_url: `/virtual-try-on?session_id=${session._id}`
     });
   } catch (error) {
     console.error("[tryon-session POST]", error);

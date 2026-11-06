@@ -40,7 +40,7 @@
  */
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
-const branchTrace = require("./branch_trace");
+const branchTrace = require("./branch-trace");
 
 const newId = () => new mongoose.Types.ObjectId();
 

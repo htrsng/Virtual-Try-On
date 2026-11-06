@@ -22,7 +22,7 @@ from runtime import ENVIRONMENT, ROOT, HarnessError, run_node, write_json
 # Đọc Excel gốc và lưu mã băm để truy vết đặc tả.
 def read_specs():
     specs = []
-    for path in sorted((ROOT / "BaoCaoATPM").glob("Module_*_spec.xlsx")):
+    for path in sorted((ROOT / "docs/specifications").glob("Module_*_spec.xlsx")):
         workbook = load_workbook(path, read_only=True, data_only=True)
         try:
             sheets = {}
@@ -63,7 +63,7 @@ def application_cases(specs):
 def execute(case, timeout=35):
     start = time.monotonic()
     try:
-        result = run_node("scenario_runner.js", case, timeout)
+        result = run_node("scenario-runner.js", case, timeout)
         return {"case": case, "status": "PASS" if evaluate(case, result) else "FAIL",
             "evidence": result, "elapsed_seconds": time.monotonic() - start}
     except (HarnessError, ValueError, KeyError, TypeError) as error:
@@ -170,10 +170,9 @@ def main():
             "Simulated datastore and test accounts; not a real-server or production benchmark.",
             "Email/virtual-closet integrations are disabled. Timing uses test hashes and is exploratory.",
             "Rate limiting, throughput and formal verification are outside this campaign."]}
-    sources = list((ROOT / "fuzzers").glob("*.py")) + list((ROOT / "seed_corpus").glob("*.json"))
-    for folder in ("node_harness", "node_harness/config", "node_harness/routes"):
+    sources = list((ROOT / "fuzzers").glob("*.py")) + list((ROOT / "data/seeds").glob("*.json"))
+    for folder in ("target", "target/config", "target/routes"):
         sources.extend((ROOT / folder).glob("*.js"))
-    sources.append(ROOT.parent / "server/concurrency.js")
     summary["source_sha256"] = {str(p.relative_to(ROOT.parent)): hashlib.sha256(p.read_bytes()).hexdigest() for p in sources}
     summary["python_version"] = sys.version
     summary["finding_groups"] = [{"testcase": tc,

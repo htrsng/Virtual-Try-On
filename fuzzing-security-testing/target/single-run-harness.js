@@ -1,14 +1,14 @@
-/* One request per process, with line coverage of node_harness/index.js.
+/* One request per process, with line coverage of target/index.js.
  * Coverage includes app initialization and setup, not the whole real application.
  */
 const path = require("path");
 const { fileURLToPath } = require("url");
 const inspector = require("inspector");
 const v8toIstanbul = require("v8-to-istanbul");
-const { createEnvironment } = require("./test_environment");
-const branchTrace = require("./branch_trace");
-const { emitResult, fail, readInput, send, setupError } = require("./harness_common");
-const ORDER_SEED = require("../seed_corpus/seed_order_valid.json");
+const { createEnvironment } = require("./test-environment");
+const branchTrace = require("./branch-trace");
+const { emitResult, fail, readInput, send, setupError } = require("./harness-common");
+const ORDER_SEED = require("../data/seeds/seed_order_valid.json");
 
 function post(session, method, params) {
   return new Promise((resolve, reject) => {

@@ -86,7 +86,7 @@ def run_concolic(output, budget=12):
             continue
         payload = {'target': 'orders', 'body': make_body(kind), 'token': token,
                    'use_auth': True, 'trace_branches': True}
-        measured = run_node('single_run_harness.js', payload)
+        measured = run_node('single-run-harness.js', payload)
         trace = measured.get('branch_trace', [])
         validate_trace(kind, trace)
         if origin is not None:
@@ -103,7 +103,7 @@ def run_concolic(output, budget=12):
             violations.append('INVALID_NUMERIC_TYPE_ACCEPTED')
         if kind == 0 and (measured['status'] not in (200, 201) or measured['orders_created'] != 1):
             raise ValueError('Valid seed control failed')
-        replay = run_node('single_run_harness.js', payload) if violations else None
+        replay = run_node('single-run-harness.js', payload) if violations else None
         if replay:
             validate_trace(kind, replay.get('branch_trace', []))
         record = {'index': len(executions), 'kind': KINDS[kind], 'input': payload['body'],
@@ -126,9 +126,9 @@ def run_concolic(output, budget=12):
                 queue.append((event['model_kind'], event))
     hashes = {}
     for name in ('fuzzers/concolic.py', 'fuzzers/whitebox_fuzzer.py',
-                 'node_harness/models.js', 'node_harness/branch_trace.js',
-                 'node_harness/single_run_harness.js', 'node_harness/index.js',
-                 'seed_corpus/seed_order_valid.json'):
+                 'target/models.js', 'target/branch-trace.js',
+                 'target/single-run-harness.js', 'target/index.js',
+                 'data/seeds/seed_order_valid.json'):
         hashes[name] = hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
     elapsed = time.monotonic() - start
     replay_count = sum(item['replay'] is not None for item in executions)
@@ -151,7 +151,7 @@ def run_concolic(output, budget=12):
         'elapsed_seconds': elapsed,
         'campaign_inputs_per_second': (len(executions) + replay_count) / elapsed,
         'throughput_scope': 'Includes token setup, Node startup, coverage conversion, solver, replay and evidence writing; not pure target speed.',
-        'coverage': {'file': 'node_harness/index.js', 'covered_lines': covered_lines,
+        'coverage': {'file': 'target/index.js', 'covered_lines': covered_lines,
                      'line_count': len(covered_lines), 'includes_setup': True,
                      'percentage': None, 'branch_or_edge_coverage': None},
         'pending_candidates': len(queue),

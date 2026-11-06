@@ -39,7 +39,7 @@ class ConcolicTests(unittest.TestCase):
         token = get_valid_token()
         for kind in range(len(KINDS)):
             with self.subTest(kind=KINDS[kind]):
-                result = run_node('single_run_harness.js', {
+                result = run_node('single-run-harness.js', {
                     'target': 'orders', 'body': make_body(kind), 'token': token,
                     'use_auth': True, 'trace_branches': True})
                 validate_trace(kind, result['branch_trace'])

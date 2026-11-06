@@ -1,7 +1,7 @@
 /* Execute one stateful test plan against the simulated sales app. */
 const bcrypt = require("bcryptjs");
-const { createEnvironment } = require("./test_environment");
-const { emitResult, fail, readInput, redactTokens, send, setupActors, setupError } = require("./harness_common");
+const { createEnvironment } = require("./test-environment");
+const { emitResult, fail, readInput, redactTokens, send, setupActors, setupError } = require("./harness-common");
 
 async function executePlan(plan, environment) {
   const { app, models } = environment;

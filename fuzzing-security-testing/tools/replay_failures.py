@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 import sys
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'fuzzers'))
 from spec_campaign import execute
 from runtime import ENVIRONMENT, write_json
@@ -29,7 +29,7 @@ def main():
         if hashlib.sha256((ROOT.parent / name).read_bytes()).hexdigest() != digest:
             raise ValueError(f'Source changed since campaign: {name}')
     for spec in json.loads((args.campaign.parent / 'spec_snapshot.json').read_text(encoding='utf-8')):
-        if hashlib.sha256((ROOT / 'BaoCaoATPM' / spec['file']).read_bytes()).hexdigest() != spec['sha256']:
+        if hashlib.sha256((ROOT / 'docs/specifications' / spec['file']).read_bytes()).hexdigest() != spec['sha256']:
             raise ValueError(f'Specification changed: {spec["file"]}')
     selected = {}
     for execution in source['executions']:

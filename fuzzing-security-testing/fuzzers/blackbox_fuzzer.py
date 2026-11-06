@@ -157,7 +157,7 @@ def run_campaign(session, base_url, iterations, seed, output):
 def fuzz(iterations=3500, seed=42, output=None, base_url=None):
     if iterations < 0:
         raise ValueError("Iteration budget must be nonnegative")
-    output = Path(output) if output else ROOT / "results/blackbox" / uuid.uuid4().hex[:12]
+    output = Path(output) if output else ROOT / "artifacts/blackbox" / uuid.uuid4().hex[:12]
     target = nullcontext(base_url.rstrip("/")) if base_url else simulated_http_server(output / "harness.log")
     with target as base_url, requests.Session() as session:
         session.trust_env = False  # Loopback traffic must not use machine proxy settings.

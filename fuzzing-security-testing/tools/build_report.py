@@ -3,7 +3,7 @@ import argparse
 import json
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[1]
 
 
 # Chuyển kết quả đã chạy thành nội dung báo cáo Markdown.
@@ -71,7 +71,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--campaign",
          type=Path,
-         default=ROOT / "results/sales_campaign/report.json")
+         default=ROOT / "artifacts/sales_campaign/report.json")
     parser.add_argument("--comparison",
          type=Path,
          help="Explicitly include a comparison from the same backend")

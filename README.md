@@ -1,53 +1,32 @@
-# VFitAI — Virtual Try-On & API Testing
+# VFitAI — Thử đồ 3D và kiểm thử API
 
-VFitAI is an academic fashion web project combining a React/TypeScript shopping interface with a 3D virtual fitting experience. The repository also contains a Python fuzzing project for a simulated sales API.
+VFitAI là dự án học tập về ứng dụng mua sắm thời trang và thử đồ 3D. Giao diện sử dụng React, TypeScript, Vite và Three.js. Phần kiểm thử API bằng Python được phát triển trong cùng kho mã để giữ lịch sử thực hiện.
 
-The application and the testing project share this repository so their development history remains available. The fuzzing target is a local simulation; it is not the production backend of the full application.
+## Các phần của dự án
 
-## Project overview
+- **Ứng dụng VFitAI:** giao diện mua sắm và trải nghiệm thử đồ 3D trong `client/`.
+- **Kiểm thử API:** sinh dữ liệu bất thường, kiểm tra phản hồi và lưu bằng chứng trên API Express mô phỏng trong [fuzzing-security-testing](./fuzzing-security-testing/README.md).
+- **Tài liệu ứng dụng:** ảnh và tài liệu học tập trong `doc/`.
+- **Kiểm thử trình duyệt:** cấu hình và mã kiểm thử trong `tests/`.
 
-The application explores online fashion shopping, virtual try-on, outfit selection and store management. Its frontend uses React, TypeScript, Vite and Three.js.
+API mô phỏng phục vụ nghiên cứu kiểm thử; không thay thế backend hoàn chỉnh của VFitAI.
 
-The API testing work is maintained in [`fuzzing-security-testing/`](./fuzzing-security-testing/README.md). Start there to review the testing code, setup instructions, evidence and known limitations.
+## Kiểm thử API bằng fuzzing
 
-## API fuzzing and security testing
+Phần này tập trung vào đăng nhập, tạo đơn hàng, cập nhật trạng thái đơn, cập nhật người dùng và quản lý sản phẩm.
 
-The Python tools generate and mutate JSON request bodies, send HTTP requests to a local Express harness and check the responses against explicit expectations.
+- Sinh và biến đổi dữ liệu JSON đầu vào.
+- Kiểm tra phản hồi HTTP, xác thực, phân quyền và tính toàn vẹn đơn hàng.
+- Chạy lại dữ liệu đã phát hiện, lưu yêu cầu, phản hồi và trạng thái để đối chiếu.
+- Khảo sát nhánh xử lý và dùng Z3 với mô hình giới hạn của trường `totalAmount`.
 
-### Testing scope
+**Công nghệ:** Python, requests, unittest, Node.js/Express và Z3.
 
-- Login and authentication responses.
-- Order creation, input validation and order integrity.
-- Order status updates.
-- User updates and access-control behavior.
-- Product management requests.
-- Replay of selected inputs with saved request/response evidence.
-- Bounded Z3 analysis of selected `totalAmount` branches.
+[Xem cấu trúc, cách chạy và giới hạn](./fuzzing-security-testing/README.md) · [Xem kết quả xác minh](./fuzzing-security-testing/docs/verification.md)
 
-**Tools:** Python, requests, unittest, Node.js/Express and Z3.
+## Chạy giao diện
 
-The Z3 component uses a manually defined model of selected input behavior. It does not symbolically execute the entire JavaScript application.
-
-[Read the fuzzing project README](./fuzzing-security-testing/README.md) · [Detailed testing guide](./fuzzing-security-testing/docs/testing-guide.md)
-
-## Repository layout
-
-| Path | Contents |
-| --- | --- |
-| `client/` | React/TypeScript frontend and 3D interface |
-| `tests/` | Browser testing project |
-| `doc/` | Application screenshots and project documents |
-| `fuzzing-security-testing/fuzzers/` | Mutation, response checks, replay and analysis tools |
-| `fuzzing-security-testing/node_harness/` | Simulated Express target and supporting models/services |
-| `fuzzing-security-testing/seed_corpus/` | Baseline JSON inputs |
-| `fuzzing-security-testing/tests/` | Regression tests for the testing tools |
-| `fuzzing-security-testing/results/` | Historical campaign evidence |
-| `fuzzing-security-testing/BaoCaoATPM/` | Academic specifications and reports |
-| `.github/workflows/` | GitHub Actions configuration |
-
-## Run the frontend
-
-Use Node.js 24 with npm. From the repository root:
+Dùng Node.js 24 và npm. Tại thư mục gốc:
 
 ```sh
 cd client
@@ -55,9 +34,7 @@ npm ci
 npm run dev
 ```
 
-Open the local URL printed by Vite. Starting the frontend alone does not provide the missing backend services.
-
-Other commands, run from `client/`:
+Mở địa chỉ do Vite in ra. Các lệnh khác trong `client/`:
 
 ```sh
 npm run build
@@ -65,40 +42,21 @@ npm run lint
 npm test -- --run
 ```
 
-These are available project commands, not a claim that every check currently passes.
+Đây là các lệnh được khai báo trong dự án, không phải xác nhận mọi kiểm tra đều đạt. Chạy giao diện riêng không cung cấp những dịch vụ backend còn thiếu.
 
-## Review and run the API tests
+## Chạy phần fuzzing
 
-Use the [fuzzing README](./fuzzing-security-testing/README.md) for Python and Node dependency setup and campaign commands.
+Làm theo [hướng dẫn cài đặt và chạy](./fuzzing-security-testing/README.md). Phần này có API mô phỏng riêng, không cần frontend hoặc backend VFitAI để chạy kiểm tra hồi quy.
 
-From the repository root, the regression command is:
+## Tình trạng và phạm vi
 
-```sh
-python -m unittest discover -s fuzzing-security-testing/tests -p "test_*.py"
-```
+- Kho mã hiện không có thư mục `server/` mà workflow ứng dụng cũ tham chiếu. Chưa xác nhận khả năng chạy ứng dụng đầy đủ từ đầu đến cuối.
+- Workflow **API Fuzzing Checks** kiểm tra riêng phần fuzzing; workflow ứng dụng chỉ chạy khi mã ứng dụng hoặc cấu hình liên quan thay đổi.
+- Kết quả của API mô phỏng không đại diện cho bảo mật của một hệ thống đang triển khai.
+- Báo cáo cũ được giữ để đối chiếu, không tự coi là kết quả chạy phiên bản hiện tại.
 
-### Current status of this branch
+## Quy ước
 
-- The `server/` directory referenced by the full-application workflow is absent.
-- The fuzzing harness imports `server/concurrency`, which is also absent from this branch.
-- The last recorded regression run on 2026-11-03 had 34 tests: 32 passed, one failed and one errored. The failures involved an outdated workbook case count and the missing concurrency module.
-- Full-application CI has separate setup issues. Its status is not an isolated assessment of the fuzzing project.
+Tài liệu hướng dẫn đang duy trì dùng tiếng Việt; tên file, thư mục, hàm và biến dùng tiếng Anh theo quy ước của từng ngôn ngữ. Tài liệu và bằng chứng lịch sử giữ nguyên tên để bảo toàn đối chiếu.
 
-Fixes verified in a separate standalone copy have not yet been applied and verified in this branch. Historical evidence must not be described as a fresh run of the current code.
-
-## Reading the evidence
-
-Each finding should be assessed with its input, observed response, expected behavior and recorded environment.
-
-- An HTTP 500 response is not proof of a process crash.
-- Repeated observations are not necessarily distinct vulnerabilities.
-- A passing sample does not prove complete coverage or security.
-- Results from the simulated datastore and services do not establish the security of a deployed application.
-
-## Contributing
-
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for naming, file organization and evidence conventions. Keep dependencies, local credentials and temporary output out of version control.
-
-## License
-
-[MIT](./LICENSE).
+Xem [CONTRIBUTING.md](./CONTRIBUTING.md). Giấy phép: [MIT](./LICENSE).

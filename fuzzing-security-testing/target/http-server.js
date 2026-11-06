@@ -1,6 +1,6 @@
 /* Private HTTP target for blackbox fuzzing. Never loads the production server. */
 const fs = require("fs");
-const { createEnvironment } = require("./test_environment");
+const { createEnvironment } = require("./test-environment");
 
 async function main() {
   const readyPath = process.argv[2];
