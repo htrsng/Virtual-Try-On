@@ -1,7 +1,7 @@
 name: API Fuzzing Checks
 on:
   push:
-    branches: [main, portfolio-cleanup]
+    branches: [main, refactor/fuzzing-project-structure]
     paths:
       - 'fuzzing-security-testing/**'
       - '.github/workflows/fuzzing.yml'
