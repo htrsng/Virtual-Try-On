@@ -1,6 +1,6 @@
 # Kiểm thử API bán hàng bằng fuzzing
 
-Dự án học tập sử dụng Python để sinh dữ liệu bất thường và kiểm tra một API Express mô phỏng. Mã nguồn được giữ trong VFitAI để bảo toàn lịch sử phát triển.
+Dự án học tập sử dụng Python để sinh dữ liệu bất thường và kiểm tra một API Express mô phỏng. Module chạy độc lập; ứng dụng VFitAI gốc được lưu trong `archive/vfitai/` ở gốc repo.
 
 ## Phạm vi
 
