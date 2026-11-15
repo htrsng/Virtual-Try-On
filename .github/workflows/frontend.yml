@@ -1,0 +1,59 @@
+name: Frontend Component Checks
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'archive/vfitai/client/**'
+      - 'tools/run_frontend_checks.py'
+      - '.github/workflows/frontend.yml'
+  pull_request:
+    paths:
+      - 'archive/vfitai/client/**'
+      - 'tools/run_frontend_checks.py'
+      - '.github/workflows/frontend.yml'
+  workflow_dispatch:
+    inputs:
+      legacy_checks:
+        description: 'Also run full legacy typecheck/build and lint (known failures remain visible)'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  components:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci --prefix archive/vfitai/client
+      - run: python tools/run_frontend_checks.py --output reports/runs/frontend-ci
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-components
+          path: reports/runs/frontend-ci/
+  legacy-diagnostics:
+    if: github.event_name == 'workflow_dispatch' && inputs.legacy_checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci --prefix archive/vfitai/client
+      - run: python tools/run_frontend_checks.py --checks legacy --output reports/runs/frontend-legacy-ci
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-legacy-diagnostics
+          path: reports/runs/frontend-legacy-ci/
