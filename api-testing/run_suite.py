@@ -71,6 +71,7 @@ def render_markdown(report):
     lines = ['# API acceptance report', '',
         f"Suite: {report['suite']}; environment: `{report['environment']}`.",
         f"Created: {report['created_utc']}; git: `{report['git_commit']}`.",
+        f"Oracle contract: {report['oracle_contract']}.",
         f"Scenario counts: {report['scenario_counts']}; unexecuted: {report['not_run']}.",
         f"Testcase counts in selected scope: {report['testcase_counts']}.", '',
         'All inputs are deterministic; no random mutation is performed by this suite.', '',
@@ -127,6 +128,7 @@ def main(argv=None):
     node = subprocess.run(['node', '--version'], capture_output=True, text=True)
     report = {'created_utc': datetime.now(timezone.utc).isoformat(),
         'suite': args.suite, 'environment': ENVIRONMENT, 'git_commit': git.stdout.strip(),
+        'oracle_contract': 'http-and-stored-state-v1',
         'python': platform.python_version(), 'node': node.stdout.strip(), 'platform': platform.platform(),
         'source_sha256': manifest, 'elapsed_seconds': time.monotonic() - started,
         'planned_scenarios': len(plans), 'not_run': len(plans) - len(results),
