@@ -1,0 +1,109 @@
+﻿ID,Requirement,Title,Preconditions,Steps,Expected,Priority,ScenarioIDs,ExecutableOracles,ExecutionStatus
+TC-AUTH-1,REQ-AUTH-1,Xử lý an toàn trường xác thực bị thiếu hoặc rỗng,Server đang chạy,"Gửi POST /api/auth/login với body rỗng
+Gửi với chỉ có email, thiếu password
+Lưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",HTTP 400 cho input thiếu/rỗng; không trả stack trace hoặc phát hành token.,HIGH,TC-AUTH-1:0; TC-AUTH-1:1; TC-AUTH-1:2,"[{""kind"": ""status"", ""allowed"": [400]}, {""kind"": ""status"", ""allowed"": [400]}, {""kind"": ""status"", ""allowed"": [400]}]",SEE_RUN_REPORT
+TC-AUTH-2,REQ-AUTH-2,Ngoại lệ khi email/password sai kiểu dữ liệu,Server đang chạy,"Gửi email là object/array
+Lặp lại 2000 lần bằng blackbox_fuzzer.py
+Lưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.","Không phát sinh HTTP 5xx do sai kiểu; không phát hành token cho thông tin không hợp lệ. HTTP 500 là lỗi ứng dụng, chưa phải crash tiến trình.",HIGH,TC-AUTH-2:0; TC-AUTH-2:1; TC-AUTH-2:2; TC-AUTH-2:3; TC-AUTH-2:4,"[{""kind"": ""no_5xx""}, {""kind"": ""no_5xx""}, {""kind"": ""no_5xx""}, {""kind"": ""no_5xx""}, {""kind"": ""no_5xx""}]",SEE_RUN_REPORT
+TC-AUTH-3,REQ-AUTH-3,Rò rỉ sự tồn tại tài khoản qua phản hồi đăng nhập,Có 1 tài khoản hợp lệ đã seed,"1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.
+2. So sánh mã HTTP và message giữa email sai vs password sai
+3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.
+Lưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",Hai trường hợp tài khoản không tồn tại và sai mật khẩu có cùng mã trạng thái và thông báo công khai; không cấp token.,HIGH,TC-AUTH-3:enumeration,"[{""kind"": ""same_response""}]",SEE_RUN_REPORT
+TC-AUTH-5,REQ-AUTH-5,Chèn role vào input xác thực để nâng quyền,Có tài khoản role=user và role=admin,"1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.
+2. Đăng nhập bằng tài khoản role=user, decode token, kiểm tra role
+3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.
+Lưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.","Role trong token lấy từ dữ liệu tài khoản phía server, không lấy từ role do client gửi.",HIGH,TC-AUTH-5:jwt-role,"[{""kind"": ""jwt""}]",SEE_RUN_REPORT
+TC-AUTH-7,REQ-AUTH-8,Khả năng xử lý email dài bất thường,Server đang chạy,"1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.
+2. Gửi email = chuỗi 5000 ký tự 'A'
+3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.
+Lưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.","Với mẫu email 5000 ký tự, trả HTTP 400/404 có kiểm soát, không HTTP 5xx. Kết luận crash/hang cần bằng chứng tiến trình; không suy ra tràn buffer từ độ dài input.",HIGH,TC-AUTH-7:long-email,"[{""kind"": ""status"", ""allowed"": [400, 404]}]",SEE_RUN_REPORT
+TC-ORD-1,"REQ-ORD-1, REQ-ORD-8",Sai kiểu và cấu trúc giỏ hàng đi vào tầng xử lý đơn,"Đã đăng nhập, có token","Gửi products: {} (object rỗng)
+Gửi products: 'abc' (chuỗi)
+Lưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",HTTP 400/422 cho products sai cấu trúc hoặc số lượng âm; không coi đơn sai cấu trúc là đơn hợp lệ.,HIGH,TC-ORD-1:0; TC-ORD-1:1; TC-ORD-1:2; TC-ORD-1:3,"[{""kind"": ""status"", ""allowed"": [400, 422]}, {""kind"": ""status"", ""allowed"": [400, 422]}, {""kind"": ""status"", ""allowed"": [400, 422]}, {""kind"": ""status"", ""allowed"": [400, 422]}]",SEE_RUN_REPORT
+TC-ORD-2,REQ-ORD-2,Thiếu cấu trúc lồng shippingInfo gây ngoại lệ,"Đã đăng nhập, có token","1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.
+2. Xóa lần lượt shippingInfo/fullName/phone/address
+3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.
+Lưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",HTTP 400 khi thiếu shippingInfo hoặc trường bắt buộc; không phát sinh ngoại lệ chưa xử lý.,HIGH,TC-ORD-2:shippingInfo; TC-ORD-2:fullName; TC-ORD-2:phone; TC-ORD-2:address,"[{""kind"": ""status"", ""allowed"": [400]}, {""kind"": ""status"", ""allowed"": [400]}, {""kind"": ""status"", ""allowed"": [400]}, {""kind"": ""status"", ""allowed"": [400]}]",SEE_RUN_REPORT
+TC-ORD-3,REQ-ORD-3,Xử lý an toàn totalAmount thiếu/null và xác nhận nhánh required,"Harness node_harness chạy được; seed_order_valid.json tạo đơn hợp lệ, có token và catalog/shipping hợp lệ. Phần concolic cần z3-solver trong requirements.txt; chạy từ thư mục gốc. Không cần MongoDB/production.","A. Kịch bản API: giữ seed hợp lệ, xóa totalAmount; gửi POST /api/orders bằng token hợp lệ, lưu response.
+B. Concolic: chạy python fuzzing-security-testing/fuzzers/whitebox_fuzzer.py --concolic --iterations-per-target 12. Bắt đầu totalAmount=400000; thu branch_trace thật tại OrderModel.save.
+Giữ tiền tố và phủ định order.total.required từ false sang true; Z3 có thể chọn đại diện null hoặc missing. Lưu công thức/model, giải mã thành JSON và gửi lại API. Đối chiếu nhánh required=true với tiền tố đã giải. Không bắt buộc solver chọn cả null và missing trong một lần chạy.
+Xem concolic/report.json và evidence: input, result.branch_trace, orders_created, violations và replay. Phân biệt lỗi ứng dụng với lỗi setup, timeout hoặc tiến trình kết thúc bất thường.","Yêu cầu ứng dụng: thiếu/null trả HTTP 400 có kiểm soát, không tạo đơn; HTTP 500 là vi phạm xử lý lỗi đầu vào, chưa chứng minh crash/bộ nhớ. Yêu cầu công cụ concolic: SAT phải sinh input có tiền tố nhánh thực đo đúng với model; lệch mô hình/trace phải báo lỗi công cụ, không ghi xác nhận nhánh thành công. Input vi phạm được replay từ dữ liệu sạch và lưu kết quả. Chưa chạy hoặc không có bằng chứng thì chưa xác minh.",HIGH,TC-ORD-3:missing-total,"[{""kind"": ""status"", ""allowed"": [400]}]",SEE_RUN_REPORT
+TC-ORD-4,REQ-ORD-4,Sai kiểu totalAmount: mutation và concolic xác nhận đường ép kiểu,"Đăng nhập thành công, seed đơn hợp lệ, catalog/shipping giữ cố định. Cài z3-solver; có thể chạy harness Node và đọc evidence. Chỉ biến đổi totalAmount trong phần concolic.","A. Campaign API: thử totalAmount là object, array, chuỗi ""NaN""/""Infinity"" và các mutation đã khai báo; đây là chuỗi JSON, không phải literal NaN/Infinity ngoài chuẩn JSON.
+B. Chạy python fuzzing-security-testing/fuzzers/whitebox_fuzzer.py --concolic --iterations-per-target 12. Biến total_kind là Int từ 0 đến 7, lần lượt đại diện number=400000, numeric_string=""400000"", invalid_string=""not-a-number"", object={}, null, missing, boolean=true, array=[]. Các trường khác dùng seed hợp lệ.
+Lấy trace order.total.required, cast.empty, cast.number, cast.boolean, cast.invalid thực sự đi qua. Với mỗi nhánh được chọn, giữ tiền tố, phủ định nhánh và bỏ hậu tố cũ; giải bằng Z3 rồi gửi JSON mới qua POST /api/orders để xác nhận tiền tố.
+Lưu SAT/model, UNSAT hoặc unknown riêng; UNSAT chỉ áp dụng miền/prefix đã mã hóa. Trong tiền tố required=false, yêu cầu cast.empty=true là mâu thuẫn. Không coi UNSAT này là chứng minh API an toàn.
+Kiểm tra HTTP và orders_created; chạy lại input có vi phạm. Chiến dịch chọn đại diện để mở đường mới, không cam kết thử cả 8 đại diện; test hồi quy của công cụ đối chiếu cả 8 đại diện với nhánh Node.","Yêu cầu ứng dụng: sai kiểu từ chối HTTP 400/422; không HTTP 5xx hoặc tạo đơn khi từ chối. Chuỗi số/boolean được chấp nhận qua ép kiểu là vi phạm hợp đồng kiểu, chưa tự chứng minh thiệt hại hoặc khả năng khai thác. Yêu cầu công cụ: model phải khớp trace và tiền tố mục tiêu; báo lỗi nếu lệch, không ghi xác nhận giả. UNKNOWN không được coi là UNSAT. Lưu điều kiện, input, response, trạng thái dữ liệu và replay; số input vi phạm không phải số lỗi gốc. Không suy ra lỗi bộ nhớ từ HTTP 500.",HIGH,TC-ORD-4:0; TC-ORD-4:1; TC-ORD-4:2; TC-ORD-4:3,"[{""kind"": ""status"", ""allowed"": [400, 422]}, {""kind"": ""status"", ""allowed"": [400, 422]}, {""kind"": ""status"", ""allowed"": [400, 422]}, {""kind"": ""status"", ""allowed"": [400, 422]}]",SEE_RUN_REPORT
+TC-ORD-5,REQ-ORD-5,Tin cậy giá từ client làm sai toàn vẹn đơn hàng,"Đã đăng nhập, có token, 1 sản phẩm giá 200000","1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.
+2. Gửi totalAmount=400000, sản phẩm thật giá 200000 x1
+3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.
+Lưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",Server từ chối giá/tổng bị sửa hoặc tính lại từ catalog tin cậy; không lưu tổng bị giả mạo.,HIGH,TC-ORD-5:catalog-price,"[{""kind"": ""catalog_total""}]",SEE_RUN_REPORT
+TC-ORD-6,REQ-ORD-6,Giá trị âm vượt qua kiểm tra miền số tiền,"Đã đăng nhập, có token","1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.
+2. Gửi totalAmount = -999999999
+3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.
+Lưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",HTTP 400/422; không chấp nhận tổng tiền âm.,HIGH,TC-ORD-6:negative-total,"[{""kind"": ""status"", ""allowed"": [400, 422]}]",SEE_RUN_REPORT
+TC-ORD-18,REQ-ORD-5,Giả mạo đồng thời đơn giá và tổng tiền để vượt oracle,Catalog productId=1 có giá 200000; actor hợp lệ. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.,"1. Gửi sản phẩm price=1, quantity=2, totalAmount=2; đọc giá trị đơn đã lưu nếu thành công.
+2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.
+Dữ liệu thử: {""products"":[{""productId"":1,""price"":1,""quantity"":2}],""totalAmount"":2}
+Lưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",Từ chối 400/422 hoặc tính lại từ catalog thành 400000 trong seed không phí/giảm giá; không lưu tổng 2.,HIGH,TC-ORD-18:catalog,"[{""kind"": ""catalog_total""}]",SEE_RUN_REPORT
+TC-ORD-19,"REQ-ORD-2, REQ-ORD-5, REQ-ORD-8",Đối chứng seed hợp lệ trước khi đột biến đơn hàng,User hợp lệ; sản phẩm còn hàng; giá catalog tin cậy. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.,"1. Gửi giỏ hàng và giao hàng hợp lệ; đọc đơn lưu và đối chiếu catalog.
+2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.
+Dữ liệu thử: Seed order hợp lệ, không voucher/phí; quantity=2, giá catalog=200000.
+Lưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.","HTTP 200/201; đơn có đúng user, sản phẩm, số lượng và tổng 400000 của seed. Seed không chạy được thì không quy lỗi cho input đột biến.",MEDIUM,TC-ORD-19:catalog,"[{""kind"": ""valid_order""}]",SEE_RUN_REPORT
+TC-OS-1,"REQ-OS-1, REQ-OS-2",Vượt quyền cập nhật tài nguyên đơn hàng,"Có 1 đơn hàng đã tạo, có 1 token user khác (không phải chủ đơn)","Gọi PUT /api/orders/:id không header Authorization
+Gọi lại với token của user khác
+Lưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",HTTP 401/403 khi thiếu token hoặc dùng tài khoản khác; request không được coi là cập nhật hợp lệ.,HIGH,TC-OS-1:None; TC-OS-1:victim,"[{""kind"": ""status"", ""allowed"": [401, 403]}, {""kind"": ""status"", ""allowed"": [401, 403]}]",SEE_RUN_REPORT
+TC-OS-2,REQ-OS-3,Giá trị enum bất thường đi vào xử lý trạng thái,Có 1 đơn hàng đã tạo,"Gửi status='' (rỗng)
+Gửi status='0000000000'
+Lưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",HTTP 400/422 khi status ngoài tập hợp cho phép; không chấp nhận trạng thái tùy ý.,HIGH,TC-OS-2:''; TC-OS-2:'0000000000',"[{""kind"": ""status"", ""allowed"": [400, 422]}, {""kind"": ""status"", ""allowed"": [400, 422]}]",SEE_RUN_REPORT
+TC-OS-3,REQ-OS-4,Phá vỡ bất biến sau trạng thái đã giao,Đơn hàng đã ở trạng thái Da_giao,"1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.
+2. Gửi PUT status='Dang xu ly' cho đơn đã ở trạng thái Da_giao
+3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.
+Lưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.","Sau khi các bước chuẩn bị thành công, request chuyển ngược bị từ chối HTTP 400/409/422.",HIGH,TC-OS-3:revert-delivered,"[{""kind"": ""status"", ""allowed"": [400, 409, 422]}]",SEE_RUN_REPORT
+TC-OS-4,REQ-OS-5,ID hoặc status sai kiểu gây lỗi tầng xử lý,Server đang chạy,"Gọi PUT /api/orders/abc
+Gọi PUT với status={""a"":1}
+Lưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.","HTTP 400/404/422 có kiểm soát, không HTTP 500 do lỗi chuyển kiểu hoặc truy cập dữ liệu.",HIGH,TC-OS-4:/api/orders/abc; TC-OS-4:/api/orders/{order},"[{""kind"": ""status"", ""allowed"": [400, 404, 422]}, {""kind"": ""status"", ""allowed"": [400, 404, 422]}]",SEE_RUN_REPORT
+TC-OS-21,REQ-OS-4,Phá vỡ trạng thái kết thúc sau khi hủy đơn,Đơn mới hợp lệ và đúng quyền thao tác. Phạm vi: harness mô phỏng; testcase mới chưa có kịch bản thực thi tự động.,"1. Tạo đơn; chuyển đã hủy; yêu cầu chuyển đang giao; đọc lại đơn.
+2. Thu thập response và dữ liệu cuối để đối chiếu kết quả mong đợi.
+Dữ liệu thử: Dùng chính xác chuỗi status của hệ thống, không tự thay bằng alias.
+Lưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.","Sau khi hủy thành công, từ chối tiếp tục giao bằng HTTP 400/409/422; trạng thái lưu vẫn là đã hủy.",HIGH,TC-OS-21:cancelled-terminal,"[{""kind"": ""cancelled_terminal""}]",SEE_RUN_REPORT
+TC-OS-5,REQ-OS-7,Đối chứng luồng và tác dụng phụ thông báo,"Có 1 đơn hàng mới tạo, đúng token chủ đơn","1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.
+2. Gửi PUT status='Dang giao' với token chủ sở hữu
+3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.
+Lưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.","Cập nhật trạng thái hợp lệ thành công; nội dung thông báo khớp đơn và trạng thái mới, không dùng lỗi setup làm bằng chứng fuzzing.",MEDIUM,TC-OS-5:positive-control,"[{""kind"": ""notification"", ""status"": ""Đang giao""}]",SEE_RUN_REPORT
+TC-PRD-1,REQ-PRD-1,Vượt quyền tạo hoặc sửa dữ liệu sản phẩm,Server đang chạy,"POST /api/products không token
+PUT /api/products/1 không token
+Lưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",HTTP 401/403 khi thiếu token hoặc dùng tài khoản thường cho thao tác quản trị.,HIGH,TC-PRD-1:POST-None; TC-PRD-1:POST-self; TC-PRD-1:PUT-None; TC-PRD-1:PUT-self,"[{""kind"": ""status"", ""allowed"": [401, 403]}, {""kind"": ""status"", ""allowed"": [401, 403]}, {""kind"": ""status"", ""allowed"": [401, 403]}, {""kind"": ""status"", ""allowed"": [401, 403]}]",SEE_RUN_REPORT
+TC-PRD-2,REQ-PRD-2,Giá âm vượt qua ràng buộc miền dữ liệu,Server đang chạy,"1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.
+2. PUT /api/products/1 với body {""price"":-500}
+3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.
+Lưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",HTTP 400/422 cho giá âm; không coi cập nhật là hợp lệ.,HIGH,TC-PRD-2:negative-price,"[{""kind"": ""status"", ""allowed"": [400, 422]}]",SEE_RUN_REPORT
+TC-PRD-3,REQ-PRD-3,Giá sản phẩm sai kiểu gây ngoại lệ xử lý,Server đang chạy,"1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.
+2. PUT /api/products/1 với body {""price"":{""a"":1}}
+3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.
+Lưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",HTTP 400/422 cho object thay vì số; không để lỗi chuyển kiểu gây HTTP 500.,HIGH,TC-PRD-3:price-object,"[{""kind"": ""status"", ""allowed"": [400, 422]}]",SEE_RUN_REPORT
+TC-PRD-5,REQ-PRD-4,ID trùng gây ghi đè hoặc mơ hồ định danh sản phẩm,Đã có sản phẩm id=1,"1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.
+2. POST /api/products với body {""id"":1,...}
+3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.
+Lưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",Từ chối ID trùng hoặc cấp ID mới duy nhất; không tạo hai sản phẩm cùng định danh hoặc ghi đè trái phép.,HIGH,TC-PRD-5:duplicate-id,"[{""kind"": ""duplicate_id""}]",SEE_RUN_REPORT
+TC-PRD-4,REQ-PRD-6,Đối chứng lỗi truy cập sản phẩm không tồn tại,Server đang chạy,"1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.
+2. PUT /api/products/999999 (id không tồn tại)
+3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.
+Lưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",HTTP 404 có kiểm soát; không báo lỗi tiến trình khi tài nguyên không tồn tại.,MEDIUM,TC-PRD-4:missing-product,"[{""kind"": ""status"", ""allowed"": [404]}]",SEE_RUN_REPORT
+TC-USR-1,"REQ-USR-1, REQ-USR-2",Truy cập trái phép hồ sơ tài khoản khác,"Có 2 user đã seed (fuzzuser, victim)","PUT /api/users/:victim_id không token
+PUT /api/users/:victim_id với token của fuzzuser
+Lưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",HTTP 401/403 khi thiếu token hoặc sửa hồ sơ người khác; không coi request là cập nhật hợp lệ.,HIGH,TC-USR-1:None; TC-USR-1:self,"[{""kind"": ""status"", ""allowed"": [401, 403]}, {""kind"": ""status"", ""allowed"": [401, 403]}]",SEE_RUN_REPORT
+TC-USR-2,REQ-USR-3,Mass assignment làm thay đổi quyền tài khoản,Có 1 user thường đã seed,"1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.
+2. Gửi PUT với body {""role"":""admin""}
+3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.
+Lưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",Role lưu trong dữ liệu vẫn giữ nguyên khi người dùng thường gửi role=admin; không nâng quyền theo body.,HIGH,TC-USR-2:role,"[{""kind"": ""role_unchanged""}]",SEE_RUN_REPORT
+TC-USR-4,"REQ-USR-5, NFR-USR-5",Dữ liệu mật khẩu nhạy cảm bị lưu dạng rõ,Có 1 user đã seed (victim),"Gửi PUT với body {""password"":""plaintext_hack""}
+Thử đăng nhập lại bằng password mới 'plaintext_hack'
+Lưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.","Sau cập nhật hợp lệ, mật khẩu không được lưu bằng chuỗi plaintext đầu vào; phải kiểm tra dữ liệu lưu, không suy ra từ đăng nhập thành công.",HIGH,TC-USR-4:password-storage,"[{""kind"": ""password""}]",SEE_RUN_REPORT
+TC-USR-3,REQ-USR-4,ID sai định dạng gây ngoại lệ truy vấn hồ sơ,Server đang chạy,"1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.
+2. Gửi PUT /api/users/abc
+3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.
+Lưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",HTTP 400/404 có kiểm soát; không HTTP 500 do ID sai định dạng.,HIGH,TC-USR-3:invalid-id,"[{""kind"": ""status"", ""allowed"": [400, 404]}]",SEE_RUN_REPORT
+TC-USR-5,REQ-USR-6,Vượt cơ chế bảo vệ khởi tạo tài khoản admin,Server đang chạy,"1. Chuẩn bị trạng thái và dữ liệu như điều kiện tiên quyết.
+2. Gửi POST /api/auth/create-admin với secretKey='wrong'
+3. Thu thập phản hồi/trạng thái cuối và đối chiếu kết quả mong đợi.
+Lưu seed, input thực tế, ngữ cảnh xác thực/trạng thái, response và thời gian. Chỉ kết luận crash khi có mã thoát/signal và log tiến trình; timeout là nghi vấn hang.",HTTP 403 khi secretKey sai; không tạo tài khoản admin từ request này.,HIGH,TC-USR-5:wrong-secret,"[{""kind"": ""status"", ""allowed"": [403]}]",SEE_RUN_REPORT

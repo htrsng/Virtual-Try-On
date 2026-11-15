@@ -1,0 +1,85 @@
+{
+  "case": {
+    "id": "TC-USR-5:wrong-secret",
+    "testcase": "TC-USR-5",
+    "steps": [
+      {
+        "url": "/api/auth/create-admin",
+        "body": {
+          "email": "probe@test.com",
+          "password": "Test123!",
+          "secretKey": "wrong"
+        },
+        "actor": null,
+        "method": "POST"
+      }
+    ],
+    "check": {
+      "kind": "status",
+      "allowed": [
+        403
+      ]
+    }
+  },
+  "status": "PASS",
+  "evidence": {
+    "ok": true,
+    "environment": "node_harness_stub",
+    "limitations": [
+      "Datastore and services are simulated; conclusions apply to this harness only."
+    ],
+    "catalog": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6af9362de2e559dff0bbc588",
+        "createdAt": "2026-11-15T04:33:49.764Z"
+      }
+    ],
+    "observations": [
+      {
+        "method": "POST",
+        "url": "/api/auth/create-admin",
+        "actor": null,
+        "input": {
+          "email": "probe@test.com",
+          "password": "Test123!",
+          "secretKey": "wrong"
+        },
+        "status": 403,
+        "body": {
+          "message": "Secret key không đúng"
+        },
+        "elapsed_ms": 3.5132999999999583,
+        "entity_after": null
+      }
+    ],
+    "password_audit": null,
+    "final_products": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6af9362de2e559dff0bbc588",
+        "createdAt": "2026-11-15T04:33:49.764Z"
+      }
+    ],
+    "notifications": null,
+    "initial_entity": null,
+    "final_entity": null,
+    "actor_ids": {
+      "self": "000000000000000000000001"
+    }
+  },
+  "elapsed_seconds": 0.8922072000000298,
+  "evidence_file": "evidence/040.json"
+}

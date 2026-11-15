@@ -1,0 +1,113 @@
+{
+  "case": {
+    "id": "TC-ORD-2:address",
+    "testcase": "TC-ORD-2",
+    "steps": [
+      {
+        "url": "/api/orders",
+        "body": {
+          "products": [
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            }
+          ],
+          "totalAmount": 400000,
+          "shippingInfo": {
+            "fullName": "Nguyen Van A",
+            "phone": "0900000000"
+          },
+          "paymentMethod": "COD",
+          "discountCode": "",
+          "discountAmount": 0,
+          "shippingFee": 0
+        },
+        "actor": "self",
+        "method": "POST"
+      }
+    ],
+    "check": {
+      "kind": "status",
+      "allowed": [
+        400
+      ]
+    }
+  },
+  "status": "PASS",
+  "evidence": {
+    "ok": true,
+    "environment": "node_harness_stub",
+    "limitations": [
+      "Datastore and services are simulated; conclusions apply to this harness only."
+    ],
+    "catalog": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6af9361ae6c80fccc11e8730",
+        "createdAt": "2026-11-15T04:33:30.266Z"
+      }
+    ],
+    "observations": [
+      {
+        "method": "POST",
+        "url": "/api/orders",
+        "actor": "self",
+        "input": {
+          "products": [
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            }
+          ],
+          "totalAmount": 400000,
+          "shippingInfo": {
+            "fullName": "Nguyen Van A",
+            "phone": "0900000000"
+          },
+          "paymentMethod": "COD",
+          "discountCode": "",
+          "discountAmount": 0,
+          "shippingFee": 0
+        },
+        "status": 400,
+        "body": {
+          "message": "Vui lòng nhập địa chỉ"
+        },
+        "elapsed_ms": 6.046699999999987,
+        "entity_after": null
+      }
+    ],
+    "password_audit": null,
+    "final_products": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6af9361ae6c80fccc11e8730",
+        "createdAt": "2026-11-15T04:33:30.266Z"
+      }
+    ],
+    "notifications": null,
+    "initial_entity": null,
+    "final_entity": null,
+    "actor_ids": {
+      "self": "000000000000000000000001"
+    }
+  },
+  "elapsed_seconds": 0.9575056999997287,
+  "evidence_file": "evidence/019.json"
+}

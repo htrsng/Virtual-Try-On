@@ -1,0 +1,5 @@
+Bước 1: blackbox khám phá input bất thường
+Khoanh biên blackbox: replay trên state mới, đổi từng trường
+Bước 2: whitebox chạy lại và khảo sát input đã tìm
+Bước 3: trace totalAmount → Z3 → xác nhận input mới
+D:\Virtual-Try-On-sync\reports\runs\portfolio-verified-20261115\fuzz\report.json

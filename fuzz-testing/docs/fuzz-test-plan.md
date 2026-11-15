@@ -1,5 +1,9 @@
 # Kế hoạch nâng cấp portfolio fuzz testing
 
+Repo hiện đã mở rộng thành QA portfolio. Kế hoạch tổng thể và trạng thái hiện tại
+nằm ở [test plan](../../docs/test-plan.md) và [traceability](../../docs/traceability.md).
+Các bước dưới đây giữ làm roadmap riêng cho module fuzzing.
+
 Module dùng tên `fuzz-testing/` sau khi gộp hai nhánh. Giữ các bản sửa harness,
 test và CI từ remote, kết hợp cách đặt module độc lập ở gốc repo từ local.
 

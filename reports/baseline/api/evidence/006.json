@@ -1,0 +1,80 @@
+{
+  "case": {
+    "id": "TC-AUTH-2:2",
+    "testcase": "TC-AUTH-2",
+    "steps": [
+      {
+        "url": "/api/auth/login",
+        "body": {
+          "email": 123,
+          "password": "Fuzz123!"
+        },
+        "actor": null,
+        "method": "POST"
+      }
+    ],
+    "check": {
+      "kind": "no_5xx"
+    }
+  },
+  "status": "PASS",
+  "evidence": {
+    "ok": true,
+    "environment": "node_harness_stub",
+    "limitations": [
+      "Datastore and services are simulated; conclusions apply to this harness only."
+    ],
+    "catalog": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6af9360ef1c54c6619723e7c",
+        "createdAt": "2026-11-15T04:33:18.153Z"
+      }
+    ],
+    "observations": [
+      {
+        "method": "POST",
+        "url": "/api/auth/login",
+        "actor": null,
+        "input": {
+          "email": 123,
+          "password": "Fuzz123!"
+        },
+        "status": 404,
+        "body": {
+          "message": "Không tìm thấy tài khoản với email này"
+        },
+        "elapsed_ms": 5.565600000000018,
+        "entity_after": null
+      }
+    ],
+    "password_audit": null,
+    "final_products": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6af9360ef1c54c6619723e7c",
+        "createdAt": "2026-11-15T04:33:18.153Z"
+      }
+    ],
+    "notifications": null,
+    "initial_entity": null,
+    "final_entity": null,
+    "actor_ids": {
+      "self": "000000000000000000000001"
+    }
+  },
+  "elapsed_seconds": 0.9323410000001786,
+  "evidence_file": "evidence/006.json"
+}

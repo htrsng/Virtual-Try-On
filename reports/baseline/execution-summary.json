@@ -1,0 +1,86 @@
+{
+  "created_utc": "2026-11-15T04:34:11.384947+00:00",
+  "suite": "full",
+  "steps": [
+    {
+      "suite": "application-unit",
+      "exit_code": 0,
+      "command": [
+        "node",
+        "--experimental-strip-types",
+        "--test",
+        "--test-reporter=junit",
+        "--test-reporter-destination=D:\\Virtual-Try-On-sync\\reports\\runs\\portfolio-verified-20261115\\unit-junit.xml",
+        "D:\\Virtual-Try-On-sync\\automation-testing\\tests\\fetch-timeout.test.mjs",
+        "D:\\Virtual-Try-On-sync\\automation-testing\\tests\\size-recommendation.test.mjs"
+      ],
+      "log": "application-unit.log"
+    },
+    {
+      "suite": "reporting-regression",
+      "exit_code": 0,
+      "command": [
+        "C:\\Users\\TRANG\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "api-testing/tests",
+        "-p",
+        "test_*.py"
+      ],
+      "log": "reporting-regression.log"
+    },
+    {
+      "suite": "fuzz-tool-regression",
+      "exit_code": 0,
+      "command": [
+        "C:\\Users\\TRANG\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "fuzz-testing/tests",
+        "-p",
+        "test_*.py"
+      ],
+      "log": "fuzz-tool-regression.log"
+    },
+    {
+      "suite": "api-acceptance",
+      "exit_code": 1,
+      "command": [
+        "C:\\Users\\TRANG\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "api-testing/run_suite.py",
+        "--suite",
+        "full",
+        "--output",
+        "D:\\Virtual-Try-On-sync\\reports\\runs\\portfolio-verified-20261115\\api"
+      ],
+      "log": "api-acceptance.log"
+    },
+    {
+      "suite": "fuzz-smoke",
+      "exit_code": 0,
+      "command": [
+        "C:\\Users\\TRANG\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "fuzz-testing/fuzzers/run_fuzzing.py",
+        "--iterations",
+        "6",
+        "--iterations-per-case",
+        "2",
+        "--max-cases",
+        "1",
+        "--boundary-budget",
+        "2",
+        "--seed",
+        "7",
+        "--concolic",
+        "--output",
+        "D:\\Virtual-Try-On-sync\\reports\\runs\\portfolio-verified-20261115\\fuzz"
+      ],
+      "log": "fuzz-smoke.log"
+    }
+  ],
+  "note": "Full acceptance is expected to expose existing target defects; inspect API report."
+}

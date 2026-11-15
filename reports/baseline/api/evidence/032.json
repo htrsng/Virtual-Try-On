@@ -1,0 +1,199 @@
+{
+  "case": {
+    "id": "TC-OS-5:positive-control",
+    "testcase": "TC-OS-5",
+    "steps": [
+      {
+        "url": "/api/orders",
+        "body": {
+          "products": [
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            }
+          ],
+          "totalAmount": 400000,
+          "shippingInfo": {
+            "fullName": "Nguyen Van A",
+            "phone": "0900000000",
+            "address": "123 Duong ABC"
+          },
+          "paymentMethod": "COD",
+          "discountCode": "",
+          "discountAmount": 0,
+          "shippingFee": 0
+        },
+        "actor": "self",
+        "method": "POST",
+        "save_order": true
+      },
+      {
+        "url": "/api/orders/{order}",
+        "body": {
+          "status": "Đang giao"
+        },
+        "actor": "self",
+        "method": "PUT"
+      }
+    ],
+    "check": {
+      "kind": "notification",
+      "status": "Đang giao"
+    },
+    "inspect_notifications": true
+  },
+  "status": "PASS",
+  "evidence": {
+    "ok": true,
+    "environment": "node_harness_stub",
+    "limitations": [
+      "Datastore and services are simulated; conclusions apply to this harness only."
+    ],
+    "catalog": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6af9362681ebd5b640fd5828",
+        "createdAt": "2026-11-15T04:33:42.301Z"
+      }
+    ],
+    "observations": [
+      {
+        "method": "POST",
+        "url": "/api/orders",
+        "actor": "self",
+        "input": {
+          "products": [
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            }
+          ],
+          "totalAmount": 400000,
+          "shippingInfo": {
+            "fullName": "Nguyen Van A",
+            "phone": "0900000000",
+            "address": "123 Duong ABC"
+          },
+          "paymentMethod": "COD",
+          "discountCode": "",
+          "discountAmount": 0,
+          "shippingFee": 0
+        },
+        "status": 200,
+        "body": {
+          "message": "Đặt hàng thành công",
+          "order": {
+            "__v": 0,
+            "_id": "6af9362681ebd5b640fd5829",
+            "userId": "000000000000000000000001",
+            "products": [
+              {
+                "productId": 1,
+                "name": "Ao thun",
+                "price": 200000,
+                "quantity": 2
+              }
+            ],
+            "totalAmount": 400000,
+            "discountCode": "",
+            "discountAmount": 0,
+            "voucherCode": "",
+            "voucherDiscount": 0,
+            "shippingFee": 0,
+            "shippingMethod": "Tiêu chuẩn",
+            "shippingInfo": {
+              "fullName": "Nguyen Van A",
+              "phone": "0900000000",
+              "address": "123 Duong ABC"
+            },
+            "paymentMethod": "COD",
+            "status": "Đang xử lý",
+            "createdAt": "2026-11-15T04:33:42.411Z"
+          }
+        },
+        "elapsed_ms": 4.5896999999999935,
+        "entity_after": null
+      },
+      {
+        "method": "PUT",
+        "url": "/api/orders/6af9362681ebd5b640fd5829",
+        "actor": "self",
+        "input": {
+          "status": "Đang giao"
+        },
+        "status": 200,
+        "body": {
+          "__v": 1,
+          "_id": "6af9362681ebd5b640fd5829",
+          "userId": "000000000000000000000001",
+          "products": [
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            }
+          ],
+          "totalAmount": 400000,
+          "discountCode": "",
+          "discountAmount": 0,
+          "voucherCode": "",
+          "voucherDiscount": 0,
+          "shippingFee": 0,
+          "shippingMethod": "Tiêu chuẩn",
+          "shippingInfo": {
+            "fullName": "Nguyen Van A",
+            "phone": "0900000000",
+            "address": "123 Duong ABC"
+          },
+          "paymentMethod": "COD",
+          "status": "Đang giao",
+          "createdAt": "2026-11-15T04:33:42.411Z"
+        },
+        "elapsed_ms": 4.3396000000000186,
+        "entity_after": null
+      }
+    ],
+    "password_audit": null,
+    "final_products": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6af9362681ebd5b640fd5828",
+        "createdAt": "2026-11-15T04:33:42.301Z"
+      }
+    ],
+    "notifications": [
+      {
+        "userId": "000000000000000000000001",
+        "title": "Cập nhật đơn hàng",
+        "message": "Đơn hàng của bạn đã được giao cho đơn vị vận chuyển",
+        "type": "order",
+        "link": "/profile",
+        "_id": "6af9362681ebd5b640fd582a"
+      }
+    ],
+    "initial_entity": null,
+    "final_entity": null,
+    "actor_ids": {
+      "self": "000000000000000000000001"
+    }
+  },
+  "elapsed_seconds": 0.9258967000000666,
+  "evidence_file": "evidence/032.json"
+}

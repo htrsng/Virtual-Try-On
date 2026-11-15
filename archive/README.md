@@ -1,6 +1,6 @@
 # Ứng dụng VFitAI gốc
 
-`vfitai/` giữ mã ứng dụng trước khi repo tập trung vào fuzz testing:
+`vfitai/` giữ mã ứng dụng gốc trước khi repo chuyển thành QA portfolio:
 
 ```text
 vfitai/
@@ -24,4 +24,7 @@ Workspace không có backend `server/` mà E2E và workflow cũ tham chiếu, n�
 thể chạy đầy đủ ứng dụng. Workflow nằm trong thư mục archive không được GitHub
 Actions kích hoạt. Bộ fuzzing sử dụng target riêng và không phụ thuộc archive.
 
-Hướng dẫn hiện tại: [VFitAI API Fuzzing](../README.md).
+Unit automation hiện import trực tiếp hai hàm từ `client/src/utils/`; giữ mã nguồn
+để kiểm thử logic thực tế. Các Playwright test cũ chưa được tính là kết quả E2E đạt.
+
+Hướng dẫn hiện tại: [VFitAI QA Portfolio](../README.md).

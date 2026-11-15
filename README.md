@@ -1,49 +1,57 @@
-# VFitAI API Fuzzing
+# VFitAI QA Portfolio
 
-Bộ kiểm thử API bán hàng bằng fuzzing: sinh input bất thường, phát hiện vi phạm
-nghiệp vụ và lưu bằng chứng để tái hiện. Target là API Express với datastore mô phỏng,
-chạy độc lập với giao diện và các dịch vụ ngoài.
+Dự án kiểm thử phần mềm phát triển từ ứng dụng bán hàng và thử đồ VFitAI:
+thiết kế testcase, kiểm thử API, unit automation, fuzzing và báo cáo lỗi có bằng chứng.
+API chạy trên Express với datastore mô phỏng; unit test chạy trực tiếp mã TypeScript
+của ứng dụng gốc. Không cần dịch vụ production.
 
-**Công nghệ:** Python · Node.js/Express · requests · unittest · Z3 · GitHub Actions.
+**Công nghệ:** Python · Node.js/Express · node:test · unittest · Z3 · JUnit XML · GitHub Actions.
 
-## Phương pháp
+## Bắt đầu xem dự án
 
-- **Blackbox:** mutation JSON từ seed, gửi HTTP và kiểm tra bằng oracle nghiệp vụ.
-- **Greybox:** dùng line coverage để chọn input khám phá thêm mã.
-- **Concolic:** trace nhánh, phủ định điều kiện bằng Z3 và xác nhận input qua API;
-  giới hạn ở mô hình kiểu của `totalAmount`.
-- **Replay:** lưu input, response và ngữ cảnh để kiểm tra lại finding.
+| Phần | Nội dung |
+|---|---|
+| [Test plan](docs/test-plan.md) | Phạm vi, rủi ro, chiến lược, điều kiện chạy và kết thúc |
+| [Manual testing](manual-testing/README.md) | 12 testcase UI được thiết kế; hiện NOT_RUN |
+| [API testing](api-testing/README.md) | 29 testcase, 51 scenario cố định; input, oracle và state/response |
+| [Unit automation](automation-testing/README.md) | 14 test cho gợi ý size và xử lý request timeout |
+| [Fuzz testing](fuzz-testing/README.md) | Mutation HTTP, greybox line coverage và concolic Z3 giới hạn |
+| [Bug reports](bug-reports/README.md) | Expected/actual, severity, tái hiện và bằng chứng |
+| [Báo cáo](reports/README.md) | JSON, Markdown, JUnit và snapshot chọn lọc |
 
-Phạm vi: đăng nhập, tạo đơn, trạng thái đơn, cập nhật người dùng và quản lý sản phẩm.
+[Ma trận traceability](docs/traceability.md) · [Mô tả dùng cho CV](docs/cv.md).
 
-## Chạy nhanh
+## Cài và chạy
 
-Yêu cầu Python 3.12, Node.js 24 và npm. Từ thư mục gốc:
+CI dùng Python 3.12, Node.js 24 và npm. Từ repo root:
 
 ```sh
-cd fuzz-testing
 python -m pip install -r requirements.txt
-npm ci --prefix target
-python -m unittest discover -s tests -p "test_*.py"
-python fuzzers/run_fuzzing.py --iterations 6 --iterations-per-case 2 --max-cases 1 --boundary-budget 2 --seed 7 --concolic
+npm ci --prefix fuzz-testing/target
+python tools/run_checks.py --suite smoke
 ```
 
-Mỗi campaign mặc định có thư mục riêng trong `fuzz-testing/artifacts/`.
-Đọc `report.json`, `report.md` và các file bằng chứng của lần chạy đó.
+Smoke chạy unit ứng dụng, regression của công cụ và bốn đối chứng API. Để kiểm tra
+đủ 51 scenario API cùng một campaign fuzzing ngắn có Z3:
 
-## Kết quả đã kiểm tra
+```sh
+python tools/run_checks.py --suite full
+```
 
-- **34/34 test hồi quy đạt** ngoài sandbox trên Windows.
-- **Campaign ngắn có Z3 hoàn tất** với seed 7.
-- **134 testcase đặc tả:** 29 ca có kịch bản API, 105 ca ngoài phạm vi campaign.
+Kết quả mới ở `reports/runs/<id>/summary.md`; report API và JUnit nằm cùng lần chạy.
+Full suite trả exit 1 khi target vi phạm yêu cầu; exit 2 nếu có lỗi runner hoặc ca
+chưa chạy. Không đổi FAIL thành PASS để làm xanh CI. Fuzz runner hoàn tất vẫn có
+thể phát hiện lỗi; xem report từng bước.
 
-Đây là test cho công cụ và target mô phỏng. Finding không phải số lỗi gốc;
-HTTP 5xx không tự chứng minh crash. Xem phạm vi và môi trường trong
-[kết quả xác minh](fuzz-testing/docs/verification.md).
+## Bằng chứng và giới hạn
 
-[Hướng dẫn và cấu trúc](fuzz-testing/README.md) ·
-[Phương pháp kiểm thử](fuzz-testing/docs/testing-guide.md) ·
-[Kế hoạch nâng cấp](fuzz-testing/docs/fuzz-test-plan.md) ·
+[Baseline đã chạy](reports/baseline/README.md) ghi riêng số testcase, scenario,
+unit test và test hạ tầng. Các bug vẫn OPEN đến khi sửa target và retest đạt.
+Workflow **QA Portfolio Checks** chạy smoke trên PR; có thể chọn full bằng
+`workflow_dispatch`. Trạng thái GitHub Actions chỉ có sau khi push và workflow chạy.
+
+Target API mô phỏng và hai hàm unit không đại diện cho ứng dụng production hay
+browser E2E. 105 testcase Excel ngoài campaign API và 12 testcase UI chưa được gán PASS.
+Mã web/E2E cũ ở [archive/](archive/README.md); lịch sử Git và bằng chứng cũ được giữ.
+
 [Quy ước đóng góp](CONTRIBUTING.md) · [MIT](LICENSE)
-
-Mã ứng dụng gốc được lưu tại [archive/](archive/README.md).

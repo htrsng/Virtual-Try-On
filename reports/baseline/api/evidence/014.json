@@ -1,0 +1,102 @@
+{
+  "case": {
+    "id": "TC-ORD-1:2",
+    "testcase": "TC-ORD-1",
+    "steps": [
+      {
+        "url": "/api/orders",
+        "body": {
+          "products": [],
+          "totalAmount": 400000,
+          "shippingInfo": {
+            "fullName": "Nguyen Van A",
+            "phone": "0900000000",
+            "address": "123 Duong ABC"
+          },
+          "paymentMethod": "COD",
+          "discountCode": "",
+          "discountAmount": 0,
+          "shippingFee": 0
+        },
+        "actor": "self",
+        "method": "POST"
+      }
+    ],
+    "check": {
+      "kind": "status",
+      "allowed": [
+        400,
+        422
+      ]
+    }
+  },
+  "status": "PASS",
+  "evidence": {
+    "ok": true,
+    "environment": "node_harness_stub",
+    "limitations": [
+      "Datastore and services are simulated; conclusions apply to this harness only."
+    ],
+    "catalog": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6af93615ab1eae1930f3f57c",
+        "createdAt": "2026-11-15T04:33:25.650Z"
+      }
+    ],
+    "observations": [
+      {
+        "method": "POST",
+        "url": "/api/orders",
+        "actor": "self",
+        "input": {
+          "products": [],
+          "totalAmount": 400000,
+          "shippingInfo": {
+            "fullName": "Nguyen Van A",
+            "phone": "0900000000",
+            "address": "123 Duong ABC"
+          },
+          "paymentMethod": "COD",
+          "discountCode": "",
+          "discountAmount": 0,
+          "shippingFee": 0
+        },
+        "status": 400,
+        "body": {
+          "message": "Giỏ hàng trống"
+        },
+        "elapsed_ms": 5.4348999999999705,
+        "entity_after": null
+      }
+    ],
+    "password_audit": null,
+    "final_products": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6af93615ab1eae1930f3f57c",
+        "createdAt": "2026-11-15T04:33:25.650Z"
+      }
+    ],
+    "notifications": null,
+    "initial_entity": null,
+    "final_entity": null,
+    "actor_ids": {
+      "self": "000000000000000000000001"
+    }
+  },
+  "elapsed_seconds": 0.8988271000002896,
+  "evidence_file": "evidence/014.json"
+}

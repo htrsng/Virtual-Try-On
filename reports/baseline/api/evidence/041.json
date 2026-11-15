@@ -1,0 +1,111 @@
+{
+  "case": {
+    "id": "TC-PRD-1:POST-None",
+    "testcase": "TC-PRD-1",
+    "steps": [
+      {
+        "url": "/api/products",
+        "body": {
+          "name": "Quan jean",
+          "price": 350000,
+          "stock": 5,
+          "totalStock": 5,
+          "category": "Quan"
+        },
+        "actor": null,
+        "method": "POST"
+      }
+    ],
+    "check": {
+      "kind": "status",
+      "allowed": [
+        401,
+        403
+      ]
+    }
+  },
+  "status": "FAIL",
+  "evidence": {
+    "ok": true,
+    "environment": "node_harness_stub",
+    "limitations": [
+      "Datastore and services are simulated; conclusions apply to this harness only."
+    ],
+    "catalog": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6af9362ec88778c92c97021a",
+        "createdAt": "2026-11-15T04:33:50.691Z"
+      }
+    ],
+    "observations": [
+      {
+        "method": "POST",
+        "url": "/api/products",
+        "actor": null,
+        "input": {
+          "name": "Quan jean",
+          "price": 350000,
+          "stock": 5,
+          "totalStock": 5,
+          "category": "Quan"
+        },
+        "status": 200,
+        "body": {
+          "__v": 0,
+          "id": 2,
+          "name": "Quan jean",
+          "price": 350000,
+          "stock": 5,
+          "totalStock": 5,
+          "category": "Quan",
+          "ai_attributes": {},
+          "_id": "6af9362ec88778c92c97021b",
+          "createdAt": "2026-11-15T04:33:50.803Z"
+        },
+        "elapsed_ms": 3.6393000000000484,
+        "entity_after": null
+      }
+    ],
+    "password_audit": null,
+    "final_products": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6af9362ec88778c92c97021a",
+        "createdAt": "2026-11-15T04:33:50.691Z"
+      },
+      {
+        "__v": 0,
+        "id": 2,
+        "name": "Quan jean",
+        "price": 350000,
+        "stock": 5,
+        "totalStock": 5,
+        "category": "Quan",
+        "ai_attributes": {},
+        "_id": "6af9362ec88778c92c97021b",
+        "createdAt": "2026-11-15T04:33:50.803Z"
+      }
+    ],
+    "notifications": null,
+    "initial_entity": null,
+    "final_entity": null,
+    "actor_ids": {
+      "self": "000000000000000000000001"
+    }
+  },
+  "elapsed_seconds": 0.9283190999999533,
+  "evidence_file": "evidence/041.json"
+}
