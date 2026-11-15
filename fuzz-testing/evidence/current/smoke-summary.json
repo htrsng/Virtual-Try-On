@@ -1,0 +1,65 @@
+{
+  "environment": "node_harness_stub",
+  "seed": 7,
+  "elapsed_seconds": 3.784337476000019,
+  "blackbox_inputs": 6,
+  "blackbox_evidence": {
+    "error_categories": {},
+    "business_or_security_observations": 5,
+    "confirmed_memory_errors": null,
+    "confirmed_process_crashes": null,
+    "note": "Memory errors/process crashes are not measured by these HTTP oracles; timeout is not a confirmed hang."
+  },
+  "whitebox_status": "EXECUTED",
+  "boundary_cases": [
+    {
+      "target": "orders",
+      "input": {
+        "products": "🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂",
+        "totalAmount": 400000,
+        "shippingInfo": {
+          "fullName": "Nguyen Van A",
+          "phone": "0900000000",
+          "address": "123 Duong ABC"
+        },
+        "paymentMethod": "COD",
+        "discountCode": "",
+        "discountAmount": 0,
+        "shippingFee": 0
+      },
+      "had_auth": true,
+      "expected_signature": "Invalid cart structure accepted (REQ-ORD#)",
+      "status": "SAMPLED",
+      "regions": [],
+      "probes_used": 2,
+      "state_scope": "fresh seeded HTTP harness for every probe",
+      "evidence_path": "fuzzing-security-testing/artifacts/verification-final/blackbox/boundary_evidence/case_000.json"
+    }
+  ],
+  "whitebox_inputs": 2,
+  "whitebox_evidence": {
+    "error_categories": {
+      "APPLICATION_HTTP_ERROR": 1
+    },
+    "business_or_security_observations": 1,
+    "confirmed_memory_errors": null,
+    "confirmed_process_crashes": null,
+    "note": "Memory errors/process crashes are not measured by these HTTP oracles; timeout is not a confirmed hang."
+  },
+  "limitations": [
+    "Không có ứng viên không chứng minh hệ thống an toàn.",
+    "Khảo sát lân cận không chứng minh vùng biên đầy đủ.",
+    "HTTP 5xx không là crash; timeout chỉ là nghi vấn hang.",
+    "Chưa đo lỗi bộ nhớ bằng sanitizer trong luồng API."
+  ],
+  "concolic": {
+    "counts": {
+      "inputs": 2,
+      "replay_inputs": 1,
+      "http_5xx_inputs": 1,
+      "violating_inputs": 1,
+      "unsat_queries": 1
+    },
+    "report": "fuzzing-security-testing/artifacts/verification-final/concolic/report.json"
+  }
+}

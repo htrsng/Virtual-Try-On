@@ -1,0 +1,20 @@
+{
+  "environment": "node_harness_stub",
+  "created_utc": "2026-11-06T06:34:27.975118+00:00",
+  "random_seed": 7,
+  "counts": {
+    "PASS": 9,
+    "FAIL": 20
+  },
+  "execution_counts": {
+    "PASS": 19,
+    "FAIL": 33
+  },
+  "excluded_testcase_count": 105,
+  "limitations": [
+    "PASS concerns listed input samples, not complete requirement coverage.",
+    "Simulated datastore and test accounts; not a real-server or production benchmark.",
+    "Email/virtual-closet integrations are disabled. Timing uses test hashes and is exploratory.",
+    "Rate limiting, throughput and formal verification are outside this campaign."
+  ]
+}

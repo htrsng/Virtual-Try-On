@@ -29,7 +29,6 @@ server/.env
 fuzz-testing/.runtime/
 __pycache__/
 *.pyc
-fuzz-testing/reports/**/*.o
 
 # Local credentials, temporary tools, and document lock files
 .env
@@ -41,11 +40,14 @@ fuzz-testing/reports/**/*.o
 .tmp-*/
 
 # Local backups and redundant development runs (keep final report evidence)
-fuzz-testing/BaoCaoATPM/SaoLuu_TruocLamRo/
-fuzz-testing/reports/cleanup_*/
-fuzz-testing/reports/manual_mode_verification_auto/
-fuzz-testing/reports/spec_clarified_audit/
-fuzz-testing/reports/blackbox/*/
-!fuzz-testing/reports/blackbox/c90c27c8ba83/
-fuzz-testing/reports/whitebox/*/
-!fuzz-testing/reports/whitebox/98522cd13f6b/
+
+# Locally installed report-generation dependencies
+.codex-report-deps/
+
+# New fuzzing runs and local tooling
+fuzz-testing/artifacts/
+fuzz-testing/.venv/
+
+# Duplicate source archive; source stays in the tracked directory
+/fuzz-testing.rar
+/fuzzing-security-testing.rar
