@@ -33,14 +33,20 @@ jobs:
           MONGOMS_DISABLE_POSTINSTALL: '1'
       - name: Kiem tra hoi quy
         run: python -m unittest discover -s tests -p 'test_*.py'
+      - name: Kiem tra y nghia VALID INVALID cua input metrics
+        run: python -m unittest discover -s tools/tests -p 'test_*.py'
       - name: Doi chieu dac ta, khong thuc thi API
         run: python fuzzers/run_ch4.py --audit-only --output artifacts/spec-audit
       - name: Chay thu blackbox, whitebox va Z3
         run: python fuzzers/run_fuzzing.py --iterations 6 --iterations-per-case 2 --max-cases 1 --boundary-budget 2 --seed 7 --output artifacts/ci-smoke --concolic
+      - name: Ghi moi input va schema metrics
+        run: python tools/quality_campaign.py --iterations 28 --seed 7 --output artifacts/input-quality
       - name: Luu bang chung
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: fuzzing-evidence
-          path: fuzz-testing/artifacts/ci-smoke/
+          path: |
+            fuzz-testing/artifacts/ci-smoke/
+            fuzz-testing/artifacts/input-quality/
           if-no-files-found: warn

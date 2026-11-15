@@ -48,6 +48,9 @@ jobs:
         env:
           QA_SUITE: ${{ inputs.suite || 'smoke' }}
         run: python tools/run_checks.py --suite "$QA_SUITE" --output reports/runs/ci
+      - name: Replay acceptance failures on full runs
+        if: always() && inputs.suite == 'full'
+        run: python api-testing/replay_failures.py --report reports/runs/ci/api/report.json --repeats 2 --output reports/runs/ci/replay
       - name: Upload logs and JUnit reports
         if: always()
         uses: actions/upload-artifact@v4
