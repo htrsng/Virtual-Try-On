@@ -1,0 +1,168 @@
+{
+  "case": {
+    "id": "TC-PRD-2:negative-price",
+    "testcase": "TC-PRD-2",
+    "steps": [
+      {
+        "url": "/api/products/1",
+        "body": {
+          "price": -500
+        },
+        "actor": "admin",
+        "method": "PUT"
+      }
+    ],
+    "check": {
+      "kind": "status",
+      "allowed": [
+        400,
+        422
+      ]
+    }
+  },
+  "status": "FAIL",
+  "evidence": {
+    "ok": true,
+    "environment": "node_harness_stub",
+    "limitations": [
+      "Datastore and services are simulated; conclusions apply to this harness only."
+    ],
+    "state_schema_version": 1,
+    "catalog": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6af943c40d7ba061512867a0",
+        "createdAt": "2026-11-15T05:31:48.141Z"
+      }
+    ],
+    "observations": [
+      {
+        "method": "PUT",
+        "url": "/api/products/1",
+        "actor": "admin",
+        "input": {
+          "price": -500
+        },
+        "status": 200,
+        "body": {
+          "__v": 1,
+          "id": 1,
+          "name": "Ao thun",
+          "price": -500,
+          "stock": 10,
+          "totalStock": 10,
+          "category": "Ao",
+          "_id": "6af943c40d7ba061512867a0",
+          "createdAt": "2026-11-15T05:31:48.141Z"
+        },
+        "elapsed_ms": 3.6189000000000533,
+        "resource": {
+          "collection": "products",
+          "id": "1"
+        },
+        "state_before": {
+          "products": [
+            {
+              "__v": 0,
+              "id": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "stock": 10,
+              "totalStock": 10,
+              "category": "Ao",
+              "_id": "6af943c40d7ba061512867a0",
+              "createdAt": "2026-11-15T05:31:48.141Z"
+            }
+          ]
+        },
+        "state_after": {
+          "products": [
+            {
+              "__v": 1,
+              "id": 1,
+              "name": "Ao thun",
+              "price": -500,
+              "stock": 10,
+              "totalStock": 10,
+              "category": "Ao",
+              "_id": "6af943c40d7ba061512867a0",
+              "createdAt": "2026-11-15T05:31:48.141Z"
+            }
+          ]
+        },
+        "entity_before": {
+          "__v": 0,
+          "id": 1,
+          "name": "Ao thun",
+          "price": 200000,
+          "stock": 10,
+          "totalStock": 10,
+          "category": "Ao",
+          "_id": "6af943c40d7ba061512867a0",
+          "createdAt": "2026-11-15T05:31:48.141Z"
+        },
+        "entity_after": {
+          "__v": 1,
+          "id": 1,
+          "name": "Ao thun",
+          "price": -500,
+          "stock": 10,
+          "totalStock": 10,
+          "category": "Ao",
+          "_id": "6af943c40d7ba061512867a0",
+          "createdAt": "2026-11-15T05:31:48.141Z"
+        }
+      }
+    ],
+    "password_audit": null,
+    "final_products": [
+      {
+        "__v": 1,
+        "id": 1,
+        "name": "Ao thun",
+        "price": -500,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6af943c40d7ba061512867a0",
+        "createdAt": "2026-11-15T05:31:48.141Z"
+      }
+    ],
+    "notifications": null,
+    "initial_entity": {
+      "__v": 0,
+      "id": 1,
+      "name": "Ao thun",
+      "price": 200000,
+      "stock": 10,
+      "totalStock": 10,
+      "category": "Ao",
+      "_id": "6af943c40d7ba061512867a0",
+      "createdAt": "2026-11-15T05:31:48.141Z"
+    },
+    "final_entity": {
+      "__v": 1,
+      "id": 1,
+      "name": "Ao thun",
+      "price": -500,
+      "stock": 10,
+      "totalStock": 10,
+      "category": "Ao",
+      "_id": "6af943c40d7ba061512867a0",
+      "createdAt": "2026-11-15T05:31:48.141Z"
+    },
+    "actor_ids": {
+      "self": "000000000000000000000001",
+      "victim": "000000000000000000000002",
+      "admin": "000000000000000000000003"
+    }
+  },
+  "elapsed_seconds": 0.9751636000000872,
+  "evidence_file": "evidence/045.json"
+}

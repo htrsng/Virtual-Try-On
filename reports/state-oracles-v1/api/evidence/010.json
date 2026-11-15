@@ -1,0 +1,108 @@
+{
+  "case": {
+    "id": "TC-AUTH-5:jwt-role",
+    "testcase": "TC-AUTH-5",
+    "steps": [
+      {
+        "url": "/api/auth/login",
+        "body": {
+          "email": "fuzzuser@test.com",
+          "password": "Fuzz123!",
+          "role": "admin"
+        },
+        "actor": null,
+        "method": "POST"
+      }
+    ],
+    "check": {
+      "kind": "jwt"
+    }
+  },
+  "status": "PASS",
+  "evidence": {
+    "ok": true,
+    "environment": "node_harness_stub",
+    "limitations": [
+      "Datastore and services are simulated; conclusions apply to this harness only."
+    ],
+    "state_schema_version": 1,
+    "catalog": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6af943a0b10546976e5098cb",
+        "createdAt": "2026-11-15T05:31:12.239Z"
+      }
+    ],
+    "observations": [
+      {
+        "method": "POST",
+        "url": "/api/auth/login",
+        "actor": null,
+        "input": {
+          "email": "fuzzuser@test.com",
+          "password": "Fuzz123!",
+          "role": "admin"
+        },
+        "status": 200,
+        "body": {
+          "message": "Đăng nhập thành công",
+          "token": "[REDACTED]",
+          "user": {
+            "id": "000000000000000000000001",
+            "email": "fuzzuser@test.com",
+            "role": "user",
+            "fullName": "Fuzz Test User",
+            "phone": "",
+            "address": "",
+            "city": "",
+            "district": "",
+            "ward": ""
+          }
+        },
+        "elapsed_ms": 71.38449999999989,
+        "resource": null,
+        "state_before": null,
+        "state_after": null,
+        "entity_before": null,
+        "entity_after": null,
+        "jwt_claims": {
+          "id": "000000000000000000000001",
+          "email": "fuzzuser@test.com",
+          "role": "user",
+          "iat": 1794720672,
+          "exp": 1795325472
+        }
+      }
+    ],
+    "password_audit": null,
+    "final_products": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6af943a0b10546976e5098cb",
+        "createdAt": "2026-11-15T05:31:12.239Z"
+      }
+    ],
+    "notifications": null,
+    "initial_entity": null,
+    "final_entity": null,
+    "actor_ids": {
+      "self": "000000000000000000000001",
+      "victim": "000000000000000000000002",
+      "admin": "000000000000000000000003"
+    }
+  },
+  "elapsed_seconds": 1.3190151000007972,
+  "evidence_file": "evidence/010.json"
+}

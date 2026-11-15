@@ -1,0 +1,9 @@
+{
+  "oracle_git_commit": "1d3468b45d405d1ef49d41634861c5df0eaec835",
+  "oracle_path": "fuzz-testing/fuzzers/oracles.py",
+  "oracle_sha256": "4ed87d69b442f8224f6f353c2e901c83cda8ef094e1b8af34ad104da1f4a9ab5",
+  "tests": 16,
+  "failures_including_subtests": 27,
+  "errors": 0,
+  "scope": "New regression tests against old oracle loaded only in this Python process. Expected failures demonstrate false-green gaps; not application bug counts."
+}

@@ -22,6 +22,10 @@ với context hooks và preview boundary được mock. Không thay đổi phạ
 chưa thực thi nêu trên. [Frontend quality](../qa/frontend-quality.md) ghi rõ build,
 lint và test integration cũ còn lỗi; [QA hub](../qa/README.md) là chỉ mục reviewer.
 
+[Stored-state oracle v1](../qa/state-oracle-contract.md) bổ sung snapshot đúng tài
+nguyên cho các mutation được hỗ trợ và invariant no-write-on-4xx. Đây là contract
+của bộ kiểm thử, chưa phải bản sửa các lỗi nghiệp vụ target.
+
 ## Chiến lược và ưu tiên
 
 | Rủi ro | Mức ưu tiên | Kiểm tra |

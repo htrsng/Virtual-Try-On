@@ -15,7 +15,7 @@ Trang này là điểm truy cập từ QA hub, không sao chép một bản kế
 
 | Đường dẫn | Nhiệm vụ | Không được diễn giải thành |
 |---|---|---|
-| `fuzz-testing/tests/` | 34 regression test công cụ, oracle và điều phối | 34 ca nghiệp vụ PASS |
+| `fuzz-testing/tests/` | 55 regression test công cụ/oracle/snapshot, gồm 21 test mới | 55 ca nghiệp vụ PASS |
 | `api-testing/tests/` | 9 test reporting/replay contract hiện hành | 9 testcase API PASS |
 | `api-testing/run_suite.py` | Chạy 29 API testcase / 51 scenario cố định | Bao phủ hết 134 ca Excel |
 | `automation-testing/tests/` | 14 unit logic import TypeScript thật | UI/React/WebGL E2E |

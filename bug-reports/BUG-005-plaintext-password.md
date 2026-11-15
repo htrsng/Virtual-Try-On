@@ -18,8 +18,8 @@ và không bằng chuỗi plaintext.
 `equals_plaintext: true`. Oracle `password` FAIL.
 
 [Baseline response và audit](../reports/baseline/api/evidence/039.json) ·
-[Replay lượt 1](../reports/current/replay/evidence/TC-USR-4-1.json) ·
-[Replay lượt 2](../reports/current/replay/evidence/TC-USR-4-2.json).
+[Replay state-v1 lượt 1](../reports/state-oracles-v1/replay/evidence/TC-USR-4-1.json) ·
+[Replay state-v1 lượt 2](../reports/state-oracles-v1/replay/evidence/TC-USR-4-2.json).
 
 **Tác động:** password update trong mô hình không giữ bất biến lưu hash; không
 suy ra dữ liệu password của một MongoDB hoặc production backend thực tế.

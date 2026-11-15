@@ -1,0 +1,199 @@
+{
+  "case": {
+    "id": "TC-PRD-5:duplicate-id",
+    "testcase": "TC-PRD-5",
+    "steps": [
+      {
+        "url": "/api/products",
+        "body": {
+          "name": "Quan jean",
+          "price": 350000,
+          "stock": 5,
+          "totalStock": 5,
+          "category": "Quan",
+          "id": 1
+        },
+        "actor": "admin",
+        "method": "POST"
+      }
+    ],
+    "check": {
+      "kind": "duplicate_id"
+    }
+  },
+  "status": "FAIL",
+  "evidence": {
+    "ok": true,
+    "environment": "node_harness_stub",
+    "limitations": [
+      "Datastore and services are simulated; conclusions apply to this harness only."
+    ],
+    "state_schema_version": 1,
+    "catalog": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6af943c70cf5a2a8e77e3789",
+        "createdAt": "2026-11-15T05:31:51.218Z"
+      }
+    ],
+    "observations": [
+      {
+        "method": "POST",
+        "url": "/api/products",
+        "actor": "admin",
+        "input": {
+          "name": "Quan jean",
+          "price": 350000,
+          "stock": 5,
+          "totalStock": 5,
+          "category": "Quan",
+          "id": 1
+        },
+        "status": 200,
+        "body": {
+          "__v": 0,
+          "id": 1,
+          "name": "Quan jean",
+          "price": 350000,
+          "stock": 5,
+          "totalStock": 5,
+          "category": "Quan",
+          "ai_attributes": {},
+          "_id": "6af943c70cf5a2a8e77e378a",
+          "createdAt": "2026-11-15T05:31:51.339Z"
+        },
+        "elapsed_ms": 4.803999999999974,
+        "resource": {
+          "collection": "products",
+          "id": 1
+        },
+        "state_before": {
+          "products": [
+            {
+              "__v": 0,
+              "id": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "stock": 10,
+              "totalStock": 10,
+              "category": "Ao",
+              "_id": "6af943c70cf5a2a8e77e3789",
+              "createdAt": "2026-11-15T05:31:51.218Z"
+            }
+          ]
+        },
+        "state_after": {
+          "products": [
+            {
+              "__v": 0,
+              "id": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "stock": 10,
+              "totalStock": 10,
+              "category": "Ao",
+              "_id": "6af943c70cf5a2a8e77e3789",
+              "createdAt": "2026-11-15T05:31:51.218Z"
+            },
+            {
+              "__v": 0,
+              "id": 1,
+              "name": "Quan jean",
+              "price": 350000,
+              "stock": 5,
+              "totalStock": 5,
+              "category": "Quan",
+              "ai_attributes": {},
+              "_id": "6af943c70cf5a2a8e77e378a",
+              "createdAt": "2026-11-15T05:31:51.339Z"
+            }
+          ]
+        },
+        "entity_before": {
+          "__v": 0,
+          "id": 1,
+          "name": "Ao thun",
+          "price": 200000,
+          "stock": 10,
+          "totalStock": 10,
+          "category": "Ao",
+          "_id": "6af943c70cf5a2a8e77e3789",
+          "createdAt": "2026-11-15T05:31:51.218Z"
+        },
+        "entity_after": {
+          "__v": 0,
+          "id": 1,
+          "name": "Ao thun",
+          "price": 200000,
+          "stock": 10,
+          "totalStock": 10,
+          "category": "Ao",
+          "_id": "6af943c70cf5a2a8e77e3789",
+          "createdAt": "2026-11-15T05:31:51.218Z"
+        }
+      }
+    ],
+    "password_audit": null,
+    "final_products": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6af943c70cf5a2a8e77e3789",
+        "createdAt": "2026-11-15T05:31:51.218Z"
+      },
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Quan jean",
+        "price": 350000,
+        "stock": 5,
+        "totalStock": 5,
+        "category": "Quan",
+        "ai_attributes": {},
+        "_id": "6af943c70cf5a2a8e77e378a",
+        "createdAt": "2026-11-15T05:31:51.339Z"
+      }
+    ],
+    "notifications": null,
+    "initial_entity": {
+      "__v": 0,
+      "id": 1,
+      "name": "Ao thun",
+      "price": 200000,
+      "stock": 10,
+      "totalStock": 10,
+      "category": "Ao",
+      "_id": "6af943c70cf5a2a8e77e3789",
+      "createdAt": "2026-11-15T05:31:51.218Z"
+    },
+    "final_entity": {
+      "__v": 0,
+      "id": 1,
+      "name": "Ao thun",
+      "price": 200000,
+      "stock": 10,
+      "totalStock": 10,
+      "category": "Ao",
+      "_id": "6af943c70cf5a2a8e77e3789",
+      "createdAt": "2026-11-15T05:31:51.218Z"
+    },
+    "actor_ids": {
+      "self": "000000000000000000000001",
+      "victim": "000000000000000000000002",
+      "admin": "000000000000000000000003"
+    }
+  },
+  "elapsed_seconds": 1.0670402000005197,
+  "evidence_file": "evidence/048.json"
+}

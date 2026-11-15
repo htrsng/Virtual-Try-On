@@ -18,8 +18,12 @@ Runner tạo state mới, đăng nhập actor `self`, rồi gửi
 **Actual:** HTTP 200, response trả `role: "admin"`; oracle `role_unchanged` FAIL.
 
 **Tác động:** có thể thay đổi đặc quyền qua endpoint cập nhật user trong target.
-Bằng chứng hiện xác nhận phản hồi cập nhật; chưa có testcase sử dụng đặc quyền vừa
-đổi trên endpoint tiếp theo hoặc xác nhận database production.
+Baseline trước nâng cấp xác nhận phản hồi cập nhật. Snapshot state-v1 mới xác nhận
+đúng user có role trước là `user`, sau là `admin` trong datastore mô phỏng;
+chưa có testcase sử dụng đặc quyền vừa đổi trên endpoint tiếp theo hoặc database production.
+
+[State trước/sau mới](../reports/state-oracles-v1/api/evidence/037.json) ·
+[Replay mới](../reports/state-oracles-v1/replay/report.md).
 
 [Input, response và oracle đã đo](../reports/baseline/api/evidence/037.json).
 Kết quả đúng với snapshot/hash trong [baseline](../reports/baseline/README.md).

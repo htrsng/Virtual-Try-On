@@ -30,6 +30,15 @@ có FAIL là kết quả kiểm thử, không được sửa assertion để bi�
 được runner đánh giá; phần mô tả Excel rộng hơn chưa được coi là đã kiểm chứng hết.
 Test reporting tại `api-testing/tests/` bảo vệ exit code và phân loại JUnit.
 
+## Oracle dữ liệu lưu — contract v1
+
+Mutation của users/products/orders có snapshot trước/sau theo đúng tài nguyên,
+gồm các collection liên quan được hỗ trợ. HTTP 4xx không được làm thay đổi dữ liệu
+trong scope đó. Role, duplicate ID và tổng tiền cũng kiểm tra state thực thay vì
+chỉ tin response; thiếu bằng chứng cần thiết là ERROR/ORACLE_ERROR.
+[Quy tắc và giới hạn](../qa/state-oracle-contract.md) ·
+[55 regression và acceptance/replay mới](../reports/state-oracles-v1/README.md).
+
 ## Replay → regression
 
 ```sh

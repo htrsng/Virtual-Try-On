@@ -20,8 +20,8 @@ Oracle `cancelled_terminal` FAIL. Đây là bằng chứng trạng thái sau req
 khác với chỉ kiểm tra status HTTP.
 
 [Baseline request và state](../reports/baseline/api/evidence/051.json) ·
-[Replay lượt 1](../reports/current/replay/evidence/TC-OS-21-1.json) ·
-[Replay lượt 2](../reports/current/replay/evidence/TC-OS-21-2.json).
+[Replay state-v1 lượt 1](../reports/state-oracles-v1/replay/evidence/TC-OS-21-1.json) ·
+[Replay state-v1 lượt 2](../reports/state-oracles-v1/replay/evidence/TC-OS-21-2.json).
 
 **Hướng sửa đề xuất:** enforce bảng chuyển trạng thái trên server, kết hợp version
 để tránh race; retest delivered/canceled terminal, đường hợp lệ và request xung đột.

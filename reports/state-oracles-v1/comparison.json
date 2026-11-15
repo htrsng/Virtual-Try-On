@@ -1,0 +1,46 @@
+{
+  "baseline": "reports/baseline/api/report.json",
+  "baseline_sha256": "e76d61ee74a59a2c9a50bcf88bd7da8a6d7feadb43d42658f48b16fb29297f47",
+  "after_sha256": "30443b6a89a80fcc59f32ad61d1abd7cf596f77147195e4f2eeba6b1c5da76e9",
+  "before_scenarios": {
+    "PASS": 19,
+    "FAIL": 32
+  },
+  "after_scenarios": {
+    "PASS": 19,
+    "FAIL": 32
+  },
+  "before_testcases": {
+    "PASS": 9,
+    "FAIL": 20
+  },
+  "after_testcases": {
+    "PASS": 9,
+    "FAIL": 20
+  },
+  "scenario_status_changes": [],
+  "source_changes": [
+    {
+      "path": "api-testing/run_suite.py",
+      "before": "b23f0c952c2ff8f4914cad805fa50bd34635795a2488f9c0c586a43ba634afa3",
+      "after": "29746baeaf91f4cbcafe574ebee0427628f4acd33eb17b7cb9f3d417877a5db3"
+    },
+    {
+      "path": "fuzz-testing/fuzzers/oracles.py",
+      "before": "4ed87d69b442f8224f6f353c2e901c83cda8ef094e1b8af34ad104da1f4a9ab5",
+      "after": "7105fd894ac3101840634e5e2c9be6b32b384241a69476b119a2fbce4982629c"
+    },
+    {
+      "path": "fuzz-testing/target/scenario-runner.js",
+      "before": "8577775a2d7382f4b0bc0fb966563dd8e5b5229c33cb7ff701800c0bbf681cb2",
+      "after": "860ab96c6fb2bc5b4e51c4bc5dfbbab72681aa79a901507b2e3db62ff5cc9bdb"
+    },
+    {
+      "path": "fuzz-testing/target/state-snapshot.js",
+      "before": null,
+      "after": "9166591a1ebf97a9eacd9f56d5eb4b80bf5c2ea0addc73bd5e9b9affad5f4da1"
+    }
+  ],
+  "captured_mutation_frames": 52,
+  "note": "Test infrastructure strengthened; target/index.js and target/models.js are unchanged. No application defect is marked fixed."
+}

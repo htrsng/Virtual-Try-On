@@ -20,6 +20,10 @@ oracle `catalog_total` FAIL.
 **Tác động:** tính toàn vẹn số tiền đơn bị phá vỡ ở response API. Chưa có thanh toán
 thật hoặc bằng chứng tổn thất tài chính thực tế.
 
+State-v1 xác nhận order thực sự được tạo với total `2`, không chỉ response trả giá
+trị đó: [catalog và state trước/sau](../reports/state-oracles-v1/api/evidence/049.json).
+[Replay mới](../reports/state-oracles-v1/replay/report.md). Target chưa được sửa.
+
 [Catalog, request và response](../reports/baseline/api/evidence/049.json).
 [Baseline và source hash](../reports/baseline/README.md).
 

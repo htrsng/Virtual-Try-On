@@ -20,6 +20,10 @@ Oracle quyền truy cập FAIL; request đo được có `actor: null`.
 **Tác động:** endpoint cho phép thao tác user không có kiểm tra xác thực phù hợp.
 Bằng chứng này xác nhận request/response, chưa phải xác nhận toàn bộ hệ thống phân quyền.
 
+State-v1 đọc đúng bản ghi `victim`, xác nhận `fullName` trong datastore đổi từ
+`Victim User` sang `Fuzz probe`: [state trước/sau](../reports/state-oracles-v1/api/evidence/035.json).
+[Replay mới](../reports/state-oracles-v1/replay/report.md). Bug vẫn OPEN.
+
 [Request không token và response](../reports/baseline/api/evidence/035.json).
 [Baseline và source hash](../reports/baseline/README.md).
 

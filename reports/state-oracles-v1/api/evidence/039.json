@@ -1,0 +1,266 @@
+{
+  "case": {
+    "id": "TC-USR-4:password-storage",
+    "testcase": "TC-USR-4",
+    "steps": [
+      {
+        "url": "/api/users/{victim}",
+        "body": {
+          "password": "PlaintextProbe!"
+        },
+        "actor": "admin",
+        "method": "PUT"
+      }
+    ],
+    "check": {
+      "kind": "password"
+    },
+    "password_audit": "PlaintextProbe!"
+  },
+  "status": "FAIL",
+  "evidence": {
+    "ok": true,
+    "environment": "node_harness_stub",
+    "limitations": [
+      "Datastore and services are simulated; conclusions apply to this harness only."
+    ],
+    "state_schema_version": 1,
+    "catalog": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6af943bece2a9009685eb488",
+        "createdAt": "2026-11-15T05:31:42.179Z"
+      }
+    ],
+    "observations": [
+      {
+        "method": "PUT",
+        "url": "/api/users/000000000000000000000002",
+        "actor": "admin",
+        "input": {
+          "password": "PlaintextProbe!"
+        },
+        "status": 200,
+        "body": {
+          "__v": 1,
+          "_id": "000000000000000000000002",
+          "email": "victim@test.com",
+          "role": "user",
+          "fullName": "Victim User",
+          "phone": "",
+          "address": "",
+          "city": "",
+          "district": "",
+          "ward": "",
+          "addresses": [],
+          "createdAt": "2026-11-15T05:31:42.179Z"
+        },
+        "elapsed_ms": 3.964800000000082,
+        "resource": {
+          "collection": "users",
+          "id": "000000000000000000000002"
+        },
+        "state_before": {
+          "users": [
+            {
+              "__v": 0,
+              "failedLoginCount": 0,
+              "_id": "000000000000000000000001",
+              "email": "fuzzuser@test.com",
+              "role": "user",
+              "fullName": "Fuzz Test User",
+              "phone": "",
+              "address": "",
+              "city": "",
+              "district": "",
+              "ward": "",
+              "addresses": [],
+              "createdAt": "2026-11-15T05:31:42.176Z",
+              "password_fingerprint": "e7d106170d216fe5dd50458ef4f6d146541194c18e50650c496a5dee91624f26"
+            },
+            {
+              "__v": 0,
+              "failedLoginCount": 0,
+              "_id": "000000000000000000000002",
+              "email": "victim@test.com",
+              "role": "user",
+              "fullName": "Victim User",
+              "phone": "",
+              "address": "",
+              "city": "",
+              "district": "",
+              "ward": "",
+              "addresses": [],
+              "createdAt": "2026-11-15T05:31:42.179Z",
+              "password_fingerprint": "652892e8e91c9701ba5d009ef73c5015ec5a6de93002c3b9277396b68a3d0f9f"
+            },
+            {
+              "__v": 0,
+              "failedLoginCount": 0,
+              "_id": "000000000000000000000003",
+              "email": "fuzzadmin@test.com",
+              "role": "admin",
+              "fullName": "Fuzz Admin",
+              "phone": "",
+              "address": "",
+              "city": "",
+              "district": "",
+              "ward": "",
+              "addresses": [],
+              "createdAt": "2026-11-15T05:31:42.177Z",
+              "password_fingerprint": "9af4563cd349ee9baf17c8bc71962c3085a0caec9824f1ada2f1b02cc34ed6a8"
+            }
+          ]
+        },
+        "state_after": {
+          "users": [
+            {
+              "__v": 0,
+              "failedLoginCount": 0,
+              "_id": "000000000000000000000001",
+              "email": "fuzzuser@test.com",
+              "role": "user",
+              "fullName": "Fuzz Test User",
+              "phone": "",
+              "address": "",
+              "city": "",
+              "district": "",
+              "ward": "",
+              "addresses": [],
+              "createdAt": "2026-11-15T05:31:42.176Z",
+              "password_fingerprint": "e7d106170d216fe5dd50458ef4f6d146541194c18e50650c496a5dee91624f26"
+            },
+            {
+              "__v": 1,
+              "failedLoginCount": 0,
+              "_id": "000000000000000000000002",
+              "email": "victim@test.com",
+              "role": "user",
+              "fullName": "Victim User",
+              "phone": "",
+              "address": "",
+              "city": "",
+              "district": "",
+              "ward": "",
+              "addresses": [],
+              "createdAt": "2026-11-15T05:31:42.179Z",
+              "password_fingerprint": "28f80c359b0e4ee239be5ff3a6beabacb48b2ca5c29cd1eb2d321fbb376822d4"
+            },
+            {
+              "__v": 0,
+              "failedLoginCount": 0,
+              "_id": "000000000000000000000003",
+              "email": "fuzzadmin@test.com",
+              "role": "admin",
+              "fullName": "Fuzz Admin",
+              "phone": "",
+              "address": "",
+              "city": "",
+              "district": "",
+              "ward": "",
+              "addresses": [],
+              "createdAt": "2026-11-15T05:31:42.177Z",
+              "password_fingerprint": "9af4563cd349ee9baf17c8bc71962c3085a0caec9824f1ada2f1b02cc34ed6a8"
+            }
+          ]
+        },
+        "entity_before": {
+          "__v": 0,
+          "failedLoginCount": 0,
+          "_id": "000000000000000000000002",
+          "email": "victim@test.com",
+          "role": "user",
+          "fullName": "Victim User",
+          "phone": "",
+          "address": "",
+          "city": "",
+          "district": "",
+          "ward": "",
+          "addresses": [],
+          "createdAt": "2026-11-15T05:31:42.179Z",
+          "password_fingerprint": "652892e8e91c9701ba5d009ef73c5015ec5a6de93002c3b9277396b68a3d0f9f"
+        },
+        "entity_after": {
+          "__v": 1,
+          "failedLoginCount": 0,
+          "_id": "000000000000000000000002",
+          "email": "victim@test.com",
+          "role": "user",
+          "fullName": "Victim User",
+          "phone": "",
+          "address": "",
+          "city": "",
+          "district": "",
+          "ward": "",
+          "addresses": [],
+          "createdAt": "2026-11-15T05:31:42.179Z",
+          "password_fingerprint": "28f80c359b0e4ee239be5ff3a6beabacb48b2ca5c29cd1eb2d321fbb376822d4"
+        }
+      }
+    ],
+    "password_audit": {
+      "is_bcrypt": false,
+      "verifies": false,
+      "equals_plaintext": true
+    },
+    "final_products": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6af943bece2a9009685eb488",
+        "createdAt": "2026-11-15T05:31:42.179Z"
+      }
+    ],
+    "notifications": null,
+    "initial_entity": {
+      "__v": 0,
+      "failedLoginCount": 0,
+      "_id": "000000000000000000000002",
+      "email": "victim@test.com",
+      "role": "user",
+      "fullName": "Victim User",
+      "phone": "",
+      "address": "",
+      "city": "",
+      "district": "",
+      "ward": "",
+      "addresses": [],
+      "createdAt": "2026-11-15T05:31:42.179Z",
+      "password_fingerprint": "652892e8e91c9701ba5d009ef73c5015ec5a6de93002c3b9277396b68a3d0f9f"
+    },
+    "final_entity": {
+      "__v": 1,
+      "failedLoginCount": 0,
+      "_id": "000000000000000000000002",
+      "email": "victim@test.com",
+      "role": "user",
+      "fullName": "Victim User",
+      "phone": "",
+      "address": "",
+      "city": "",
+      "district": "",
+      "ward": "",
+      "addresses": [],
+      "createdAt": "2026-11-15T05:31:42.179Z",
+      "password_fingerprint": "28f80c359b0e4ee239be5ff3a6beabacb48b2ca5c29cd1eb2d321fbb376822d4"
+    },
+    "actor_ids": {
+      "self": "000000000000000000000001",
+      "victim": "000000000000000000000002",
+      "admin": "000000000000000000000003"
+    }
+  },
+  "elapsed_seconds": 0.965291000000434,
+  "evidence_file": "evidence/039.json"
+}

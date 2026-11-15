@@ -1,0 +1,395 @@
+{
+  "created_utc": "2026-11-15T05:33:44.171182+00:00",
+  "environment": "node_harness_stub",
+  "input_report": "reports\\runs\\state-oracles-v1-final\\api\\report.json",
+  "input_report_sha256": "30443b6a89a80fcc59f32ad61d1abd7cf596f77147195e4f2eeba6b1c5da76e9",
+  "source_sha256": {
+    "api-testing/run_suite.py": "29746baeaf91f4cbcafe574ebee0427628f4acd33eb17b7cb9f3d417877a5db3",
+    "fuzz-testing/data/seeds/seed_login_valid.json": "5fe4a22bb27d1b3881aee334b7e719dbbe2eeb3d3737c38c00b0a84be0258c46",
+    "fuzz-testing/data/seeds/seed_order_status_valid.json": "c2ab3f570d25de5044aca716c58bfa97b6eae13d1d2392d5be2b574dfe61d2e0",
+    "fuzz-testing/data/seeds/seed_order_valid.json": "da48e68c725c710357d6d24caecb406c8735242e2da9db70b0254c9b0ceb3e6f",
+    "fuzz-testing/data/seeds/seed_product_valid.json": "689eace6b944c382251c6cd36cc01cf659597e4287402b7d2b2aad8b555f5a5a",
+    "fuzz-testing/data/seeds/seed_user_update_valid.json": "d10fe47430a5b99239698e57f01f89fe27477201d7ef5c9965892fc3818b4d7e",
+    "fuzz-testing/docs/specifications/Module_Auth_Login_spec.xlsx": "0911ac90a0c86ce7afa5d20d1337a1f96bbed61945fa0790a0e0235cb9485e6f",
+    "fuzz-testing/docs/specifications/Module_Orders_Create_spec.xlsx": "e012313461b5fd75c1e153e02c862a43e588567b6e4f5a6e2b531de87748cbce",
+    "fuzz-testing/docs/specifications/Module_OrderStatus_spec.xlsx": "def734a752a43c9c21064ee9e00918282c147b058bf7d0a2177413032f39944b",
+    "fuzz-testing/docs/specifications/Module_Products_Manage_spec.xlsx": "659d7990fbd69a36bef7a73b0e19612917e907e4081fc62a59bce2d93715c5e8",
+    "fuzz-testing/docs/specifications/Module_Users_Admin_spec.xlsx": "e1d890ac77a57337f675fe2b7f45a65d511897246458b4d7d0b8cc122b676551",
+    "fuzz-testing/fuzzers/blackbox_fuzzer.py": "7c8aada1c980280a152ed31f4f982a7be0a42af932ab69d206da49d6bd4288bc",
+    "fuzz-testing/fuzzers/boundaries.py": "59c8976e0c5820390a1da8fd37937d571fde607b065c2c8744d5c1a24a0dc578",
+    "fuzz-testing/fuzzers/concolic.py": "863eb770040d3351679d26092338a6b531078226692894fdcf65607d030ee99a",
+    "fuzz-testing/fuzzers/controlled_comparison.py": "f06208e7e3e59dc7fdc46bfbe3ba87009ff7748462d554dedead63f43614d6de",
+    "fuzz-testing/fuzzers/finding_types.py": "3064c3b6e7968e497a3958f3536940b3fe28f401b1f9d3004913e37731184a2d",
+    "fuzz-testing/fuzzers/fuzzer_common.py": "a31ea4ca0d050ccc629289346d8b81613507f9b016d7a6107f0e35c50e59fa23",
+    "fuzz-testing/fuzzers/oracles.py": "7105fd894ac3101840634e5e2c9be6b32b384241a69476b119a2fbce4982629c",
+    "fuzz-testing/fuzzers/run_ch4.py": "80576663640ed49a88318429888e805fc68bda94cee02356de2aa12fe4967085",
+    "fuzz-testing/fuzzers/run_fuzzing.py": "46a9bb4a5d33acea1a01975137639d03e4a4061aa120b312d0187cf88bc948b9",
+    "fuzz-testing/fuzzers/runtime.py": "d731ce437ca0083fb09fd2769f76cb93d649e6af979ab891e7186c0695537c42",
+    "fuzz-testing/fuzzers/spec_campaign.py": "83e22ff47060407a927158bd8cab1b137a6205b3551f876ee62ccb9a5d8fc9a5",
+    "fuzz-testing/fuzzers/testcases.py": "70bc7d20bcf6d77975eedaad630170d1787ca0fbc6e989e8c762feb96919be2c",
+    "fuzz-testing/fuzzers/whitebox_fuzzer.py": "4fd3527d3c6f8c078ea474d28a51f92b434db4f0f9fdf8531dc1c00121f5fdfe",
+    "fuzz-testing/target/branch-trace.js": "908ba7cf736930ead3fd986e2ad60ed8f05b009561a68f5a4c29f0d3dd7b9676",
+    "fuzz-testing/target/concurrency.js": "cbd9fe9cf7eea850119ede0b38337e5dba3ff9ab7ba43bd0da1fe03f2cea52d5",
+    "fuzz-testing/target/config/env.js": "021f9f10011fa8ca174a2430770e598cd088c2154176d5ad0dbf3d1a6af88823",
+    "fuzz-testing/target/harness-common.js": "d20fddbe1f11fe62acb9199601ba3dde9d18b1289c97ff79c26ee24e22690b3f",
+    "fuzz-testing/target/http-server.js": "a4009170d9cd2a8823a9a940c3eb506b8508789b97fd36dfb1423e564dbe43eb",
+    "fuzz-testing/target/index.js": "bbaa12849ac355b2031f432d22fe1bd778138ba8b7ecacb42aa2355366342f75",
+    "fuzz-testing/target/middleware.js": "9fdcaea3c6d42919081595128e0d71f388f252f8df9e2b8e557957bfe8eafc00",
+    "fuzz-testing/target/models.js": "426804785d151353544b06c78fd20f988c577492f2e08dbc001a28240046a06b",
+    "fuzz-testing/target/routes/ai.routes.js": "f0f6c0ef16918d5e68c812604873dc4270c25791b76c755704cd189165a55e61",
+    "fuzz-testing/target/scenario-runner.js": "860ab96c6fb2bc5b4e51c4bc5dfbbab72681aa79a901507b2e3db62ff5cc9bdb",
+    "fuzz-testing/target/services.js": "004e374403dc06a06c2c011fc1bce37101a38d3fd49b258bc74a97bbddfa5b6e",
+    "fuzz-testing/target/single-run-harness.js": "d8f6f54d7d3487d7dfdc764ff8ae204704efbe08c66b810c578ee5ae22faf625",
+    "fuzz-testing/target/state-snapshot.js": "9166591a1ebf97a9eacd9f56d5eb4b80bf5c2ea0addc73bd5e9b9affad5f4da1",
+    "fuzz-testing/target/test-environment.js": "15b313b17acb7f4f5ca63314921a3c51348accc74629838ba30edd65c7ade2cf"
+  },
+  "replay_runner_sha256": "de7ab8994033bccc749b2048375f588261209f02b9fdf1c4e0ef8553cea00591",
+  "repeats": 2,
+  "representatives": 20,
+  "counts": {
+    "REPRODUCED": 20
+  },
+  "records": [
+    {
+      "testcase": "TC-AUTH-3",
+      "scenario": "TC-AUTH-3:enumeration",
+      "runs": [
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-AUTH-3-1.json"
+        },
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-AUTH-3-2.json"
+        }
+      ],
+      "conclusion": "REPRODUCED",
+      "fixed": false,
+      "regression_scenario": "TC-AUTH-3:enumeration"
+    },
+    {
+      "testcase": "TC-ORD-1",
+      "scenario": "TC-ORD-1:0",
+      "runs": [
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-ORD-1-1.json"
+        },
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-ORD-1-2.json"
+        }
+      ],
+      "conclusion": "REPRODUCED",
+      "fixed": false,
+      "regression_scenario": "TC-ORD-1:0"
+    },
+    {
+      "testcase": "TC-ORD-3",
+      "scenario": "TC-ORD-3:missing-total",
+      "runs": [
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-ORD-3-1.json"
+        },
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-ORD-3-2.json"
+        }
+      ],
+      "conclusion": "REPRODUCED",
+      "fixed": false,
+      "regression_scenario": "TC-ORD-3:missing-total"
+    },
+    {
+      "testcase": "TC-ORD-4",
+      "scenario": "TC-ORD-4:0",
+      "runs": [
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-ORD-4-1.json"
+        },
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-ORD-4-2.json"
+        }
+      ],
+      "conclusion": "REPRODUCED",
+      "fixed": false,
+      "regression_scenario": "TC-ORD-4:0"
+    },
+    {
+      "testcase": "TC-ORD-5",
+      "scenario": "TC-ORD-5:catalog-price",
+      "runs": [
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-ORD-5-1.json"
+        },
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-ORD-5-2.json"
+        }
+      ],
+      "conclusion": "REPRODUCED",
+      "fixed": false,
+      "regression_scenario": "TC-ORD-5:catalog-price"
+    },
+    {
+      "testcase": "TC-ORD-6",
+      "scenario": "TC-ORD-6:negative-total",
+      "runs": [
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-ORD-6-1.json"
+        },
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-ORD-6-2.json"
+        }
+      ],
+      "conclusion": "REPRODUCED",
+      "fixed": false,
+      "regression_scenario": "TC-ORD-6:negative-total"
+    },
+    {
+      "testcase": "TC-OS-1",
+      "scenario": "TC-OS-1:None",
+      "runs": [
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-OS-1-1.json"
+        },
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-OS-1-2.json"
+        }
+      ],
+      "conclusion": "REPRODUCED",
+      "fixed": false,
+      "regression_scenario": "TC-OS-1:None"
+    },
+    {
+      "testcase": "TC-OS-2",
+      "scenario": "TC-OS-2:''",
+      "runs": [
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-OS-2-1.json"
+        },
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-OS-2-2.json"
+        }
+      ],
+      "conclusion": "REPRODUCED",
+      "fixed": false,
+      "regression_scenario": "TC-OS-2:''"
+    },
+    {
+      "testcase": "TC-OS-3",
+      "scenario": "TC-OS-3:revert-delivered",
+      "runs": [
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-OS-3-1.json"
+        },
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-OS-3-2.json"
+        }
+      ],
+      "conclusion": "REPRODUCED",
+      "fixed": false,
+      "regression_scenario": "TC-OS-3:revert-delivered"
+    },
+    {
+      "testcase": "TC-OS-4",
+      "scenario": "TC-OS-4:/api/orders/abc",
+      "runs": [
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-OS-4-1.json"
+        },
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-OS-4-2.json"
+        }
+      ],
+      "conclusion": "REPRODUCED",
+      "fixed": false,
+      "regression_scenario": "TC-OS-4:/api/orders/abc"
+    },
+    {
+      "testcase": "TC-USR-1",
+      "scenario": "TC-USR-1:None",
+      "runs": [
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-USR-1-1.json"
+        },
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-USR-1-2.json"
+        }
+      ],
+      "conclusion": "REPRODUCED",
+      "fixed": false,
+      "regression_scenario": "TC-USR-1:None"
+    },
+    {
+      "testcase": "TC-USR-2",
+      "scenario": "TC-USR-2:role",
+      "runs": [
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-USR-2-1.json"
+        },
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-USR-2-2.json"
+        }
+      ],
+      "conclusion": "REPRODUCED",
+      "fixed": false,
+      "regression_scenario": "TC-USR-2:role"
+    },
+    {
+      "testcase": "TC-USR-3",
+      "scenario": "TC-USR-3:invalid-id",
+      "runs": [
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-USR-3-1.json"
+        },
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-USR-3-2.json"
+        }
+      ],
+      "conclusion": "REPRODUCED",
+      "fixed": false,
+      "regression_scenario": "TC-USR-3:invalid-id"
+    },
+    {
+      "testcase": "TC-USR-4",
+      "scenario": "TC-USR-4:password-storage",
+      "runs": [
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-USR-4-1.json"
+        },
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-USR-4-2.json"
+        }
+      ],
+      "conclusion": "REPRODUCED",
+      "fixed": false,
+      "regression_scenario": "TC-USR-4:password-storage"
+    },
+    {
+      "testcase": "TC-PRD-1",
+      "scenario": "TC-PRD-1:POST-None",
+      "runs": [
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-PRD-1-1.json"
+        },
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-PRD-1-2.json"
+        }
+      ],
+      "conclusion": "REPRODUCED",
+      "fixed": false,
+      "regression_scenario": "TC-PRD-1:POST-None"
+    },
+    {
+      "testcase": "TC-PRD-2",
+      "scenario": "TC-PRD-2:negative-price",
+      "runs": [
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-PRD-2-1.json"
+        },
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-PRD-2-2.json"
+        }
+      ],
+      "conclusion": "REPRODUCED",
+      "fixed": false,
+      "regression_scenario": "TC-PRD-2:negative-price"
+    },
+    {
+      "testcase": "TC-PRD-3",
+      "scenario": "TC-PRD-3:price-object",
+      "runs": [
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-PRD-3-1.json"
+        },
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-PRD-3-2.json"
+        }
+      ],
+      "conclusion": "REPRODUCED",
+      "fixed": false,
+      "regression_scenario": "TC-PRD-3:price-object"
+    },
+    {
+      "testcase": "TC-PRD-5",
+      "scenario": "TC-PRD-5:duplicate-id",
+      "runs": [
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-PRD-5-1.json"
+        },
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-PRD-5-2.json"
+        }
+      ],
+      "conclusion": "REPRODUCED",
+      "fixed": false,
+      "regression_scenario": "TC-PRD-5:duplicate-id"
+    },
+    {
+      "testcase": "TC-ORD-18",
+      "scenario": "TC-ORD-18:catalog",
+      "runs": [
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-ORD-18-1.json"
+        },
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-ORD-18-2.json"
+        }
+      ],
+      "conclusion": "REPRODUCED",
+      "fixed": false,
+      "regression_scenario": "TC-ORD-18:catalog"
+    },
+    {
+      "testcase": "TC-OS-21",
+      "scenario": "TC-OS-21:cancelled-terminal",
+      "runs": [
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-OS-21-1.json"
+        },
+        {
+          "status": "FAIL",
+          "evidence": "evidence/TC-OS-21-2.json"
+        }
+      ],
+      "conclusion": "REPRODUCED",
+      "fixed": false,
+      "regression_scenario": "TC-OS-21:cancelled-terminal"
+    }
+  ],
+  "scope": "One failing representative per testcase, fresh Node per attempt. Not every original input; no fixes verified."
+}

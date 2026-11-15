@@ -4,29 +4,31 @@
 17 là số nhóm triệu chứng do reviewer phân loại, không phải số bug gốc đã xác nhận.
 Số lỗi gốc độc lập hiện **chưa xác định**. Không suy ra từ số testcase, HTTP status hay nhóm.
 Các nhóm có thể tách hoặc gộp tiếp sau code review và kiểm chứng bản sửa.
+Nguồn: [API http-and-stored-state-v1](../reports/state-oracles-v1/api/report.json) và [replay](../reports/state-oracles-v1/replay/report.md).
+Contract state-v1 kiểm tra dữ liệu trước/sau khi mutation trả 4xx; xem [quy tắc](state-oracle-contract.md).
 
 | Finding | Module | Testcase | Nhóm | Severity | Expected | Actual trong các scenario FAIL | Replay | State | Regression cố định | Evidence / bug |
 |---|---|---|---|---|---|---|---|---|---|---|
-| DF-001 | Login | TC-AUTH-3 | G01 | Medium | Hai response login cùng status/body | HTTP [401]; hai nhánh HTTP 404/401 | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-AUTH-3:enumeration | [API](../reports/baseline/api/evidence/009.json) |
-| DF-002 | Order | TC-ORD-1 | G02 | High | HTTP thuộc [400, 422] | HTTP [200] | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-ORD-1:0 | [API](../reports/baseline/api/evidence/012.json) |
-| DF-003 | Order | TC-ORD-3 | G03 | Medium | HTTP thuộc [400] | HTTP [500] | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-ORD-3:missing-total | [API](../reports/baseline/api/evidence/020.json) |
-| DF-004 | Order | TC-ORD-4 | G03 | Medium | HTTP thuộc [400, 422] | HTTP [200, 500] | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-ORD-4:0 | [API](../reports/baseline/api/evidence/021.json) |
-| DF-005 | Order | TC-ORD-5 | G04 | High | Từ chối 400/422 hoặc tổng theo catalog | HTTP [200]; response total=2 | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-ORD-5:catalog-price | [API](../reports/baseline/api/evidence/025.json) / [BUG-002](../bug-reports/BUG-002-order-total.md) |
-| DF-006 | Order | TC-ORD-6 | G05 | High | HTTP thuộc [400, 422] | HTTP [200] | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-ORD-6:negative-total | [API](../reports/baseline/api/evidence/026.json) |
-| DF-007 | Order | TC-ORD-18 | G04 | High | Từ chối 400/422 hoặc tổng theo catalog | HTTP [200]; response total=2 | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-ORD-18:catalog | [API](../reports/baseline/api/evidence/049.json) / [BUG-002](../bug-reports/BUG-002-order-total.md) |
-| DF-008 | Order state | TC-OS-1 | G06 | High | HTTP thuộc [401, 403] | HTTP [200] | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-OS-1:None | [API](../reports/baseline/api/evidence/027.json) |
-| DF-009 | Order state | TC-OS-2 | G07 | Medium | HTTP thuộc [400, 422] | HTTP [200] | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-OS-2:'' | [API](../reports/baseline/api/evidence/029.json) |
-| DF-010 | Order state | TC-OS-3 | G08 | High | HTTP thuộc [400, 409, 422] | HTTP [200] | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-OS-3:revert-delivered | [API](../reports/baseline/api/evidence/031.json) / [BUG-004](../bug-reports/BUG-004-terminal-order-state.md) |
-| DF-011 | Order state | TC-OS-4 | G09 | Medium | HTTP thuộc [400, 404, 422] | HTTP [500] | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-OS-4:/api/orders/abc | [API](../reports/baseline/api/evidence/033.json) |
-| DF-012 | Order state | TC-OS-21 | G08 | High | Chặn chuyển tiếp, đơn vẫn hủy và dữ liệu không đổi | HTTP [200]; state cuối=Đang giao | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-OS-21:cancelled-terminal | [API](../reports/baseline/api/evidence/051.json) / [BUG-004](../bug-reports/BUG-004-terminal-order-state.md) |
-| DF-013 | Product | TC-PRD-1 | G10 | High | HTTP thuộc [401, 403] | HTTP [200] | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-PRD-1:POST-None | [API](../reports/baseline/api/evidence/041.json) |
-| DF-014 | Product | TC-PRD-2 | G11 | High | HTTP thuộc [400, 422] | HTTP [200] | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-PRD-2:negative-price | [API](../reports/baseline/api/evidence/045.json) |
-| DF-015 | Product | TC-PRD-3 | G12 | Medium | HTTP thuộc [400, 422] | HTTP [500] | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-PRD-3:price-object | [API](../reports/baseline/api/evidence/046.json) |
-| DF-016 | Product | TC-PRD-5 | G13 | High | Từ chối trùng hoặc cấp ID mới và giữ nguyên product gốc | HTTP [200] | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-PRD-5:duplicate-id | [API](../reports/baseline/api/evidence/048.json) |
-| DF-017 | User | TC-USR-1 | G14 | High | HTTP thuộc [401, 403] | HTTP [200] | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-USR-1:None | [API](../reports/baseline/api/evidence/035.json) / [BUG-003](../bug-reports/BUG-003-user-authorization.md) |
-| DF-018 | User | TC-USR-2 | G15 | High | Từ chối hoặc giữ role user | HTTP [200]; response role=admin | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-USR-2:role | [API](../reports/baseline/api/evidence/037.json) / [BUG-001](../bug-reports/BUG-001-role-escalation.md) |
-| DF-019 | User | TC-USR-4 | G16 | High | Password là bcrypt, xác minh được và không bằng plaintext | HTTP [200]; audit={"is_bcrypt": false, "verifies": false, "equals_plaintext": true} | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-USR-4:password-storage | [API](../reports/baseline/api/evidence/039.json) / [BUG-005](../bug-reports/BUG-005-plaintext-password.md) |
-| DF-020 | User | TC-USR-3 | G17 | Medium | HTTP thuộc [400, 404] | HTTP [500] | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-USR-3:invalid-id | [API](../reports/baseline/api/evidence/038.json) |
+| DF-001 | Login | TC-AUTH-3 | G01 | Medium | Hai response login cùng status/body | HTTP [401]; hai nhánh HTTP 404/401 | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-AUTH-3:enumeration | [API](../reports/state-oracles-v1/api/evidence/009.json) |
+| DF-002 | Order | TC-ORD-1 | G02 | High | HTTP thuộc [400, 422] | HTTP [200] | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-ORD-1:0 | [API](../reports/state-oracles-v1/api/evidence/012.json) |
+| DF-003 | Order | TC-ORD-3 | G03 | Medium | HTTP thuộc [400] | HTTP [500] | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-ORD-3:missing-total | [API](../reports/state-oracles-v1/api/evidence/020.json) |
+| DF-004 | Order | TC-ORD-4 | G03 | Medium | HTTP thuộc [400, 422] | HTTP [200, 500] | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-ORD-4:0 | [API](../reports/state-oracles-v1/api/evidence/021.json) |
+| DF-005 | Order | TC-ORD-5 | G04 | High | Từ chối không ghi dữ liệu hoặc tổng catalog khớp response/state | HTTP [200]; response total=2 | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-ORD-5:catalog-price | [API](../reports/state-oracles-v1/api/evidence/025.json) / [BUG-002](../bug-reports/BUG-002-order-total.md) |
+| DF-006 | Order | TC-ORD-6 | G05 | High | HTTP thuộc [400, 422] | HTTP [200] | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-ORD-6:negative-total | [API](../reports/state-oracles-v1/api/evidence/026.json) |
+| DF-007 | Order | TC-ORD-18 | G04 | High | Từ chối không ghi dữ liệu hoặc tổng catalog khớp response/state | HTTP [200]; response total=2 | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-ORD-18:catalog | [API](../reports/state-oracles-v1/api/evidence/049.json) / [BUG-002](../bug-reports/BUG-002-order-total.md) |
+| DF-008 | Order state | TC-OS-1 | G06 | High | HTTP thuộc [401, 403] | HTTP [200] | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-OS-1:None | [API](../reports/state-oracles-v1/api/evidence/027.json) |
+| DF-009 | Order state | TC-OS-2 | G07 | Medium | HTTP thuộc [400, 422] | HTTP [200] | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-OS-2:'' | [API](../reports/state-oracles-v1/api/evidence/029.json) |
+| DF-010 | Order state | TC-OS-3 | G08 | High | HTTP thuộc [400, 409, 422] | HTTP [200] | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-OS-3:revert-delivered | [API](../reports/state-oracles-v1/api/evidence/031.json) / [BUG-004](../bug-reports/BUG-004-terminal-order-state.md) |
+| DF-011 | Order state | TC-OS-4 | G09 | Medium | HTTP thuộc [400, 404, 422] | HTTP [500] | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-OS-4:/api/orders/abc | [API](../reports/state-oracles-v1/api/evidence/033.json) |
+| DF-012 | Order state | TC-OS-21 | G08 | High | Chặn chuyển tiếp, đơn vẫn hủy và dữ liệu không đổi | HTTP [200]; state cuối=Đang giao | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-OS-21:cancelled-terminal | [API](../reports/state-oracles-v1/api/evidence/051.json) / [BUG-004](../bug-reports/BUG-004-terminal-order-state.md) |
+| DF-013 | Product | TC-PRD-1 | G10 | High | HTTP thuộc [401, 403] | HTTP [200] | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-PRD-1:POST-None | [API](../reports/state-oracles-v1/api/evidence/041.json) |
+| DF-014 | Product | TC-PRD-2 | G11 | High | HTTP thuộc [400, 422] | HTTP [200] | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-PRD-2:negative-price | [API](../reports/state-oracles-v1/api/evidence/045.json) |
+| DF-015 | Product | TC-PRD-3 | G12 | Medium | HTTP thuộc [400, 422] | HTTP [500] | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-PRD-3:price-object | [API](../reports/state-oracles-v1/api/evidence/046.json) |
+| DF-016 | Product | TC-PRD-5 | G13 | High | Từ chối trùng hoặc cấp ID mới và giữ nguyên product gốc | HTTP [200] | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-PRD-5:duplicate-id | [API](../reports/state-oracles-v1/api/evidence/048.json) |
+| DF-017 | User | TC-USR-1 | G14 | High | HTTP thuộc [401, 403] | HTTP [200] | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-USR-1:None | [API](../reports/state-oracles-v1/api/evidence/035.json) / [BUG-003](../bug-reports/BUG-003-user-authorization.md) |
+| DF-018 | User | TC-USR-2 | G15 | High | Từ chối hoặc giữ role user | HTTP [200]; response role=admin | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-USR-2:role | [API](../reports/state-oracles-v1/api/evidence/037.json) / [BUG-001](../bug-reports/BUG-001-role-escalation.md) |
+| DF-019 | User | TC-USR-4 | G16 | High | Password là bcrypt, xác minh được và không bằng plaintext | HTTP [200]; audit={"is_bcrypt": false, "verifies": false, "equals_plaintext": true} | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-USR-4:password-storage | [API](../reports/state-oracles-v1/api/evidence/039.json) / [BUG-005](../bug-reports/BUG-005-plaintext-password.md) |
+| DF-020 | User | TC-USR-3 | G17 | Medium | HTTP thuộc [400, 404] | HTTP [500] | REPRODUCED (2 lần) | OPEN; chưa sửa | TC-USR-3:invalid-id | [API](../reports/state-oracles-v1/api/evidence/038.json) |
 
 ## Phân nhóm và giả thuyết nguyên nhân
 
@@ -56,4 +58,4 @@ Nguồn implementation để tiếp tục kiểm tra giả thuyết: [routes](..
 Regression cố định = scenario xác định đã có và đang FAIL; không có nghĩa bug đã sửa.
 Chưa có bug nào được đánh dấu FIXED/CLOSED hoặc retest sau sửa đạt.
 Replay kiểm tra hash source trước khi chạy; mỗi lượt reset Node/datastore.
-[40 lượt replay đo được](../reports/current/replay/report.md) · [phạm vi bằng chứng](evidence-index.md).
+[40 lượt replay đo được](../reports/state-oracles-v1/replay/report.md) · [phạm vi bằng chứng](evidence-index.md).

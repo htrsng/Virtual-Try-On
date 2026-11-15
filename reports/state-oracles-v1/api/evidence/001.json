@@ -1,0 +1,84 @@
+{
+  "case": {
+    "id": "TC-AUTH-1:0",
+    "testcase": "TC-AUTH-1",
+    "steps": [
+      {
+        "url": "/api/auth/login",
+        "body": {},
+        "actor": null,
+        "method": "POST"
+      }
+    ],
+    "check": {
+      "kind": "status",
+      "allowed": [
+        400
+      ]
+    }
+  },
+  "status": "PASS",
+  "evidence": {
+    "ok": true,
+    "environment": "node_harness_stub",
+    "limitations": [
+      "Datastore and services are simulated; conclusions apply to this harness only."
+    ],
+    "state_schema_version": 1,
+    "catalog": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6af94395e6e2499146eb4634",
+        "createdAt": "2026-11-15T05:31:01.742Z"
+      }
+    ],
+    "observations": [
+      {
+        "method": "POST",
+        "url": "/api/auth/login",
+        "actor": null,
+        "input": {},
+        "status": 400,
+        "body": {
+          "message": "Email và password là bắt buộc"
+        },
+        "elapsed_ms": 3.52780000000007,
+        "resource": null,
+        "state_before": null,
+        "state_after": null,
+        "entity_before": null,
+        "entity_after": null
+      }
+    ],
+    "password_audit": null,
+    "final_products": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6af94395e6e2499146eb4634",
+        "createdAt": "2026-11-15T05:31:01.742Z"
+      }
+    ],
+    "notifications": null,
+    "initial_entity": null,
+    "final_entity": null,
+    "actor_ids": {
+      "self": "000000000000000000000001",
+      "victim": "000000000000000000000002",
+      "admin": "000000000000000000000003"
+    }
+  },
+  "elapsed_seconds": 1.0685869999997522,
+  "evidence_file": "evidence/001.json"
+}

@@ -1,0 +1,248 @@
+FFFFFFFFFFFFFFFF.FF.FFFFFFF.FF
+======================================================================
+FAIL: test_accepted_catalog_total_must_match_stored_order (test_state_oracles.StoredStateOracleTests.test_accepted_catalog_total_must_match_stored_order)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Virtual-Try-On-sync\fuzz-testing\tests\test_state_oracles.py", line 132, in test_accepted_catalog_total_must_match_stored_order
+    self.assertFalse(evaluate({'check': {'kind': 'catalog_total'}}, measured(last)))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_duplicate_acceptance_requires_actual_unique_new_product (test_state_oracles.StoredStateOracleTests.test_duplicate_acceptance_requires_actual_unique_new_product)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Virtual-Try-On-sync\fuzz-testing\tests\test_state_oracles.py", line 126, in test_duplicate_acceptance_requires_actual_unique_new_product
+    self.assertFalse(evaluate({'check': {'kind': 'duplicate_id'}}, measured(last)))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_missing_request_identity_cannot_bypass_snapshot_requirements (test_state_oracles.StoredStateOracleTests.test_missing_request_identity_cannot_bypass_snapshot_requirements) (missing='method')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Virtual-Try-On-sync\fuzz-testing\tests\test_state_oracles.py", line 112, in test_missing_request_identity_cannot_bypass_snapshot_requirements
+    with self.subTest(missing=missing), self.assertRaises(ValueError):
+                                        ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_missing_request_identity_cannot_bypass_snapshot_requirements (test_state_oracles.StoredStateOracleTests.test_missing_request_identity_cannot_bypass_snapshot_requirements) (missing='url')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Virtual-Try-On-sync\fuzz-testing\tests\test_state_oracles.py", line 112, in test_missing_request_identity_cannot_bypass_snapshot_requirements
+    with self.subTest(missing=missing), self.assertRaises(ValueError):
+                                        ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_missing_snapshot_is_inconclusive_not_pass (test_state_oracles.StoredStateOracleTests.test_missing_snapshot_is_inconclusive_not_pass) (missing='state_before')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Virtual-Try-On-sync\fuzz-testing\tests\test_state_oracles.py", line 105, in test_missing_snapshot_is_inconclusive_not_pass
+    with self.subTest(missing=missing), self.assertRaises(ValueError):
+                                        ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_missing_snapshot_is_inconclusive_not_pass (test_state_oracles.StoredStateOracleTests.test_missing_snapshot_is_inconclusive_not_pass) (missing='state_after')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Virtual-Try-On-sync\fuzz-testing\tests\test_state_oracles.py", line 105, in test_missing_snapshot_is_inconclusive_not_pass
+    with self.subTest(missing=missing), self.assertRaises(ValueError):
+                                        ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_missing_snapshot_is_inconclusive_not_pass (test_state_oracles.StoredStateOracleTests.test_missing_snapshot_is_inconclusive_not_pass) (missing='resource')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Virtual-Try-On-sync\fuzz-testing\tests\test_state_oracles.py", line 105, in test_missing_snapshot_is_inconclusive_not_pass
+    with self.subTest(missing=missing), self.assertRaises(ValueError):
+                                        ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_rejected_duplicate_requires_unchanged_catalog (test_state_oracles.StoredStateOracleTests.test_rejected_duplicate_requires_unchanged_catalog) (status=400, changed=[{'_id': 'p1', 'id': 1, 'price': 1}])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Virtual-Try-On-sync\fuzz-testing\tests\test_state_oracles.py", line 43, in test_rejected_duplicate_requires_unchanged_catalog
+    self.assertFalse(evaluate(case, measured(last)))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_rejected_duplicate_requires_unchanged_catalog (test_state_oracles.StoredStateOracleTests.test_rejected_duplicate_requires_unchanged_catalog) (status=400, changed=[{'_id': 'p1', 'id': 1, 'price': 200000}, {'_id': 'p2', 'id': 1, 'price': 200000}])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Virtual-Try-On-sync\fuzz-testing\tests\test_state_oracles.py", line 43, in test_rejected_duplicate_requires_unchanged_catalog
+    self.assertFalse(evaluate(case, measured(last)))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_rejected_duplicate_requires_unchanged_catalog (test_state_oracles.StoredStateOracleTests.test_rejected_duplicate_requires_unchanged_catalog) (status=400, changed=[])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Virtual-Try-On-sync\fuzz-testing\tests\test_state_oracles.py", line 43, in test_rejected_duplicate_requires_unchanged_catalog
+    self.assertFalse(evaluate(case, measured(last)))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_rejected_duplicate_requires_unchanged_catalog (test_state_oracles.StoredStateOracleTests.test_rejected_duplicate_requires_unchanged_catalog) (status=409, changed=[{'_id': 'p1', 'id': 1, 'price': 1}])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Virtual-Try-On-sync\fuzz-testing\tests\test_state_oracles.py", line 43, in test_rejected_duplicate_requires_unchanged_catalog
+    self.assertFalse(evaluate(case, measured(last)))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_rejected_duplicate_requires_unchanged_catalog (test_state_oracles.StoredStateOracleTests.test_rejected_duplicate_requires_unchanged_catalog) (status=409, changed=[{'_id': 'p1', 'id': 1, 'price': 200000}, {'_id': 'p2', 'id': 1, 'price': 200000}])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Virtual-Try-On-sync\fuzz-testing\tests\test_state_oracles.py", line 43, in test_rejected_duplicate_requires_unchanged_catalog
+    self.assertFalse(evaluate(case, measured(last)))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_rejected_duplicate_requires_unchanged_catalog (test_state_oracles.StoredStateOracleTests.test_rejected_duplicate_requires_unchanged_catalog) (status=409, changed=[])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Virtual-Try-On-sync\fuzz-testing\tests\test_state_oracles.py", line 43, in test_rejected_duplicate_requires_unchanged_catalog
+    self.assertFalse(evaluate(case, measured(last)))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_rejected_duplicate_requires_unchanged_catalog (test_state_oracles.StoredStateOracleTests.test_rejected_duplicate_requires_unchanged_catalog) (status=422, changed=[{'_id': 'p1', 'id': 1, 'price': 1}])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Virtual-Try-On-sync\fuzz-testing\tests\test_state_oracles.py", line 43, in test_rejected_duplicate_requires_unchanged_catalog
+    self.assertFalse(evaluate(case, measured(last)))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_rejected_duplicate_requires_unchanged_catalog (test_state_oracles.StoredStateOracleTests.test_rejected_duplicate_requires_unchanged_catalog) (status=422, changed=[{'_id': 'p1', 'id': 1, 'price': 200000}, {'_id': 'p2', 'id': 1, 'price': 200000}])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Virtual-Try-On-sync\fuzz-testing\tests\test_state_oracles.py", line 43, in test_rejected_duplicate_requires_unchanged_catalog
+    self.assertFalse(evaluate(case, measured(last)))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_rejected_duplicate_requires_unchanged_catalog (test_state_oracles.StoredStateOracleTests.test_rejected_duplicate_requires_unchanged_catalog) (status=422, changed=[])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Virtual-Try-On-sync\fuzz-testing\tests\test_state_oracles.py", line 43, in test_rejected_duplicate_requires_unchanged_catalog
+    self.assertFalse(evaluate(case, measured(last)))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_rejected_intermediate_write_is_not_hidden_by_later_restoration (test_state_oracles.StoredStateOracleTests.test_rejected_intermediate_write_is_not_hidden_by_later_restoration)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Virtual-Try-On-sync\fuzz-testing\tests\test_state_oracles.py", line 118, in test_rejected_intermediate_write_is_not_hidden_by_later_restoration
+    self.assertFalse(evaluate({'check': {'kind': 'status', 'allowed': [200]}}, {'observations': [first, last]}))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_rejected_order_creation_cannot_store_an_order (test_state_oracles.StoredStateOracleTests.test_rejected_order_creation_cannot_store_an_order)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Virtual-Try-On-sync\fuzz-testing\tests\test_state_oracles.py", line 87, in test_rejected_order_creation_cannot_store_an_order
+    self.assertFalse(evaluate({'check': {'kind': 'catalog_total'}}, measured(last)))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_rejected_profile_write_cannot_change_password_or_another_user (test_state_oracles.StoredStateOracleTests.test_rejected_profile_write_cannot_change_password_or_another_user)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Virtual-Try-On-sync\fuzz-testing\tests\test_state_oracles.py", line 62, in test_rejected_profile_write_cannot_change_password_or_another_user
+    self.assertFalse(evaluate(case, measured(last)))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_rejected_role_change_must_preserve_stored_user (test_state_oracles.StoredStateOracleTests.test_rejected_role_change_must_preserve_stored_user) (status=400)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Virtual-Try-On-sync\fuzz-testing\tests\test_state_oracles.py", line 55, in test_rejected_role_change_must_preserve_stored_user
+    self.assertFalse(evaluate(case, measured(last)))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_rejected_role_change_must_preserve_stored_user (test_state_oracles.StoredStateOracleTests.test_rejected_role_change_must_preserve_stored_user) (status=401)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Virtual-Try-On-sync\fuzz-testing\tests\test_state_oracles.py", line 55, in test_rejected_role_change_must_preserve_stored_user
+    self.assertFalse(evaluate(case, measured(last)))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_rejected_role_change_must_preserve_stored_user (test_state_oracles.StoredStateOracleTests.test_rejected_role_change_must_preserve_stored_user) (status=403)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Virtual-Try-On-sync\fuzz-testing\tests\test_state_oracles.py", line 55, in test_rejected_role_change_must_preserve_stored_user
+    self.assertFalse(evaluate(case, measured(last)))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_rejected_role_change_must_preserve_stored_user (test_state_oracles.StoredStateOracleTests.test_rejected_role_change_must_preserve_stored_user) (status=422)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Virtual-Try-On-sync\fuzz-testing\tests\test_state_oracles.py", line 55, in test_rejected_role_change_must_preserve_stored_user
+    self.assertFalse(evaluate(case, measured(last)))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_rejected_status_update_cannot_change_entity_or_notifications (test_state_oracles.StoredStateOracleTests.test_rejected_status_update_cannot_change_entity_or_notifications)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Virtual-Try-On-sync\fuzz-testing\tests\test_state_oracles.py", line 96, in test_rejected_status_update_cannot_change_entity_or_notifications
+    self.assertFalse(evaluate(case, measured(last)))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_role_check_uses_targeted_victim_not_self (test_state_oracles.StoredStateOracleTests.test_role_check_uses_targeted_victim_not_self)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Virtual-Try-On-sync\fuzz-testing\tests\test_state_oracles.py", line 74, in test_role_check_uses_targeted_victim_not_self
+    self.assertFalse(evaluate({'check': {'kind': 'role_unchanged'}}, result))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_role_success_response_cannot_conceal_stored_admin_role (test_state_oracles.StoredStateOracleTests.test_role_success_response_cannot_conceal_stored_admin_role)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Virtual-Try-On-sync\fuzz-testing\tests\test_state_oracles.py", line 66, in test_role_success_response_cannot_conceal_stored_admin_role
+    self.assertFalse(evaluate({'check': {'kind': 'role_unchanged'}}, measured(last)))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_successful_role_response_cannot_hide_a_deleted_target (test_state_oracles.StoredStateOracleTests.test_successful_role_response_cannot_hide_a_deleted_target)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Virtual-Try-On-sync\fuzz-testing\tests\test_state_oracles.py", line 82, in test_successful_role_response_cannot_hide_a_deleted_target
+    self.assertFalse(evaluate({'check': {'kind': 'role_unchanged'}}, measured(last)))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 16 tests in 0.005s
+
+FAILED (failures=27)

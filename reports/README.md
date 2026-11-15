@@ -2,6 +2,8 @@
 
 - `runs/<id>/`: kết quả chạy mới, Git bỏ qua. Mỗi lần chạy có output riêng.
 - `baseline/`: snapshot chọn lọc được commit để reviewer kiểm chứng portfolio.
+- `state-oracles-v1/`: API/replay hiện hành sau khi làm chặt oracle và bổ sung
+  snapshot trước/sau; baseline cũ giữ nguyên, source hash mới được lưu riêng.
 - `current/`: replay, component/build/lint và fuzz-quality snapshot bổ sung;
   [evidence index](../qa/evidence-index.md) chỉ rõ ngày, nguồn và phạm vi từng loại.
 - `../fuzz-testing/evidence/`: bằng chứng fuzzing có trước lần chuyển thành QA portfolio.

@@ -13,10 +13,11 @@ VFitAI gốc. **Frontend và target API chưa tích hợp thành hệ thống E2
 | Báo cáo hiện hành so với tài liệu lịch sử | [Evidence index](evidence-index.md) |
 | Component scope, lỗi build/lint và CI | [Frontend quality](frontend-quality.md) |
 | Chất lượng và giới hạn phép đo fuzzing | [Fuzzing quality](fuzzing-quality.md) |
+| Dữ liệu trước/sau và chống false-green | [Stored-state oracle v1](state-oracle-contract.md) |
 
 ## Các kết quả không được gộp
 
-- **34/34**: regression của công cụ fuzzing, không phải nghiệp vụ ứng dụng đạt.
+- **55/55**: regression công cụ/oracle/snapshot, gồm 34 test cũ và 21 test mới; không phải nghiệp vụ ứng dụng đạt.
 - **29 API testcase / 51 scenario:** 9 testcase PASS, 20 FAIL; tương ứng 19 scenario
   PASS, 32 FAIL; không có ERROR/NOT_RUN trong baseline.
 - **20/20 FAIL testcase tái hiện:** hai lượt trên một scenario đại diện mỗi testcase,
@@ -42,3 +43,7 @@ không nối bằng `&&` khiến shell bỏ qua replay. Baseline cũ có thể l
 source hoặc line ending của checkout; dùng report mới từ chính môi trường đang chạy.
 
 [Năm bug report chi tiết](../bug-reports/README.md) · [Mẫu CV](../docs/cv.md).
+
+Lần chạy API/replay hiện hành: [state-oracles-v1](../reports/state-oracles-v1/README.md).
+Baseline trước nâng cấp được giữ nguyên. Replay từ report cũ trên code mới phải
+từ chối source hash lệch; demo trên tạo report mới trước khi replay.

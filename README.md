@@ -24,13 +24,15 @@ Snapshot ngày **15/11/2026**; môi trường và source hash nằm trong [Evide
 | Bộ kiểm thử | Kết quả | Bằng chứng |
 |---|---|---|
 | API acceptance — 29 testcase | 9 PASS · 20 FAIL · 0 ERROR/NOT_RUN | [Coverage](qa/test-coverage.md) |
-| 51 scenario triển khai từ các API testcase | 19 PASS · 32 FAIL · 0 ERROR/NOT_RUN | [Report](reports/baseline/api/report.md) |
-| Replay 20 testcase FAIL | Một scenario đại diện mỗi ca, chạy 2 lần; cả 40 lượt tái hiện | [Replay](reports/current/replay/report.md) |
+| 51 scenario triển khai từ các API testcase | 19 PASS · 32 FAIL · 0 ERROR/NOT_RUN | [Report state-v1](reports/state-oracles-v1/api/report.md) |
+| Replay 20 testcase FAIL | Một scenario đại diện mỗi ca, chạy 2 lần; cả 40 lượt tái hiện | [Replay state-v1](reports/state-oracles-v1/replay/report.md) |
 | Unit logic ứng dụng | 14/14 PASS | [JUnit](reports/baseline/unit-junit.xml) |
 | Component ProductList/Toast | 14/14 PASS | [JUnit](reports/current/frontend/components-junit.xml) |
 | Manual UI | 12 testcase thiết kế, NOT_RUN | [Testcases](manual-testing/test-cases.md) |
 
-Regression của **công cụ** được thống kê riêng: 34 test fuzz-tool, 9 test reporting/replay và 4 test schema advisory đều đạt. Không cộng các nhóm này với acceptance để tính tỷ lệ PASS chung. Trong 134 ca Excel, [105 ca ngoài API campaign](qa/excluded-testcases.csv) chưa được gán PASS.
+Regression của **công cụ** được thống kê riêng: 55 test fuzz-tool/oracle/snapshot, 9 test reporting/replay và 4 test schema advisory đều đạt. Không cộng các nhóm này với acceptance để tính tỷ lệ PASS chung. Trong 134 ca Excel, [105 ca ngoài API campaign](qa/excluded-testcases.csv) chưa được gán PASS.
+
+[Oracle state-v1](qa/state-oracle-contract.md) kiểm tra dữ liệu trước/sau request bị từ chối, đúng tài nguyên bị tác động và response khớp dữ liệu lưu. [Đợt xác minh mới](reports/state-oracles-v1/README.md) giữ nguyên target và baseline cũ; số testcase nghiệp vụ PASS/FAIL chưa đổi.
 
 ### Phát hiện lỗi
 

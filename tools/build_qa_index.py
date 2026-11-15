@@ -1,6 +1,8 @@
 """Build QA tables from measured artifacts; never invent execution statuses."""
 from collections import Counter
+import argparse
 import csv
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -44,7 +46,7 @@ def expected(case):
     check = case['check']
     return {'status': f"HTTP thuộc {check.get('allowed')}",
         'no_5xx': 'Mọi response HTTP < 500', 'same_response': 'Hai response login cùng status/body',
-        'catalog_total': 'Từ chối 400/422 hoặc tổng theo catalog',
+        'catalog_total': 'Từ chối không ghi dữ liệu hoặc tổng catalog khớp response/state',
         'role_unchanged': 'Từ chối hoặc giữ role user',
         'password': 'Password là bcrypt, xác minh được và không bằng plaintext',
         'duplicate_id': 'Từ chối trùng hoặc cấp ID mới và giữ nguyên product gốc',
@@ -72,13 +74,23 @@ def actual(executions):
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--api-report', type=Path, default=REPO / 'reports/state-oracles-v1/api/report.json')
+    parser.add_argument('--replay-report', type=Path, default=REPO / 'reports/state-oracles-v1/replay/report.json')
+    args = parser.parse_args()
     qa = REPO / 'qa'
     qa.mkdir(exist_ok=True)
-    source = json.loads((REPO / 'reports/baseline/api/report.json').read_text(encoding='utf-8'))
-    replay = json.loads((REPO / 'reports/current/replay/report.json').read_text(encoding='utf-8'))
+    api_path, replay_path = args.api_report.resolve(), args.replay_report.resolve()
+    api_link = '../' + api_path.parent.relative_to(REPO).as_posix()
+    replay_link = '../' + replay_path.parent.relative_to(REPO).as_posix()
+    source = json.loads(api_path.read_text(encoding='utf-8'))
+    replay = json.loads(replay_path.read_text(encoding='utf-8'))
+    if replay['input_report_sha256'] != hashlib.sha256(api_path.read_bytes()).hexdigest():
+        raise ValueError('Replay belongs to a different acceptance report')
+    included, excluded = application_cases(read_specs())
     failing = {row['testcase']['ID'] for row in source['traceability'] if row['status'] == 'FAIL'}
     if failing != TRIAGE.keys():
-        raise ValueError('Baseline FAIL set changed: review triage before regenerating')
+        raise ValueError('FAIL set changed: review triage before regenerating')
     replay_by_id = {r['testcase']:r for r in replay['records']}
     if failing != replay_by_id.keys():
         raise ValueError('Replay does not cover every failing testcase')
@@ -86,7 +98,9 @@ def main():
         '**20 testcase FAIL / 32 scenario FAIL → 17 nhóm triage sơ bộ.**',
         '17 là số nhóm triệu chứng do reviewer phân loại, không phải số bug gốc đã xác nhận.',
         'Số lỗi gốc độc lập hiện **chưa xác định**. Không suy ra từ số testcase, HTTP status hay nhóm.',
-        'Các nhóm có thể tách hoặc gộp tiếp sau code review và kiểm chứng bản sửa.', '',
+        'Các nhóm có thể tách hoặc gộp tiếp sau code review và kiểm chứng bản sửa.',
+        f"Nguồn: [API {source.get('oracle_contract', 'legacy')}]({api_link}/report.json) và [replay]({replay_link}/report.md).",
+        'Contract state-v1 kiểm tra dữ liệu trước/sau khi mutation trả 4xx; xem [quy tắc](state-oracle-contract.md).', '',
         '| Finding | Module | Testcase | Nhóm | Severity | Expected | Actual trong các scenario FAIL | Replay | State | Regression cố định | Evidence / bug |',
         '|---|---|---|---|---|---|---|---|---|---|---|']
     for index, row in enumerate((r for r in source['traceability'] if r['status']=='FAIL'), 1):
@@ -94,7 +108,7 @@ def main():
         examples = [e for e in source['executions'] if e['case']['testcase']==tc and e['status']=='FAIL']
         group,severity,_,_,bug = TRIAGE[tc]
         replayed = replay_by_id[tc]
-        ev = f"[API](../reports/baseline/api/{examples[0]['evidence_file']})"
+        ev = f"[API]({api_link}/{examples[0]['evidence_file']})"
         if bug:
             ev += f" / [{bug}](../bug-reports/{bug}-{BUG_FILES[bug]}.md)"
         module = {'AUTH':'Login', 'ORD':'Order', 'OS':'Order state', 'USR':'User', 'PRD':'Product'}[tc.split('-')[1]]
@@ -112,7 +126,7 @@ def main():
         'Regression cố định = scenario xác định đã có và đang FAIL; không có nghĩa bug đã sửa.',
         'Chưa có bug nào được đánh dấu FIXED/CLOSED hoặc retest sau sửa đạt.',
         'Replay kiểm tra hash source trước khi chạy; mỗi lượt reset Node/datastore.',
-        '[40 lượt replay đo được](../reports/current/replay/report.md) · [phạm vi bằng chứng](evidence-index.md).', '']
+        f'[40 lượt replay đo được]({replay_link}/report.md) · [phạm vi bằng chứng](evidence-index.md).', '']
     (qa/'defect-register.md').write_text('\n'.join(lines),encoding='utf-8')
 
     matrix = ['# Test Coverage Matrix', '',
@@ -120,6 +134,7 @@ def main():
         '**134 testcase Excel: 29 ca API đã thực thi / 105 ca ngoài campaign API.**',
         '29 ca được triển khai thành 51 scenario xác định: 19 PASS, 32 FAIL, 0 ERROR/NOT_RUN.',
         'Tổng hợp testcase: 9 PASS, 20 FAIL, 0 ERROR/NOT_RUN. Không cộng với regression test của công cụ.', '',
+        f"Lần chạy hiện hành: [API {source.get('oracle_contract', 'legacy')}]({api_link}/report.md).", '',
         '| Testcase | Nhóm chức năng | Requirement gốc | Scenario PASS/FAIL | Kết quả | Fuzz target cùng module | Replay đại diện |',
         '|---|---|---|---|---|---|---|']
     fuzz = {'AUTH':'login', 'ORD':'orders', 'OS':'order_status',
@@ -130,7 +145,7 @@ def main():
         counts=Counter(e['status'] for e in runs)
         module=tc.split('-')[1]
         values=[tc,module,row['testcase']['YeuCauLienQuan'],f"{counts['PASS']} / {counts['FAIL']}",
-                row['status'],fuzz[module],replay_by_id[tc]['conclusion'] if tc in replay_by_id else 'Không chọn (baseline PASS)']
+                row['status'],fuzz[module],replay_by_id[tc]['conclusion'] if tc in replay_by_id else 'Không chọn (API PASS)']
         matrix.append('| '+' | '.join(cell(v) for v in values)+' |')
     matrix += ['', 'Cột fuzz target là điểm liên hệ kiến trúc, **không xác nhận từng testcase đã được fuzz oracle bao phủ**.',
         'Login chỉ thuộc blackbox; greybox/concolic hỗ trợ target có giới hạn như mô tả trong module fuzzing.', '',
@@ -138,9 +153,8 @@ def main():
         '- [29 API definitions và oracle cụ thể](../api-testing/test-cases.csv).',
         '- [12 manual UI case](../manual-testing/test-cases.md): NOT_RUN, không thuộc 134 ca Excel.',
         '- [14 unit logic](../automation-testing/README.md) và [14 component checks](frontend-quality.md) là phạm vi khác.',
-        '- Regression hạ tầng: 34 test fuzz tool; 9 test API reporting/replay hiện hành, không phải acceptance coverage.', '']
+        '- Regression hạ tầng: 55 test fuzz tool/oracle/snapshot; 9 test API reporting/replay, không phải acceptance coverage.', '']
     (qa/'test-coverage.md').write_text('\n'.join(matrix),encoding='utf-8')
-    _, excluded = application_cases(read_specs())
     if len(excluded) != source['excluded_spec_testcases']:
         raise ValueError('Current specification scope differs from baseline')
     with (qa/'excluded-testcases.csv').open('w',encoding='utf-8-sig',newline='') as stream:

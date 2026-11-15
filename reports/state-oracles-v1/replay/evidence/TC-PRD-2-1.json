@@ -1,0 +1,167 @@
+{
+  "case": {
+    "id": "TC-PRD-2:negative-price",
+    "testcase": "TC-PRD-2",
+    "steps": [
+      {
+        "url": "/api/products/1",
+        "body": {
+          "price": -500
+        },
+        "actor": "admin",
+        "method": "PUT"
+      }
+    ],
+    "check": {
+      "kind": "status",
+      "allowed": [
+        400,
+        422
+      ]
+    }
+  },
+  "status": "FAIL",
+  "evidence": {
+    "ok": true,
+    "environment": "node_harness_stub",
+    "limitations": [
+      "Datastore and services are simulated; conclusions apply to this harness only."
+    ],
+    "state_schema_version": 1,
+    "catalog": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6af9442fe481574957560467",
+        "createdAt": "2026-11-15T05:33:35.062Z"
+      }
+    ],
+    "observations": [
+      {
+        "method": "PUT",
+        "url": "/api/products/1",
+        "actor": "admin",
+        "input": {
+          "price": -500
+        },
+        "status": 200,
+        "body": {
+          "__v": 1,
+          "id": 1,
+          "name": "Ao thun",
+          "price": -500,
+          "stock": 10,
+          "totalStock": 10,
+          "category": "Ao",
+          "_id": "6af9442fe481574957560467",
+          "createdAt": "2026-11-15T05:33:35.062Z"
+        },
+        "elapsed_ms": 3.8012999999999693,
+        "resource": {
+          "collection": "products",
+          "id": "1"
+        },
+        "state_before": {
+          "products": [
+            {
+              "__v": 0,
+              "id": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "stock": 10,
+              "totalStock": 10,
+              "category": "Ao",
+              "_id": "6af9442fe481574957560467",
+              "createdAt": "2026-11-15T05:33:35.062Z"
+            }
+          ]
+        },
+        "state_after": {
+          "products": [
+            {
+              "__v": 1,
+              "id": 1,
+              "name": "Ao thun",
+              "price": -500,
+              "stock": 10,
+              "totalStock": 10,
+              "category": "Ao",
+              "_id": "6af9442fe481574957560467",
+              "createdAt": "2026-11-15T05:33:35.062Z"
+            }
+          ]
+        },
+        "entity_before": {
+          "__v": 0,
+          "id": 1,
+          "name": "Ao thun",
+          "price": 200000,
+          "stock": 10,
+          "totalStock": 10,
+          "category": "Ao",
+          "_id": "6af9442fe481574957560467",
+          "createdAt": "2026-11-15T05:33:35.062Z"
+        },
+        "entity_after": {
+          "__v": 1,
+          "id": 1,
+          "name": "Ao thun",
+          "price": -500,
+          "stock": 10,
+          "totalStock": 10,
+          "category": "Ao",
+          "_id": "6af9442fe481574957560467",
+          "createdAt": "2026-11-15T05:33:35.062Z"
+        }
+      }
+    ],
+    "password_audit": null,
+    "final_products": [
+      {
+        "__v": 1,
+        "id": 1,
+        "name": "Ao thun",
+        "price": -500,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6af9442fe481574957560467",
+        "createdAt": "2026-11-15T05:33:35.062Z"
+      }
+    ],
+    "notifications": null,
+    "initial_entity": {
+      "__v": 0,
+      "id": 1,
+      "name": "Ao thun",
+      "price": 200000,
+      "stock": 10,
+      "totalStock": 10,
+      "category": "Ao",
+      "_id": "6af9442fe481574957560467",
+      "createdAt": "2026-11-15T05:33:35.062Z"
+    },
+    "final_entity": {
+      "__v": 1,
+      "id": 1,
+      "name": "Ao thun",
+      "price": -500,
+      "stock": 10,
+      "totalStock": 10,
+      "category": "Ao",
+      "_id": "6af9442fe481574957560467",
+      "createdAt": "2026-11-15T05:33:35.062Z"
+    },
+    "actor_ids": {
+      "self": "000000000000000000000001",
+      "victim": "000000000000000000000002",
+      "admin": "000000000000000000000003"
+    }
+  },
+  "elapsed_seconds": 0.9532134000000951
+}

@@ -1,0 +1,119 @@
+{
+  "case": {
+    "id": "TC-PRD-4:missing-product",
+    "testcase": "TC-PRD-4",
+    "steps": [
+      {
+        "url": "/api/products/999999",
+        "body": {
+          "price": 500
+        },
+        "actor": "admin",
+        "method": "PUT"
+      }
+    ],
+    "check": {
+      "kind": "status",
+      "allowed": [
+        404
+      ]
+    }
+  },
+  "status": "PASS",
+  "evidence": {
+    "ok": true,
+    "environment": "node_harness_stub",
+    "limitations": [
+      "Datastore and services are simulated; conclusions apply to this harness only."
+    ],
+    "state_schema_version": 1,
+    "catalog": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6af943c6547b399b5c7d7a50",
+        "createdAt": "2026-11-15T05:31:50.161Z"
+      }
+    ],
+    "observations": [
+      {
+        "method": "PUT",
+        "url": "/api/products/999999",
+        "actor": "admin",
+        "input": {
+          "price": 500
+        },
+        "status": 404,
+        "body": {
+          "error": "Không tìm thấy sản phẩm"
+        },
+        "elapsed_ms": 3.9341000000000577,
+        "resource": {
+          "collection": "products",
+          "id": "999999"
+        },
+        "state_before": {
+          "products": [
+            {
+              "__v": 0,
+              "id": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "stock": 10,
+              "totalStock": 10,
+              "category": "Ao",
+              "_id": "6af943c6547b399b5c7d7a50",
+              "createdAt": "2026-11-15T05:31:50.161Z"
+            }
+          ]
+        },
+        "state_after": {
+          "products": [
+            {
+              "__v": 0,
+              "id": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "stock": 10,
+              "totalStock": 10,
+              "category": "Ao",
+              "_id": "6af943c6547b399b5c7d7a50",
+              "createdAt": "2026-11-15T05:31:50.161Z"
+            }
+          ]
+        },
+        "entity_before": null,
+        "entity_after": null
+      }
+    ],
+    "password_audit": null,
+    "final_products": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6af943c6547b399b5c7d7a50",
+        "createdAt": "2026-11-15T05:31:50.161Z"
+      }
+    ],
+    "notifications": null,
+    "initial_entity": null,
+    "final_entity": null,
+    "actor_ids": {
+      "self": "000000000000000000000001",
+      "victim": "000000000000000000000002",
+      "admin": "000000000000000000000003"
+    }
+  },
+  "elapsed_seconds": 1.0184343000000808,
+  "evidence_file": "evidence/047.json"
+}
