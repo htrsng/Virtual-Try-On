@@ -1,5 +1,17 @@
 ﻿# Fuzzing cho hệ thống bán hàng mô phỏng
 
+Module fuzz testing của VFitAI, dùng Python điều phối và Node.js/Express làm
+target mô phỏng. Xem [cấu trúc và kế hoạch nâng cấp](docs/fuzz-test-plan.md).
+
+Thư mục đã đổi từ `fuzzing-security-testing/` sang `fuzz-testing/`;
+`seed_corpus/` thành `seeds/`, `results/` thành `reports/`.
+Snapshot báo cáo cũ giữ nguyên nội dung và có thể còn đường dẫn của phiên bản cũ.
+
+Hiện còn các lỗi nền cần xử lý trước khi chạy demo đầy đủ: thiếu dependency
+`server/concurrency`, số testcase ngoài campaign chưa khớp workbook và lỗi quyền
+thư mục tạm trong môi trường kiểm tra. Các lệnh bên dưới là giao diện chạy hiện có,
+chưa phải cam kết campaign đang chạy thành công ở checkout này.
+
 ## Mục tiêu và luồng chính
 
 Tìm hành vi bất thường bằng input sinh từ seed, sau đó chạy lại và khảo sát chi tiết:

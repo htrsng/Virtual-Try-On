@@ -1,3 +1,5 @@
+> Fuzz testing: [Module và hướng dẫn](fuzz-testing/README.md) · [Cấu trúc và kế hoạch nâng cấp](fuzz-testing/docs/fuzz-test-plan.md).
+
 <div align="center">
 
 # 👕 VFitAI — Virtual Try-On & SmartFit 3D Platform
