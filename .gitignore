@@ -47,6 +47,8 @@ __pycache__/
 # New fuzzing runs and local tooling
 fuzz-testing/artifacts/
 fuzz-testing/.venv/
+/.venv/
+/reports/runs/
 
 # Duplicate source archive; source stays in the tracked directory
 /fuzz-testing.rar

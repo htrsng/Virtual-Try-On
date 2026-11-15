@@ -1,0 +1,9 @@
+{
+  "name": "vfitai-qa-automation",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22.15.0" },
+  "scripts": {
+    "test": "node --experimental-strip-types --test tests/*.test.mjs"
+  }
+}

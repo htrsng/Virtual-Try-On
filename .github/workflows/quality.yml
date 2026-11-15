@@ -1,0 +1,57 @@
+name: QA Portfolio Checks
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'api-testing/**'
+      - 'automation-testing/**'
+      - 'fuzz-testing/**'
+      - 'tools/**'
+      - 'archive/vfitai/client/src/utils/**'
+      - 'requirements.txt'
+      - '.github/workflows/quality.yml'
+  pull_request:
+    paths:
+      - 'api-testing/**'
+      - 'automation-testing/**'
+      - 'fuzz-testing/**'
+      - 'tools/**'
+      - 'archive/vfitai/client/src/utils/**'
+      - 'requirements.txt'
+      - '.github/workflows/quality.yml'
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: 'full runs all acceptance cases; existing defects cause a failed job'
+        type: choice
+        options: [smoke, full]
+        default: smoke
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements.txt
+      - run: npm ci --prefix fuzz-testing/target
+        env:
+          MONGOMS_DISABLE_POSTINSTALL: '1'
+      - name: Run selected QA suites
+        env:
+          QA_SUITE: ${{ inputs.suite || 'smoke' }}
+        run: python tools/run_checks.py --suite "$QA_SUITE" --output reports/runs/ci
+      - name: Upload logs and JUnit reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-portfolio-results
+          path: reports/runs/ci/
+          if-no-files-found: warn
