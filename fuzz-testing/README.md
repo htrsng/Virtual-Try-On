@@ -87,3 +87,10 @@ Xem [hướng dẫn phương pháp](./docs/testing-guide.md), [kết quả xác 
 - Chỉ số `node_harness_stub` trong báo cáo được giữ làm định danh môi trường mô phỏng, dù thư mục mã nguồn đã đổi thành `target/`.
 
 Workflow **API Fuzzing Checks** cài thư viện, chạy hồi quy, đối chiếu đặc tả và chạy thử chiến dịch ngắn. Xanh ở workflow này không có nghĩa toàn bộ VFitAI đã đạt kiểm thử.
+
+## Input metrics và phạm vi QA hiện hành
+
+[QA Overview](../qa/README.md) tách regression công cụ, acceptance, replay và frontend.
+Campaign `python fuzz-testing/tools/quality_campaign.py --iterations 28 --seed 7`
+(từ repo root) ghi mọi input mutation, schema advisory, response và oracle;
+[phép đo và giới hạn](../qa/fuzzing-quality.md). Không thay đổi số liệu snapshot cũ.

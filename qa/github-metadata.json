@@ -1,0 +1,8 @@
+{
+  "repository": "htrsng/Virtual-Try-On",
+  "description": "QA portfolio for a simulated e-commerce API: acceptance tests, TypeScript unit tests, React component checks, seeded fuzzing, replay, traceability and reproducible defect reports.",
+  "topics": [
+    "software-testing", "qa-automation", "api-testing", "test-automation",
+    "fuzzing", "security-testing", "python", "nodejs", "vitest", "z3", "github-actions"
+  ]
+}

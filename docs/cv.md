@@ -26,3 +26,10 @@ của target, và finding fuzzing với bug gốc đã phân tích.
 
 Công cụ có thể hỗ trợ viết code và tài liệu. Chỉ đưa kỹ năng vào CV khi bạn có thể
 tự chạy, giải thích thiết kế và sửa một testcase khi yêu cầu thay đổi.
+
+## Bằng chứng mở rộng hiện hành
+
+[QA Overview](../qa/README.md) có 29-case matrix, register đầy đủ 20 testcase FAIL
+và 40 lượt replay trên state sạch. Có thêm 14 React component check ProductList/Toast
+trong jsdom; nếu bổ sung vào CV, ghi đúng scope và mock, không gọi là browser E2E.
+17 nhóm triage chưa phải 17 bug gốc; build/lint frontend vẫn có lỗi được công khai.

@@ -1,5 +1,9 @@
 # Ma trận yêu cầu và kiểm thử
 
+[Matrix hiện hành theo từng API testcase và trạng thái](../qa/test-coverage.md)
+bổ sung bảng tổng hợp dưới đây; [105 ca ngoài phạm vi](../qa/excluded-testcases.csv)
+giữ đủ ID và lý do, không gán PASS.
+
 Các mã `QA-*` là nhóm yêu cầu tổng hợp cho portfolio. ID `TC-*` và expected result
 gốc đến từ Excel trong `fuzz-testing/docs/specifications/`. API suite chỉ thực thi
 các oracle cụ thể ghi trong catalogue, chưa tự động kiểm chứng mọi câu trong Excel.

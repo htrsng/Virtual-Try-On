@@ -17,6 +17,11 @@ UI và E2E được thiết kế trong manual suite nhưng chưa thực thi: ứ
 backend đầy đủ. Không gán kết quả unit/API cho UI. Không kiểm chứng hiển thị WebGL,
 thanh toán thật, AI bên ngoài, hiệu năng tải hoặc toàn bộ 134 testcase Excel.
 
+Đã bổ sung scope component riêng: ProductList/Toast trong jsdom, 14 assertion case
+với context hooks và preview boundary được mock. Không thay đổi phạm vi UI/E2E
+chưa thực thi nêu trên. [Frontend quality](../qa/frontend-quality.md) ghi rõ build,
+lint và test integration cũ còn lỗi; [QA hub](../qa/README.md) là chỉ mục reviewer.
+
 ## Chiến lược và ưu tiên
 
 | Rủi ro | Mức ưu tiên | Kiểm tra |

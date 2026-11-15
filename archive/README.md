@@ -26,5 +26,7 @@ Actions kích hoạt. Bộ fuzzing sử dụng target riêng và không phụ th
 
 Unit automation hiện import trực tiếp hai hàm từ `client/src/utils/`; giữ mã nguồn
 để kiểm thử logic thực tế. Các Playwright test cũ chưa được tính là kết quả E2E đạt.
+ProductList/Toast có suite component được bảo trì riêng bằng Vitest/Testing Library;
+[scope và diagnostic frontend](../qa/frontend-quality.md). Archive không có backend hoàn chỉnh.
 
 Hướng dẫn hiện tại: [VFitAI QA Portfolio](../README.md).

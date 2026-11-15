@@ -1,0 +1,1786 @@
+{
+  "created_utc": "2026-11-15T04:52:24.220537+00:00",
+  "environment": "node_harness_stub",
+  "seed": 7,
+  "iterations": 28,
+  "setup_requests": 2,
+  "mutation_requests_attempted": 28,
+  "mutation_responses_received": 28,
+  "schema_counts": {
+    "INVALID": 12,
+    "VALID": 16
+  },
+  "schema_valid_ratio": 0.5714285714285714,
+  "schema_scope": "Advisory required fields/types/nonnegative amounts; no email syntax, length caps, catalog pricing or auth semantics.",
+  "categories": {
+    "RESPONSE": 27,
+    "HTTP_5XX": 1
+  },
+  "oracle_violations": 9,
+  "elapsed_seconds": 1.3003380000000107,
+  "mutation_inputs_per_second": 21.5328629940829,
+  "throughput_scope": "Includes startup/setup, HTTP, schema/oracle evaluation and shutdown; not isolated target throughput.",
+  "coverage": {
+    "line": null,
+    "branch": null,
+    "reason": "No coverage instrumentation in this campaign."
+  },
+  "source_sha256": {
+    "fuzz-testing/tools/quality_campaign.py": "17a200343ed6667d2d0d0d6db86ad11e84026cb10337f7a03339814fc36c8a3c",
+    "fuzz-testing/fuzzers/blackbox_fuzzer.py": "7c8aada1c980280a152ed31f4f982a7be0a42af932ab69d206da49d6bd4288bc",
+    "fuzz-testing/fuzzers/boundaries.py": "59c8976e0c5820390a1da8fd37937d571fde607b065c2c8744d5c1a24a0dc578",
+    "fuzz-testing/fuzzers/concolic.py": "863eb770040d3351679d26092338a6b531078226692894fdcf65607d030ee99a",
+    "fuzz-testing/fuzzers/controlled_comparison.py": "f06208e7e3e59dc7fdc46bfbe3ba87009ff7748462d554dedead63f43614d6de",
+    "fuzz-testing/fuzzers/finding_types.py": "3064c3b6e7968e497a3958f3536940b3fe28f401b1f9d3004913e37731184a2d",
+    "fuzz-testing/fuzzers/fuzzer_common.py": "a31ea4ca0d050ccc629289346d8b81613507f9b016d7a6107f0e35c50e59fa23",
+    "fuzz-testing/fuzzers/oracles.py": "4ed87d69b442f8224f6f353c2e901c83cda8ef094e1b8af34ad104da1f4a9ab5",
+    "fuzz-testing/fuzzers/runtime.py": "d731ce437ca0083fb09fd2769f76cb93d649e6af979ab891e7186c0695537c42",
+    "fuzz-testing/fuzzers/run_ch4.py": "80576663640ed49a88318429888e805fc68bda94cee02356de2aa12fe4967085",
+    "fuzz-testing/fuzzers/run_fuzzing.py": "46a9bb4a5d33acea1a01975137639d03e4a4061aa120b312d0187cf88bc948b9",
+    "fuzz-testing/fuzzers/spec_campaign.py": "83e22ff47060407a927158bd8cab1b137a6205b3551f876ee62ccb9a5d8fc9a5",
+    "fuzz-testing/fuzzers/testcases.py": "70bc7d20bcf6d77975eedaad630170d1787ca0fbc6e989e8c762feb96919be2c",
+    "fuzz-testing/fuzzers/whitebox_fuzzer.py": "4fd3527d3c6f8c078ea474d28a51f92b434db4f0f9fdf8531dc1c00121f5fdfe",
+    "fuzz-testing/target/branch-trace.js": "908ba7cf736930ead3fd986e2ad60ed8f05b009561a68f5a4c29f0d3dd7b9676",
+    "fuzz-testing/target/concurrency.js": "cbd9fe9cf7eea850119ede0b38337e5dba3ff9ab7ba43bd0da1fe03f2cea52d5",
+    "fuzz-testing/target/harness-common.js": "d20fddbe1f11fe62acb9199601ba3dde9d18b1289c97ff79c26ee24e22690b3f",
+    "fuzz-testing/target/http-server.js": "a4009170d9cd2a8823a9a940c3eb506b8508789b97fd36dfb1423e564dbe43eb",
+    "fuzz-testing/target/index.js": "bbaa12849ac355b2031f432d22fe1bd778138ba8b7ecacb42aa2355366342f75",
+    "fuzz-testing/target/middleware.js": "9fdcaea3c6d42919081595128e0d71f388f252f8df9e2b8e557957bfe8eafc00",
+    "fuzz-testing/target/models.js": "426804785d151353544b06c78fd20f988c577492f2e08dbc001a28240046a06b",
+    "fuzz-testing/target/scenario-runner.js": "8577775a2d7382f4b0bc0fb966563dd8e5b5229c33cb7ff701800c0bbf681cb2",
+    "fuzz-testing/target/services.js": "004e374403dc06a06c2c011fc1bce37101a38d3fd49b258bc74a97bbddfa5b6e",
+    "fuzz-testing/target/single-run-harness.js": "d8f6f54d7d3487d7dfdc764ff8ae204704efbe08c66b810c578ee5ae22faf625",
+    "fuzz-testing/target/test-environment.js": "15b313b17acb7f4f5ca63314921a3c51348accc74629838ba30edd65c7ade2cf",
+    "fuzz-testing/target/config/env.js": "021f9f10011fa8ca174a2430770e598cd088c2154176d5ad0dbf3d1a6af88823",
+    "fuzz-testing/target/routes/ai.routes.js": "f0f6c0ef16918d5e68c812604873dc4270c25791b76c755704cd189165a55e61",
+    "fuzz-testing/data/seeds/seed_login_valid.json": "5fe4a22bb27d1b3881aee334b7e719dbbe2eeb3d3737c38c00b0a84be0258c46",
+    "fuzz-testing/data/seeds/seed_order_status_valid.json": "c2ab3f570d25de5044aca716c58bfa97b6eae13d1d2392d5be2b574dfe61d2e0",
+    "fuzz-testing/data/seeds/seed_order_valid.json": "da48e68c725c710357d6d24caecb406c8735242e2da9db70b0254c9b0ceb3e6f",
+    "fuzz-testing/data/seeds/seed_product_valid.json": "689eace6b944c382251c6cd36cc01cf659597e4287402b7d2b2aad8b555f5a5a",
+    "fuzz-testing/data/seeds/seed_user_update_valid.json": "d10fe47430a5b99239698e57f01f89fe27477201d7ef5c9965892fc3818b4d7e"
+  },
+  "oracles": [
+    "login: response/HTTP 5xx observation only",
+    "orders: input validity, catalog membership and catalog total via check_order_response"
+  ],
+  "records": [
+    {
+      "index": 0,
+      "target": "login",
+      "input": {
+        "email": null,
+        "password": "Fuzz123!"
+      },
+      "schema_class": "INVALID",
+      "had_auth": false,
+      "status": 400,
+      "response": {
+        "message": "Email và password là bắt buộc"
+      },
+      "category": "RESPONSE",
+      "oracle_violation": null
+    },
+    {
+      "index": 1,
+      "target": "orders",
+      "input": {
+        "products": "🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂",
+        "totalAmount": 400000,
+        "shippingInfo": {
+          "fullName": "Nguyen Van A",
+          "phone": "0900000000",
+          "address": "123 Duong ABC"
+        },
+        "paymentMethod": "COD",
+        "discountCode": "",
+        "discountAmount": 0,
+        "shippingFee": 0
+      },
+      "schema_class": "INVALID",
+      "had_auth": true,
+      "status": 200,
+      "response": {
+        "message": "Đặt hàng thành công",
+        "order": {
+          "__v": 0,
+          "_id": "6af93a872050f42d310629b0",
+          "userId": "000000000000000000000001",
+          "products": "🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂",
+          "totalAmount": 400000,
+          "discountCode": "",
+          "discountAmount": 0,
+          "voucherCode": "",
+          "voucherDiscount": 0,
+          "shippingFee": 0,
+          "shippingMethod": "Tiêu chuẩn",
+          "shippingInfo": {
+            "fullName": "Nguyen Van A",
+            "phone": "0900000000",
+            "address": "123 Duong ABC"
+          },
+          "paymentMethod": "COD",
+          "status": "Đang xử lý",
+          "createdAt": "2026-11-15T04:52:23.748Z"
+        }
+      },
+      "category": "RESPONSE",
+      "oracle_violation": "Invalid cart structure accepted (REQ-ORD-1)"
+    },
+    {
+      "index": 2,
+      "target": "login",
+      "input": {
+        "email": "fuzzuser@test.com",
+        "password": "\u0000\u0001"
+      },
+      "schema_class": "VALID",
+      "had_auth": false,
+      "status": 401,
+      "response": {
+        "message": "Email hoặc mật khẩu không đúng"
+      },
+      "category": "RESPONSE",
+      "oracle_violation": null
+    },
+    {
+      "index": 3,
+      "target": "orders",
+      "input": {
+        "products": [
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          }
+        ],
+        "totalAmount": 400000,
+        "shippingInfo": {
+          "fullName": "Nguyen Van A",
+          "phone": "0900000000",
+          "address": "123 Duong ABC"
+        },
+        "paymentMethod": "COD",
+        "discountCode": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "discountAmount": 0,
+        "shippingFee": 0
+      },
+      "schema_class": "VALID",
+      "had_auth": true,
+      "status": 200,
+      "response": {
+        "message": "Đặt hàng thành công",
+        "order": {
+          "__v": 0,
+          "_id": "6af93a872050f42d310629b1",
+          "userId": "000000000000000000000001",
+          "products": [
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            }
+          ],
+          "totalAmount": 400000,
+          "discountCode": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+          "discountAmount": 0,
+          "voucherCode": "",
+          "voucherDiscount": 0,
+          "shippingFee": 0,
+          "shippingMethod": "Tiêu chuẩn",
+          "shippingInfo": {
+            "fullName": "Nguyen Van A",
+            "phone": "0900000000",
+            "address": "123 Duong ABC"
+          },
+          "paymentMethod": "COD",
+          "status": "Đang xử lý",
+          "createdAt": "2026-11-15T04:52:23.812Z"
+        }
+      },
+      "category": "RESPONSE",
+      "oracle_violation": null
+    },
+    {
+      "index": 4,
+      "target": "login",
+      "input": {
+        "email": true,
+        "password": "Fuzz123!"
+      },
+      "schema_class": "INVALID",
+      "had_auth": false,
+      "status": 404,
+      "response": {
+        "message": "Không tìm thấy tài khoản với email này"
+      },
+      "category": "RESPONSE",
+      "oracle_violation": null
+    },
+    {
+      "index": 5,
+      "target": "orders",
+      "input": {
+        "products": [
+          {
+            "productId": "🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂",
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          }
+        ],
+        "totalAmount": 400000,
+        "shippingInfo": {
+          "fullName": "Nguyen Van A",
+          "phone": "0900000000",
+          "address": "123 Duong ABC"
+        },
+        "paymentMethod": "COD",
+        "discountCode": "",
+        "discountAmount": 0,
+        "shippingFee": 0
+      },
+      "schema_class": "INVALID",
+      "had_auth": true,
+      "status": 200,
+      "response": {
+        "message": "Đặt hàng thành công",
+        "order": {
+          "__v": 0,
+          "_id": "6af93a872050f42d310629b3",
+          "userId": "000000000000000000000001",
+          "products": [
+            {
+              "productId": "🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂",
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            }
+          ],
+          "totalAmount": 400000,
+          "discountCode": "",
+          "discountAmount": 0,
+          "voucherCode": "",
+          "voucherDiscount": 0,
+          "shippingFee": 0,
+          "shippingMethod": "Tiêu chuẩn",
+          "shippingInfo": {
+            "fullName": "Nguyen Van A",
+            "phone": "0900000000",
+            "address": "123 Duong ABC"
+          },
+          "paymentMethod": "COD",
+          "status": "Đang xử lý",
+          "createdAt": "2026-11-15T04:52:23.817Z"
+        }
+      },
+      "category": "RESPONSE",
+      "oracle_violation": "Unknown catalog product accepted (REQ-ORD-8)"
+    },
+    {
+      "index": 6,
+      "target": "login",
+      "input": {
+        "email": "fuzzuser@test.com",
+        "password": "Fuzz123!"
+      },
+      "schema_class": "VALID",
+      "had_auth": false,
+      "status": 200,
+      "response": {
+        "message": "Đăng nhập thành công",
+        "token": "[REDACTED]",
+        "user": {
+          "id": "000000000000000000000001",
+          "email": "fuzzuser@test.com",
+          "role": "user",
+          "fullName": "Fuzz Test User",
+          "phone": "",
+          "address": "",
+          "city": "",
+          "district": "",
+          "ward": ""
+        }
+      },
+      "category": "RESPONSE",
+      "oracle_violation": null
+    },
+    {
+      "index": 7,
+      "target": "orders",
+      "input": {
+        "products": [
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          }
+        ],
+        "totalAmount": 400000,
+        "shippingInfo": {
+          "fullName": "Nguyen Van A",
+          "phone": "0900000000",
+          "address": "123 Duong ABC"
+        },
+        "paymentMethod": "COD",
+        "discountCode": "",
+        "discountAmount": 0,
+        "shippingFee": "\u0000\u0001"
+      },
+      "schema_class": "INVALID",
+      "had_auth": true,
+      "status": 500,
+      "response": {
+        "message": "Lỗi server khi tạo đơn hàng",
+        "error": "Cast to Number failed for value \"\"\\u0000\\u0001\"\" at path \"shippingFee\"",
+        "details": "CastError: Cast to Number failed for value \"\"\\u0000\\u0001\"\" at path \"shippingFee\""
+      },
+      "category": "HTTP_5XX",
+      "oracle_violation": null
+    },
+    {
+      "index": 8,
+      "target": "login",
+      "input": {
+        "email": "0000000000",
+        "password": "Fuzz123!"
+      },
+      "schema_class": "VALID",
+      "had_auth": false,
+      "status": 404,
+      "response": {
+        "message": "Không tìm thấy tài khoản với email này"
+      },
+      "category": "RESPONSE",
+      "oracle_violation": null
+    },
+    {
+      "index": 9,
+      "target": "orders",
+      "input": {
+        "products": [
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          }
+        ],
+        "totalAmount": 400000,
+        "shippingInfo": {
+          "fullName": "Nguyen Van A",
+          "phone": "0900000000",
+          "address": "123 Duong ABC"
+        },
+        "paymentMethod": "COD",
+        "discountCode": "",
+        "discountAmount": 0,
+        "shippingFee": 0
+      },
+      "schema_class": "VALID",
+      "had_auth": true,
+      "status": 200,
+      "response": {
+        "message": "Đặt hàng thành công",
+        "order": {
+          "__v": 0,
+          "_id": "6af93a872050f42d310629b5",
+          "userId": "000000000000000000000001",
+          "products": [
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            }
+          ],
+          "totalAmount": 400000,
+          "discountCode": "",
+          "discountAmount": 0,
+          "voucherCode": "",
+          "voucherDiscount": 0,
+          "shippingFee": 0,
+          "shippingMethod": "Tiêu chuẩn",
+          "shippingInfo": {
+            "fullName": "Nguyen Van A",
+            "phone": "0900000000",
+            "address": "123 Duong ABC"
+          },
+          "paymentMethod": "COD",
+          "status": "Đang xử lý",
+          "createdAt": "2026-11-15T04:52:23.884Z"
+        }
+      },
+      "category": "RESPONSE",
+      "oracle_violation": "totalAmount (400000) inconsistent with catalog (~8000000)"
+    },
+    {
+      "index": 10,
+      "target": "login",
+      "input": {
+        "email": "fuzzuser@test.com",
+        "password": "Fuzz123!"
+      },
+      "schema_class": "VALID",
+      "had_auth": false,
+      "status": 200,
+      "response": {
+        "message": "Đăng nhập thành công",
+        "token": "[REDACTED]",
+        "user": {
+          "id": "000000000000000000000001",
+          "email": "fuzzuser@test.com",
+          "role": "user",
+          "fullName": "Fuzz Test User",
+          "phone": "",
+          "address": "",
+          "city": "",
+          "district": "",
+          "ward": ""
+        }
+      },
+      "category": "RESPONSE",
+      "oracle_violation": null
+    },
+    {
+      "index": 11,
+      "target": "orders",
+      "input": {
+        "products": [
+          {
+            "productId": "🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂",
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          }
+        ],
+        "totalAmount": 400000,
+        "shippingInfo": {
+          "fullName": "Nguyen Van A",
+          "phone": "0900000000",
+          "address": "123 Duong ABC"
+        },
+        "paymentMethod": "COD",
+        "discountCode": "",
+        "discountAmount": 0,
+        "shippingFee": 0
+      },
+      "schema_class": "INVALID",
+      "had_auth": true,
+      "status": 200,
+      "response": {
+        "message": "Đặt hàng thành công",
+        "order": {
+          "__v": 0,
+          "_id": "6af93a872050f42d310629b6",
+          "userId": "000000000000000000000001",
+          "products": [
+            {
+              "productId": "🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂",
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            }
+          ],
+          "totalAmount": 400000,
+          "discountCode": "",
+          "discountAmount": 0,
+          "voucherCode": "",
+          "voucherDiscount": 0,
+          "shippingFee": 0,
+          "shippingMethod": "Tiêu chuẩn",
+          "shippingInfo": {
+            "fullName": "Nguyen Van A",
+            "phone": "0900000000",
+            "address": "123 Duong ABC"
+          },
+          "paymentMethod": "COD",
+          "status": "Đang xử lý",
+          "createdAt": "2026-11-15T04:52:23.946Z"
+        }
+      },
+      "category": "RESPONSE",
+      "oracle_violation": "Unknown catalog product accepted (REQ-ORD-8)"
+    },
+    {
+      "index": 12,
+      "target": "login",
+      "input": {
+        "email": "fuzzuser@test.com"
+      },
+      "schema_class": "INVALID",
+      "had_auth": false,
+      "status": 400,
+      "response": {
+        "message": "Email và password là bắt buộc"
+      },
+      "category": "RESPONSE",
+      "oracle_violation": null
+    },
+    {
+      "index": 13,
+      "target": "orders",
+      "input": {
+        "products": [
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": "🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂",
+            "quantity": 2
+          }
+        ],
+        "totalAmount": 400000,
+        "shippingInfo": {
+          "fullName": "Nguyen Van A",
+          "phone": "0900000000",
+          "address": "123 Duong ABC"
+        },
+        "paymentMethod": "COD",
+        "discountCode": "",
+        "discountAmount": 0,
+        "shippingFee": 0
+      },
+      "schema_class": "INVALID",
+      "had_auth": true,
+      "status": 200,
+      "response": {
+        "message": "Đặt hàng thành công",
+        "order": {
+          "__v": 0,
+          "_id": "6af93a872050f42d310629b7",
+          "userId": "000000000000000000000001",
+          "products": [
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": "🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂",
+              "quantity": 2
+            }
+          ],
+          "totalAmount": 400000,
+          "discountCode": "",
+          "discountAmount": 0,
+          "voucherCode": "",
+          "voucherDiscount": 0,
+          "shippingFee": 0,
+          "shippingMethod": "Tiêu chuẩn",
+          "shippingInfo": {
+            "fullName": "Nguyen Van A",
+            "phone": "0900000000",
+            "address": "123 Duong ABC"
+          },
+          "paymentMethod": "COD",
+          "status": "Đang xử lý",
+          "createdAt": "2026-11-15T04:52:23.949Z"
+        }
+      },
+      "category": "RESPONSE",
+      "oracle_violation": "Invalid unit price accepted (REQ-ORD-8)"
+    },
+    {
+      "index": 14,
+      "target": "login",
+      "input": {
+        "password": "Fuzz123!"
+      },
+      "schema_class": "INVALID",
+      "had_auth": false,
+      "status": 400,
+      "response": {
+        "message": "Email và password là bắt buộc"
+      },
+      "category": "RESPONSE",
+      "oracle_violation": null
+    },
+    {
+      "index": 15,
+      "target": "orders",
+      "input": {
+        "products": [
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          }
+        ],
+        "totalAmount": 400000,
+        "shippingInfo": {
+          "fullName": "Nguyen Van A",
+          "phone": "0900000000",
+          "address": "123 Duong ABC"
+        },
+        "paymentMethod": "COD",
+        "discountCode": "",
+        "discountAmount": 0,
+        "shippingFee": 0
+      },
+      "schema_class": "VALID",
+      "had_auth": true,
+      "status": 200,
+      "response": {
+        "message": "Đặt hàng thành công",
+        "order": {
+          "__v": 0,
+          "_id": "6af93a872050f42d310629b8",
+          "userId": "000000000000000000000001",
+          "products": [
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            }
+          ],
+          "totalAmount": 400000,
+          "discountCode": "",
+          "discountAmount": 0,
+          "voucherCode": "",
+          "voucherDiscount": 0,
+          "shippingFee": 0,
+          "shippingMethod": "Tiêu chuẩn",
+          "shippingInfo": {
+            "fullName": "Nguyen Van A",
+            "phone": "0900000000",
+            "address": "123 Duong ABC"
+          },
+          "paymentMethod": "COD",
+          "status": "Đang xử lý",
+          "createdAt": "2026-11-15T04:52:23.952Z"
+        }
+      },
+      "category": "RESPONSE",
+      "oracle_violation": "totalAmount (400000) inconsistent with catalog (~5200000)"
+    },
+    {
+      "index": 16,
+      "target": "login",
+      "input": {
+        "email": "\u0000\u0001",
+        "password": "Fuzz123!"
+      },
+      "schema_class": "VALID",
+      "had_auth": false,
+      "status": 404,
+      "response": {
+        "message": "Không tìm thấy tài khoản với email này"
+      },
+      "category": "RESPONSE",
+      "oracle_violation": null
+    },
+    {
+      "index": 17,
+      "target": "orders",
+      "input": {
+        "products": [
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          }
+        ],
+        "totalAmount": 400000,
+        "shippingInfo": {
+          "fullName": "Nguyen Van A",
+          "phone": "0900000000",
+          "address": "123 Duong ABC"
+        },
+        "paymentMethod": "COD",
+        "discountCode": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "discountAmount": 0,
+        "shippingFee": 0
+      },
+      "schema_class": "VALID",
+      "had_auth": true,
+      "status": 400,
+      "response": {
+        "message": "Mã giảm giá này bạn đã sử dụng rồi"
+      },
+      "category": "RESPONSE",
+      "oracle_violation": null
+    },
+    {
+      "index": 18,
+      "target": "login",
+      "input": {
+        "email": "fuzzuser@test.com",
+        "password": "Fuzz123!"
+      },
+      "schema_class": "VALID",
+      "had_auth": false,
+      "status": 200,
+      "response": {
+        "message": "Đăng nhập thành công",
+        "token": "[REDACTED]",
+        "user": {
+          "id": "000000000000000000000001",
+          "email": "fuzzuser@test.com",
+          "role": "user",
+          "fullName": "Fuzz Test User",
+          "phone": "",
+          "address": "",
+          "city": "",
+          "district": "",
+          "ward": ""
+        }
+      },
+      "category": "RESPONSE",
+      "oracle_violation": null
+    },
+    {
+      "index": 19,
+      "target": "orders",
+      "input": {
+        "products": [
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          }
+        ],
+        "totalAmount": 400000,
+        "shippingInfo": {
+          "fullName": "Nguyen Van A",
+          "phone": "0900000000",
+          "address": "123 Duong ABC"
+        },
+        "paymentMethod": "COD",
+        "discountCode": "",
+        "discountAmount": 0,
+        "shippingFee": 0
+      },
+      "schema_class": "VALID",
+      "had_auth": true,
+      "status": 200,
+      "response": {
+        "message": "Đặt hàng thành công",
+        "order": {
+          "__v": 0,
+          "_id": "6af93a882050f42d310629b9",
+          "userId": "000000000000000000000001",
+          "products": [
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            }
+          ],
+          "totalAmount": 400000,
+          "discountCode": "",
+          "discountAmount": 0,
+          "voucherCode": "",
+          "voucherDiscount": 0,
+          "shippingFee": 0,
+          "shippingMethod": "Tiêu chuẩn",
+          "shippingInfo": {
+            "fullName": "Nguyen Van A",
+            "phone": "0900000000",
+            "address": "123 Duong ABC"
+          },
+          "paymentMethod": "COD",
+          "status": "Đang xử lý",
+          "createdAt": "2026-11-15T04:52:24.016Z"
+        }
+      },
+      "category": "RESPONSE",
+      "oracle_violation": "totalAmount (400000) inconsistent with catalog (~4800000)"
+    },
+    {
+      "index": 20,
+      "target": "login",
+      "input": {
+        "email": "fuzzuser@test.com",
+        "password": "Fuzz123!"
+      },
+      "schema_class": "VALID",
+      "had_auth": false,
+      "status": 200,
+      "response": {
+        "message": "Đăng nhập thành công",
+        "token": "[REDACTED]",
+        "user": {
+          "id": "000000000000000000000001",
+          "email": "fuzzuser@test.com",
+          "role": "user",
+          "fullName": "Fuzz Test User",
+          "phone": "",
+          "address": "",
+          "city": "",
+          "district": "",
+          "ward": ""
+        }
+      },
+      "category": "RESPONSE",
+      "oracle_violation": null
+    },
+    {
+      "index": 21,
+      "target": "orders",
+      "input": {
+        "products": [
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          }
+        ],
+        "totalAmount": 400000,
+        "shippingInfo": {
+          "fullName": "Nguyen Van A",
+          "phone": "0900000000",
+          "address": "123 Duong ABC"
+        },
+        "paymentMethod": "COD",
+        "discountCode": "",
+        "discountAmount": 0,
+        "shippingFee": 0
+      },
+      "schema_class": "VALID",
+      "had_auth": true,
+      "status": 200,
+      "response": {
+        "message": "Đặt hàng thành công",
+        "order": {
+          "__v": 0,
+          "_id": "6af93a882050f42d310629ba",
+          "userId": "000000000000000000000001",
+          "products": [
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            }
+          ],
+          "totalAmount": 400000,
+          "discountCode": "",
+          "discountAmount": 0,
+          "voucherCode": "",
+          "voucherDiscount": 0,
+          "shippingFee": 0,
+          "shippingMethod": "Tiêu chuẩn",
+          "shippingInfo": {
+            "fullName": "Nguyen Van A",
+            "phone": "0900000000",
+            "address": "123 Duong ABC"
+          },
+          "paymentMethod": "COD",
+          "status": "Đang xử lý",
+          "createdAt": "2026-11-15T04:52:24.079Z"
+        }
+      },
+      "category": "RESPONSE",
+      "oracle_violation": "totalAmount (400000) inconsistent with catalog (~5200000)"
+    },
+    {
+      "index": 22,
+      "target": "login",
+      "input": {
+        "email": 12345,
+        "password": "Fuzz123!"
+      },
+      "schema_class": "INVALID",
+      "had_auth": false,
+      "status": 404,
+      "response": {
+        "message": "Không tìm thấy tài khoản với email này"
+      },
+      "category": "RESPONSE",
+      "oracle_violation": null
+    },
+    {
+      "index": 23,
+      "target": "orders",
+      "input": {
+        "totalAmount": 400000,
+        "shippingInfo": {
+          "fullName": "Nguyen Van A",
+          "phone": "0900000000",
+          "address": "123 Duong ABC"
+        },
+        "paymentMethod": "COD",
+        "discountCode": "",
+        "discountAmount": 0,
+        "shippingFee": 0
+      },
+      "schema_class": "INVALID",
+      "had_auth": true,
+      "status": 400,
+      "response": {
+        "message": "Giỏ hàng trống"
+      },
+      "category": "RESPONSE",
+      "oracle_violation": null
+    },
+    {
+      "index": 24,
+      "target": "login",
+      "input": {
+        "email": "fuzzuser@test.com",
+        "password": "Fuzz123!"
+      },
+      "schema_class": "VALID",
+      "had_auth": false,
+      "status": 200,
+      "response": {
+        "message": "Đăng nhập thành công",
+        "token": "[REDACTED]",
+        "user": {
+          "id": "000000000000000000000001",
+          "email": "fuzzuser@test.com",
+          "role": "user",
+          "fullName": "Fuzz Test User",
+          "phone": "",
+          "address": "",
+          "city": "",
+          "district": "",
+          "ward": ""
+        }
+      },
+      "category": "RESPONSE",
+      "oracle_violation": null
+    },
+    {
+      "index": 25,
+      "target": "orders",
+      "input": {
+        "products": [
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          }
+        ],
+        "totalAmount": 400000,
+        "shippingInfo": {
+          "fullName": "Nguyen Van A",
+          "phone": "0900000000",
+          "address": "123 Duong ABC"
+        },
+        "paymentMethod": "COD",
+        "discountCode": null,
+        "discountAmount": 0,
+        "shippingFee": 0
+      },
+      "schema_class": "VALID",
+      "had_auth": true,
+      "status": 200,
+      "response": {
+        "message": "Đặt hàng thành công",
+        "order": {
+          "__v": 0,
+          "_id": "6af93a882050f42d310629bb",
+          "userId": "000000000000000000000001",
+          "products": [
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            }
+          ],
+          "totalAmount": 400000,
+          "discountCode": "",
+          "discountAmount": 0,
+          "voucherCode": "",
+          "voucherDiscount": 0,
+          "shippingFee": 0,
+          "shippingMethod": "Tiêu chuẩn",
+          "shippingInfo": {
+            "fullName": "Nguyen Van A",
+            "phone": "0900000000",
+            "address": "123 Duong ABC"
+          },
+          "paymentMethod": "COD",
+          "status": "Đang xử lý",
+          "createdAt": "2026-11-15T04:52:24.145Z"
+        }
+      },
+      "category": "RESPONSE",
+      "oracle_violation": null
+    },
+    {
+      "index": 26,
+      "target": "login",
+      "input": {
+        "email": "fuzzuser@test.com",
+        "password": [
+          1,
+          2,
+          3
+        ]
+      },
+      "schema_class": "INVALID",
+      "had_auth": false,
+      "status": 401,
+      "response": {
+        "message": "Email hoặc mật khẩu không đúng"
+      },
+      "category": "RESPONSE",
+      "oracle_violation": null
+    },
+    {
+      "index": 27,
+      "target": "orders",
+      "input": {
+        "products": [
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          },
+          {
+            "productId": 1,
+            "name": "Ao thun",
+            "price": 200000,
+            "quantity": 2
+          }
+        ],
+        "totalAmount": 400000,
+        "shippingInfo": {
+          "fullName": "Nguyen Van A",
+          "phone": "0900000000",
+          "address": "123 Duong ABC"
+        },
+        "paymentMethod": "COD",
+        "discountCode": "",
+        "discountAmount": 0,
+        "shippingFee": 0
+      },
+      "schema_class": "VALID",
+      "had_auth": true,
+      "status": 200,
+      "response": {
+        "message": "Đặt hàng thành công",
+        "order": {
+          "__v": 0,
+          "_id": "6af93a882050f42d310629bc",
+          "userId": "000000000000000000000001",
+          "products": [
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            },
+            {
+              "productId": 1,
+              "name": "Ao thun",
+              "price": 200000,
+              "quantity": 2
+            }
+          ],
+          "totalAmount": 400000,
+          "discountCode": "",
+          "discountAmount": 0,
+          "voucherCode": "",
+          "voucherDiscount": 0,
+          "shippingFee": 0,
+          "shippingMethod": "Tiêu chuẩn",
+          "shippingInfo": {
+            "fullName": "Nguyen Van A",
+            "phone": "0900000000",
+            "address": "123 Duong ABC"
+          },
+          "paymentMethod": "COD",
+          "status": "Đang xử lý",
+          "createdAt": "2026-11-15T04:52:24.208Z"
+        }
+      },
+      "category": "RESPONSE",
+      "oracle_violation": "totalAmount (400000) inconsistent with catalog (~2000000)"
+    }
+  ]
+}

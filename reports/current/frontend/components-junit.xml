@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="14" failures="0" errors="0" time="0.4880023">
+    <testsuite name="src/components/ProductList.test.jsx" timestamp="2026-11-15T04:46:59.993Z" hostname="LAPTOP-F73KN129" tests="8" failures="0" errors="0" skipped="0" time="0.3563578">
+        <testcase classname="src/components/ProductList.test.jsx" name="ProductList Component &gt; COMP-PRD-01: displays product name, currency and detail destination" time="0.2186536">
+        </testcase>
+        <testcase classname="src/components/ProductList.test.jsx" name="ProductList Component &gt; COMP-PRD-02: empty products show an empty state" time="0.0027342">
+        </testcase>
+        <testcase classname="src/components/ProductList.test.jsx" name="ProductList Component &gt; COMP-PRD-03: loading hides stale product actions" time="0.0145666">
+        </testcase>
+        <testcase classname="src/components/ProductList.test.jsx" name="ProductList Component &gt; COMP-PRD-04: adds the correct product to wishlist" time="0.0171895">
+        </testcase>
+        <testcase classname="src/components/ProductList.test.jsx" name="ProductList Component &gt; COMP-PRD-05: removes an existing wishlist item" time="0.0122689">
+        </testcase>
+        <testcase classname="src/components/ProductList.test.jsx" name="ProductList Component &gt; COMP-PRD-06: opens and closes the preview boundary for the selected product" time="0.042443">
+        </testcase>
+        <testcase classname="src/components/ProductList.test.jsx" name="ProductList Component &gt; COMP-PRD-07: view action navigates to the product detail" time="0.0291007">
+        </testcase>
+        <testcase classname="src/components/ProductList.test.jsx" name="ProductList Component &gt; COMP-PRD-08: custom section title is rendered" time="0.0171045">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/Toast.test.jsx" timestamp="2026-11-15T04:46:59.995Z" hostname="LAPTOP-F73KN129" tests="6" failures="0" errors="0" skipped="0" time="0.1316445">
+        <testcase classname="src/components/Toast.test.jsx" name="Toast Component &gt; COMP-TOAST-01: empty message renders no status" time="0.0122237">
+        </testcase>
+        <testcase classname="src/components/Toast.test.jsx" name="Toast Component &gt; COMP-TOAST-02: success content is announced through a live status" time="0.1019867">
+        </testcase>
+        <testcase classname="src/components/Toast.test.jsx" name="Toast Component &gt; COMP-TOAST-03: closes at the deadline, not before" time="0.0073727">
+        </testcase>
+        <testcase classname="src/components/Toast.test.jsx" name="Toast Component &gt; COMP-TOAST-04: unmount cancels the pending callback" time="0.0024275">
+        </testcase>
+        <testcase classname="src/components/Toast.test.jsx" name="Toast Component &gt; COMP-TOAST-05: unknown type uses the info title and icon" time="0.002599">
+        </testcase>
+        <testcase classname="src/components/Toast.test.jsx" name="Toast Component &gt; COMP-TOAST-06: replacing onClose cancels the previous callback" time="0.0026895">
+        </testcase>
+    </testsuite>
+</testsuites>

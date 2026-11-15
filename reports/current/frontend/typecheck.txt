@@ -1,0 +1,131 @@
+src/App.tsx(53,7): error TS6133: 'AIOutfitRoom' is declared but its value is never read.
+src/App.tsx(564,33): error TS2345: Argument of type '({ size: any; tryon_ready: boolean; id: string | number; name: string; price: PriceValue; quantity?: number | undefined; cartId?: number | undefined; img?: string | undefined; image?: string | undefined; } | null)[]' is not assignable to parameter of type 'SetStateAction<ProductRecord[] | null>'.
+  Type '({ size: any; tryon_ready: boolean; id: string | number; name: string; price: PriceValue; quantity?: number | undefined; cartId?: number | undefined; img?: string | undefined; image?: string | undefined; } | null)[]' is not assignable to type 'ProductRecord[]'.
+    Type '{ size: any; tryon_ready: boolean; id: string | number; name: string; price: PriceValue; quantity?: number | undefined; cartId?: number | undefined; img?: string | undefined; image?: string | undefined; } | null' is not assignable to type 'ProductRecord'.
+      Type 'null' is not assignable to type 'ProductRecord'.
+src/components/ai-outfit/OutfitCard.tsx(1,29): error TS6196: 'OutfitItem' is declared but never used.
+src/components/ai-outfit/OutfitCard.tsx(11,46): error TS6133: 'index' is declared but its value is never read.
+src/components/ai-outfit/OutfitCard.tsx(157,11): error TS6133: 'expandedButtonHoverStyle' is declared but its value is never read.
+src/components/ai-outfit/OutfitCard.tsx(219,57): error TS2339: Property 'occasion' does not exist on type 'OutfitResult'.
+src/components/outfit/AIOutfitSuggestionsPanel.tsx(1,1): error TS6133: 'X' is declared but its value is never read.
+src/components/outfit/AIOutfitSuggestionsPanel.tsx(23,5): error TS6133: 'isOpen' is declared but its value is never read.
+src/components/outfit/AIOutfitSuggestionsPanel.tsx(24,5): error TS6133: 'onClose' is declared but its value is never read.
+src/components/outfit/AIOutfitSuggestionsPanel.tsx(28,5): error TS6133: 'onWearSet' is declared but its value is never read.
+src/components/outfit/AvatarPanel.tsx(1,10): error TS6133: 'Suspense' is declared but its value is never read.
+src/components/outfit/AvatarPanel.tsx(3,25): error TS6133: 'Grid' is declared but its value is never read.
+src/components/outfit/AvatarPanel.tsx(6,1): error TS6133: 'Avatar' is declared but its value is never read.
+src/components/outfit/AvatarPanel.tsx(7,1): error TS6133: 'GarmentModel' is declared but its value is never read.
+src/components/outfit/AvatarPanel.tsx(10,10): error TS1484: 'OutfitResult' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/components/outfit/AvatarPanel.tsx(10,24): error TS1484: 'ViewAngle' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/components/outfit/AvatarPanel.tsx(29,10): error TS6133: 'LoadingScreen' is declared but its value is never read.
+src/components/outfit/AvatarPanel.tsx(72,3): error TS6133: 'outfits' is declared but its value is never read.
+src/components/outfit/AvatarPanel.tsx(73,3): error TS6133: 'activeOutfitIndex' is declared but its value is never read.
+src/components/outfit/AvatarPanel.tsx(74,3): error TS6133: 'onSelectOutfit' is declared but its value is never read.
+src/components/outfit/AvatarPanel.tsx(77,10): error TS6133: 'avatarScene' is declared but its value is never read.
+src/components/outfit/AvatarPanel.tsx(179,9): error TS6133: 'topItem' is declared but its value is never read.
+src/components/outfit/AvatarPanel.tsx(180,9): error TS6133: 'bottomItem' is declared but its value is never read.
+src/components/outfit/AvatarPanel.tsx(181,9): error TS6133: 'shoeItem' is declared but its value is never read.
+src/components/outfit/FloatingAISuggestions.tsx(4,42): error TS6196: 'ViewAngle' is declared but never used.
+src/components/outfit/OutfitCard.tsx(22,5): error TS6133: 'isLocalFallback' is declared but its value is never read.
+src/components/outfit/OutfitCard.tsx(26,12): error TS6133: 'expanded' is declared but its value is never read.
+src/components/outfit/OutfitCard.tsx(27,12): error TS6133: 'isLoadingSession' is declared but its value is never read.
+src/components/outfit/OutfitCard.tsx(27,30): error TS6133: 'setIsLoadingSession' is declared but its value is never read.
+src/components/outfit/OutfitCard.tsx(28,11): error TS6133: 'navigate' is declared but its value is never read.
+src/components/outfit/OutfitColorPicker.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/outfit/TryOnPanel.tsx(1,31): error TS6133: 'useMemo' is declared but its value is never read.
+src/components/outfit/TryOnPanel.tsx(69,23): error TS6133: 'shouldBeSelected' is declared but its value is never read.
+src/components/tryon/PhotoUploadFlow.tsx(22,10): error TS6133: 'isAnalyzing' is declared but its value is never read.
+src/components/tryon/TryOnScene.tsx(39,29): error TS2322: Type 'Profile | null | undefined' is not assignable to type 'BodyMeasurements'.
+  Type 'undefined' is not assignable to type 'BodyMeasurements'.
+src/features/virtual-tryon/components/SizeCompare3DCanvas.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
+src/features/virtual-tryon/components/SizeCompare3DCanvas.tsx(11,39): error TS7016: Could not find a declaration file for module '../../../data/ThreeDConfig'. 'D:/Virtual-Try-On-sync/archive/vfitai/client/src/data/ThreeDConfig.js' implicitly has an 'any' type.
+src/features/virtual-tryon/components/SizeCompare3DCanvas.tsx(178,49): error TS2322: Type '{ config: any; selectedSize: string; selectedColor: string; fabricOverride: LocalFabricProfile | undefined; avatarScene: Group<Object3DEventMap> | null; ... 4 more ...; avatarProfile: Profile; }' is not assignable to type 'IntrinsicAttributes & GarmentModelProps'.
+  Property 'ghostOpacity' does not exist on type 'IntrinsicAttributes & GarmentModelProps'.
+src/features/virtual-tryon/components/SizeCompare3DCanvas.tsx(194,49): error TS2322: Type '{ config: any; selectedSize: string; selectedColor: string; fabricOverride: LocalFabricProfile | undefined; avatarScene: Group<Object3DEventMap> | null; ... 4 more ...; avatarProfile: Profile; }' is not assignable to type 'IntrinsicAttributes & GarmentModelProps'.
+  Property 'ghostOpacity' does not exist on type 'IntrinsicAttributes & GarmentModelProps'.
+src/features/virtual-tryon/components/VirtualPersonalClosetDrawer.tsx(4,33): error TS7016: Could not find a declaration file for module '../../../data/ThreeDConfig'. 'D:/Virtual-Try-On-sync/archive/vfitai/client/src/data/ThreeDConfig.js' implicitly has an 'any' type.
+src/features/virtual-tryon/components/VirtualPersonalClosetDrawer.tsx(299,32): error TS2339: Property 'glbUrl' does not exist on type 'ClosetApiItem'.
+src/features/virtual-tryon/components/VirtualPersonalClosetDrawer.tsx(307,35): error TS2339: Property 'glbUrl' does not exist on type 'ClosetApiItem'.
+src/features/virtual-tryon/components/VirtualPersonalClosetDrawer.tsx(312,25): error TS2339: Property 'glbUrl' does not exist on type 'ClosetApiItem'.
+src/features/virtual-tryon/components/VirtualPersonalClosetDrawer.tsx(317,104): error TS2339: Property 'glbUrl' does not exist on type 'ClosetApiItem'.
+src/features/virtual-tryon/components/VirtualPersonalClosetDrawer.tsx(330,41): error TS2339: Property '_id' does not exist on type 'ClosetApiItem'.
+src/features/virtual-tryon/components/VirtualPersonalClosetDrawer.tsx(334,13): error TS2353: Object literal may only specify known properties, and 'img' does not exist in type 'ClosetItem'.
+src/features/virtual-tryon/garmentBinding.ts(818,18): error TS2345: Argument of type 'Object3D<Object3DEventMap>' is not assignable to parameter of type 'Bone<Object3DEventMap>'.
+  Property 'isBone' is missing in type 'Object3D<Object3DEventMap>' but required in type 'Bone<Object3DEventMap>'.
+src/features/virtual-tryon/garmentBinding.ts(819,45): error TS2345: Argument of type 'Object3D<Object3DEventMap>' is not assignable to parameter of type 'Bone<Object3DEventMap>'.
+  Property 'isBone' is missing in type 'Object3D<Object3DEventMap>' but required in type 'Bone<Object3DEventMap>'.
+src/features/virtual-tryon/garmentBinding.ts(820,55): error TS2345: Argument of type 'Object3D<Object3DEventMap>' is not assignable to parameter of type 'Bone<Object3DEventMap>'.
+  Property 'isBone' is missing in type 'Object3D<Object3DEventMap>' but required in type 'Bone<Object3DEventMap>'.
+src/features/virtual-tryon/garmentBinding.ts(885,26): error TS2345: Argument of type 'Object3D<Object3DEventMap>' is not assignable to parameter of type 'Mesh<BufferGeometry<NormalBufferAttributes, BufferGeometryEventMap>, Material | Material[], Object3DEventMap>'.
+  Type 'Object3D<Object3DEventMap>' is missing the following properties from type 'Mesh<BufferGeometry<NormalBufferAttributes, BufferGeometryEventMap>, Material | Material[], Object3DEventMap>': isMesh, geometry, material, updateMorphTargets, getVertexPosition
+src/features/virtual-tryon/garmentBinding.ts(893,56): error TS2339: Property 'material' does not exist on type 'Object3D<Object3DEventMap>'.
+src/features/virtual-tryon/garmentBinding.ts(944,15): error TS2339: Property 'material' does not exist on type 'Object3D<Object3DEventMap>'.
+src/features/virtual-tryon/garmentBinding.ts(944,46): error TS2339: Property 'material' does not exist on type 'Object3D<Object3DEventMap>'.
+src/features/virtual-tryon/garmentBinding.ts(1510,11): error TS6133: 'maxInfluence' is declared but its value is never read.
+src/features/virtual-tryon/GarmentModel.tsx(428,17): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/features/virtual-tryon/VirtualTryOn.test.tsx(4,1): error TS6133: 'React' is declared but its value is never read.
+src/features/virtual-tryon/VirtualTryOn.test.tsx(26,10): error TS2739: Type '{}' is missing the following properties from type 'VirtualTryOnProps': product, onAddToCart, onBuyNow, showToast
+src/features/virtual-tryon/VirtualTryOn.test.tsx(31,47): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+src/features/virtual-tryon/VirtualTryOn.tsx(74,10): error TS6133: 'Accordion' is declared but its value is never read.
+src/features/virtual-tryon/VirtualTryOn.tsx(279,10): error TS6133: 'SizeCompareViewport' is declared but its value is never read.
+src/features/virtual-tryon/VirtualTryOn.tsx(299,11): error TS6133: 'quickSizeItems' is declared but its value is never read.
+src/features/virtual-tryon/VirtualTryOn.tsx(474,7): error TS6133: 'FIT_LABELS' is declared but its value is never read.
+src/features/virtual-tryon/VirtualTryOn.tsx(481,7): error TS6133: 'formatDeltaCm' is declared but its value is never read.
+src/features/virtual-tryon/VirtualTryOn.tsx(483,7): error TS6133: 'getZoneIcon' is declared but its value is never read.
+src/features/virtual-tryon/VirtualTryOn.tsx(567,7): error TS6133: 'resolveFitScopeLabel' is declared but its value is never read.
+src/features/virtual-tryon/VirtualTryOn.tsx(607,10): error TS6133: 'CameraHotspot' is declared but its value is never read.
+src/features/virtual-tryon/VirtualTryOn.tsx(636,9): error TS6133: 'currentAvatarId' is declared but its value is never read.
+src/features/virtual-tryon/VirtualTryOn.tsx(637,9): error TS6133: 'setCurrentAvatarId' is declared but its value is never read.
+src/features/virtual-tryon/VirtualTryOn.tsx(685,60): error TS2339: Property 'colors' does not exist on type '{ url: string; autoNormalize?: boolean | undefined; followAvatarBones?: boolean | undefined; softness?: { morphInfluence?: number | undefined; morphSmoothing?: number | undefined; maxMorphInfluence?: number | undefined; roughness?: number | undefined; metalness?: number | undefined; envMapIntensity?: number | undefi...'.
+src/features/virtual-tryon/VirtualTryOn.tsx(686,68): error TS2339: Property 'colors' does not exist on type '{ url: string; autoNormalize?: boolean | undefined; followAvatarBones?: boolean | undefined; softness?: { morphInfluence?: number | undefined; morphSmoothing?: number | undefined; maxMorphInfluence?: number | undefined; roughness?: number | undefined; metalness?: number | undefined; envMapIntensity?: number | undefi...'.
+src/features/virtual-tryon/VirtualTryOn.tsx(740,12): error TS6133: 'showMeasurements' is declared but its value is never read.
+src/features/virtual-tryon/VirtualTryOn.tsx(740,30): error TS6133: 'setShowMeasurements' is declared but its value is never read.
+src/features/virtual-tryon/VirtualTryOn.tsx(742,21): error TS6133: 'setBgTheme' is declared but its value is never read.
+src/features/virtual-tryon/VirtualTryOn.tsx(744,11): error TS6133: 'sidebarScrollRef' is declared but its value is never read.
+src/features/virtual-tryon/VirtualTryOn.tsx(938,68): error TS2339: Property 'sizes' does not exist on type '{}'.
+src/features/virtual-tryon/VirtualTryOn.tsx(939,56): error TS2339: Property 'sizes' does not exist on type '{}'.
+src/features/virtual-tryon/VirtualTryOn.tsx(955,11): error TS6133: 'comparePreviewColor' is declared but its value is never read.
+src/features/virtual-tryon/VirtualTryOn.tsx(956,11): error TS6133: 'comparePreviewColorName' is declared but its value is never read.
+src/features/virtual-tryon/VirtualTryOn.tsx(957,11): error TS6133: 'comparePreviewFabric' is declared but its value is never read.
+src/features/virtual-tryon/VirtualTryOn.tsx(1019,11): error TS6133: 'sizeCompareRows' is declared but its value is never read.
+src/features/virtual-tryon/VirtualTryOn.tsx(1045,11): error TS6133: 'sizeCompareScoreDiff' is declared but its value is never read.
+src/features/virtual-tryon/VirtualTryOn.tsx(1150,11): error TS6133: 'handleClose' is declared but its value is never read.
+src/features/virtual-tryon/VirtualTryOn.tsx(1193,11): error TS6133: 'handleUndo' is declared but its value is never read.
+src/features/virtual-tryon/VirtualTryOn.tsx(1204,11): error TS6133: 'handleRedo' is declared but its value is never read.
+src/features/virtual-tryon/VirtualTryOn.tsx(1348,11): error TS6133: 'handleSizeCompareLeftChange' is declared but its value is never read.
+src/features/virtual-tryon/VirtualTryOn.tsx(1361,11): error TS6133: 'handleSizeCompareRightChange' is declared but its value is never read.
+src/features/virtual-tryon/VirtualTryOn.tsx(1393,11): error TS6133: 'handleScreenshot' is declared but its value is never read.
+src/features/virtual-tryon/VirtualTryOn.tsx(2164,59): error TS2322: Type 'unknown' is not assignable to type 'string | undefined'.
+src/features/virtual-tryon/VirtualTryOn.tsx(2169,117): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'RecommendSizeOptions | undefined'.
+  Type 'string' has no properties in common with type 'RecommendSizeOptions'.
+src/hooks/useOutfitGenerator.ts(168,68): error TS6133: 'avatarData' is declared but its value is never read.
+src/hooks/useOutfitGenerator.ts(316,85): error TS2345: Argument of type 'Product[]' is not assignable to parameter of type 'Product[]'.
+  Type 'Product' is not assignable to type 'Product'. Two different types with this name exist, but they are unrelated.
+    Types of property 'name' are incompatible.
+      Type 'string | undefined' is not assignable to type 'string'.
+        Type 'undefined' is not assignable to type 'string'.
+src/pages/AIOutfitGenerator.tsx(5,1): error TS6192: All imports in import declaration are unused.
+src/pages/AIOutfitGenerator.tsx(6,25): error TS7016: Could not find a declaration file for module '../contexts/AuthContext'. 'D:/Virtual-Try-On-sync/archive/vfitai/client/src/contexts/AuthContext.jsx' implicitly has an 'any' type.
+src/pages/AIOutfitGenerator.tsx(13,33): error TS7016: Could not find a declaration file for module '../data/ThreeDConfig'. 'D:/Virtual-Try-On-sync/archive/vfitai/client/src/data/ThreeDConfig.js' implicitly has an 'any' type.
+src/pages/AIOutfitGenerator.tsx(18,25): error TS1484: 'SelectionState' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/pages/AIOutfitGenerator.tsx(130,92): error TS6133: 'category' is declared but its value is never read.
+src/pages/AIOutfitGenerator.tsx(329,5): error TS2552: Cannot find name 'setIsGenerating'. Did you mean 'isGenerating'?
+src/pages/AIOutfitGenerator.tsx(353,7): error TS2552: Cannot find name 'setIsGenerating'. Did you mean 'isGenerating'?
+src/pages/AIOutfitRoom.tsx(686,17): error TS2322: Type 'RefObject<HTMLDivElement | null>' is not assignable to type 'HTMLElement | RefObject<HTMLElement> | undefined'.
+  Type 'RefObject<HTMLDivElement | null>' is not assignable to type 'RefObject<HTMLElement>'.
+    Type 'HTMLDivElement | null' is not assignable to type 'HTMLElement'.
+      Type 'null' is not assignable to type 'HTMLElement'.
+src/pages/SizeComparisonRoom.tsx(18,7): error TS6133: 'IcCols' is declared but its value is never read.
+src/pages/SizeComparisonRoom.tsx(23,7): error TS6133: 'IcLayers' is declared but its value is never read.
+src/pages/SizeComparisonRoom.tsx(28,7): error TS6133: 'IcSlide' is declared but its value is never read.
+src/pages/SizeComparisonRoom.tsx(281,24): error TS6133: 'setCameraPreset' is declared but its value is never read.
+src/pages/SizeComparisonRoom.tsx(287,10): error TS6133: 'sidebarTab' is declared but its value is never read.
+src/pages/SizeComparisonRoom.tsx(287,23): error TS6133: 'setSidebarTab' is declared but its value is never read.
+src/utils/generateLocalOutfits.ts(129,32): error TS18048: 'p' is possibly 'undefined'.
+src/utils/generateLocalOutfits.ts(129,41): error TS18048: 'p' is possibly 'undefined'.
+src/utils/glb.ts(1,10): error TS1484: 'OutfitItem' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/utils/glb.ts(1,22): error TS1484: 'OutfitResult' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/utils/glb.ts(2,1): error TS6133: 'MODEL_INJECTION' is declared but its value is never read.
+src/utils/glb.ts(2,33): error TS7016: Could not find a declaration file for module '../data/ThreeDConfig'. 'D:/Virtual-Try-On-sync/archive/vfitai/client/src/data/ThreeDConfig.js' implicitly has an 'any' type.
+src/utils/glb.ts(47,3): error TS6133: 'productId' is declared but its value is never read.

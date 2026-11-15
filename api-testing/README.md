@@ -29,3 +29,19 @@ có FAIL là kết quả kiểm thử, không được sửa assertion để bi�
 `python tools/export_api_catalog.py`. Cột `ExecutableOracles` là phạm vi thực sự
 được runner đánh giá; phần mô tả Excel rộng hơn chưa được coi là đã kiểm chứng hết.
 Test reporting tại `api-testing/tests/` bảo vệ exit code và phân loại JUnit.
+
+## Replay → regression
+
+```sh
+python api-testing/replay_failures.py --repeats 2 --output reports/runs/replay-demo
+```
+
+Chọn một scenario FAIL đại diện cho mỗi testcase, kiểm tra hash nguồn và workbook,
+reset Node cho từng lượt rồi dùng lại oracle. `--testcase TC-USR-2` chọn một ca;
+nguồn mặc định là baseline portfolio, có thể dùng `--report <API report mới>`.
+Output có dữ liệu sẽ bị từ chối; source đổi phải chạy acceptance mới, không bypass hash.
+
+Exit replay 0 nghĩa mọi lỗi đã chọn tái hiện, 1 nghĩa có NOT_REPRODUCED cần khảo sát,
+2 là lỗi setup/manifest/runner. Không coi NOT_REPRODUCED là FIXED. Scenario cố định
+đã có trong full suite nhưng còn FAIL; chưa xác minh bản sửa target.
+[Tracking 20 testcase](../qa/defect-register.md) · [Replay hiện hành](../reports/current/replay/report.md).

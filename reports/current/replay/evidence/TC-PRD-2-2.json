@@ -1,0 +1,89 @@
+{
+  "case": {
+    "id": "TC-PRD-2:negative-price",
+    "testcase": "TC-PRD-2",
+    "steps": [
+      {
+        "url": "/api/products/1",
+        "body": {
+          "price": -500
+        },
+        "actor": "admin",
+        "method": "PUT"
+      }
+    ],
+    "check": {
+      "kind": "status",
+      "allowed": [
+        400,
+        422
+      ]
+    }
+  },
+  "status": "FAIL",
+  "evidence": {
+    "ok": true,
+    "environment": "node_harness_stub",
+    "limitations": [
+      "Datastore and services are simulated; conclusions apply to this harness only."
+    ],
+    "catalog": [
+      {
+        "__v": 0,
+        "id": 1,
+        "name": "Ao thun",
+        "price": 200000,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6af938ac0bced7c7d92c2c73",
+        "createdAt": "2026-11-15T04:44:28.045Z"
+      }
+    ],
+    "observations": [
+      {
+        "method": "PUT",
+        "url": "/api/products/1",
+        "actor": "admin",
+        "input": {
+          "price": -500
+        },
+        "status": 200,
+        "body": {
+          "__v": 1,
+          "id": 1,
+          "name": "Ao thun",
+          "price": -500,
+          "stock": 10,
+          "totalStock": 10,
+          "category": "Ao",
+          "_id": "6af938ac0bced7c7d92c2c73",
+          "createdAt": "2026-11-15T04:44:28.045Z"
+        },
+        "elapsed_ms": 4.1959000000000515,
+        "entity_after": null
+      }
+    ],
+    "password_audit": null,
+    "final_products": [
+      {
+        "__v": 1,
+        "id": 1,
+        "name": "Ao thun",
+        "price": -500,
+        "stock": 10,
+        "totalStock": 10,
+        "category": "Ao",
+        "_id": "6af938ac0bced7c7d92c2c73",
+        "createdAt": "2026-11-15T04:44:28.045Z"
+      }
+    ],
+    "notifications": null,
+    "initial_entity": null,
+    "final_entity": null,
+    "actor_ids": {
+      "self": "000000000000000000000001"
+    }
+  },
+  "elapsed_seconds": 0.913910599999781
+}
