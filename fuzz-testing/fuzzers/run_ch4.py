@@ -12,7 +12,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--seed', type=int, default=7)
     parser.add_argument('--fuzz-cases', type=int, default=8)
-    parser.add_argument('--output', type=Path, default=HERE.parent / 'results/sales_campaign')
+    parser.add_argument('--output', type=Path, default=HERE.parent / 'reports/sales_campaign')
     parser.add_argument('--audit-only', action='store_true')
     parser.add_argument('--compare',
          action='store_true',

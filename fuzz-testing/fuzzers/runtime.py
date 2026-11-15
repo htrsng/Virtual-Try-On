@@ -50,7 +50,7 @@ def write_json(path, value):
 
 
 def load_seed(filename):
-    return read_json(ROOT / "seed_corpus" / filename)
+    return read_json(ROOT / "seeds" / filename)
 
 
 @contextmanager

@@ -128,7 +128,7 @@ def run_concolic(output, budget=12):
     for name in ('fuzzers/concolic.py', 'fuzzers/whitebox_fuzzer.py',
                  'node_harness/models.js', 'node_harness/branch_trace.js',
                  'node_harness/single_run_harness.js', 'node_harness/index.js',
-                 'seed_corpus/seed_order_valid.json'):
+                 'seeds/seed_order_valid.json'):
         hashes[name] = hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
     elapsed = time.monotonic() - start
     replay_count = sum(item['replay'] is not None for item in executions)

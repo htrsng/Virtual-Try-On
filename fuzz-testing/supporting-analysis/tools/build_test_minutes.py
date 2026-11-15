@@ -16,9 +16,9 @@ def read(rel):
     return json.loads((ROOT / rel).read_text(encoding='utf-8'))
 def sha(p):
     return hashlib.sha256(p.read_bytes()).hexdigest()
-report = read('results/spec_excel_aligned/report.json')
-snapshot = read('results/spec_excel_aligned/spec_snapshot.json')
-black = read('results/blackbox/e97d715116e3/report.json')
+report = read('reports/spec_excel_aligned/report.json')
+snapshot = read('reports/spec_excel_aligned/spec_snapshot.json')
+black = read('reports/blackbox/e97d715116e3/report.json')
 traces = {t['testcase']['ID']: t for t in report['traceability']}
 old = {t['ID']: t for s in snapshot for t in s['sheets']['TestCase']}
 specs, current, manifest = [], [], []
@@ -49,7 +49,7 @@ p('## 1. Thông tin và căn cứ')
 p('Đơn vị/nhóm thực hiện: ................................; Người kiểm thử: ................................; Người xác nhận: ................................\n')
 p('Biên bản được lập bằng cách đọc 5 workbook Excel (đủ 10 sheet/workbook), mã nguồn bộ chạy/oracle và bằng chứng JSON đã lưu. Đây là biên bản tổng hợp kết quả lịch sử, không phải xác nhận đã chạy mới ngày 30/10/2026. Không điền giả tên người thực hiện, thời gian chạy hoặc chữ ký.\n')
 stamp = datetime.fromisoformat(report['created_utc']).astimezone(timezone(timedelta(hours=7)))
-p(f'Campaign đối chiếu Excel: results/spec_excel_aligned/report.json; thời điểm tạo báo cáo {stamp:%d/%m/%Y %H:%M:%S} (UTC+7); seed {report["random_seed"]}; Python được ghi trong báo cáo: {report["python_version"]}. Môi trường: node_harness_stub; Express xử lý request thực, datastore và dịch vụ là mô phỏng. Không đại diện cho production/MongoDB thật.\n')
+p(f'Campaign đối chiếu Excel: reports/spec_excel_aligned/report.json; thời điểm tạo báo cáo {stamp:%d/%m/%Y %H:%M:%S} (UTC+7); seed {report["random_seed"]}; Python được ghi trong báo cáo: {report["python_version"]}. Môi trường: node_harness_stub; Express xử lý request thực, datastore và dịch vụ là mô phỏng. Không đại diện cho production/MongoDB thật.\n')
 p('## 2. Đối chiếu đặc tả và phạm vi')
 table(['Workbook','TC hiện tại','Có kết quả lịch sử','Chưa có kết quả','PASS/FAIL lịch sử'],[(name,len(rows),sum(r['ID'] in traces for r in rows),sum(r['ID'] not in traces for r in rows),str(dict(Counter(traces[r['ID']]['status'] for r in rows if r['ID'] in traces)))) for name,rows,_,_ in specs])
 p('Excel hiện tại có 134 testcase; snapshot lúc chạy có 104. Có 30 ID bổ sung, 75 ID trong snapshot chưa thực thi, tổng cộng 105 testcase hiện tại chưa có kết quả campaign API này. README ghi 104 là số của snapshot, không phải số đếm hiện tại.\n')
@@ -72,14 +72,14 @@ for t in report['traceability']:
     if ev.get('password_audit'): p('Kiểm tra lưu mật khẩu: '+json.dumps(ev['password_audit'],ensure_ascii=False)+'\n')
 p('Các mục FAIL là nhóm theo testcase; chưa có phân tích chứng minh đây là 20 lỗi gốc độc lập. Dữ liệu request, actor, entity_before/after (nếu được lưu), response và toàn bộ chuỗi thao tác tra trong executions của JSON gốc theo Case ID ở trên.\n')
 p('## 5. Blackbox 3.500 input (campaign riêng)')
-p(f'Nguồn: results/blackbox/e97d715116e3/report.json. Seed 42, 3.500 input, thời gian được ghi {black["elapsed_seconds"]:.3f} giây. 240 HTTP 5xx (6,86%), 1.669 lượt finding nghiệp vụ/bảo mật. Không dùng 1.669 làm số lỗi gốc; không cộng với 20 testcase FAIL.\n')
+p(f'Nguồn: reports/blackbox/e97d715116e3/report.json. Seed 42, 3.500 input, thời gian được ghi {black["elapsed_seconds"]:.3f} giây. 240 HTTP 5xx (6,86%), 1.669 lượt finding nghiệp vụ/bảo mật. Không dùng 1.669 làm số lỗi gốc; không cộng với 20 testcase FAIL.\n')
 table(['Target','HTTP','Số lượt'],[(k.rsplit(':',1)[0],k.rsplit(':',1)[1],v) for k,v in sorted(black['status_counter'].items())])
 table(['Target có 5xx','Số lượt'],Counter(e['target'] for e in black['errors']).items())
 p('Ví dụ iteration 1: tạo đơn thiếu totalAmount trả HTTP 500 với thông báo required; finding iteration 3 ghi sửa hồ sơ bản thân không có token vẫn HTTP 200; iteration 4 ghi sửa hồ sơ người khác bằng token user thường vẫn HTTP 200. Đây là quan sát trên harness; 500 không chứng minh tiến trình crash.\n')
 p('## 6. Demo coverage, concolic và khảo sát biên')
-p('results/demo_chuong4_final/: blackbox 42 input, 1 lỗi HTTP ứng dụng, 22 quan sát nghiệp vụ/bảo mật; khảo sát coverage 16 input, 6 lỗi HTTP ứng dụng và 6 quan sát. Coverage-guided là greybox; không gọi toàn bộ giai đoạn này là symbolic execution.\n')
+p('reports/demo_chuong4_final/: blackbox 42 input, 1 lỗi HTTP ứng dụng, 22 quan sát nghiệp vụ/bảo mật; khảo sát coverage 16 input, 6 lỗi HTTP ứng dụng và 6 quan sát. Coverage-guided là greybox; không gọi toàn bộ giai đoạn này là symbolic execution.\n')
 p('Concolic riêng cho totalAmount: 5 input, 4 input replay, 4 input vi phạm, 2 input HTTP 5xx, 1 truy vấn UNSAT. number trả 200; null và object trả 500; numeric_string và boolean trả 200 nhưng bị phân loại chấp nhận sai kiểu. Mô hình thủ công total_kind trong [0,7], Z3 phiên bản ghi nhận 5.1.0; không chứng minh toàn bộ JavaScript hoặc toàn hệ thống. requirements.txt hiện quy định z3-solver<5 khác phiên bản ghi trong bằng chứng: cần tái lập môi trường trước khi so sánh lần chạy mới.\n')
-p('results/boundary_smoke_final/: blackbox 14 input (1 lỗi HTTP, 8 quan sát); khảo sát coverage 4 input (4 lỗi HTTP). Probe thay productId và độ dài name trong [0,16] trong khi shippingFee sai kiểu được giữ nguyên; các mẫu đều 5xx, không có transition, complete=false. Vì vậy chưa xác định được biên lỗi của productId/name, chưa loại trừ tác động che khuất từ shippingFee. Không suy ra toàn miền [0,16] đã được kiểm tra đầy đủ.\n')
+p('reports/boundary_smoke_final/: blackbox 14 input (1 lỗi HTTP, 8 quan sát); khảo sát coverage 4 input (4 lỗi HTTP). Probe thay productId và độ dài name trong [0,16] trong khi shippingFee sai kiểu được giữ nguyên; các mẫu đều 5xx, không có transition, complete=false. Vì vậy chưa xác định được biên lỗi của productId/name, chưa loại trừ tác động che khuất từ shippingFee. Không suy ra toàn miền [0,16] đã được kiểm tra đầy đủ.\n')
 p('## 7. Sai lệch và giới hạn bằng chứng')
 p('Hai lần thử ngày 28/10/2026 được Kiem_tra_runtime.json ghi SETUP_ERROR: harness chưa sẵn sàng sau 15 giây; nguyên nhân chưa xác định. Đây không phải campaign hoàn tất, không cộng thành PASS/FAIL của ứng dụng.\n')
 p('Chưa có bằng chứng xác nhận crash tiến trình, hang hoặc memory corruption bằng sanitizer; giá trị null trong mục confirmed_* là chưa đo, không phải số 0. Chưa xác minh đầy đủ CTL/SMT, concurrency, timing, rate limit, tích hợp email/virtual closet và 105 testcase còn lại. Năm sheet mô hình/thuộc tính hay mã sinh trong Excel là đặc tả, không tự trở thành kết quả chạy.\n')
@@ -87,7 +87,7 @@ p('## 8. Kết luận và xử lý đề nghị')
 p('Kết luận theo bằng chứng lịch sử: campaign API chưa đạt, vì 20/29 testcase vi phạm oracle; chưa đủ cơ sở xác nhận an toàn hoặc nghiệm thu toàn bộ 134 testcase hiện tại. Chưa có kết quả retest chứng minh các vi phạm đã được sửa.\n')
 p('Ưu tiên sửa kiểm tra xác thực/quyền trên tài khoản, sản phẩm và trạng thái đơn; ngăn mass assignment role, lưu mật khẩu bằng hash phù hợp; kiểm tra kiểu/miền đầu vào trước tầng lưu trữ; tính giá/tổng từ dữ liệu server; bảo vệ trạng thái kết thúc và định danh sản phẩm; đồng nhất phản hồi đăng nhập. Sau sửa cần chạy lại theo Excel hiện tại, bổ sung oracle cho điều kiện mới, lưu snapshot/hash/runtime và retest từng FAIL cùng testcase hồi quy. Mức ưu tiên là đề nghị xử lý, chưa phải chấm điểm CVSS.\n')
 p('## 9. Nguồn và truy vết')
-sources=['results/spec_excel_aligned/report.json','results/spec_excel_aligned/spec_snapshot.json','results/spec_excel_aligned/excluded_testcases.json','results/blackbox/e97d715116e3/report.json','results/demo_chuong4_final/report.json','results/demo_chuong4_final/concolic/report.json','results/boundary_smoke_final/report.json','results/boundary_smoke_final/whitebox/bounded_analysis.json','BaoCaoATPM/BaoCao_Trang/Kiem_tra_runtime.json','fuzzers/oracles.py','fuzzers/spec_campaign.py','README.md','requirements.txt']
+sources=['reports/spec_excel_aligned/report.json','reports/spec_excel_aligned/spec_snapshot.json','reports/spec_excel_aligned/excluded_testcases.json','reports/blackbox/e97d715116e3/report.json','reports/demo_chuong4_final/report.json','reports/demo_chuong4_final/concolic/report.json','reports/boundary_smoke_final/report.json','reports/boundary_smoke_final/whitebox/bounded_analysis.json','BaoCaoATPM/BaoCao_Trang/Kiem_tra_runtime.json','fuzzers/oracles.py','fuzzers/spec_campaign.py','README.md','requirements.txt']
 for rel in sources:
     f=ROOT/rel; manifest.append({'path':rel,'sha256':sha(f)})
 table(['Nguồn (tương đối từ fuzzing-security-testing)','SHA-256 hiện tại'],[(m['path'],m['sha256']) for m in manifest])

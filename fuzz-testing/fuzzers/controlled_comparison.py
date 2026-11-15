@@ -79,7 +79,7 @@ def main():
     args = parser.parse_args()
     if args.iterations_per_target <= ENERGY:
         parser.error(f"Budget must exceed energy={ENERGY} to exercise parent selection")
-    output = args.output or ROOT / "results/comparisons" / uuid.uuid4().hex[:12]
+    output = args.output or ROOT / "reports/comparisons" / uuid.uuid4().hex[:12]
     token = get_valid_token()
     runs = []
     for index, seed in enumerate(args.seeds):

@@ -71,7 +71,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--campaign",
          type=Path,
-         default=ROOT / "results/sales_campaign/report.json")
+         default=ROOT / "reports/sales_campaign/report.json")
     parser.add_argument("--comparison",
          type=Path,
          help="Explicitly include a comparison from the same backend")

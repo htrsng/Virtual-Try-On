@@ -8,7 +8,7 @@ const v8toIstanbul = require("v8-to-istanbul");
 const { createEnvironment } = require("./test_environment");
 const branchTrace = require("./branch_trace");
 const { emitResult, fail, readInput, send, setupError } = require("./harness_common");
-const ORDER_SEED = require("../seed_corpus/seed_order_valid.json");
+const ORDER_SEED = require("../seeds/seed_order_valid.json");
 
 function post(session, method, params) {
   return new Promise((resolve, reject) => {

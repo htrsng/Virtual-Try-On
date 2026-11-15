@@ -22,8 +22,8 @@ Request thực sự được xử lý; không cần MongoDB hoặc server produc
 ## Cài đặt
 
 ```powershell
-python -m pip install -r fuzzing-security-testing/requirements.txt
-npm ci --prefix fuzzing-security-testing/node_harness
+python -m pip install -r fuzz-testing/requirements.txt
+npm ci --prefix fuzz-testing/node_harness
 ```
 
 ## Chạy một lệnh để demo luồng chính
@@ -31,10 +31,10 @@ npm ci --prefix fuzzing-security-testing/node_harness
 Mở PowerShell tại thư mục gốc dự án:
 
 ```powershell
-python fuzzing-security-testing/fuzzers/run_fuzzing.py --iterations 42 --iterations-per-case 8 --max-cases 2 --seed 7 --concolic
+python fuzz-testing/fuzzers/run_fuzzing.py --iterations 42 --iterations-per-case 8 --max-cases 2 --seed 7 --concolic
 ```
 
-Mặc định mỗi lần chạy có thư mục riêng `results/fuzzing/<ID>/`:
+Mặc định mỗi lần chạy có thư mục riêng `reports/fuzzing/<ID>/`:
 
 - `blackbox/report.json`: các điểm input có triệu chứng.
 - `whitebox/report.json` và `whitebox/evidence/`: chạy lại, lân cận, coverage.
@@ -46,7 +46,7 @@ Phân biệt kỹ thuật: chế độ cũ trong `whitebox_fuzzer.py` là covera
 Chạy riêng whitebox Z3:
 
 ```powershell
-python fuzzing-security-testing/fuzzers/whitebox_fuzzer.py --concolic --iterations-per-target 12
+python fuzz-testing/fuzzers/whitebox_fuzzer.py --concolic --iterations-per-target 12
 ```
 
 Có thể thêm `--output <thư_mục_mới>` để chọn nơi lưu. Input login chưa thuộc các target khảo sát whitebox; danh sách chuyển giao bị giới hạn bởi target được hỗ trợ và max-cases.
@@ -54,11 +54,11 @@ Có thể thêm `--output <thư_mục_mới>` để chọn nơi lưu. Input logi
 ## Chạy riêng để quan sát hai giai đoạn
 
 ```powershell
-python fuzzing-security-testing/fuzzers/blackbox_fuzzer.py --iterations 100 --seed 7 --output fuzzing-security-testing/results/demo/blackbox
-python fuzzing-security-testing/fuzzers/whitebox_fuzzer.py --blackbox-report fuzzing-security-testing/results/demo/blackbox/report.json --iterations-per-target 12 --max-cases 6 --seed 7 --output fuzzing-security-testing/results/demo/whitebox
+python fuzz-testing/fuzzers/blackbox_fuzzer.py --iterations 100 --seed 7 --output fuzz-testing/reports/demo/blackbox
+python fuzz-testing/fuzzers/whitebox_fuzzer.py --blackbox-report fuzz-testing/reports/demo/blackbox/report.json --iterations-per-target 12 --max-cases 6 --seed 7 --output fuzz-testing/reports/demo/whitebox
 ```
 
-Muốn mở môi trường ở PowerShell riêng, chạy `node fuzzing-security-testing/node_harness/http_server.js`, rồi thêm `--base-url http://127.0.0.1:5050` vào lệnh blackbox hoặc run_fuzzing. Không chỉ định URL thì tự mở/đóng harness.
+Muốn mở môi trường ở PowerShell riêng, chạy `node fuzz-testing/node_harness/http_server.js`, rồi thêm `--base-url http://127.0.0.1:5050` vào lệnh blackbox hoặc run_fuzzing. Không chỉ định URL thì tự mở/đóng harness.
 
 ## Những file cần trình bày
 
@@ -85,8 +85,8 @@ Code hiện có kịch bản cho 29 testcase API: login 5, tạo đơn 8, trạn
 `testcases.py`, `oracles.py`, `spec_campaign.py` dùng để đối chiếu yêu cầu và kiểm tra oracle, không phải luồng demo chính. Khi cần kiểm thử theo đặc tả:
 
 ```powershell
-python fuzzing-security-testing/fuzzers/run_ch4.py --seed 7 --fuzz-cases 8
-python -m unittest discover -s fuzzing-security-testing/tests -p "test_*.py"
+python fuzz-testing/fuzzers/run_ch4.py --seed 7 --fuzz-cases 8
+python -m unittest discover -s fuzz-testing/tests -p "test_*.py"
 ```
 
 `controlled_comparison.py` là thực nghiệm bổ trợ so sánh chiến lược với cùng điều kiện. `supporting-analysis/tools/` chỉ giữ công cụ tạo báo cáo API và tái hiện FAIL. Đã bỏ bộ kiểm chứng mô hình, mẫu native và các công cụ thêm testcase phụ.
@@ -103,11 +103,11 @@ python -m unittest discover -s fuzzing-security-testing/tests -p "test_*.py"
 
 Bằng chứng theo từng phiên bản (snapshot và mã băm thuộc lần chạy tương ứng):
 
-- `results/spec_excel_aligned/`: 29 testcase, 9 PASS và 20 FAIL; 59 lượt thực thi; 75 testcase ngoài campaign. Đây là snapshot dùng đối chiếu Excel trong báo cáo.
-- `results/blackbox/e97d715116e3/`: campaign 3.500 input, seed 42; 240 HTTP 5xx và 1.669 lượt finding, không phải số lỗi gốc độc lập.
-- `results/demo_chuong4_final/`: demo blackbox, coverage-guided và concolic; đọc riêng số liệu từng giai đoạn, không cộng thành số lỗi gốc.
-- `results/boundary_smoke_final/`: bằng chứng kiểm tra biên cuối cùng đã lưu.
-- `results/trang_report_20261028/` và `results/trang_report_20261028_verified/`: log hai lần chạy bị lỗi setup; không phải campaign hoàn tất.
+- `reports/spec_excel_aligned/`: 29 testcase, 9 PASS và 20 FAIL; 59 lượt thực thi; 75 testcase ngoài campaign. Đây là snapshot dùng đối chiếu Excel trong báo cáo.
+- `reports/blackbox/e97d715116e3/`: campaign 3.500 input, seed 42; 240 HTTP 5xx và 1.669 lượt finding, không phải số lỗi gốc độc lập.
+- `reports/demo_chuong4_final/`: demo blackbox, coverage-guided và concolic; đọc riêng số liệu từng giai đoạn, không cộng thành số lỗi gốc.
+- `reports/boundary_smoke_final/`: bằng chứng kiểm tra biên cuối cùng đã lưu.
+- `reports/trang_report_20261028/` và `reports/trang_report_20261028_verified/`: log hai lần chạy bị lỗi setup; không phải campaign hoàn tất.
 
 Trong Excel, `ThongTin` ghi phạm vi tự động hóa từng module; TC-ORD-3/4 mô tả riêng phần API và concolic, còn TC-ORD-20 phân biệt khảo sát coverage với symbolic execution. Các sheet mô hình hình thức giữ nguyên; không suy ra chúng đã được công cụ hiện tại kiểm chứng. Các kết quả là bằng chứng theo snapshot, không gán cho cấu hình hoặc lần chạy mới.
 

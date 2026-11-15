@@ -128,7 +128,7 @@ def main():
     parser.add_argument("--testcase", action="append", help="Run only this API TC-ID; repeatable")
     parser.add_argument("--seed", type=int, default=7)
     parser.add_argument("--fuzz-cases", type=int, default=8)
-    parser.add_argument("--output", type=Path, default=ROOT / "results" / "sales_campaign")
+    parser.add_argument("--output", type=Path, default=ROOT / "reports" / "sales_campaign")
     args = parser.parse_args()
     if args.fuzz_cases < 0:
         parser.error("--fuzz-cases must be nonnegative")
@@ -170,7 +170,7 @@ def main():
             "Simulated datastore and test accounts; not a real-server or production benchmark.",
             "Email/virtual-closet integrations are disabled. Timing uses test hashes and is exploratory.",
             "Rate limiting, throughput and formal verification are outside this campaign."]}
-    sources = list((ROOT / "fuzzers").glob("*.py")) + list((ROOT / "seed_corpus").glob("*.json"))
+    sources = list((ROOT / "fuzzers").glob("*.py")) + list((ROOT / "seeds").glob("*.json"))
     for folder in ("node_harness", "node_harness/config", "node_harness/routes"):
         sources.extend((ROOT / folder).glob("*.js"))
     sources.append(ROOT.parent / "server/concurrency.js")
