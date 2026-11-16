@@ -31,7 +31,8 @@ Node 24 của workflow hiện tại chưa được xác minh local. Chưa có Se
 | UI startup | PASS giới hạn | HTTP 200, HTML có React root; chưa chứng minh render/browser hoặc toàn bộ nghiệp vụ |
 | Playwright inventory | PASS | 3 tests / 2 files; không di chuyển hoặc sửa specs |
 | Browser execution | PASS có giới hạn | Sau cài Chromium: 3/3 tests Pass; config riêng, database rỗng, specs có conditional assertions |
-| GitHub CI / remote sync | NOT VERIFIED | Chưa push hoặc chạy Actions; không suy luận CI xanh từ local |
+| Remote sync | PASS | Đã push nhánh QA lên origin GitHub; commit bàn giao `33bec8c`, không thay đổi main |
+| GitHub CI | NOT VERIFIED | Chưa chạy Actions cho nhánh; không suy luận CI xanh từ local |
 
 Backend diagnostic tái hiện test product không khớp route/contract, order nhận 403,
 FAQ assertion không khớp và lỗi syntax auth. Đây là lỗi test hoặc nghi vấn contract
@@ -64,8 +65,10 @@ product/user fixtures. Chỉ xác minh được browser khởi chạy và các a
 Source đã có commit nền và nhánh riêng; clone local sạch cài được dependencies;
 startup UI/API/MongoDB và các kiểm tra cơ sở có kết quả, lỗi được phân loại.
 Giai đoạn 0 không yêu cầu tất cả checks Pass. Những lỗi ở trên được giữ làm backlog.
-Khả năng clone từ GitHub và kết quả CI vẫn chưa xác minh; cần push nhánh và chạy CI
-trước khi tuyên bố repository remote có cùng baseline.
+Nhánh QA đã đồng bộ lên GitHub; clean clone được đo từ local object store của cùng
+source commit. Clone qua mạng từ GitHub và kết quả CI chưa được đo lại; cần chạy CI
+trước khi tuyên bố baseline trên runner GitHub. Workflow hiện tại chỉ trigger cho
+push main hoặc PR vào main; push nhánh QA không phải bằng chứng workflow đã chạy.
 
 Không chạy reset/migration, không đọc/commit secrets, không tạo dữ liệu người dùng,
 không sửa security/business logic trong giai đoạn này. SEC-01/02 và DATA-01 vẫn là
