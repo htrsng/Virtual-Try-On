@@ -1,0 +1,126 @@
+{
+  "base_commit": "46d20b9b2412fdcc166dd0e8247cd45d38b20529",
+  "working_tree": "dirty; restored app not committed",
+  "results": [
+    {
+      "name": "frontend-build",
+      "cwd": "client",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "started_utc": "2026-11-16T14:40:15.843219+00:00",
+      "duration_seconds": 9.7,
+      "exit_code": 2,
+      "status": "FAIL"
+    },
+    {
+      "name": "frontend-lint",
+      "cwd": "client",
+      "command": [
+        "npm",
+        "run",
+        "lint",
+        "--",
+        "--format",
+        "json"
+      ],
+      "started_utc": "2026-11-16T14:40:15.843776+00:00",
+      "duration_seconds": 17.86,
+      "exit_code": 1,
+      "status": "FAIL"
+    },
+    {
+      "name": "frontend-unit",
+      "cwd": "client",
+      "command": [
+        "npm",
+        "test",
+        "--",
+        "--run"
+      ],
+      "started_utc": "2026-11-16T14:41:08.082730+00:00",
+      "duration_seconds": 9.69,
+      "exit_code": 1,
+      "status": "FAIL"
+    },
+    {
+      "name": "backend-tests",
+      "cwd": "server",
+      "command": [
+        "npm",
+        "test",
+        "--",
+        "--runInBand",
+        "--json",
+        "--outputFile",
+        "<repo>\\.runtime\\qa-baseline-2026-11-16-verified\\backend-jest.json"
+      ],
+      "started_utc": "2026-11-16T14:41:08.083146+00:00",
+      "duration_seconds": 14.77,
+      "exit_code": 1,
+      "status": "FAIL"
+    },
+    {
+      "name": "playwright-existing",
+      "cwd": "tests",
+      "command": [
+        "npm",
+        "test",
+        "--",
+        "--reporter=json",
+        "--output",
+        "<repo>\\.runtime\\qa-baseline-2026-11-16-verified\\playwright-results"
+      ],
+      "started_utc": "2026-11-16T14:41:08.083495+00:00",
+      "duration_seconds": 5.99,
+      "exit_code": 1,
+      "status": "BLOCKED",
+      "reason": "Missing version-specific Playwright Chromium headless shell executable; 3 cases could not launch."
+    }
+  ],
+  "date_local": "2026-11-16",
+  "timezone": "Asia/Saigon",
+  "environment": {
+    "os": "Windows 11 x64",
+    "node": "22.15.0",
+    "npm": "11.3.0",
+    "java": "17.0.12",
+    "maven": "3.9.10"
+  },
+  "frontend_build": {
+    "typescript_diagnostics": 112,
+    "bundle": "NOT_RUN"
+  },
+  "frontend_lint": {
+    "files": 74,
+    "errors": 210,
+    "warnings": 14
+  },
+  "frontend_unit": {
+    "passed_tests": 14,
+    "failed_to_load_suites": 1,
+    "passed_suites": 2,
+    "reason": "useGLTF.preload missing in mock"
+  },
+  "backend": {
+    "passed_tests": 10,
+    "failed_tests": 6,
+    "passed_suites": 3,
+    "failed_suites": 4,
+    "runtime_error_suites": 1
+  },
+  "playwright": {
+    "cases_blocked": 3,
+    "product_assertions_evaluated": false
+  },
+  "isolation": "Jest: MONGODB_URI empty prevents dev .env load; disposable MongoMemoryServer; credentials blank; local system binary; serial execution.",
+  "limitations": [
+    "Existing node_modules; not clean npm ci on all packages",
+    "No clean-clone check",
+    "No Selenium or GitHub Actions run",
+    "No production payment, Gemini, email or 3D render verification"
+  ],
+  "raw_logs_local_only": true
+}

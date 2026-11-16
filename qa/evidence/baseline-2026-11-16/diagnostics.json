@@ -1,0 +1,2073 @@
+{
+  "typescript": [
+    "src/App.tsx(53,7): error TS6133: 'AIOutfitRoom' is declared but its value is never read.",
+    "src/App.tsx(564,33): error TS2345: Argument of type '({ size: any; tryon_ready: boolean; id: string | number; name: string; price: PriceValue; quantity?: number | undefined; cartId?: number | undefined; img?: string | undefined; image?: string | undefined; } | null)[]' is not assignable to parameter of type 'SetStateAction<ProductRecord[] | null>'.",
+    "src/components/ai-outfit/OutfitCard.tsx(1,29): error TS6196: 'OutfitItem' is declared but never used.",
+    "src/components/ai-outfit/OutfitCard.tsx(11,46): error TS6133: 'index' is declared but its value is never read.",
+    "src/components/ai-outfit/OutfitCard.tsx(157,11): error TS6133: 'expandedButtonHoverStyle' is declared but its value is never read.",
+    "src/components/ai-outfit/OutfitCard.tsx(219,57): error TS2339: Property 'occasion' does not exist on type 'OutfitResult'.",
+    "src/components/outfit/AIOutfitSuggestionsPanel.tsx(1,1): error TS6133: 'X' is declared but its value is never read.",
+    "src/components/outfit/AIOutfitSuggestionsPanel.tsx(23,5): error TS6133: 'isOpen' is declared but its value is never read.",
+    "src/components/outfit/AIOutfitSuggestionsPanel.tsx(24,5): error TS6133: 'onClose' is declared but its value is never read.",
+    "src/components/outfit/AIOutfitSuggestionsPanel.tsx(28,5): error TS6133: 'onWearSet' is declared but its value is never read.",
+    "src/components/outfit/AvatarPanel.tsx(1,10): error TS6133: 'Suspense' is declared but its value is never read.",
+    "src/components/outfit/AvatarPanel.tsx(3,25): error TS6133: 'Grid' is declared but its value is never read.",
+    "src/components/outfit/AvatarPanel.tsx(6,1): error TS6133: 'Avatar' is declared but its value is never read.",
+    "src/components/outfit/AvatarPanel.tsx(7,1): error TS6133: 'GarmentModel' is declared but its value is never read.",
+    "src/components/outfit/AvatarPanel.tsx(10,10): error TS1484: 'OutfitResult' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.",
+    "src/components/outfit/AvatarPanel.tsx(10,24): error TS1484: 'ViewAngle' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.",
+    "src/components/outfit/AvatarPanel.tsx(29,10): error TS6133: 'LoadingScreen' is declared but its value is never read.",
+    "src/components/outfit/AvatarPanel.tsx(72,3): error TS6133: 'outfits' is declared but its value is never read.",
+    "src/components/outfit/AvatarPanel.tsx(73,3): error TS6133: 'activeOutfitIndex' is declared but its value is never read.",
+    "src/components/outfit/AvatarPanel.tsx(74,3): error TS6133: 'onSelectOutfit' is declared but its value is never read.",
+    "src/components/outfit/AvatarPanel.tsx(77,10): error TS6133: 'avatarScene' is declared but its value is never read.",
+    "src/components/outfit/AvatarPanel.tsx(179,9): error TS6133: 'topItem' is declared but its value is never read.",
+    "src/components/outfit/AvatarPanel.tsx(180,9): error TS6133: 'bottomItem' is declared but its value is never read.",
+    "src/components/outfit/AvatarPanel.tsx(181,9): error TS6133: 'shoeItem' is declared but its value is never read.",
+    "src/components/outfit/FloatingAISuggestions.tsx(4,42): error TS6196: 'ViewAngle' is declared but never used.",
+    "src/components/outfit/OutfitCard.tsx(22,5): error TS6133: 'isLocalFallback' is declared but its value is never read.",
+    "src/components/outfit/OutfitCard.tsx(26,12): error TS6133: 'expanded' is declared but its value is never read.",
+    "src/components/outfit/OutfitCard.tsx(27,12): error TS6133: 'isLoadingSession' is declared but its value is never read.",
+    "src/components/outfit/OutfitCard.tsx(27,30): error TS6133: 'setIsLoadingSession' is declared but its value is never read.",
+    "src/components/outfit/OutfitCard.tsx(28,11): error TS6133: 'navigate' is declared but its value is never read.",
+    "src/components/outfit/OutfitColorPicker.tsx(1,1): error TS6133: 'React' is declared but its value is never read.",
+    "src/components/outfit/TryOnPanel.tsx(1,31): error TS6133: 'useMemo' is declared but its value is never read.",
+    "src/components/outfit/TryOnPanel.tsx(69,23): error TS6133: 'shouldBeSelected' is declared but its value is never read.",
+    "src/components/tryon/PhotoUploadFlow.tsx(22,10): error TS6133: 'isAnalyzing' is declared but its value is never read.",
+    "src/components/tryon/TryOnScene.tsx(39,29): error TS2322: Type 'Profile | null | undefined' is not assignable to type 'BodyMeasurements'.",
+    "src/features/virtual-tryon/components/SizeCompare3DCanvas.tsx(1,8): error TS6133: 'React' is declared but its value is never read.",
+    "src/features/virtual-tryon/components/SizeCompare3DCanvas.tsx(11,39): error TS7016: Could not find a declaration file for module '../../../data/ThreeDConfig'. '<repo>/client/src/data/ThreeDConfig.js' implicitly has an 'any' type.",
+    "src/features/virtual-tryon/components/SizeCompare3DCanvas.tsx(178,49): error TS2322: Type '{ config: any; selectedSize: string; selectedColor: string; fabricOverride: LocalFabricProfile | undefined; avatarScene: Group<Object3DEventMap> | null; ... 4 more ...; avatarProfile: Profile; }' is not assignable to type 'IntrinsicAttributes & GarmentModelProps'.",
+    "src/features/virtual-tryon/components/SizeCompare3DCanvas.tsx(194,49): error TS2322: Type '{ config: any; selectedSize: string; selectedColor: string; fabricOverride: LocalFabricProfile | undefined; avatarScene: Group<Object3DEventMap> | null; ... 4 more ...; avatarProfile: Profile; }' is not assignable to type 'IntrinsicAttributes & GarmentModelProps'.",
+    "src/features/virtual-tryon/components/VirtualPersonalClosetDrawer.tsx(4,33): error TS7016: Could not find a declaration file for module '../../../data/ThreeDConfig'. '<repo>/client/src/data/ThreeDConfig.js' implicitly has an 'any' type.",
+    "src/features/virtual-tryon/components/VirtualPersonalClosetDrawer.tsx(299,32): error TS2339: Property 'glbUrl' does not exist on type 'ClosetApiItem'.",
+    "src/features/virtual-tryon/components/VirtualPersonalClosetDrawer.tsx(307,35): error TS2339: Property 'glbUrl' does not exist on type 'ClosetApiItem'.",
+    "src/features/virtual-tryon/components/VirtualPersonalClosetDrawer.tsx(312,25): error TS2339: Property 'glbUrl' does not exist on type 'ClosetApiItem'.",
+    "src/features/virtual-tryon/components/VirtualPersonalClosetDrawer.tsx(317,104): error TS2339: Property 'glbUrl' does not exist on type 'ClosetApiItem'.",
+    "src/features/virtual-tryon/components/VirtualPersonalClosetDrawer.tsx(330,41): error TS2339: Property '_id' does not exist on type 'ClosetApiItem'.",
+    "src/features/virtual-tryon/components/VirtualPersonalClosetDrawer.tsx(334,13): error TS2353: Object literal may only specify known properties, and 'img' does not exist in type 'ClosetItem'.",
+    "src/features/virtual-tryon/garmentBinding.ts(818,18): error TS2345: Argument of type 'Object3D<Object3DEventMap>' is not assignable to parameter of type 'Bone<Object3DEventMap>'.",
+    "src/features/virtual-tryon/garmentBinding.ts(819,45): error TS2345: Argument of type 'Object3D<Object3DEventMap>' is not assignable to parameter of type 'Bone<Object3DEventMap>'.",
+    "src/features/virtual-tryon/garmentBinding.ts(820,55): error TS2345: Argument of type 'Object3D<Object3DEventMap>' is not assignable to parameter of type 'Bone<Object3DEventMap>'.",
+    "src/features/virtual-tryon/garmentBinding.ts(885,26): error TS2345: Argument of type 'Object3D<Object3DEventMap>' is not assignable to parameter of type 'Mesh<BufferGeometry<NormalBufferAttributes, BufferGeometryEventMap>, Material | Material[], Object3DEventMap>'.",
+    "src/features/virtual-tryon/garmentBinding.ts(893,56): error TS2339: Property 'material' does not exist on type 'Object3D<Object3DEventMap>'.",
+    "src/features/virtual-tryon/garmentBinding.ts(944,15): error TS2339: Property 'material' does not exist on type 'Object3D<Object3DEventMap>'.",
+    "src/features/virtual-tryon/garmentBinding.ts(944,46): error TS2339: Property 'material' does not exist on type 'Object3D<Object3DEventMap>'.",
+    "src/features/virtual-tryon/garmentBinding.ts(1510,11): error TS6133: 'maxInfluence' is declared but its value is never read.",
+    "src/features/virtual-tryon/GarmentModel.tsx(428,17): error TS2322: Type 'string | undefined' is not assignable to type 'string'.",
+    "src/features/virtual-tryon/VirtualTryOn.test.tsx(4,1): error TS6133: 'React' is declared but its value is never read.",
+    "src/features/virtual-tryon/VirtualTryOn.test.tsx(26,10): error TS2739: Type '{}' is missing the following properties from type 'VirtualTryOnProps': product, onAddToCart, onBuyNow, showToast",
+    "src/features/virtual-tryon/VirtualTryOn.test.tsx(31,47): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(74,10): error TS6133: 'Accordion' is declared but its value is never read.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(279,10): error TS6133: 'SizeCompareViewport' is declared but its value is never read.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(299,11): error TS6133: 'quickSizeItems' is declared but its value is never read.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(474,7): error TS6133: 'FIT_LABELS' is declared but its value is never read.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(481,7): error TS6133: 'formatDeltaCm' is declared but its value is never read.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(483,7): error TS6133: 'getZoneIcon' is declared but its value is never read.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(567,7): error TS6133: 'resolveFitScopeLabel' is declared but its value is never read.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(607,10): error TS6133: 'CameraHotspot' is declared but its value is never read.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(636,9): error TS6133: 'currentAvatarId' is declared but its value is never read.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(637,9): error TS6133: 'setCurrentAvatarId' is declared but its value is never read.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(685,60): error TS2339: Property 'colors' does not exist on type '{ url: string; autoNormalize?: boolean | undefined; followAvatarBones?: boolean | undefined; softness?: { morphInfluence?: number | undefined; morphSmoothing?: number | undefined; maxMorphInfluence?: number | undefined; roughness?: number | undefined; metalness?: number | undefined; envMapIntensity?: number | undefi...'.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(686,68): error TS2339: Property 'colors' does not exist on type '{ url: string; autoNormalize?: boolean | undefined; followAvatarBones?: boolean | undefined; softness?: { morphInfluence?: number | undefined; morphSmoothing?: number | undefined; maxMorphInfluence?: number | undefined; roughness?: number | undefined; metalness?: number | undefined; envMapIntensity?: number | undefi...'.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(740,12): error TS6133: 'showMeasurements' is declared but its value is never read.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(740,30): error TS6133: 'setShowMeasurements' is declared but its value is never read.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(742,21): error TS6133: 'setBgTheme' is declared but its value is never read.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(744,11): error TS6133: 'sidebarScrollRef' is declared but its value is never read.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(938,68): error TS2339: Property 'sizes' does not exist on type '{}'.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(939,56): error TS2339: Property 'sizes' does not exist on type '{}'.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(955,11): error TS6133: 'comparePreviewColor' is declared but its value is never read.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(956,11): error TS6133: 'comparePreviewColorName' is declared but its value is never read.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(957,11): error TS6133: 'comparePreviewFabric' is declared but its value is never read.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(1019,11): error TS6133: 'sizeCompareRows' is declared but its value is never read.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(1045,11): error TS6133: 'sizeCompareScoreDiff' is declared but its value is never read.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(1150,11): error TS6133: 'handleClose' is declared but its value is never read.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(1193,11): error TS6133: 'handleUndo' is declared but its value is never read.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(1204,11): error TS6133: 'handleRedo' is declared but its value is never read.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(1348,11): error TS6133: 'handleSizeCompareLeftChange' is declared but its value is never read.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(1361,11): error TS6133: 'handleSizeCompareRightChange' is declared but its value is never read.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(1393,11): error TS6133: 'handleScreenshot' is declared but its value is never read.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(2164,59): error TS2322: Type 'unknown' is not assignable to type 'string | undefined'.",
+    "src/features/virtual-tryon/VirtualTryOn.tsx(2169,117): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'RecommendSizeOptions | undefined'.",
+    "src/hooks/useOutfitGenerator.ts(168,68): error TS6133: 'avatarData' is declared but its value is never read.",
+    "src/hooks/useOutfitGenerator.ts(316,85): error TS2345: Argument of type 'Product[]' is not assignable to parameter of type 'Product[]'.",
+    "src/pages/AIOutfitGenerator.tsx(5,1): error TS6192: All imports in import declaration are unused.",
+    "src/pages/AIOutfitGenerator.tsx(6,25): error TS7016: Could not find a declaration file for module '../contexts/AuthContext'. '<repo>/client/src/contexts/AuthContext.jsx' implicitly has an 'any' type.",
+    "src/pages/AIOutfitGenerator.tsx(13,33): error TS7016: Could not find a declaration file for module '../data/ThreeDConfig'. '<repo>/client/src/data/ThreeDConfig.js' implicitly has an 'any' type.",
+    "src/pages/AIOutfitGenerator.tsx(18,25): error TS1484: 'SelectionState' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.",
+    "src/pages/AIOutfitGenerator.tsx(130,92): error TS6133: 'category' is declared but its value is never read.",
+    "src/pages/AIOutfitGenerator.tsx(329,5): error TS2552: Cannot find name 'setIsGenerating'. Did you mean 'isGenerating'?",
+    "src/pages/AIOutfitGenerator.tsx(353,7): error TS2552: Cannot find name 'setIsGenerating'. Did you mean 'isGenerating'?",
+    "src/pages/AIOutfitRoom.tsx(686,17): error TS2322: Type 'RefObject<HTMLDivElement | null>' is not assignable to type 'HTMLElement | RefObject<HTMLElement> | undefined'.",
+    "src/pages/SizeComparisonRoom.tsx(18,7): error TS6133: 'IcCols' is declared but its value is never read.",
+    "src/pages/SizeComparisonRoom.tsx(23,7): error TS6133: 'IcLayers' is declared but its value is never read.",
+    "src/pages/SizeComparisonRoom.tsx(28,7): error TS6133: 'IcSlide' is declared but its value is never read.",
+    "src/pages/SizeComparisonRoom.tsx(281,24): error TS6133: 'setCameraPreset' is declared but its value is never read.",
+    "src/pages/SizeComparisonRoom.tsx(287,10): error TS6133: 'sidebarTab' is declared but its value is never read.",
+    "src/pages/SizeComparisonRoom.tsx(287,23): error TS6133: 'setSidebarTab' is declared but its value is never read.",
+    "src/utils/generateLocalOutfits.ts(129,32): error TS18048: 'p' is possibly 'undefined'.",
+    "src/utils/generateLocalOutfits.ts(129,41): error TS18048: 'p' is possibly 'undefined'.",
+    "src/utils/glb.ts(1,10): error TS1484: 'OutfitItem' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.",
+    "src/utils/glb.ts(1,22): error TS1484: 'OutfitResult' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.",
+    "src/utils/glb.ts(2,1): error TS6133: 'MODEL_INJECTION' is declared but its value is never read.",
+    "src/utils/glb.ts(2,33): error TS7016: Could not find a declaration file for module '../data/ThreeDConfig'. '<repo>/client/src/data/ThreeDConfig.js' implicitly has an 'any' type.",
+    "src/utils/glb.ts(47,3): error TS6133: 'productId' is declared but its value is never read."
+  ],
+  "eslint": [
+    {
+      "file": "client/src/App.tsx",
+      "errors": 9,
+      "warnings": 0,
+      "messages": [
+        {
+          "ruleId": "@typescript-eslint/ban-ts-comment",
+          "severity": 2,
+          "message": "Use \"@ts-expect-error\" instead of \"@ts-ignore\", as \"@ts-ignore\" will do nothing if the following line is error-free.",
+          "line": 23,
+          "column": 1
+        },
+        {
+          "ruleId": "@typescript-eslint/ban-ts-comment",
+          "severity": 2,
+          "message": "Use \"@ts-expect-error\" instead of \"@ts-ignore\", as \"@ts-ignore\" will do nothing if the following line is error-free.",
+          "line": 25,
+          "column": 1
+        },
+        {
+          "ruleId": "@typescript-eslint/ban-ts-comment",
+          "severity": 2,
+          "message": "Use \"@ts-expect-error\" instead of \"@ts-ignore\", as \"@ts-ignore\" will do nothing if the following line is error-free.",
+          "line": 27,
+          "column": 1
+        },
+        {
+          "ruleId": "@typescript-eslint/ban-ts-comment",
+          "severity": 2,
+          "message": "Use \"@ts-expect-error\" instead of \"@ts-ignore\", as \"@ts-ignore\" will do nothing if the following line is error-free.",
+          "line": 29,
+          "column": 1
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'AIOutfitRoom' is assigned a value but never used.",
+          "line": 53,
+          "column": 7
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 555,
+          "column": 66
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 556,
+          "column": 109
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 574,
+          "column": 96
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 576,
+          "column": 87
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/AIOutfitChat.tsx",
+      "errors": 3,
+      "warnings": 0,
+      "messages": [
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 29,
+          "column": 18
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 30,
+          "column": 17
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'e' is defined but never used.",
+          "line": 110,
+          "column": 18
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/AIOutfitSidebar.tsx",
+      "errors": 2,
+      "warnings": 0,
+      "messages": [
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 64,
+          "column": 26
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 69,
+          "column": 60
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/Portal.tsx",
+      "errors": 1,
+      "warnings": 1,
+      "messages": [
+        {
+          "ruleId": "react-hooks/exhaustive-deps",
+          "severity": 1,
+          "message": "The ref value 'el.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'el.current' to a variable inside the effect, and use that variable in the cleanup function.",
+          "line": 16,
+          "column": 39
+        },
+        {
+          "ruleId": "react-hooks/refs",
+          "severity": 2,
+          "message": "Error: Cannot access refs during render\n\nReact refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).\n\nD:\\Virtual-Try-On-sync\\client\\src\\components\\Portal.tsx:20:35\n  18 |     }, []);\n  19 |\n> 20 |     return createPortal(children, el.current);\n     |                                   ^^^^^^^^^^ Passing a ref to a function may read its value during render\n  21 | }",
+          "line": 20,
+          "column": 35
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/ai-outfit/OutfitCard.tsx",
+      "errors": 3,
+      "warnings": 0,
+      "messages": [
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'OutfitItem' is defined but never used.",
+          "line": 1,
+          "column": 29
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'index' is defined but never used.",
+          "line": 11,
+          "column": 46
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'expandedButtonHoverStyle' is assigned a value but never used.",
+          "line": 157,
+          "column": 11
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/outfit/AIOutfitSuggestionsPanel.tsx",
+      "errors": 4,
+      "warnings": 0,
+      "messages": [
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'X' is defined but never used.",
+          "line": 1,
+          "column": 10
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'isOpen' is defined but never used.",
+          "line": 23,
+          "column": 5
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'onClose' is defined but never used.",
+          "line": 24,
+          "column": 5
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'onWearSet' is defined but never used.",
+          "line": 28,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/outfit/AvatarPanel.tsx",
+      "errors": 13,
+      "warnings": 1,
+      "messages": [
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'Suspense' is defined but never used.",
+          "line": 1,
+          "column": 10
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'Grid' is defined but never used.",
+          "line": 3,
+          "column": 25
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'Avatar' is defined but never used.",
+          "line": 6,
+          "column": 10
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'GarmentModel' is defined but never used.",
+          "line": 7,
+          "column": 8
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'LoadingScreen' is defined but never used.",
+          "line": 29,
+          "column": 10
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'outfits' is assigned a value but never used.",
+          "line": 72,
+          "column": 3
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'activeOutfitIndex' is assigned a value but never used.",
+          "line": 73,
+          "column": 3
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'onSelectOutfit' is assigned a value but never used.",
+          "line": 74,
+          "column": 3
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'avatarScene' is assigned a value but never used.",
+          "line": 77,
+          "column": 10
+        },
+        {
+          "ruleId": "react-hooks/preserve-manual-memoization",
+          "severity": 2,
+          "message": "Compilation Skipped: Existing memoization could not be preserved\n\nReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `fallbackMode`, but the source dependencies were []. Inferred dependency not present in source.\n\nD:\\Virtual-Try-On-sync\\client\\src\\components\\outfit\\AvatarPanel.tsx:90:43\n   88 |   }>({})\n   89 |\n>  90 |   const handleCanvasCreated = useCallback(({ gl }: { gl: THREE.WebGLRenderer }) => {\n      |                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n>  91 |     if (!gl || !gl.domElement) return\n      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n>  92 |     setIsWebglContextLost(false)\n      …\n      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n> 119 |     canvas.addEventListener('webglcontextrestored', handleContextRestored, false)\n      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n> 120 |   }, [])\n      | ^^^^ Could not preserve existing manual memoization\n  121 |\n  122 |   useEffect(() => {\n  123 |     return () => {",
+          "line": 90,
+          "column": 43
+        },
+        {
+          "ruleId": "react-hooks/exhaustive-deps",
+          "severity": 1,
+          "message": "React Hook useCallback has a missing dependency: 'fallbackMode'. Either include it or remove the dependency array. You can also replace multiple useState variables with useReducer if 'setLossCount' needs the current value of 'fallbackMode'.",
+          "line": 120,
+          "column": 6
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'topItem' is assigned a value but never used.",
+          "line": 179,
+          "column": 9
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'bottomItem' is assigned a value but never used.",
+          "line": 180,
+          "column": 9
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'shoeItem' is assigned a value but never used.",
+          "line": 181,
+          "column": 9
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/outfit/FloatingAISuggestions.tsx",
+      "errors": 1,
+      "warnings": 0,
+      "messages": [
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'ViewAngle' is defined but never used.",
+          "line": 4,
+          "column": 42
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/outfit/OutfitCard.tsx",
+      "errors": 18,
+      "warnings": 0,
+      "messages": [
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'isLocalFallback' is assigned a value but never used.",
+          "line": 22,
+          "column": 5
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'expanded' is assigned a value but never used.",
+          "line": 26,
+          "column": 12
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'isLoadingSession' is assigned a value but never used.",
+          "line": 27,
+          "column": 12
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'setIsLoadingSession' is assigned a value but never used.",
+          "line": 27,
+          "column": 30
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'navigate' is assigned a value but never used.",
+          "line": 28,
+          "column": 11
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 34,
+          "column": 46
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 35,
+          "column": 54
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 144,
+          "column": 52
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 209,
+          "column": 89
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 209,
+          "column": 117
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 210,
+          "column": 48
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 210,
+          "column": 71
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 210,
+          "column": 98
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 210,
+          "column": 119
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 210,
+          "column": 145
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 323,
+          "column": 131
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 423,
+          "column": 72
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 423,
+          "column": 104
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/outfit/OutfitColorPicker.tsx",
+      "errors": 1,
+      "warnings": 0,
+      "messages": [
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'_' is defined but never used.",
+          "line": 43,
+          "column": 11
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/outfit/TryOnPanel.tsx",
+      "errors": 8,
+      "warnings": 2,
+      "messages": [
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'useMemo' is defined but never used.",
+          "line": 1,
+          "column": 31
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 8,
+          "column": 19
+        },
+        {
+          "ruleId": "react-hooks/set-state-in-effect",
+          "severity": 2,
+          "message": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:\n* Update external systems with the latest state from React.\n* Subscribe for updates from some external system, calling setState in a callback function when external state changes.\n\nCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).\n\nD:\\Virtual-Try-On-sync\\client\\src\\components\\outfit\\TryOnPanel.tsx:54:9\n  52 |             initialSelection[item.id] = !isOwned;\n  53 |         });\n> 54 |         setSelectedForPurchase(initialSelection);\n     |         ^^^^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect\n  55 |     }, [outfit?.id, closetItems]);\n  56 |\n  57 |     // Update selection dynamically when size or color changes",
+          "line": 54,
+          "column": 9
+        },
+        {
+          "ruleId": "react-hooks/exhaustive-deps",
+          "severity": 1,
+          "message": "React Hook useEffect has missing dependencies: 'checkIsOwned' and 'outfit'. Either include them or remove the dependency array.",
+          "line": 55,
+          "column": 8
+        },
+        {
+          "ruleId": "react-hooks/set-state-in-effect",
+          "severity": 2,
+          "message": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:\n* Update external systems with the latest state from React.\n* Subscribe for updates from some external system, calling setState in a callback function when external state changes.\n\nCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).\n\nD:\\Virtual-Try-On-sync\\client\\src\\components\\outfit\\TryOnPanel.tsx:60:9\n  58 |     useEffect(() => {\n  59 |         if (!outfit) return;\n> 60 |         setSelectedForPurchase(prev => {\n     |         ^^^^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect\n  61 |             const next = { ...prev };\n  62 |             let changed = false;\n  63 |             outfit.items.forEach(item => {",
+          "line": 60,
+          "column": 9
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'shouldBeSelected' is assigned a value but never used.",
+          "line": 69,
+          "column": 23
+        },
+        {
+          "ruleId": "react-hooks/exhaustive-deps",
+          "severity": 1,
+          "message": "React Hook useEffect has a missing dependency: 'checkIsOwned'. Either include it or remove the dependency array.",
+          "line": 80,
+          "column": 8
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 220,
+          "column": 76
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 220,
+          "column": 99
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 259,
+          "column": 66
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/tryon/PhotoUploadFlow.tsx",
+      "errors": 1,
+      "warnings": 0,
+      "messages": [
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'isAnalyzing' is assigned a value but never used.",
+          "line": 22,
+          "column": 10
+        }
+      ]
+    },
+    {
+      "file": "client/src/components/tryon/TryOnScene.tsx",
+      "errors": 1,
+      "warnings": 0,
+      "messages": [
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 26,
+          "column": 38
+        }
+      ]
+    },
+    {
+      "file": "client/src/contexts/FittingRoomContext.tsx",
+      "errors": 1,
+      "warnings": 0,
+      "messages": [
+        {
+          "ruleId": "react-hooks/set-state-in-effect",
+          "severity": 2,
+          "message": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:\n* Update external systems with the latest state from React.\n* Subscribe for updates from some external system, calling setState in a callback function when external state changes.\n\nCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).\n\nD:\\Virtual-Try-On-sync\\client\\src\\contexts\\FittingRoomContext.tsx:181:17\n  179 |         if (avatars.length === 0) {\n  180 |             if (currentAvatarId !== null) {\n> 181 |                 setCurrentAvatarIdState(null);\n      |                 ^^^^^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect\n  182 |             }\n  183 |             return;\n  184 |         }",
+          "line": 181,
+          "column": 17
+        }
+      ]
+    },
+    {
+      "file": "client/src/features/virtual-tryon/GarmentModel.tsx",
+      "errors": 14,
+      "warnings": 2,
+      "messages": [
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 74,
+          "column": 21
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 118,
+          "column": 33
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 119,
+          "column": 93
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 119,
+          "column": 130
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 120,
+          "column": 135
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 120,
+          "column": 164
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 134,
+          "column": 21
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 177,
+          "column": 38
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 181,
+          "column": 96
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 189,
+          "column": 136
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 189,
+          "column": 183
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 189,
+          "column": 229
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'innerErr' is defined but never used.",
+          "line": 221,
+          "column": 22
+        },
+        {
+          "ruleId": "no-empty",
+          "severity": 2,
+          "message": "Empty block statement.",
+          "line": 221,
+          "column": 32
+        },
+        {
+          "ruleId": "react-hooks/exhaustive-deps",
+          "severity": 1,
+          "message": "React Hook useMemo has missing dependencies: 'garment.scale' and 'garment.translate'. Either include them or remove the dependency array.",
+          "line": 253,
+          "column": 8
+        },
+        {
+          "ruleId": "react-hooks/exhaustive-deps",
+          "severity": 1,
+          "message": "React Hook useEffect has missing dependencies: 'garment.garmentType' and 'garmentScaleFactors'. Either include them or remove the dependency array.",
+          "line": 356,
+          "column": 8
+        }
+      ]
+    },
+    {
+      "file": "client/src/features/virtual-tryon/VirtualTryOn.test.tsx",
+      "errors": 2,
+      "warnings": 0,
+      "messages": [
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 9,
+          "column": 26
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 18,
+          "column": 26
+        }
+      ]
+    },
+    {
+      "file": "client/src/features/virtual-tryon/VirtualTryOn.tsx",
+      "errors": 30,
+      "warnings": 4,
+      "messages": [
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'Accordion' is defined but never used.",
+          "line": 74,
+          "column": 10
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'SizeCompareViewport' is defined but never used.",
+          "line": 279,
+          "column": 10
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'quickSizeItems' is assigned a value but never used.",
+          "line": 299,
+          "column": 11
+        },
+        {
+          "ruleId": "react-hooks/set-state-in-effect",
+          "severity": 2,
+          "message": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:\n* Update external systems with the latest state from React.\n* Subscribe for updates from some external system, calling setState in a callback function when external state changes.\n\nCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).\n\nD:\\Virtual-Try-On-sync\\client\\src\\features\\virtual-tryon\\VirtualTryOn.tsx:329:9\n  327 |\n  328 |         previousSizeRef.current = selectedSize;\n> 329 |         setIsSizeSwitching(true);\n      |         ^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect\n  330 |\n  331 |         if (sizeSwitchTimerRef.current) {\n  332 |             clearTimeout(sizeSwitchTimerRef.current);",
+          "line": 329,
+          "column": 9
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'FIT_LABELS' is assigned a value but never used.",
+          "line": 474,
+          "column": 7
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'formatDeltaCm' is assigned a value but never used.",
+          "line": 481,
+          "column": 7
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'getZoneIcon' is assigned a value but never used.",
+          "line": 483,
+          "column": 7
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'resolveFitScopeLabel' is assigned a value but never used.",
+          "line": 567,
+          "column": 7
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'CameraHotspot' is defined but never used.",
+          "line": 607,
+          "column": 10
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'currentAvatarId' is assigned a value but never used.",
+          "line": 636,
+          "column": 9
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'setCurrentAvatarId' is assigned a value but never used.",
+          "line": 637,
+          "column": 9
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'showMeasurements' is assigned a value but never used.",
+          "line": 740,
+          "column": 12
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'setShowMeasurements' is assigned a value but never used.",
+          "line": 740,
+          "column": 30
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'setBgTheme' is assigned a value but never used.",
+          "line": 742,
+          "column": 21
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'sidebarScrollRef' is assigned a value but never used.",
+          "line": 744,
+          "column": 11
+        },
+        {
+          "ruleId": "react-hooks/exhaustive-deps",
+          "severity": 1,
+          "message": "React Hook useMemo has an unnecessary dependency: 'resolveModel3D'. Either exclude it or remove the dependency array. Outer scope values like 'resolveModel3D' aren't valid dependencies because mutating them doesn't re-render the component.",
+          "line": 882,
+          "column": 8
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 939,
+          "column": 71
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'comparePreviewColor' is assigned a value but never used.",
+          "line": 955,
+          "column": 11
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'comparePreviewColorName' is assigned a value but never used.",
+          "line": 956,
+          "column": 11
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'comparePreviewFabric' is assigned a value but never used.",
+          "line": 957,
+          "column": 11
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'sizeCompareRows' is assigned a value but never used.",
+          "line": 1019,
+          "column": 11
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'sizeCompareScoreDiff' is assigned a value but never used.",
+          "line": 1045,
+          "column": 11
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'handleClose' is assigned a value but never used.",
+          "line": 1150,
+          "column": 11
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'handleUndo' is assigned a value but never used.",
+          "line": 1193,
+          "column": 11
+        },
+        {
+          "ruleId": "react-hooks/exhaustive-deps",
+          "severity": 1,
+          "message": "React Hook useCallback has a missing dependency: 'setSelectedSize'. Either include it or remove the dependency array.",
+          "line": 1202,
+          "column": 8
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'handleRedo' is assigned a value but never used.",
+          "line": 1204,
+          "column": 11
+        },
+        {
+          "ruleId": "react-hooks/exhaustive-deps",
+          "severity": 1,
+          "message": "React Hook useCallback has a missing dependency: 'setSelectedSize'. Either include it or remove the dependency array.",
+          "line": 1213,
+          "column": 8
+        },
+        {
+          "ruleId": "react-hooks/exhaustive-deps",
+          "severity": 1,
+          "message": "React Hook useEffect has a missing dependency: 'resolveClosetSlot'. Either include it or remove the dependency array. Outer scope values like 'resolveModel3D' aren't valid dependencies because mutating them doesn't re-render the component.",
+          "line": 1346,
+          "column": 8
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'handleSizeCompareLeftChange' is assigned a value but never used.",
+          "line": 1348,
+          "column": 11
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'handleSizeCompareRightChange' is assigned a value but never used.",
+          "line": 1361,
+          "column": 11
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'handleScreenshot' is assigned a value but never used.",
+          "line": 1393,
+          "column": 11
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 1909,
+          "column": 84
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 2169,
+          "column": 149
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 2169,
+          "column": 157
+        }
+      ]
+    },
+    {
+      "file": "client/src/features/virtual-tryon/components/BodyPresets.tsx",
+      "errors": 2,
+      "warnings": 0,
+      "messages": [
+        {
+          "ruleId": "react-refresh/only-export-components",
+          "severity": 2,
+          "message": "Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.",
+          "line": 29,
+          "column": 17
+        },
+        {
+          "ruleId": "react-refresh/only-export-components",
+          "severity": 2,
+          "message": "Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.",
+          "line": 70,
+          "column": 17
+        }
+      ]
+    },
+    {
+      "file": "client/src/features/virtual-tryon/components/SizeCompare3DCanvas.tsx",
+      "errors": 4,
+      "warnings": 0,
+      "messages": [
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 32,
+          "column": 16
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 209,
+          "column": 84
+        },
+        {
+          "ruleId": "react-hooks/refs",
+          "severity": 2,
+          "message": "Error: Cannot access refs during render\n\nReact refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).\n\nD:\\Virtual-Try-On-sync\\client\\src\\features\\virtual-tryon\\components\\SizeCompare3DCanvas.tsx:219:38\n  217 |                     {ghostSizes && (\n  218 |                         <CustomOutline \n> 219 |                             target1={ghost1Ref.current} \n      |                                      ^^^^^^^^^^^^^^^^^ Cannot access ref value during render\n  220 |                             target2={ghost2Ref.current} \n  221 |                             color1=\"#D5C9B3\" \n  222 |                             color2=\"#C8A867\" ",
+          "line": 219,
+          "column": 38
+        },
+        {
+          "ruleId": "react-hooks/refs",
+          "severity": 2,
+          "message": "Error: Cannot access refs during render\n\nReact refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).\n\nD:\\Virtual-Try-On-sync\\client\\src\\features\\virtual-tryon\\components\\SizeCompare3DCanvas.tsx:220:38\n  218 |                         <CustomOutline \n  219 |                             target1={ghost1Ref.current} \n> 220 |                             target2={ghost2Ref.current} \n      |                                      ^^^^^^^^^^^^^^^^^ Cannot access ref value during render\n  221 |                             color1=\"#D5C9B3\" \n  222 |                             color2=\"#C8A867\" \n  223 |                             edgeStrength1={diffOnly ? 0 : 2}",
+          "line": 220,
+          "column": 38
+        }
+      ]
+    },
+    {
+      "file": "client/src/features/virtual-tryon/components/SizeRecommendation.tsx",
+      "errors": 2,
+      "warnings": 0,
+      "messages": [
+        {
+          "ruleId": "react-refresh/only-export-components",
+          "severity": 2,
+          "message": "Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.",
+          "line": 331,
+          "column": 17
+        },
+        {
+          "ruleId": "react-hooks/set-state-in-effect",
+          "severity": 2,
+          "message": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:\n* Update external systems with the latest state from React.\n* Subscribe for updates from some external system, calling setState in a callback function when external state changes.\n\nCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).\n\nD:\\Virtual-Try-On-sync\\client\\src\\features\\virtual-tryon\\components\\SizeRecommendation.tsx:422:9\n  420 |\n  421 |     useEffect(() => {\n> 422 |         setIsDetailOpen(false);\n      |         ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect\n  423 |     }, [selectedSize, profile]);\n  424 |\n  425 |     return (",
+          "line": 422,
+          "column": 9
+        }
+      ]
+    },
+    {
+      "file": "client/src/features/virtual-tryon/components/VirtualClosetItem.tsx",
+      "errors": 6,
+      "warnings": 0,
+      "messages": [
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 21,
+          "column": 11
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 23,
+          "column": 20
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 24,
+          "column": 28
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 39,
+          "column": 13
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 175,
+          "column": 64
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 205,
+          "column": 63
+        }
+      ]
+    },
+    {
+      "file": "client/src/features/virtual-tryon/components/VirtualPersonalClosetDrawer.tsx",
+      "errors": 1,
+      "warnings": 1,
+      "messages": [
+        {
+          "ruleId": "@typescript-eslint/ban-ts-comment",
+          "severity": 2,
+          "message": "Use \"@ts-expect-error\" instead of \"@ts-ignore\", as \"@ts-ignore\" will do nothing if the following line is error-free.",
+          "line": 295,
+          "column": 9
+        },
+        {
+          "ruleId": "react-hooks/exhaustive-deps",
+          "severity": 1,
+          "message": "The 'activeItems' logical expression could make the dependencies of useMemo Hook (at line 544) change on every render. Move it inside the useMemo callback. Alternatively, wrap the initialization of 'activeItems' in its own useMemo() Hook.",
+          "line": 522,
+          "column": 11
+        }
+      ]
+    },
+    {
+      "file": "client/src/features/virtual-tryon/garmentBinding.ts",
+      "errors": 3,
+      "warnings": 0,
+      "messages": [
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'err' is defined but never used.",
+          "line": 1011,
+          "column": 14
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'err' is defined but never used.",
+          "line": 1048,
+          "column": 14
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'maxInfluence' is assigned a value but never used.",
+          "line": 1510,
+          "column": 11
+        }
+      ]
+    },
+    {
+      "file": "client/src/hooks/useOutfitGenerator.ts",
+      "errors": 6,
+      "warnings": 1,
+      "messages": [
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 33,
+          "column": 18
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 34,
+          "column": 17
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 36,
+          "column": 18
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'avatarData' is assigned a value but never used.",
+          "line": 168,
+          "column": 68
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 309,
+          "column": 27
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 327,
+          "column": 36
+        },
+        {
+          "ruleId": "react-hooks/exhaustive-deps",
+          "severity": 1,
+          "message": "React Hook useCallback has a missing dependency: 'shopLoading'. Either include it or remove the dependency array.",
+          "line": 341,
+          "column": 9
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/AIOutfitGenerator.tsx",
+      "errors": 11,
+      "warnings": 2,
+      "messages": [
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'Sparkles' is defined but never used.",
+          "line": 5,
+          "column": 10
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'MessageCircle' is defined but never used.",
+          "line": 5,
+          "column": 20
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 22,
+          "column": 27
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 23,
+          "column": 24
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 54,
+          "column": 50
+        },
+        {
+          "ruleId": "react-hooks/exhaustive-deps",
+          "severity": 1,
+          "message": "React Hook useEffect has a missing dependency: 'selectedOutfit'. Either include it or remove the dependency array.",
+          "line": 92,
+          "column": 6
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 130,
+          "column": 66
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'category' is defined but never used.",
+          "line": 130,
+          "column": 92
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 147,
+          "column": 41
+        },
+        {
+          "ruleId": "prefer-const",
+          "severity": 2,
+          "message": "'strId' is never reassigned. Use 'const' instead.",
+          "line": 150,
+          "column": 9
+        },
+        {
+          "ruleId": "prefer-const",
+          "severity": 2,
+          "message": "'glbUrl' is never reassigned. Use 'const' instead.",
+          "line": 172,
+          "column": 13
+        },
+        {
+          "ruleId": "react-hooks/exhaustive-deps",
+          "severity": 1,
+          "message": "React Hook useEffect has a missing dependency: 'outfits'. Either include it or remove the dependency array.",
+          "line": 306,
+          "column": 6
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 345,
+          "column": 19
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/AIOutfitRoom.tsx",
+      "errors": 5,
+      "warnings": 0,
+      "messages": [
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 346,
+          "column": 36
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 357,
+          "column": 33
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 367,
+          "column": 51
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 499,
+          "column": 57
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 558,
+          "column": 52
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/AIOutfitRoom_new.tsx",
+      "errors": 1,
+      "warnings": 0,
+      "messages": [
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 244,
+          "column": 53
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/AvatarStudioPage.tsx",
+      "errors": 6,
+      "warnings": 0,
+      "messages": [
+        {
+          "ruleId": "react-hooks/set-state-in-effect",
+          "severity": 2,
+          "message": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:\n* Update external systems with the latest state from React.\n* Subscribe for updates from some external system, calling setState in a callback function when external state changes.\n\nCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).\n\nD:\\Virtual-Try-On-sync\\client\\src\\pages\\AvatarStudioPage.tsx:202:13\n  200 |     useEffect(() => {\n  201 |         if (avatars.length === 0) {\n> 202 |             setIsCreatingNew(true);\n      |             ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect\n  203 |             setEditingAvatarId(null);\n  204 |             return;\n  205 |         }",
+          "line": 202,
+          "column": 13
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 269,
+          "column": 66
+        },
+        {
+          "ruleId": "no-useless-escape",
+          "severity": 2,
+          "message": "Unnecessary escape character: \\\".",
+          "line": 319,
+          "column": 28
+        },
+        {
+          "ruleId": "no-useless-escape",
+          "severity": 2,
+          "message": "Unnecessary escape character: \\\".",
+          "line": 319,
+          "column": 49
+        },
+        {
+          "ruleId": "no-useless-escape",
+          "severity": 2,
+          "message": "Unnecessary escape character: \\\".",
+          "line": 327,
+          "column": 53
+        },
+        {
+          "ruleId": "no-useless-escape",
+          "severity": 2,
+          "message": "Unnecessary escape character: \\\".",
+          "line": 327,
+          "column": 77
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/CartPage.tsx",
+      "errors": 2,
+      "warnings": 0,
+      "messages": [
+        {
+          "ruleId": "@typescript-eslint/ban-ts-comment",
+          "severity": 2,
+          "message": "Use \"@ts-expect-error\" instead of \"@ts-ignore\", as \"@ts-ignore\" will do nothing if the following line is error-free.",
+          "line": 3,
+          "column": 1
+        },
+        {
+          "ruleId": "react-hooks/set-state-in-effect",
+          "severity": 2,
+          "message": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:\n* Update external systems with the latest state from React.\n* Subscribe for updates from some external system, calling setState in a callback function when external state changes.\n\nCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).\n\nD:\\Virtual-Try-On-sync\\client\\src\\pages\\CartPage.tsx:216:9\n  214 |         const s: Record<number, boolean> = {};\n  215 |         cartItems.forEach(it => { s[it.cartId] = false; });\n> 216 |         setSelected(s);\n      |         ^^^^^^^^^^^ Avoid calling setState() directly within an effect\n  217 |         // fake loading for UX polish\n  218 |         const t = setTimeout(() => setIsLoading(false), 400);\n  219 |         return () => clearTimeout(t);",
+          "line": 216,
+          "column": 9
+        }
+      ]
+    },
+    {
+      "file": "client/src/pages/SizeComparisonRoom.tsx",
+      "errors": 22,
+      "warnings": 0,
+      "messages": [
+        {
+          "ruleId": "@typescript-eslint/ban-ts-comment",
+          "severity": 2,
+          "message": "Use \"@ts-expect-error\" instead of \"@ts-ignore\", as \"@ts-ignore\" will do nothing if the following line is error-free.",
+          "line": 5,
+          "column": 1
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'IcCols' is assigned a value but never used.",
+          "line": 18,
+          "column": 7
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'IcLayers' is assigned a value but never used.",
+          "line": 23,
+          "column": 7
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'IcSlide' is assigned a value but never used.",
+          "line": 28,
+          "column": 7
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 76,
+          "column": 73
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 98,
+          "column": 14
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 99,
+          "column": 17
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 101,
+          "column": 20
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 102,
+          "column": 39
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 255,
+          "column": 24
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 256,
+          "column": 47
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 258,
+          "column": 41
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 259,
+          "column": 39
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 260,
+          "column": 37
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'setCameraPreset' is assigned a value but never used.",
+          "line": 281,
+          "column": 24
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'sidebarTab' is assigned a value but never used.",
+          "line": 287,
+          "column": 10
+        },
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'setSidebarTab' is assigned a value but never used.",
+          "line": 287,
+          "column": 23
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 382,
+          "column": 111
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 382,
+          "column": 119
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 382,
+          "column": 169
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 396,
+          "column": 213
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 396,
+          "column": 221
+        }
+      ]
+    },
+    {
+      "file": "client/src/services/aiOutfitService.ts",
+      "errors": 12,
+      "warnings": 0,
+      "messages": [
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 74,
+          "column": 37
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 75,
+          "column": 32
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 91,
+          "column": 54
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 92,
+          "column": 57
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 97,
+          "column": 36
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 98,
+          "column": 60
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 139,
+          "column": 29
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 151,
+          "column": 37
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 161,
+          "column": 16
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 162,
+          "column": 15
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 237,
+          "column": 16
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 238,
+          "column": 15
+        }
+      ]
+    },
+    {
+      "file": "client/src/utils/fetchWithTimeout.ts",
+      "errors": 1,
+      "warnings": 0,
+      "messages": [
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 19,
+          "column": 19
+        }
+      ]
+    },
+    {
+      "file": "client/src/utils/generateLocalOutfits.ts",
+      "errors": 10,
+      "warnings": 0,
+      "messages": [
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 139,
+          "column": 42
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 142,
+          "column": 31
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 142,
+          "column": 68
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 143,
+          "column": 48
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 144,
+          "column": 60
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 148,
+          "column": 40
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 151,
+          "column": 46
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 153,
+          "column": 53
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 174,
+          "column": 40
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 174,
+          "column": 62
+        }
+      ]
+    },
+    {
+      "file": "client/src/utils/glb.ts",
+      "errors": 3,
+      "warnings": 0,
+      "messages": [
+        {
+          "ruleId": "@typescript-eslint/no-unused-vars",
+          "severity": 2,
+          "message": "'MODEL_INJECTION' is defined but never used.",
+          "line": 2,
+          "column": 10
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 75,
+          "column": 58
+        },
+        {
+          "ruleId": "@typescript-eslint/no-explicit-any",
+          "severity": 2,
+          "message": "Unexpected any. Specify a different type.",
+          "line": 75,
+          "column": 74
+        }
+      ]
+    },
+    {
+      "file": "client/update3D.cjs",
+      "errors": 1,
+      "warnings": 0,
+      "messages": [
+        {
+          "ruleId": null,
+          "severity": 2,
+          "message": "Parsing error: Unexpected token ?",
+          "line": 55,
+          "column": 37
+        }
+      ]
+    }
+  ],
+  "backend": [
+    {
+      "file": "server/tests/product.test.js",
+      "status": "failed",
+      "assertions": [
+        {
+          "title": "Product API should create a new product (admin)",
+          "status": "failed",
+          "failures": [
+            "Error: expect(received).toEqual(expected) // deep equality\n\nExpected: 201\nReceived: 200\n    at Object.toEqual (<repo>\\server\\tests\\product.test.js:35:28)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"
+          ]
+        },
+        {
+          "title": "Product API should get all products",
+          "status": "failed",
+          "failures": [
+            "Error: expect(received).toBeInstanceOf(expected)\n\nExpected constructor: Array\n\nReceived value has no prototype\nReceived value: undefined\n    at Object.toBeInstanceOf (<repo>\\server\\tests\\product.test.js:42:31)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"
+          ]
+        },
+        {
+          "title": "Product API should get a single product by id",
+          "status": "failed",
+          "failures": [
+            "Error: expect(received).toEqual(expected) // deep equality\n\nExpected: 200\nReceived: 404\n    at Object.toEqual (<repo>\\server\\tests\\product.test.js:48:28)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"
+          ]
+        }
+      ],
+      "suite_error": ""
+    },
+    {
+      "file": "server/tests/admin.test.js",
+      "status": "passed",
+      "assertions": [
+        {
+          "title": "Admin API should get sync status",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "title": "Admin API should get all data for sync",
+          "status": "passed",
+          "failures": []
+        }
+      ],
+      "suite_error": ""
+    },
+    {
+      "file": "server/tests/order.test.js",
+      "status": "failed",
+      "assertions": [
+        {
+          "title": "Order API should create a new order and payment",
+          "status": "failed",
+          "failures": [
+            "Error: expect(received).toContain(expected) // indexOf\n\nExpected value: 403\nReceived array: [200, 201]\n    at Object.toContain (<repo>\\server\\tests\\order.test.js:37:24)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"
+          ]
+        },
+        {
+          "title": "Order API should get user orders",
+          "status": "failed",
+          "failures": [
+            "Error: expect(received).toEqual(expected) // deep equality\n\nExpected: 200\nReceived: 403\n    at Object.toEqual (<repo>\\server\\tests\\order.test.js:60:28)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"
+          ]
+        }
+      ],
+      "suite_error": ""
+    },
+    {
+      "file": "server/tests/ai_recommendation.test.js",
+      "status": "failed",
+      "assertions": [
+        {
+          "title": "AI & Recommendation API should handle AI chat messages and auto reply",
+          "status": "failed",
+          "failures": [
+            "Error: expect(received).toContain(expected) // indexOf\n\nExpected substring: \"giao hàng\"\nReceived string:    \"nội thành: 1-2 ngày. ngoại thành: 3-5 ngày. miễn phí ship cho đơn từ 300k.\"\n    at Object.toContain (<repo>\\server\\tests\\ai_recommendation.test.js:27:53)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)"
+          ]
+        },
+        {
+          "title": "AI & Recommendation API should fetch recommendations",
+          "status": "passed",
+          "failures": []
+        }
+      ],
+      "suite_error": ""
+    },
+    {
+      "file": "server/tests/concurrency.test.js",
+      "status": "passed",
+      "assertions": [
+        {
+          "title": "Atomic counters and compare-and-swap on MongoDB 50 rejected logins increment the stored counter exactly 50 times",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "title": "Atomic counters and compare-and-swap on MongoDB product accepts exactly one update for the same version",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "title": "Atomic counters and compare-and-swap on MongoDB user accepts exactly one update for the same version",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "title": "Atomic counters and compare-and-swap on MongoDB order accepts exactly one update for the same version",
+          "status": "passed",
+          "failures": []
+        }
+      ],
+      "suite_error": ""
+    },
+    {
+      "file": "server/tests/models.test.js",
+      "status": "passed",
+      "assertions": [
+        {
+          "title": "Database Models should normalize product inventory on save",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "title": "Database Models should require email and password for User",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "title": "Database Models should create an order with default status",
+          "status": "passed",
+          "failures": []
+        }
+      ],
+      "suite_error": ""
+    },
+    {
+      "file": "server/tests/auth.test.js",
+      "status": "failed",
+      "assertions": [],
+      "suite_error": "  ● Test suite failed to run\n\n    Jest encountered an unexpected token\n\n    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.\n\n    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.\n\n    By default \"node_modules\" folder is ignored by transformers.\n\n    Here's what you can do:\n     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.\n     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript\n     • To have some of your \"node_modules\" files transformed, you can specify a custom \"transformIgnorePatterns\" in your config.\n     • If you need a custom transformation, specify a \"transform\" option in your config.\n     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option.\n\n    You'll find more details and examples of these config options in the docs:\n    https://jestjs.io/docs/configuration\n    For information about custom transformations, see:\n    https://jestjs.io/docs/code-transformation\n\n    Details:\n\n    SyntaxError: <repo>\\server\\tests\\auth.test.js: Unexpected token (85:0)\n\n      83 |   });\n      84 | });\n    > 85 |\n         | ^\n\n      at constructor (node_modules/@babel/parser/src/parse-error.ts:95:45)\n      at Parser.toParseError [as raise] (node_modules/@babel/parser/src/tokenizer/index.ts:1504:19)\n      at Parser.raise [as unexpected] (node_modules/@babel/parser/src/tokenizer/index.ts:1544:16)\n      at Parser.unexpected [as parseExprAtom] (node_modules/@babel/parser/src/parser/expression.ts:1358:22)\n      at Parser.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:742:23)\n      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)\n      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)\n      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)\n      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)\n      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)\n      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)\n      at Parser.parseMaybeAssign [as parseExpressionBase] (node_modules/@babel/parser/src/parser/expression.ts:226:23)\n      at parseExpressionBase (node_modules/@babel/parser/src/parser/expression.ts:217:39)\n      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3192:16)\n      at Parser.allowInAnd [as parseExpression] (node_modules/@babel/parser/src/parser/expression.ts:217:17)\n      at Parser.parseExpression [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:688:23)\n      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)\n      at Parser.parseStatementLike [as parseStatementListItem] (node_modules/@babel/parser/src/parser/statement.ts:431:17)\n      at Parser.parseStatementListItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1444:16)\n      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)\n      at Parser.parseBlockBody [as parseBlock] (node_modules/@babel/parser/src/parser/statement.ts:1385:10)\n      at Parser.parseBlock [as parseFunctionBody] (node_modules/@babel/parser/src/parser/expression.ts:2621:24)\n      at Parser.parseFunctionBody [as parseArrowExpression] (node_modules/@babel/parser/src/parser/expression.ts:2562:10)\n      at Parser.parseArrowExpression [as parseParenAndDistinguishExpression] (node_modules/@babel/parser/src/parser/expression.ts:1850:12)\n      at Parser.parseParenAndDistinguishExpression [as parseExprAtom] (node_modules/@babel/parser/src/parser/expression.ts:1170:21)\n      at Parser.parseExprAtom [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:742:23)\n      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)\n      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)\n      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)\n      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)\n      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)\n      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)\n      at parseMaybeAssign (node_modules/@babel/parser/src/parser/expression.ts:257:12)\n      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3197:12)\n      at Parser.allowInAnd [as parseMaybeAssignAllowIn] (node_modules/@babel/parser/src/parser/expression.ts:256:17)\n      at Parser.parseMaybeAssignAllowIn [as parseMaybeAssignAllowInOrVoidPattern] (node_modules/@babel/parser/src/parser/expression.ts:3311:17)\n      at Parser.parseMaybeAssignAllowInOrVoidPattern [as parseExprListItem] (node_modules/@babel/parser/src/parser/expression.ts:2793:18)\n      at Parser.parseExprListItem [as parseCallExpressionArguments] (node_modules/@babel/parser/src/parser/expression.ts:1042:14)\n      at Parser.parseCallExpressionArguments [as parseCoverCallAndAsyncArrowHead] (node_modules/@babel/parser/src/parser/expression.ts:922:29)\n      at Parser.parseCoverCallAndAsyncArrowHead [as parseSubscript] (node_modules/@babel/parser/src/parser/expression.ts:804:19)\n      at Parser.parseSubscript [as parseSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:763:19)\n      at Parser.parseSubscripts [as parseExprSubscripts] (node_modules/@babel/parser/src/parser/expression.ts:748:17)\n      at Parser.parseExprSubscripts [as parseUpdate] (node_modules/@babel/parser/src/parser/expression.ts:721:21)\n      at Parser.parseUpdate [as parseMaybeUnary] (node_modules/@babel/parser/src/parser/expression.ts:683:23)\n      at Parser.parseMaybeUnary [as parseMaybeUnaryOrPrivate] (node_modules/@babel/parser/src/parser/expression.ts:417:14)\n      at Parser.parseMaybeUnaryOrPrivate [as parseExprOps] (node_modules/@babel/parser/src/parser/expression.ts:429:23)\n      at Parser.parseExprOps [as parseMaybeConditional] (node_modules/@babel/parser/src/parser/expression.ts:384:23)\n      at Parser.parseMaybeConditional [as parseMaybeAssign] (node_modules/@babel/parser/src/parser/expression.ts:301:21)\n      at Parser.parseMaybeAssign [as parseExpressionBase] (node_modules/@babel/parser/src/parser/expression.ts:226:23)\n      at parseExpressionBase (node_modules/@babel/parser/src/parser/expression.ts:217:39)\n      at Parser.callback [as allowInAnd] (node_modules/@babel/parser/src/parser/expression.ts:3192:16)\n      at Parser.allowInAnd [as parseExpression] (node_modules/@babel/parser/src/parser/expression.ts:217:17)\n      at Parser.parseExpression [as parseStatementContent] (node_modules/@babel/parser/src/parser/statement.ts:688:23)\n      at Parser.parseStatementContent [as parseStatementLike] (node_modules/@babel/parser/src/parser/statement.ts:482:17)\n      at Parser.parseStatementLike [as parseModuleItem] (node_modules/@babel/parser/src/parser/statement.ts:419:17)\n      at Parser.parseModuleItem [as parseBlockOrModuleBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1443:16)\n      at Parser.parseBlockOrModuleBlockBody [as parseBlockBody] (node_modules/@babel/parser/src/parser/statement.ts:1417:10)\n      at Parser.parseBlockBody [as parseProgram] (node_modules/@babel/parser/src/parser/statement.ts:229:10)\n      at Parser.parseProgram [as parseTopLevel] (node_modules/@babel/parser/src/parser/statement.ts:203:25)\n      at Parser.parseTopLevel [as parse] (node_modules/@babel/parser/src/parser/index.ts:83:25)\n      at parse (node_modules/@babel/parser/src/index.ts:86:38)\n      at parser (node_modules/@babel/core/src/parser/index.ts:29:19)\n          at parser.next (<anonymous>)\n      at normalizeFile (node_modules/@babel/core/src/transformation/normalize-file.ts:49:24)\n          at normalizeFile.next (<anonymous>)\n      at run (node_modules/@babel/core/src/transformation/index.ts:41:36)\n          at run.next (<anonymous>)\n      at transform (node_modules/@babel/core/src/transform.ts:29:20)\n          at transform.next (<anonymous>)\n      at evaluateSync (node_modules/gensync/index.js:251:28)\n      at sync (node_modules/gensync/index.js:89:14)\n      at fn (node_modules/@babel/core/src/errors/rewrite-stack-trace.ts:99:14)\n      at transformSync (node_modules/@babel/core/src/transform.ts:66:52)\n      at ScriptTransformer.transformSource (node_modules/@jest/transform/build/index.js:415:31)\n      at ScriptTransformer._transformAndBuildScript (node_modules/@jest/transform/build/index.js:512:40)\n      at ScriptTransformer.transform (node_modules/@jest/transform/build/index.js:551:19)\n"
+    }
+  ]
+}
