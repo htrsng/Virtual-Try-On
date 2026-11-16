@@ -23,10 +23,13 @@ dist-ssr
 *.sln
 *.sw?
 server/.env
+/.runtime/
+/tests/test-results/
+/tests/playwright-report/
 
 # Local analysis tools and generated compiler/cache files
 .tmp-pdf-reader/
-fuzz-testing/.runtime/
+archive/coursework-api-fuzzing/fuzz-testing/.runtime/
 __pycache__/
 *.pyc
 
@@ -45,10 +48,10 @@ __pycache__/
 .codex-report-deps/
 
 # New fuzzing runs and local tooling
-fuzz-testing/artifacts/
-fuzz-testing/.venv/
+archive/coursework-api-fuzzing/fuzz-testing/artifacts/
+archive/coursework-api-fuzzing/fuzz-testing/.venv/
 /.venv/
-/reports/runs/
+/archive/coursework-api-fuzzing/reports/runs/
 
 # Duplicate source archive; source stays in the tracked directory
 /fuzz-testing.rar

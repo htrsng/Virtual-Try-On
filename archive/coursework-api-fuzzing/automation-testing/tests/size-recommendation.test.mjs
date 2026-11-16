@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { calculateRecommendedSize } from '../../archive/vfitai/client/src/utils/sizeCalculator.ts';
+import { calculateRecommendedSize } from '../../../vfitai/client/src/utils/sizeCalculator.ts';
 
 const profile = { chest: 88, waist: 72, hips: 96, shoulder: 40 };
 const chart = [

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { fetchWithTimeout } from '../../archive/vfitai/client/src/utils/fetchWithTimeout.ts';
+import { fetchWithTimeout } from '../../../vfitai/client/src/utils/fetchWithTimeout.ts';
 
 test('UNIT-HTTP-01: forwards method/body and returns the original response', async (t) => {
   const expected = new Response('{"ok":true}', { status: 201 });

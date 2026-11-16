@@ -11,7 +11,8 @@ import sys
 import uuid
 
 REPO = Path(__file__).resolve().parents[1]
-CLIENT = REPO / 'archive/vfitai/client'
+SOURCE_REPO = REPO.parents[1]
+CLIENT = SOURCE_REPO / 'client'
 
 
 def main():
@@ -54,10 +55,12 @@ def main():
             data = json.loads((output / 'lint.json').read_text(encoding='utf-8'))
             records[-1].update(errors=sum(x['errorCount'] for x in data),
                                warnings=sum(x['warningCount'] for x in data))
-    tracked = subprocess.check_output(['git', 'ls-files', 'archive/vfitai/client'], cwd=REPO, text=True).splitlines()
-    source_paths = [REPO / name for name in tracked] + [CLIENT / 'vitest.components.config.ts', Path(__file__)]
+    # Restored app files may not be committed yet; hash the files actually checked.
+    source_paths = list((CLIENT / 'src').rglob('*')) + list((CLIENT / 'tests').rglob('*'))
+    source_paths += [p for p in CLIENT.iterdir() if p.is_file()] + [Path(__file__)]
+    source_paths = [p for p in source_paths if p.name != '.env' and not p.name.startswith('.env.')]
     report = {'created_utc': datetime.now(timezone.utc).isoformat(), 'checks': args.checks,
-        'results': records, 'source_sha256': {p.relative_to(REPO).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
+        'results': records, 'source_sha256': {p.relative_to(SOURCE_REPO).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
             for p in sorted(set(source_paths)) if p.is_file()},
         'scope': 'ProductList/Toast in jsdom; context hooks and preview boundary mocked. No backend, WebGL or browser E2E.',
         'legacy_test_not_in_component_scope': 'src/features/virtual-tryon/VirtualTryOn.test.tsx'}
