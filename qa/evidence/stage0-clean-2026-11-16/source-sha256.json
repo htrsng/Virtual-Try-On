@@ -1,0 +1,42 @@
+﻿[
+    {
+        "path":  "client/package.json",
+        "sha256":  "1B53DA6D963A15423D71824581787476C49A9D9D214C89A6977908A8CFDC49E6"
+    },
+    {
+        "path":  "client/package-lock.json",
+        "sha256":  "261D18AA794A08DF5D9EEAD3F21293C94571B4B1296664BB2664C2D786D78051"
+    },
+    {
+        "path":  "server/package.json",
+        "sha256":  "3E51AF1E6187C10D1F632445D7C4173F22AD8C3363AC55CEA6533A2A074C9AC4"
+    },
+    {
+        "path":  "server/package-lock.json",
+        "sha256":  "7184FA3F9397261432A55128ADC1FDB4C843F91EE2AC772398F3F2718CEB0BFD"
+    },
+    {
+        "path":  "server/jest.config.js",
+        "sha256":  "73081DB920BFC9FD8A0F5271C325F323F7E41101827C4D8AA81404808BC372DD"
+    },
+    {
+        "path":  "tests/package.json",
+        "sha256":  "ACD52BA7853A72C12F07E5CD1342A6A97848EBB66F125F747ABB9DBF5963FFEE"
+    },
+    {
+        "path":  "tests/package-lock.json",
+        "sha256":  "259DDE46C4ED7E6209906400FE055E11070F4805B26621F410B428BCB48D9EF3"
+    },
+    {
+        "path":  "tests/playwright.config.ts",
+        "sha256":  "F0FDA736359B639AFC9E0505AC5F16BB45703F59EBBD1CA2F3335446EA94411B"
+    },
+    {
+        "path":  "tests/e2e/home.spec.ts",
+        "sha256":  "5912FF347E7037B78248E79709ED8BAC27675CD4BE0BB0FBA7AE127569367DB2"
+    },
+    {
+        "path":  "tests/e2e/checkout-journey.spec.ts",
+        "sha256":  "6707016680AD23F2B21DB7BF8054080A887BC5516C03533ABFF69E7DC6E0AE5B"
+    }
+]

@@ -1,0 +1,31 @@
+{
+  "root": "D:\\Virtual-Try-On-sync\\.runtime\\stage0-clean",
+  "node": "v22.15.0",
+  "results": [
+    {
+      "name": "build",
+      "started": "2026-11-16T15:07:40.831Z",
+      "code": 2
+    },
+    {
+      "name": "lint",
+      "started": "2026-11-16T15:07:48.639Z",
+      "code": 1
+    },
+    {
+      "name": "unit",
+      "started": "2026-11-16T15:08:00.100Z",
+      "code": 1
+    },
+    {
+      "name": "backend",
+      "started": "2026-11-16T15:08:04.150Z",
+      "code": 1
+    },
+    {
+      "name": "browser-inventory",
+      "started": "2026-11-16T15:08:04.746Z",
+      "code": 0
+    }
+  ]
+}

@@ -7,6 +7,9 @@ Bài fuzzing môn học giữ riêng tại `archive/coursework-api-fuzzing/`.
 
 ## Tài liệu và bằng chứng
 
+- [Giai đoạn 0 — clean-clone baseline](docs/baseline-report.md): lần xác minh mới
+  trên commit `3d61097`; báo cáo dưới đây vẫn giữ lịch sử lượt khảo sát trước.
+
 - [System inventory](docs/system-inventory.md): chức năng và API đọc từ source.
 - [Environment setup](docs/environment-setup.md): chạy web, môi trường và test.
 - [Baseline report](docs/baseline-test-report.md): kết quả thực thi, giới hạn.

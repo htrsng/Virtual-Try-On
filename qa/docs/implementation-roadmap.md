@@ -6,7 +6,7 @@ sang `coursework/api-fuzzing/` hoặc tạo Playwright framework mới.
 
 | Giai đoạn | Deliverable | Exit criterion | Trạng thái |
 |---|---|---|---|
-| 0 Baseline | Inventory, setup, report, source manifest | Clone sạch chạy lại và biết rõ failures | Đã khảo sát/chạy checks; clone sạch còn blocked |
+| 0 Baseline | Inventory, setup, report, source manifest | Clone sạch chạy lại và biết rõ failures | Đã kiểm chứng clone local sạch tại `3d61097`; xem `baseline-report.md`; remote/CI chưa xác minh |
 | 1 QA foundation | Strategy, 12 scenarios/cases, RTM | Expected result và contract rõ | Draft đã có; cần chốt các contract còn mơ hồ |
 | 2 Test environment | MongoDB test, fixture lifecycle, launcher/health | Repeat run không ảnh hưởng dev | Chưa triển khai; Jest disposable DB hiện có được tận dụng |
 | 3 Selenium | Java 17+, Maven, TestNG, POM, 5 smoke tests | Maven run độc lập có report/failure screenshots | Chưa triển khai |
@@ -31,3 +31,63 @@ Không tạo hàng loạt thư mục rỗng, Docker/Grid/Allure Server trước 
 Source khôi phục và archive đã được lưu trong commit `c83799e`; QA baseline được
 lưu riêng sau đó. Kết quả baseline vẫn mô tả working tree tại thời điểm thực thi,
 không thay bằng kết quả giả định từ commit hoặc CI.
+
+## Cam kết phạm vi cho các lượt tiếp theo
+
+Yêu cầu ngày 16/11/2026: hoàn thành Giai đoạn 0 trước. Chỉ tiếp tục các giai đoạn
+sau khi có yêu cầu triển khai; tài liệu này lưu định hướng bền vững trong repository.
+Không di chuyển `tests/` nếu làm hỏng imports/workflows, không đổi cấu trúc chỉ để
+khớp sơ đồ. `client/`, `server/`, `tests/`, `qa/`, `archive/`, `.github/`, `doc/`
+là cấu trúc mục tiêu. Chưa tạo các thư mục framework rỗng để giả định đã triển khai.
+
+Sáu tiêu chí cuối cùng: hệ thống chạy nhất quán; nghiệp vụ/auth/RBAC đáng tin cậy;
+Selenium Java có kiến trúc Maven/TestNG/POM; Playwright tập trung 3D/visual/traces;
+có results/bugs/retesting/evidence/CI artifacts; README giúp người khác chạy và
+xác minh. Chỉ ghi kết quả đã thực thi, không dùng các mục tiêu dưới đây làm coverage thực tế.
+
+| Backlog | Ưu tiên | Điều kiện kiểm chứng |
+|---|---|---|
+| SEC-01 | P0 | Rà soát toàn bộ route nhạy cảm; auth/RBAC regression |
+| SEC-02 | P0 | Reset/delete chỉ trong môi trường cho phép; secrets không vào Git |
+| DATA-01 | P0 | Server xác minh và tính giá trị đơn hàng |
+| ENV-01 | P0 | Clone sạch cài/chạy/kiểm thử được; mở rộng baseline hiện tại |
+| CI-01 | P0 | Baseline CI mới có kết quả riêng từng job và artifacts |
+| TEST-01 | P1 | Inventory và audit coverage Playwright |
+| AUTO-01 | P1 | Selenium Java, Maven, TestNG, POM |
+| TEST-02 | P1 | Strategy, cases, RTM, bug register tập trung |
+| 3D-01 | P1 | Functional/visual tests có render evidence tái lập |
+| DOC-01 | P1 | README đồng bộ commit và kết quả thực tế |
+| CODE-01 | P2 | Refactor module có tests bảo vệ |
+| PORT-01 | P2 | Demo, CI, bug evidence và báo cáo dễ đánh giá |
+
+SEC/DATA là hạng mục cần xác minh; không mặc định là vulnerability đã khai thác.
+Sau baseline, ưu tiên rà soát P0 backend song song với chốt contract/test foundation.
+
+Mục tiêu sáu tuần có thể điều chỉnh: (1) baseline/P0, (2) test environment và QA
+foundation, (3) Java/Selenium và 5 smoke, (4) POM/E2E/persistence, (5) 3D/visual/CI,
+(6) bug retest/refactor/README. Phụ thuộc kỹ thuật và chất lượng quyết định tiến độ.
+
+## Mục tiêu coverage, chưa phải kết quả
+
+MVP 40 cases → Portfolio Ready 90 → mở rộng 150. Chốt số lượng sau feature
+inventory; không tạo cases cho chức năng chưa tồn tại để đủ chỉ tiêu. Mỗi case
+có một phương pháp thực thi chính để tránh đếm trùng giữa framework.
+
+| Module | Mục tiêu mở rộng |
+|---|---:|
+| Authentication & User | 20 |
+| Product Management | 20 |
+| Shopping Cart | 15 |
+| Checkout & Orders | 20 |
+| 3D Virtual Try-On | 25 |
+| Admin & Authorization | 15 |
+| API & Database Integration | 15 |
+| UI & Compatibility | 10 |
+| Reliability & Regression | 10 |
+| Tổng | 150 |
+
+Phân bổ dự kiến: Selenium 60, Playwright 35, API/integration 30, manual 25.
+125 automated cases là mục tiêu mở rộng, không phải số scripts đang có hoặc
+điều kiện bắt buộc để ứng tuyển. Không cần automation hóa toàn bộ manual cases.
+Artifacts lớn, trace/report/screenshots hàng loạt lưu qua CI với retention;
+Git chỉ giữ summary, tài liệu và evidence mẫu đã kiểm tra dữ liệu nhạy cảm.

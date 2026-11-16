@@ -56,6 +56,11 @@ File `.env`, binary MongoDB và database local không được commit. Muốn d�
 
 ## Hướng kiểm thử
 
+Giai đoạn 0 đã bổ sung kiểm chứng clone local sạch, setup và script baseline
+trên nhánh QA. Xem [baseline mới](qa/docs/baseline-report.md) và
+[lộ trình lưu trong repo](qa/docs/implementation-roadmap.md).
+Build/lint/tests vẫn có lỗi được ghi nhận; chưa xác minh GitHub Actions của nhánh này.
+
 Giữ các backend tests trong `server/` và Playwright tests trong `tests/`. Hướng Selenium + Java + TestNG/POM vẫn là kế hoạch phát triển; chưa có Selenium suite mới.
 
 Đã bắt đầu [QA baseline và kế hoạch triển khai](qa/README.md), gồm inventory,

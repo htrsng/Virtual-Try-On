@@ -1,5 +1,52 @@
 # Environment setup
 
+## Giai đoạn 0: clean-clone verification (16/11/2026)
+
+Xem [baseline mới](baseline-report.md); các phần bên dưới giữ lại ngữ cảnh lượt cũ.
+Commit source đã xác minh: `3d6109745e1ec6a3035f7af25ea586357784fa1a`.
+Clone vào thư mục mới; không copy `.env`, database hoặc `node_modules`.
+Thay `<repository-url>` bằng remote của bạn và checkout commit trên.
+
+```powershell
+git clone <repository-url> VFitAI-stage0
+cd VFitAI-stage0
+git checkout 3d6109745e1ec6a3035f7af25ea586357784fa1a
+# Nếu dùng binary MongoDB local, đặt đường dẫn tuyệt đối trước npm ci:
+$env:MONGOMS_SYSTEM_BINARY = 'C:\tools\mongodb\bin\mongod.exe'
+$env:MONGOMS_RUNTIME_DOWNLOAD = 'false'
+npm ci --prefix server --no-audit
+npm ci --prefix client --no-audit
+npm ci --prefix tests --no-audit
+node tests/node_modules/@playwright/test/cli.js install chromium
+```
+
+Đường dẫn binary ở trên là ví dụ, cần thay bằng binary tin cậy thực sự tồn tại.
+Máy đo dùng MongoDB 8.2.6; package có thể cần Internet để tải binary nếu không đặt
+`MONGOMS_SYSTEM_BINARY`. Không vô hiệu hóa kiểm tra TLS để tải dependencies.
+`--no-audit` chỉ bỏ audit trong bước cài, không phải tuyên bố dependencies an toàn.
+
+Hai script mới có trong nhánh QA sau commit nguồn trên. Có thể chạy từ nhánh QA
+và truyền đường dẫn tuyệt đối tới clone cần đo (không cần copy script vào clone):
+
+```powershell
+node scripts/qa-baseline.cjs D:\path\VFitAI-stage0
+node scripts/qa-startup-smoke.cjs D:\path\VFitAI-stage0
+```
+
+Script baseline tự chặn URI development và đặt khóa dịch vụ ngoài rỗng; startup dùng DB tạm,
+cổng 3300/55173 và override cả API URL lẫn Vite proxy. Cần cổng trống.
+Exit code khác 0 phải được đọc trong logs, không đồng nghĩa mọi test thất bại.
+Baseline có lỗi Jest discovery Windows; diagnostic từ `server/`, trong terminal
+đã đặt `NODE_ENV=test`, `MONGODB_URI=''`, JWT test và khóa dịch vụ rỗng như hướng dẫn dưới:
+
+```powershell
+node node_modules/jest/bin/jest.js --runInBand --testMatch '**/tests/**/*.test.js'
+```
+
+Lệnh diagnostic thay glob, không thay assertions; báo cáo riêng với run nguyên cấu hình.
+Để chạy ứng dụng development theo phần bên dưới cần `.env` riêng. Hai script QA
+không cần `.env` và không dùng launcher development.
+
 ## Môi trường đã quan sát
 
 16/11/2026: Windows 11 x64, Node 22.15.0, npm 11.3.0, Java/Javac 17.0.12,

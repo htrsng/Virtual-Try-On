@@ -1,0 +1,14 @@
+﻿[
+    {
+        "log":  "api.log",
+        "sha256":  "E09432EAB00F91991A9568FBBDB917B5E9505764BC799728EBEF29FA329CC586"
+    },
+    {
+        "log":  "playwright.log",
+        "sha256":  "02712F89DB4267B83B8868AF7E07D7C2E5E9D0A0FA27A31ADD177522A99FBDC4"
+    },
+    {
+        "log":  "ui.log",
+        "sha256":  "A8C3CF8EF1836733AA58A0D8BDC0710F73A118711958B1B3A58F3E05AC9DFF6A"
+    }
+]
