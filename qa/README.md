@@ -7,6 +7,11 @@ Bài fuzzing môn học giữ riêng tại `archive/coursework-api-fuzzing/`.
 
 ## Tài liệu và bằng chứng
 
+- [Giai đoạn 1 — backend P0](docs/stage-1-backend-report.md): Development Fix,
+  QA regression và các giới hạn triển khai.
+- [API inventory](docs/api-inventory.md), [permission matrix](docs/permission-matrix.md),
+  [validation rules](docs/validation-rules.md), [bugs trước/sau](bug-reports/STAGE1-P0.md).
+
 - [Giai đoạn 0 — clean-clone baseline](docs/baseline-report.md): lần xác minh mới
   trên commit `3d61097`; báo cáo dưới đây vẫn giữ lịch sử lượt khảo sát trước.
 

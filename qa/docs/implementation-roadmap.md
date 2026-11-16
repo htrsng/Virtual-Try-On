@@ -7,8 +7,8 @@ sang `coursework/api-fuzzing/` hoặc tạo Playwright framework mới.
 | Giai đoạn | Deliverable | Exit criterion | Trạng thái |
 |---|---|---|---|
 | 0 Baseline | Inventory, setup, report, source manifest | Clone sạch chạy lại và biết rõ failures | Đã kiểm chứng clone local sạch tại `3d61097`; xem `baseline-report.md`; remote/CI chưa xác minh |
-| 1 QA foundation | Strategy, 12 scenarios/cases, RTM | Expected result và contract rõ | Draft đã có; cần chốt các contract còn mơ hồ |
-| 2 Test environment | MongoDB test, fixture lifecycle, launcher/health | Repeat run không ảnh hưởng dev | Chưa triển khai; Jest disposable DB hiện có được tận dụng |
+| 1 Backend P0 | API inventory, RBAC, validation, server checkout, regression, before/after bugs | Important routes có quyền/data/state contract và regression Pass | Hoàn thành scope local: 120 backend tests + 2 UI safety Pass; xem stage-1-backend-report.md; CI chưa xác minh |
+| 2 QA foundation và Test environment | Strategy, cases/RTM, MongoDB test, fixtures, launcher/health | Contract rõ; repeat run không ảnh hưởng dev | Draft docs đã có; Jest replica set tạm có ở giai đoạn 1; chưa có full E2E seed/launcher |
 | 3 Selenium | Java 17+, Maven, TestNG, POM, 5 smoke tests | Maven run độc lập có report/failure screenshots | Chưa triển khai |
 | 4 Integration | UI write → API → Mongo → read-back + failure | Persistence và failure path có evidence | Chưa triển khai |
 | 5 Playwright | Sửa tests hiện có, thêm diagnostics | Assertions không skip âm thầm; scope bổ trợ | Audit source đã có; chưa sửa/chạy browser thành công |

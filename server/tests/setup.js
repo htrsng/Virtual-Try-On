@@ -1,10 +1,10 @@
 const mongoose = require("mongoose");
-const { MongoMemoryServer } = require("mongodb-memory-server");
+const { MongoMemoryReplSet } = require("mongodb-memory-server");
 
 let mongoServer;
 
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
+  mongoServer = await MongoMemoryReplSet.create({ replSet: { count: 1, storageEngine: 'wiredTiger' } });
   const uri = mongoServer.getUri();
   
   // Close any existing connection
@@ -13,6 +13,7 @@ beforeAll(async () => {
   }
   
   await mongoose.connect(uri);
+  await Promise.all(Object.values(mongoose.models).map(Model => Model.init()));
 });
 
 afterAll(async () => {

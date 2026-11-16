@@ -718,7 +718,6 @@ OUTPUT FORMAT (JSON thuần, không markdown, không giải thích):
             res.status(500).json({
                 error: "AI tạm thời không khả dụng",
                 code: "AI_ERROR",
-                detail: process.env.NODE_ENV === "production" ? undefined : String(err?.message || err),
             });
         }
     });

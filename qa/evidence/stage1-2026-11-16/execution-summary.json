@@ -1,0 +1,42 @@
+﻿{
+    "date":  "2026-11-16",
+    "timezone":  "Asia/Saigon",
+    "inputCommit":  "e751a46",
+    "baselineApplicationCommit":  "3d6109745e1ec6a3035f7af25ea586357784fa1a",
+    "branch":  "qa/stage-1-backend-p0",
+    "environment":  {
+                        "database":  "disposable MongoMemoryReplSet",
+                        "node":  "22.15.0",
+                        "mongo":  "8.2.6",
+                        "os":  "Windows 11 x64",
+                        "npm":  "11.3.0"
+                    },
+    "before":  {
+                   "notSelected":  12,
+                   "targetedFailed":  5,
+                   "destructiveEndpointsExecuted":  false,
+                   "expectedTotal":  430000,
+                   "pricingProbeFailed":  1,
+                   "forgedTotalPersisted":  1
+               },
+    "backend":  {
+                    "passed":  120,
+                    "forceExit":  false,
+                    "failed":  0,
+                    "total":  120,
+                    "success":  true,
+                    "pending":  0,
+                    "suites":  12
+                },
+    "frontend":  {
+                     "paymentSafetyPassed":  2,
+                     "jsxParsed":  8,
+                     "syntaxDiagnostics":  0,
+                     "fullBuildVerified":  false
+                 },
+    "inventory":  {
+                      "retiredPaths":  3,
+                      "liveRoutes":  71
+                  },
+    "ciVerified":  false
+}

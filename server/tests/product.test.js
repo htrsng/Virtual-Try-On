@@ -1,51 +1,27 @@
-const request = require("supertest");
-const app = require("../index");
-const { UserModel } = require("../models");
-
-describe("Product API", () => {
-  let adminToken;
-
-  beforeAll(async () => {
-    // Create an admin user to test admin endpoints
-    await request(app).post("/api/auth/register").send({
-      email: "admin_prod@test.com", password: "123", fullName: "Admin"
-    });
-    await UserModel.findOneAndUpdate({ email: "admin_prod@test.com" }, { role: "admin" });
-    const loginRes = await request(app).post("/api/auth/login").send({
-      email: "admin_prod@test.com", password: "123"
-    });
-    adminToken = loginRes.body.token;
+const request = require('supertest');
+const app = require('../index');
+const { actor, product } = require('./helpers');
+describe('Product API', () => {
+  test('admin creates product with numeric identity', async () => {
+    const { token } = await actor('admin');
+    const res = await request(app).post('/api/products').auth(token, { type: 'bearer' }).send({ name: 'QA shirt', price: 200000, stock: 5 });
+    expect(res.status).toBe(201); expect(res.body.stock).toBe(5); expect(res.body.id).toBe(1);
   });
-
-  it("should create a new product (admin)", async () => {
-    const newProduct = {
-      id: 101,
-      name: "T-Shirt Test",
-      price: 200,
-      originalPrice: 250,
-      category: "Áo",
-      status: "active"
-    };
-
-    const res = await request(app)
-      .post("/api/products")
-      .set("Authorization", `Bearer ${adminToken}`)
-      .send(newProduct);
-
-    expect(res.statusCode).toEqual(201);
-    expect(res.body).toHaveProperty("name", "T-Shirt Test");
+  test('public catalog is array and includes independently seeded product', async () => {
+    const item = await product(); const res = await request(app).get('/api/products');
+    expect(res.status).toBe(200); expect(Array.isArray(res.body)).toBe(true); expect(res.body.map(p => p.id)).toContain(item.id);
   });
-
-  it("should get all products", async () => {
-    const res = await request(app).get("/api/products");
-    expect(res.statusCode).toEqual(200);
-    expect(res.body.products).toBeInstanceOf(Array);
-    expect(res.body.products.length).toBeGreaterThanOrEqual(1);
+  test('product detail resolves numeric and Mongo identity; absent id is 404', async () => {
+    const item = await product();
+    for (const id of [item.id, String(item._id)]) {
+      const res = await request(app).get(`/api/products/${id}`); expect(res.status).toBe(200); expect(res.body.name).toBe(item.name);
+    }
+    expect((await request(app).get('/api/products/999')).status).toBe(404);
   });
-
-  it("should get a single product by id", async () => {
-    const res = await request(app).get("/api/products/101");
-    expect(res.statusCode).toEqual(200);
-    expect(res.body).toHaveProperty("name", "T-Shirt Test");
+  test('partial edit preserves inventory; duplicate numeric identity is 409', async () => {
+    const item = await product(); const { token } = await actor('admin');
+    const res = await request(app).put(`/api/products/${item.id}`).auth(token, { type: 'bearer' }).send({ name: 'renamed', __v: 0 });
+    expect(res.status).toBe(200); expect(res.body.stock).toBe(20);
+    expect((await request(app).post('/api/products').auth(token, { type: 'bearer' }).send({ id: item.id, name: 'duplicate', price: 1 })).status).toBe(409);
   });
 });

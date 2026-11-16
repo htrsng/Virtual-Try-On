@@ -43,7 +43,7 @@ const normalizeProductInventory = (body = {}) => {
 };
 
 const ProductSchema = new mongoose.Schema({
-  id: Number,
+  id: { type: Number, unique: true, sparse: true },
   name: String,
   description: String,
   price: Number,
@@ -55,7 +55,7 @@ const ProductSchema = new mongoose.Schema({
   rating: Number,
   status: { type: String, default: "active" },
   stock: { type: Number, default: 0 },
-  totalStock: { type: Number, default: 0 },
+  totalStock: { type: Number },
   variants: {
     type: [
       {
@@ -95,8 +95,8 @@ const UserSchema = new mongoose.Schema({
   failedLoginCount: { type: Number, default: 0, select: false },
   id: Number,
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  role: { type: String, default: "user" },
+  password: { type: String, required: true, select: false },
+  role: { type: String, enum: ['user', 'admin'], default: "user" },
   fullName: { type: String, default: "" },
   phone: { type: String, default: "" },
   address: { type: String, default: "" },
@@ -119,6 +119,7 @@ const UserSchema = new mongoose.Schema({
 const UserModel = mongoose.model("users", UserSchema);
 
 const OrderSchema = new mongoose.Schema({
+  inventoryReserved: { type: Boolean, default: false, select: false },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "users",
@@ -155,11 +156,12 @@ const OrderSchema = new mongoose.Schema({
     ward: String,
   },
   paymentMethod: { type: String, default: "COD" },
-  status: { type: String, default: "Đang xử lý" },
+  status: { type: String, enum: ['Đang xử lý', 'Đang giao', 'Đã giao', 'Đã hủy'], default: "Đang xử lý" },
   createdAt: { type: Date, default: Date.now },
   cancelledAt: { type: Date },
   cancelReason: { type: String },
 });
+OrderSchema.set('toJSON', { transform: (_doc, result) => { delete result.inventoryReserved; return result; } });
 const OrderModel = mongoose.model("orders", OrderSchema);
 
 const WishlistSchema = new mongoose.Schema({
@@ -324,7 +326,6 @@ const VirtualClosetSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
-VirtualClosetSchema.index({ userId: 1 });
 const VirtualClosetModel = mongoose.model("virtual_closets", VirtualClosetSchema);
 
 const SavedOutfitSchema = new mongoose.Schema({

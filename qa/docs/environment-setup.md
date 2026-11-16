@@ -1,5 +1,92 @@
 # Environment setup
 
+## Giai đoạn 1 — cấu hình hiện tại
+
+Backend hardening nằm ở nhánh `qa/stage-1-backend-p0`; xem
+[stage report](stage-1-backend-report.md). Các mục Giai đoạn 0 phía dưới là lịch sử.
+
+Prerequisites đã dùng: Windows 11, Node 22.15.0, npm 11.3.0, MongoDB binary 8.2.6.
+Không thêm dependency mới. Java/Maven chưa dùng trong giai đoạn này.
+
+```powershell
+# Nếu có binary tin cậy sẵn, đặt trước npm ci server:
+$env:MONGOMS_SYSTEM_BINARY = 'C:\tools\mongodb\bin\mongod.exe'
+$env:MONGOMS_RUNTIME_DOWNLOAD = 'false'
+npm ci --prefix server --no-audit
+npm ci --prefix client --no-audit
+npm test --prefix server -- --runInBand
+```
+
+Thay đường dẫn ví dụ bằng binary thật; máy thực thi dùng
+`D:\Virtual-Try-On-sync\.runtime\tools\mongod.exe`. Nếu không dùng binary local,
+MongoMemoryServer có thể cần Internet để tải đúng binary (package hiện tại dùng 8.2.6).
+`global-setup.js` đặt test JWT/URI/service keys; NODE_ENV=test không đọc `.env`.
+Mỗi suite tự chạy MongoMemoryReplSet tạm và chờ indexes; afterEach chỉ xóa các
+collections trong replica set tạm, afterAll disconnect/stop. Không cần database dev,
+không gọi HTTP reset/create-admin. Test fixtures không phải tài khoản triển khai.
+
+UI safety tests từ `client/`:
+
+```powershell
+node node_modules/vitest/vitest.mjs run src/components/PaymentSafety.test.jsx
+```
+
+### Chạy ứng dụng với checkout mới
+
+Checkout dùng transaction nên cần MongoDB replica set/Atlas. Standalone cũ vẫn có thể
+phục vụ một số reads nhưng checkout trả 503 REPLICA_SET_REQUIRED. Không tự chuyển
+hoặc reset database cũ. Dùng database/dev path riêng, ví dụ port 27018:
+
+```powershell
+# Terminal MongoDB: giữ process chạy; cần mongod trong PATH.
+New-Item -ItemType Directory -Force .runtime/mongodb-rs | Out-Null
+mongod --dbpath .runtime/mongodb-rs --port 27018 --bind_ip 127.0.0.1 --replSet rs0
+```
+
+Terminal khác, dùng mongosh đã cài riêng (hoặc replica set/Atlas do bạn quản lý):
+
+```powershell
+mongosh 'mongodb://127.0.0.1:27018/?directConnection=true' --eval 'rs.initiate({_id:"rs0",members:[{_id:0,host:"127.0.0.1:27018"}]})'
+```
+
+Đây là hướng dẫn self-managed local; lệnh mongosh này chưa được chạy trên máy đo.
+Replica-set path đã được xác minh qua MongoMemoryReplSet của regression suite.
+Chỉ bind localhost cho dev, không mở MongoDB không auth ra mạng.
+
+Tạo `.env` từ example và cấu hình URI
+`mongodb://127.0.0.1:27018/vfitai?replicaSet=rs0`; không ghi đè `.env` đang có.
+Tạo secret riêng bằng `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"`
+rồi lưu vào `.env` untracked hoặc secret manager. Backend từ chối secret thiếu,
+dưới 32 ký tự hoặc placeholder. `npm start --prefix server`, UI `npm run dev --prefix client`.
+Launcher development cũ không cấu hình/initialize replica set; khởi động DB riêng trước.
+Restart backend/frontend đang chạy để dùng code mới; suite không dừng server dev của bạn.
+
+### Bootstrap admin riêng, không qua HTTP
+
+Chỉ chạy trên database bạn chủ động chọn. Script không in password, không sửa
+account email đã tồn tại. Đặt URI/JWT đúng môi trường trước; lấy credentials qua prompt:
+
+```powershell
+$qaAdminCredential = Get-Credential -Message 'New VFitAI admin credentials'
+$env:ADMIN_EMAIL = $qaAdminCredential.UserName
+$env:ADMIN_PASSWORD = $qaAdminCredential.GetNetworkCredential().Password
+try { npm run admin:create --prefix server }
+finally {
+    Remove-Item Env:ADMIN_PASSWORD -ErrorAction SilentlyContinue
+    Remove-Item Env:ADMIN_EMAIL -ErrorAction SilentlyContinue
+}
+```
+
+Không có reset-all CLI/HTTP mới; disposable test setup chịu trách nhiệm fixture cleanup.
+Không giả định các tài khoản mật khẩu yếu từng có trong DB đã được thay đổi bởi code fix.
+
+### Evidence local
+
+Raw logs chỉ ở `.runtime/stage1/`; summary/hashes trong
+`qa/evidence/stage1-2026-11-16/`. Export inventory bằng
+`node scripts/export-api-inventory.cjs`. CI mới chưa được chạy; không đẩy generated
+reports, Mongo files, browser binaries hoặc secrets lên Git.
+
 ## Giai đoạn 0: clean-clone verification (16/11/2026)
 
 Xem [baseline mới](baseline-report.md); các phần bên dưới giữ lại ngữ cảnh lượt cũ.

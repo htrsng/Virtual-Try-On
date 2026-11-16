@@ -15,6 +15,11 @@ archive/      Coursework kiểm thử và báo cáo lịch sử
 
 ## Chạy ứng dụng
 
+Giai đoạn 1 bổ sung backend RBAC/validation và server checkout với MongoDB transaction.
+Cần **replica set/Atlas**, JWT secret riêng tối thiểu 32 ký tự; cấu hình mẫu dùng port
+27018. Hướng dẫn hiện tại tại [environment setup](qa/docs/environment-setup.md).
+Reset/create-admin HTTP đã được bỏ; admin bootstrap dùng script riêng.
+
 Cài dependency từ thư mục gốc:
 
 ```powershell
@@ -22,7 +27,7 @@ npm ci --prefix server
 npm ci --prefix client
 ```
 
-Tạo `server/.env` theo [server/.env.example](server/.env.example), đặt `MONGODB_URI` và `JWT_SECRET`. Cấu hình mặc định dùng MongoDB local `mongodb://127.0.0.1:27017/vfitai`, API cổng 3000. Tạo `client/.env` theo [client/.env.example](client/.env.example); frontend và Vite proxy trỏ API cổng 3000.
+Tạo `server/.env` theo [server/.env.example](server/.env.example), đặt `MONGODB_URI` và `JWT_SECRET`. Mẫu hiện tại dùng MongoDB replica set local `mongodb://127.0.0.1:27018/vfitai?replicaSet=rs0`, API cổng 3000. Tạo `client/.env` theo [client/.env.example](client/.env.example); frontend và Vite proxy trỏ API cổng 3000.
 
 Trên Windows:
 
@@ -55,6 +60,12 @@ File `.env`, binary MongoDB và database local không được commit. Muốn d�
 Đây chưa phải kết quả kiểm tra toàn bộ hệ thống: chưa submit đơn hàng, xác minh thanh toán/email/Gemini hoặc toàn bộ luồng 3D. Chi tiết nguồn khôi phục, cấu hình và phạm vi xác minh ở [doc/RESTORED_WEB.md](doc/RESTORED_WEB.md).
 
 ## Hướng kiểm thử
+
+[Giai đoạn 1 — Backend P0](qa/docs/stage-1-backend-report.md) có API inventory,
+permission matrix, validation rules và regression evidence. Backend: **120 tests / 12 suites
+Pass** trên MongoDB replica set tạm; UI payment safety: **2 tests Pass**.
+Online payment chưa có provider, API trả unavailable; không mô phỏng success.
+Frontend build/lint/3D và CI vẫn có giới hạn nêu trong baseline/report.
 
 Giai đoạn 0 đã bổ sung kiểm chứng clone local sạch, setup và script baseline
 trên nhánh QA. Xem [baseline mới](qa/docs/baseline-report.md) và

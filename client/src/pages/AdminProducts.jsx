@@ -412,12 +412,9 @@ function AdminProducts({ showToast, categories = [] }) {
                     totalStock,
                     variants: normalizedVariants,
                     description: formData.description,
-                    shortDescription: formData.shortDescription,
                     img: formData.mainImage,
-                    secondaryImages,
                     images: resolvedImages,
                     rating: 0,
-                    reviewCount: 0,
                     status: formData.status,
                     ai_attributes: aiAttributes
                 };
@@ -453,12 +450,9 @@ function AdminProducts({ showToast, categories = [] }) {
                     totalStock,
                     variants: normalizedVariants,
                     description: formData.description,
-                    shortDescription: formData.shortDescription,
                     img: formData.mainImage,
-                    secondaryImages,
                     images: resolvedImages,
                     rating: 0,
-                    reviewCount: 0,
                     status: formData.status,
                     ai_attributes: aiAttributes
                 };

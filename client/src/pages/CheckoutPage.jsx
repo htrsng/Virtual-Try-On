@@ -598,7 +598,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast, suggestionProducts, onAddT
                 })),
                 totalAmount: finalAmount, // Dùng finalAmount đã trừ giảm giá và cộng phí ship
                 shippingFee: shippingFee,
-                shippingMethod: t(selectedShipping.nameKey),
+                shippingMethod: selectedShipping.id,
                 discountCode: appliedDiscount?.code || null,
                 discountAmount: discountAmount,
                 voucherCode: selectedVoucher?.code || null,

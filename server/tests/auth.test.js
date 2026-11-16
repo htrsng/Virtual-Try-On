@@ -1,84 +1,34 @@
-const request = require("supertest");
-const app = require("../index"); // Cần export app từ index.js
-
-describe("Auth API", () => {
-  const testUser = {
-    email: "test_auth@example.com",
-    password: "password123",
-    fullName: "Test Auth User"
-  };
-
-  it("should register a new user successfully", async () => {
-    const res = await request(app)
-      .post("/api/auth/register")
-      .send(testUser);
-
-    expect(res.statusCode).toEqual(201);
-    expect(res.body).toHaveProperty("message", "Đăng ký thành công");
-    expect(res.body.user).toHaveProperty("email", testUser.email);
-    expect(res.body.user).not.toHaveProperty("password"); // Password should not be returned
+const request = require('supertest');
+const bcrypt = require('bcryptjs');
+const app = require('../index');
+const { UserModel } = require('../models');
+describe('Authentication API contract', () => {
+  const user = { email: 'qa-auth@example.test', password: 'Fixture123!', fullName: 'QA' };
+  test('registration hashes password, returns safe user and usable token', async () => {
+    const res = await request(app).post('/api/auth/register').send(user);
+    expect(res.status).toBe(201); expect(res.body.user.email).toBe(user.email);
+    expect(res.body.user.role).toBe('user'); expect(res.body.user).not.toHaveProperty('password');
+    const stored = await UserModel.findOne({ email: user.email }).select('+password');
+    expect(await bcrypt.compare(user.password, stored.password)).toBe(true); expect(stored.password).not.toBe(user.password);
+    expect((await request(app).get('/api/auth/me').auth(res.body.token, { type: 'bearer' })).status).toBe(200);
   });
-
-  it("should not register a user with an existing email", async () => {
-    // First registration already happened in the previous test?
-    // Oh wait, collections are cleared afterEach in setup.js, so we need to register again.
-    await request(app)
-      .post("/api/auth/register")
-      .send(testUser);
-
-    const res = await request(app)
-      .post("/api/auth/register")
-      .send(testUser);
-
-    expect(res.statusCode).toEqual(400);
-    expect(res.body).toHaveProperty("message", "Email đã được sử dụng");
+  test('duplicate normalized email is conflict', async () => {
+    await request(app).post('/api/auth/register').send(user);
+    expect((await request(app).post('/api/auth/register').send({ ...user, email: user.email.toUpperCase() })).status).toBe(409);
   });
-
-  it("should login successfully and return a token", async () => {
-    // Register first
-    await request(app)
-      .post("/api/auth/register")
-      .send(testUser);
-
-    const res = await request(app)
-      .post("/api/auth/login")
-      .send({
-        email: testUser.email,
-        password: testUser.password
-      });
-
-    expect(res.statusCode).toEqual(200);
-    expect(res.body).toHaveProperty("token");
-    expect(res.body.user).toHaveProperty("email", testUser.email);
+  test('valid login uses normalized email and returns safe profile', async () => {
+    await request(app).post('/api/auth/register').send(user);
+    const res = await request(app).post('/api/auth/login').send({ email: user.email.toUpperCase(), password: user.password });
+    expect(res.status).toBe(200); expect(typeof res.body.token).toBe('string'); expect(res.body.user).not.toHaveProperty('password');
   });
-
-  it("should not login with incorrect password", async () => {
-    // Register first
-    await request(app)
-      .post("/api/auth/register")
-      .send(testUser);
-
-    const res = await request(app)
-      .post("/api/auth/login")
-      .send({
-        email: testUser.email,
-        password: "wrongpassword"
-      });
-
-    expect(res.statusCode).toEqual(400);
-    expect(res.body).toHaveProperty("message", "Mật khẩu không đúng");
-  it("should get user profile via JWT", async () => {
-    const loginRes = await request(app)
-      .post("/api/auth/login")
-      .send({ email: testUser.email, password: testUser.password });
-      
-    const token = loginRes.body.token;
-    
-    const res = await request(app)
-      .get("/api/auth/me")
-      .set("Authorization", `Bearer ${token}`);
-      
-    expect(res.statusCode).toEqual(200);
-    expect(res.body).toHaveProperty("email", testUser.email);
+  test('wrong password and missing account use identical 401 contract', async () => {
+    await request(app).post('/api/auth/register').send(user);
+    const wrong = await request(app).post('/api/auth/login').send({ email: user.email, password: 'incorrect' });
+    const unknown = await request(app).post('/api/auth/login').send({ email: 'unknown@example.test', password: 'incorrect' });
+    expect(wrong.status).toBe(401); expect(unknown.status).toBe(401); expect(wrong.body).toEqual(unknown.body);
+  });
+  test.each([{ email: { $ne: null }, password: 'Fixture123!' }, { ...user, password: '123' }, { ...user, role: 'admin' }, { ...user, email: 'bad' }])('invalid registration %j', async body => {
+    expect((await request(app).post('/api/auth/register').send(body)).status).toBe(400);
+    expect(await UserModel.countDocuments()).toBe(0);
   });
 });

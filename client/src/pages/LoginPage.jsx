@@ -46,8 +46,8 @@ function LoginPage({ showToast }) {
                 return;
             }
 
-            if (password.length < 6) {
-                showToast("Mật khẩu phải có ít nhất 6 ký tự!", "warning");
+            if (password.length < 8) {
+                showToast("Mật khẩu phải có ít nhất 8 ký tự!", "warning");
                 return;
             }
 

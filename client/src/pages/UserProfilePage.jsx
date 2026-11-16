@@ -182,10 +182,10 @@ function UserProfilePage({ showToast }) {
             setVouchers(getManagedVouchers());
             const userId = user._id || user.id;
             if (userId) {
-                fetch(`/api/users/${userId}/used-coupons`)
+                fetch('/api/used-coupons', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
                     .then(res => res.json())
                     .then(data => {
-                        if (Array.isArray(data)) setUsedCouponCodes(data.map(c => c.couponCode));
+                        if (Array.isArray(data.coupons)) setUsedCouponCodes(data.coupons);
                     })
                     .catch(console.error);
             }

@@ -9,7 +9,7 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-transporter.verify((error) => {
+if (process.env.NODE_ENV !== 'test' && EMAIL_USER && EMAIL_PASS) transporter.verify((error) => {
     if (error) {
         console.error("❌ Email transporter lỗi:", error.message);
     } else {

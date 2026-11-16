@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FiRefreshCw, FiTrash2, FiRotateCcw, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
+import { FiRefreshCw, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
 import axios from 'axios';
 import '../styles/admin-sync.css';
 
@@ -7,8 +7,6 @@ function AdminDataSync() {
     const [syncStatus, setSyncStatus] = useState(null);
     const [loading, setLoading] = useState(false);
     const [data, setData] = useState(null);
-    const [showConfirmClear, setShowConfirmClear] = useState(false);
-    const [showConfirmReset, setShowConfirmReset] = useState(false);
 
     const API_BASE = '/api/admin';
 
@@ -41,46 +39,11 @@ function AdminDataSync() {
         }
     };
 
-    const clearAllData = async () => {
-        try {
-            setLoading(true);
-            await axios.post(`${API_BASE}/clear-all-data`, {
-                confirm: 'CLEAR_ALL_DATA'
-            });
-            alert('✅ Đã xóa tất cả dữ liệu!');
-            setShowConfirmClear(false);
-            checkSync();
-        } catch (error) {
-            alert('❌ Lỗi: ' + error.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const resetData = async () => {
-        try {
-            setLoading(true);
-            const res = await axios.post(`${API_BASE}/reset-data`, {});
-            alert(`✅ Đã reset dữ liệu!\n\nTest User: ${res.data.data.testUser}\nAdmin: ${res.data.data.admin}\nPassword: ${res.data.data.password}`);
-            setShowConfirmReset(false);
-            checkSync();
-        } catch (error) {
-            alert('❌ Lỗi: ' + error.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleClearAll = async () => {
-        await clearAllData();
-        await resetData();
-    };
-
     return (
         <div className="admin-sync-container">
             <div className="sync-header">
                 <h2>🔄 Quản lý đồng bộ dữ liệu</h2>
-                <p>Kiểm tra, đồng bộ và reset dữ liệu từ web vào admin</p>
+                <p>Kiểm tra và xem dữ liệu từ web trong admin</p>
             </div>
 
             {/* Status Card */}
@@ -118,21 +81,9 @@ function AdminDataSync() {
                     <FiRefreshCw size={20} /> Lấy tất cả dữ liệu
                 </button>
 
-                <button
-                    className="btn btn-warning"
-                    onClick={() => setShowConfirmReset(true)}
-                    disabled={loading}
-                >
-                    <FiRotateCcw size={20} /> Reset dữ liệu
-                </button>
 
-                <button
-                    className="btn btn-danger"
-                    onClick={() => setShowConfirmClear(true)}
-                    disabled={loading}
-                >
-                    <FiTrash2 size={20} /> Xóa tất cả
-                </button>
+
+
             </div>
 
             {/* Data Display */}
@@ -188,59 +139,6 @@ function AdminDataSync() {
             )}
 
             {/* Confirm Dialogs */}
-            {showConfirmReset && (
-                <div className="confirm-modal">
-                    <div className="confirm-content">
-                        <h3>🔄 Xác nhận Reset dữ liệu?</h3>
-                        <p>Điều này sẽ xóa tất cả dữ liệu hiện tại và tạo user test mới.</p>
-                        <div className="confirm-actions">
-                            <button
-                                className="btn btn-secondary"
-                                onClick={() => setShowConfirmReset(false)}
-                            >
-                                Hủy
-                            </button>
-                            <button
-                                className="btn btn-warning"
-                                onClick={() => {
-                                    setShowConfirmReset(false);
-                                    resetData();
-                                }}
-                            >
-                                Xác nhận Reset
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {showConfirmClear && (
-                <div className="confirm-modal">
-                    <div className="confirm-content danger">
-                        <h3>⚠️ Xác nhận Xóa tất cả dữ liệu?</h3>
-                        <p>Hành động này sẽ xóa TOÀN BỘ dữ liệu và KHÔNG THỂ HOÀN TÁC!</p>
-                        <p>Sau đó tôi sẽ tự động reset dữ liệu ban đầu.</p>
-                        <div className="confirm-actions">
-                            <button
-                                className="btn btn-secondary"
-                                onClick={() => setShowConfirmClear(false)}
-                            >
-                                Hủy
-                            </button>
-                            <button
-                                className="btn btn-danger"
-                                onClick={() => {
-                                    setShowConfirmClear(false);
-                                    handleClearAll();
-                                }}
-                            >
-                                ✓ Xóa toàn bộ & Reset
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
             {loading && <div className="loading">⏳ Đang xử lý...</div>}
         </div>
     );
