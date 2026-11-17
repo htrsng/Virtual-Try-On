@@ -13,6 +13,7 @@ const reporters: ReporterDescription[] = ciOutput
 
 export default defineConfig({
   testDir: './e2e',
+  testIgnore: '**/compatibility.spec.ts',
   globalSetup: require.resolve('./global-setup'),
   fullyParallel: false,
   retries: 0,
@@ -31,7 +32,7 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      testIgnore: '**/tryon-3d.spec.ts',
+      testIgnore: ['**/tryon-3d.spec.ts', '**/compatibility.spec.ts'],
       use: { ...devices['Desktop Chrome'] },
     },
     {

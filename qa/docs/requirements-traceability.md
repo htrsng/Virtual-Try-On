@@ -1,5 +1,9 @@
 # Requirements traceability
 
+Historical baseline snapshot. Current implementation and coverage are tracked in
+[RTM](rtm.md) and [Test Summary](test-summary.md); planned/failed labels below refer
+to the initial baseline, not the current suites.
+
 Mã REQ là đề xuất QA từ source. DESIGNED không đồng nghĩa implemented hoặc passed.
 
 | Requirement | Scenario | Test case | Automation hiện có / kế hoạch | Kết quả liên quan | Finding |

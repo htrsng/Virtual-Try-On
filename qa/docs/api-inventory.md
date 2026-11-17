@@ -1,6 +1,6 @@
-# API inventory — Stage 2
+# API inventory - Stage 9
 
-Generated from server/index.js and server/routes/ai.routes.js by
+Generated from server/index.js, server/routes/ai.routes.js and server/routes/addresses.routes.js by
 `node scripts/export-api-inventory.cjs`. 73 live route registrations + 3 retired paths.
 The response descriptions are maintained explicitly in the exporter; review them with handler changes.
 
@@ -13,9 +13,6 @@ Payment responses intentionally have no success path until a provider is connect
 |---|---|---|---|---|
 | GET | `/api/health/live` | Public | 200 | status=alive, service; independent of database |
 | GET | `/api/health/ready` | Public | 200/503 | status, service, database readiness; test runId when managed |
-| GET | `/api/user/addresses` | Authenticated owner | 200 | addresses[] (owner) |
-| POST | `/api/user/addresses` | Authenticated owner | 200 | success, address (owner) |
-| PUT | `/api/user/addresses/:addressId` | Authenticated owner | 200 | success, address (owner) |
 | GET | `/api/products` | Public | 200 | normalized product[] |
 | GET | `/api/products/next-id` | Admin (stored role) | 200 | nextId |
 | GET | `/api/products/:id/stock` | Public | 200 | id, stock, totalStock, variants |
@@ -84,6 +81,9 @@ Payment responses intentionally have no success path until a provider is connect
 | GET | `/api/admin/get-all-data` | Admin (stored role) | 200 | status, aggregate counts/product sales; no credential records |
 | POST | `/api/admin/check-sync` | Admin (stored role) | 200 | status, isSynced, message, stats or diagnostic suggestion |
 | POST | `/api/ai/outfit-suggest` | Authenticated owner | 200/503 | outfits/suggestions/meta; AI_NOT_INITIALIZED if no provider |
+| GET | `/api/user/addresses` | Authenticated owner | 200 | addresses[] (owner) |
+| POST | `/api/user/addresses` | Authenticated owner | 200 | success, address (owner) |
+| PUT | `/api/user/addresses/:addressId` | Authenticated owner | 200 | success, address (owner) |
 
 Retired paths (all methods, all environments, every role):
 

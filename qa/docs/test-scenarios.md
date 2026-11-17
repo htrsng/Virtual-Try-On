@@ -1,5 +1,8 @@
 # Initial test scenarios
 
+Historical initial designs. Current [RTM](rtm.md), [E2E cases](e2e-test-cases.csv)
+and [Test Summary](test-summary.md) supersede the implementation status below.
+
 12 scenarios ban đầu từ source và kiểm tra khôi phục. Toàn bộ là thiết kế cho
 suite mới, chưa có kết quả Selenium. Xem `test-cases.csv` cho steps và oracle.
 

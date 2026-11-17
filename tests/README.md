@@ -41,3 +41,23 @@ generated accounts/capabilities are never artifacts. Keep raw reports outside
 Read [3D scope, oracles and limits](../qa/docs/stage-7-playwright-3d.md),
 [approved baseline process](visual-baselines/README.md) and
 [bugs/retest](../qa/bug-reports/stage7-3d.md).
+
+## Compatibility and keyboard checks (Stage 9)
+
+From `tests/`: install pinned browsers with
+`node node_modules/@playwright/test/cli.js install chromium firefox`, then run
+`node node_modules/@playwright/test/cli.js test --config=playwright.compat.config.ts`.
+Five scenarios run across desktop Chromium/Firefox, tablet768x1024 Chromium and
+mobile390x844 Chromium:20 invocations. Mobile is emulation, not physical-device
+coverage. WebKit/Safari and screen-reader checks remain Not Run.
+
+The opt-in matrix reuses catalog/checkout cases; it does not duplicate them in the
+default12-test suite or compare Firefox against Windows WebGL baselines. The
+checkout case stops at the summary, not order submission/payment. Keyboard tests
+check login/registration controls and password toggles, not full WCAG conformance.
+
+For SHA-stamped JUnit/HTML/JSON, run `node scripts/ci/run.cjs init playwright-compat`,
+`run playwright-compat`, then `finalize playwright-compat` from root. Full regression
+CI includes this matrix; manual/scheduled remote execution requires default-branch
+availability. [Manual testing](../qa/docs/manual-testing.md) records visual review
+findings beyond the width and navigation assertions.

@@ -1,5 +1,7 @@
+import CameraAnimator from './components/CameraAnimator';
+import EmptyAvatarModal from './components/EmptyAvatarModal';
 import { Suspense, useState, useRef, useMemo, useEffect, useCallback, type ReactNode } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows, Html, useProgress, Grid, MeshReflectorMaterial } from '@react-three/drei';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Avatar } from '../../three/controls/avatar/Avatar';
@@ -142,37 +144,6 @@ function Accordion({ title, icon, defaultOpen = false, children, onLayoutChange 
     );
 }
 
-interface EmptyAvatarModalProps {
-    isOpen: boolean;
-    onCreateAvatar: () => void;
-    onSkip: () => void;
-}
-
-function EmptyAvatarModal({ isOpen, onCreateAvatar, onSkip }: EmptyAvatarModalProps) {
-    if (!isOpen) {
-        return null;
-    }
-
-    return (
-        <div className="vto-empty-avatar-modal__backdrop" role="presentation">
-            <div className="vto-empty-avatar-modal" role="dialog" aria-modal="true" aria-labelledby="vto-empty-avatar-title">
-                <h3 id="vto-empty-avatar-title">Bạn chưa tạo avatar nào</h3>
-                <p>
-                    Tạo avatar để thử đồ với số đo thật của bạn. Nếu bỏ qua, hệ thống sẽ sử dụng body mặc định tạm thời.
-                </p>
-                <div className="vto-empty-avatar-modal__actions">
-                    <button type="button" className="vto-btn vto-btn--primary" onClick={onCreateAvatar}>
-                        Tạo Avatar
-                    </button>
-                    <button type="button" className="vto-btn vto-btn--ghost" onClick={onSkip}>
-                        Bỏ qua
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-}
-
 /* ─── Loader ─── */
 function Loader() {
     const { progress } = useProgress();
@@ -187,36 +158,6 @@ function Loader() {
 }
 
 /* ─── Camera animator (inside Canvas) ─── */
-function CameraAnimator({ targetPosition, targetLookAt }: { targetPosition: [number, number, number]; targetLookAt: [number, number, number] }) {
-    const posRef = useRef(new THREE.Vector3(...targetPosition));
-    const lookRef = useRef(new THREE.Vector3(...targetLookAt));
-    const transitioning = useRef(true);
-
-    useEffect(() => {
-        posRef.current.set(...targetPosition);
-        lookRef.current.set(...targetLookAt);
-        transitioning.current = true;
-    }, [targetPosition, targetLookAt]);
-
-    useFrame(({ camera, controls }) => {
-        if (!transitioning.current || !controls) return;
-        const orbit = controls as unknown as { enabled: boolean; enableDamping: boolean; target: THREE.Vector3; update: () => void };
-        // OrbitControls updates at priority -1. Pause it while this frame-loop transition owns the camera.
-        orbit.enabled = false;
-        camera.position.lerp(posRef.current, 0.08);
-        camera.lookAt(lookRef.current);
-        if (camera.position.distanceTo(posRef.current) <= 0.01) {
-            const damping = orbit.enableDamping;
-            orbit.enableDamping = false; orbit.update(); // drain pending angular/zoom deltas
-            camera.position.copy(posRef.current); orbit.target.copy(lookRef.current); orbit.update();
-            orbit.enableDamping = damping; orbit.enabled = true;
-            transitioning.current = false;
-        }
-    });
-
-    return null;
-}
-
 /* ─── Types ─── */
 type TryOnProduct = {
     id: number | string;

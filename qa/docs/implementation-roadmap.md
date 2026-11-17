@@ -1,5 +1,10 @@
 # Implementation roadmap
 
+Trạng thái hiện tại: Giai đoạn 9. Xem [Test Summary](test-summary.md),
+[Feature Inventory](feature-inventory.md), [RTM](rtm.md) và [Bug Register](../bug-reports/bug-register.md).
+Các dòng giai đoạn cũ giữ kết quả tại thời điểm bàn giao; “CI pending” trong lịch sử
+không thay thế kết quả CI đã xác minh ở Giai đoạn 8. Lint/build vẫn Fail; chưa release.
+
 Tài liệu định hướng thứ hai được dùng để thống nhất cấu trúc: giữ `server/` và
 `tests/`; coursework giữ tại `archive/coursework-api-fuzzing/`. Không chuyển tiếp
 sang `coursework/api-fuzzing/` hoặc tạo Playwright framework mới.
@@ -15,7 +20,7 @@ sang `coursework/api-fuzzing/` hoặc tạo Playwright framework mới.
 | 6 Business E2E (yêu cầu mới) | UI checkout, API/MongoDB readback, regression, bugs | Critical flows có kết quả nghiệp vụ lưu trữ và isolation | Xem stage-6-business-e2e.md; Playwright render/visual vẫn là backlog |
 | 7 Playwright 3D (yêu cầu mới) | Real viewer/state, approved baselines, pixel diffs/traces, reliability | Sai 3D tái hiện qua oracle thực | Xem stage-7-playwright-3d.md; CI chờ run thật |
 | 8 CI | Five scoped workflows + reusable runner, metadata, JUnit/HTML/artifacts | PR checks đủ dữ liệu phân tích mọi Fail | Xem stage-8-ci-quality-gates.md; lint/build vẫn Fail, remote proof ở PR checks |
-| 9 Portfolio | Coverage/results/bugs/limits/CV | Người khác chạy được smoke | Chưa đạt |
+| 9 Portfolio | Refactor có tests, compatibility/manual logs, coverage/results/bugs/limits | Repo dễ đọc/chạy/xác minh, phân biệt QA và Development | Xem stage-9-portfolio.md; manual screen-reader/device checks chưa chạy, UX overlap và static gates còn mở |
 
 ## Hành động ưu tiên sau baseline
 

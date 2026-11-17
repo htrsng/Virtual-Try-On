@@ -16,8 +16,11 @@ test('seeded customer: Home -> Product -> Cart -> Checkout', async ({ page, requ
   await page.goto('/cart', { waitUntil: 'domcontentloaded' });
   await page.locator('label.cp-checkbox-label').filter({ hasText: 'Chọn tất cả' }).click();
   await expect(page.getByLabel(/Chọn tất cả/)).toBeChecked();
-  await expect(page.locator('.cp-checkout-btn')).toBeEnabled();
-  await page.locator('.cp-checkout-btn').click();
+  // Both responsive layouts expose a checkout action; role locators exclude CSS-hidden controls.
+  const checkout = page.getByRole('button', { name: /^(Tiến hành thanh toán|Thanh toán \(1\))$/ });
+  await expect(checkout).toHaveCount(1);
+  await expect(checkout).toBeVisible(); await expect(checkout).toBeEnabled();
+  await checkout.click();
   await expect(page).toHaveURL(/\/checkout\/cart$/);
   const summary = page.locator('.co-summary');
   await summary.getByRole('button', { name: 'Xem sản phẩm đã chọn (1)', exact: true }).click();

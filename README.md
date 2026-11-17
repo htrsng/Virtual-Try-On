@@ -1,112 +1,98 @@
-# VFitAI — Virtual Try-On & SmartFit
+# VFitAI - Full-Stack & 3D QA Automation
 
-Hệ thống web thời trang với phòng thử đồ 3D, quản lý sản phẩm/đơn hàng và AI stylist. Frontend React/TypeScript/Three.js kết nối backend Node.js/Express và MongoDB.
+React / TypeScript / Three.js / Express / MongoDB
+Selenium / Java / TestNG / Maven / POM / Playwright
 
-## CI quality gates (giai đoạn 8)
+E-commerce and 3D virtual try-on with UI-to-API-to-MongoDB verification, isolated
+synthetic data, reviewed visual baselines and CI failure evidence.
+**Development in progress: lint/build gates still fail; not production-ready.**
 
-PR smoke, API/integration, quality và 3D workflows; full regression theo lịch/manual.
-Xem [CI/reporting guide](qa/docs/stage-8-ci-quality-gates.md). Lint/build baseline đang Fail và không được miễn trừ.
+## Review the portfolio
 
-## Playwright 3D (giai đoạn 7)
+- [Test Summary](qa/docs/test-summary.md): verified results, environment, CI links and limitations.
+- [Feature Inventory](qa/docs/feature-inventory.md), [RTM](qa/docs/rtm.md), [Bug Register](qa/bug-reports/bug-register.md).
+- [Selenium framework](qa/selenium-java/README.md): fresh driver per test, explicit waits, POM, failure screenshots.
+- [Playwright 3D](qa/docs/stage-7-playwright-3d.md): mounted GLB/state, camera, resource lifecycle, visual comparison and wrong-model detector.
+- [CI/reporting](qa/docs/stage-8-ci-quality-gates.md): SHA/environment, JUnit/HTML, screenshots and traces.
+- [Manual/exploratory](qa/docs/manual-testing.md) and [Stage 9 review](qa/docs/stage-9-portfolio.md).
 
-Viewer/WebGL interaction, model state, approved visual baselines và reliability: [Playwright README](tests/README.md), [3D report](qa/docs/stage-7-playwright-3d.md), [bugs/retest](qa/bug-reports/stage7-3d.md).
+## Verified status
 
-## Business E2E (giai đoạn 6)
+[PR #4](https://github.com/htrsng/Virtual-Try-On/pull/4), source `8d6b8b0`, verified
+backend128, frontend25, helpers14, policy12, Selenium smoke5, 3D functional6 and
+Windows visual1 passing on GitHub. Lint failed213 errors/14 warnings; build failed109
+TypeScript diagnostics. These are **pre-refactor** results. Current Stage 9 results
+are maintained separately in [Test Summary](qa/docs/test-summary.md).
 
-Selenium regression có 22 lượt chạy, gồm 17 business E2E cases mới. Xem [E2E report và coverage](qa/docs/stage-6-business-e2e.md), [test cases](qa/docs/e2e-test-cases.csv) và [bug reports](qa/bug-reports/stage6-business-e2e.md).
+Online payment has no provider (API503); social login and password recovery have
+no complete flow. Live Gemini/email integrations are not E2E-verified. Browser
+repeats are execution counts, not new business cases;150 cases remains a target.
 
-## Selenium Java (giai đoạn 5)
+## Run smoke from a clean clone
 
-Framework, lệnh chạy smoke và evidence: [Selenium README](qa/selenium-java/README.md), [stage 5 report](qa/docs/stage-5-selenium.md).
+Requires Node22, Java17, Maven3.9+, and Chrome or Edge. The QA launcher creates its
+own MongoDB replica set; no real account, development database or application
+`.env` is needed. First run needs network for dependencies, MongoDB8.2.6 and drivers.
 
-## Cấu trúc
-
-```text
-client/       Frontend React, Vite và tài nguyên 3D
-server/       Backend Express, Mongoose models, services và backend tests
-tests/        Playwright browser tests gốc
-doc/          Tài liệu ứng dụng và ghi nhận khôi phục
-scripts/      Launcher web/QA, seed lifecycle và repeat checks
-qa/           QA docs, fixtures, isolated environment và evidence summaries
-archive/      Coursework kiểm thử và báo cáo lịch sử
-```
-
-## Chạy ứng dụng
-
-Giai đoạn 1 bổ sung backend RBAC/validation và server checkout với MongoDB transaction.
-Cần **replica set/Atlas**, JWT secret riêng tối thiểu 32 ký tự; cấu hình mẫu dùng port
-27018. Hướng dẫn hiện tại tại [environment setup](qa/docs/environment-setup.md).
-Reset/create-admin HTTP đã được bỏ; admin bootstrap dùng script riêng.
-
-Cài dependency từ thư mục gốc:
-
-```powershell
+```sh
 npm ci --prefix server
 npm ci --prefix client
+npm ci --prefix tests
+node scripts/qa-selenium.cjs -Dbrowser=chrome -Dgroups=smoke
 ```
 
-Tạo `server/.env` theo [server/.env.example](server/.env.example), đặt `MONGODB_URI` và `JWT_SECRET`. Mẫu hiện tại dùng MongoDB replica set local `mongodb://127.0.0.1:27018/vfitai?replicaSet=rs0`, API cổng 3000. Tạo `client/.env` theo [client/.env.example](client/.env.example); frontend và Vite proxy trỏ API cổng 3000.
+Run browser suites sequentially (default QA ports are shared):
 
-Trên Windows:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\start-web.ps1
+```sh
+node tests/node_modules/@playwright/test/cli.js install chromium firefox
+npm --prefix tests test
+node scripts/qa-selenium.cjs -Dbrowser=chrome -Dgroups=regression
+node scripts/ci/run.cjs init playwright-compat
+node scripts/ci/run.cjs run playwright-compat
+node scripts/ci/run.cjs finalize playwright-compat
 ```
 
-Mở **http://127.0.0.1:5173**. Script sử dụng MongoDB đang chạy; nếu dùng URI local mặc định và chưa có MongoDB, script tìm `mongod` trong PATH hoặc `.runtime/tools/mongod.exe`. Log nằm trong `.runtime/`.
+Compatibility covers desktop Chromium/Firefox plus tablet768 and mobile390 Chromium.
+Device emulation does not replace physical devices/Safari. Reviewed visual baselines
+apply only to the fixed Windows render profile; never auto-update them to hide a diff.
+See [browser test guide](tests/README.md) for visual and diagnostic commands.
 
-Có thể chạy backend và frontend trong hai terminal riêng, sau khi khởi động MongoDB:
-
-```powershell
-cd server
-node index.js
+```sh
+npm --prefix client run test:ci
+npm --prefix server test
+npm --prefix client run lint
+npm --prefix client run build
 ```
 
-```powershell
-cd client
-npm run dev
+Generated reports: `.runtime/`, `tests/playwright-report/`,
+`qa/selenium-java/target/` (ignored). CI artifacts retain14 days; open the runs in
+Test Summary to download JUnit/HTML/traces. Never upload QA environment manifests,
+which contain synthetic credentials. Only curated samples/summaries are committed.
+
+## Application setup and structure
+
+[Environment setup](qa/docs/environment-setup.md) documents MongoDB replica sets,
+JWT secret, `.env.example`, UI5173/API3000 and Windows `scripts/start-web.ps1`.
+QA uses API3300/UI55173 and a temporary database; readiness checks precede tests.
+
+```text
+client/           React/TypeScript/Three.js application and component tests
+server/           Routes/controllers, business logic, models and API tests
+tests/            Existing Playwright functional, 3D, visual and compatibility tests
+qa/docs/          Strategy, inventory, cases, RTM, manual testing and summary
+qa/selenium-java/ Maven/TestNG/POM smoke and business regression
+qa/test-data/     Synthetic fixtures and lifecycle contract
+qa/bug-reports/   Confirmed findings, fixes and retests
+qa/evidence/      Curated summaries and sample evidence
+scripts/          Owned QA lifecycle and CI reporting
+.github/          Scoped workflows and reusable job
+doc/              Application and restoration documentation
+archive/          Historical coursework
 ```
 
-File `.env`, binary MongoDB và database local không được commit. Muốn dùng lại catalog, tài khoản và đơn hàng cũ, cần cấu hình URI của database gốc. Gemini và email cần khóa/cấu hình riêng trong `server/.env`.
+[Stage 9 report](qa/docs/stage-9-portfolio.md) separates Development Fix/refactor
+from QA work. [Roadmap](qa/docs/implementation-roadmap.md) keeps dependencies and
+future scope. Earlier baseline reports are historical, not current status.
 
-## Tình trạng khôi phục — 16/11/2026
-
-Đã đưa frontend, tài liệu và browser tests về thư mục gốc; khôi phục 26 file backend gốc từ commit `ff37283`, ngay trước commit xóa server.
-
-Đã kiểm tra bằng Edge với backend và MongoDB thật: trang chủ, đăng nhập, chi tiết sản phẩm, chọn size, thêm giỏ và mở checkout. Không ghi nhận JavaScript page error trong luồng này. Hai record kiểm thử được dọn riêng sau khi chạy.
-
-Đây chưa phải kết quả kiểm tra toàn bộ hệ thống: chưa submit đơn hàng, xác minh thanh toán/email/Gemini hoặc toàn bộ luồng 3D. Chi tiết nguồn khôi phục, cấu hình và phạm vi xác minh ở [doc/RESTORED_WEB.md](doc/RESTORED_WEB.md).
-
-## Hướng kiểm thử
-
-[Giai đoạn 4 — kiểm toán tests hiện có](qa/docs/existing-test-audit.md): frontend
-**21 Pass**, helper units **14 Pass**, backend **128 Pass**, Playwright **6/6 Pass ×2**.
-Đã sửa mock GLTF và đọc logs từng CI job; E2E CI cũ fail do Ubuntu26.04 không được
-Playwright1.60 hỗ trợ, độc lập với lỗi frontend. Candidate đã pin Ubuntu24.04;
-CI mới chờ chạy. Build/lint vẫn Fail và coverage gaps được ghi rõ trong audit.
-
-Giai đoạn 2 có môi trường QA riêng, tự seed/reset/cleanup và health checks.
-Chạy `node scripts/qa-repeat.cjs all`: đã xác minh **backend 130/130 Pass ×2** và
-**Playwright 6/6 Pass ×2**. Test không dùng database/server development.
-Xem [setup hiện tại](qa/docs/environment-setup.md),
-[fixture contract](qa/test-data/README.md) và [stage report](qa/docs/stage-2-test-environment.md).
-
-[Giai đoạn 1 — Backend P0](qa/docs/stage-1-backend-report.md) có API inventory,
-permission matrix, validation rules và regression evidence. Backend: **120 tests / 12 suites
-Pass** trên MongoDB replica set tạm; UI payment safety: **2 tests Pass**.
-Online payment chưa có provider, API trả unavailable; không mô phỏng success.
-Frontend build/lint/3D và CI vẫn có giới hạn nêu trong baseline/report.
-
-Giai đoạn 0 đã bổ sung kiểm chứng clone local sạch, setup và script baseline
-trên nhánh QA. Xem [baseline mới](qa/docs/baseline-report.md) và
-[lộ trình lưu trong repo](qa/docs/implementation-roadmap.md).
-Build/lint/tests vẫn có lỗi được ghi nhận; chưa xác minh GitHub Actions của nhánh này.
-
-Giữ các backend tests trong `server/` và Playwright tests trong `tests/`. Hướng Selenium + Java + TestNG/POM vẫn là kế hoạch phát triển; chưa có Selenium suite mới.
-
-Đã bắt đầu [QA baseline và kế hoạch triển khai](qa/README.md), gồm inventory,
-kết quả build/lint/tests, 12 test scenarios/cases và bảng truy vết.
-Xem [baseline report](qa/docs/baseline-test-report.md) để phân biệt kết quả
-đã chạy, lỗi hiện tại và phần chưa triển khai.
-
-Bộ bài tập API/fuzzing và các báo cáo trước đây được giữ tại [archive/coursework-api-fuzzing](archive/coursework-api-fuzzing/README.md). API target của coursework có phạm vi riêng; backend của ứng dụng nằm trong `server/`.
+API fuzzing remains in the [Coursework Archive](archive/coursework-api-fuzzing/README.md)
+and is not counted as VFitAI backend coverage.

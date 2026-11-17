@@ -1,53 +1,49 @@
-# Test strategy
+# Test strategy - current Stage 9
 
-## Mục tiêu và nguồn yêu cầu
+QA-derived expectations come from source and observed behavior. Feature presence,
+designs, executed tests and signed product requirements are distinct. See
+[Feature Inventory](feature-inventory.md), [RTM](rtm.md), [Test Summary](test-summary.md).
 
-Kiểm thử hệ thống VFitAI thật, bao gồm ranh giới UI/API/MongoDB và thử đồ 3D.
-REQ trong tài liệu QA là yêu cầu kiểm thử đề xuất từ hành vi/source đã quan sát,
-không phải đặc tả nghiệp vụ đã được chủ sản phẩm phê duyệt. Những kỳ vọng chưa rõ
-(status code tạo product, đăng ký, role policy, payment) cần chốt trước automation.
+| Tool | Responsibility | Current implementation |
+| --- | --- | --- |
+| Selenium/Java/TestNG/Maven/POM | Functional UI and commerce E2E | Smoke5 subset of22 regression invocations; real UI login/order submission and API/Mongo readback |
+| Playwright/TypeScript | WebGL/state/visual/network diagnostics | Six3D functional cases; reviewed Windows visual1 plus separate expected-failure detector |
+| Playwright compatibility | Browser/reflow/keyboard checks | Five scenarios across four configurations;20 invocations, not20 independent designs |
+| Jest/Supertest/Mongoose | API validation/RBAC/business integration |134 tests against owned temporary replica sets |
+| Vitest/Testing Library | DOM boundaries and transport |32 tests; R3F mocked only for DOM composition, never claimed as WebGL evidence |
+| Manual/exploratory | Usability, screenshot review, assistive technologies | Executed reviews and Not Run charters tracked separately; no fabricated human sign-off |
+| Python API fuzzing | Separate coursework | Archived; excluded from VFitAI coverage |
 
-## Phân công công cụ
+P0: reproducible environment, authorization, server pricing/transactions and smoke.
+P1: E2E persistence, negative cases, model loading/state/visual and reliable CI.
+P2: bounded refactor, compatibility, accessibility/UX and reviewable portfolio.
 
-| Công cụ | Phạm vi | Tình trạng |
-|---|---|---|
-| Selenium/Java/TestNG/Maven/POM | UI smoke, login, catalog/cart, functional regression | Planned |
-| Playwright hiện có | Audit trước; bổ sung 3D/network/trace/visual có giá trị riêng | Existing, baseline blocked |
-| Jest/Supertest/Mongoose | API contract, authorization, persistence, concurrency | Existing, baseline failing |
-| Manual/exploratory | Render 3D, UX, xác định expected result/visual baseline | Planned |
-| Python API fuzzing | Coursework độc lập trên API mô phỏng | Archived; không tính vào coverage VFitAI |
+## Design and isolation
 
-## Ưu tiên
+Use equivalence classes, boundaries, role decision tables and state transitions
+when supported by real contracts. Test methods assert behavior, Page Objects own
+UI actions. Fresh browser/driver and reset/clear synthetic fixtures per test; no
+shared mutable session or order dependency. Explicit waits follow observable state.
+No fixed sleeps, retries or weaker assertions to make failures pass.
 
-P0: khởi chạy lặp lại, login/permission, đọc sản phẩm thật, test isolation và
-persistence. P1: negative cases, cart/checkout, model loading/error. P2: responsive,
-cross-browser, visual regression sau khi có trạng thái render ổn định.
+Only owned QA MongoDB is reset; application/development data and real accounts are
+outside automated tests. Secrets and manifests are excluded from artifacts. Provider
+payment is unavailable by design and live Gemini/email are not verified by mocks.
 
-Khởi đầu 5 smoke tests có expected result rõ: homepage thực sự render, login hợp
-lệ, login sai mật khẩu, product fixture, size/add-to-cart. Mỗi test tự chuẩn bị
-dữ liệu; chưa tuyên bố đã có 5 tests này. Order write/read + failure path là
-vertical slice tích hợp kế tiếp; cart localStorage không thay thế bước đó.
+## Results and gates
 
-## Thiết kế và độc lập
+Passed requires executed assertions. Failed is a verified assertion/static-check
+failure; InfrastructureFailure means provisioning/runner could not execute; Blocked
+means prerequisites missing; Skipped is explicitly visible and cannot turn an empty
+or partly skipped required suite green. Manual Not Run never becomes Pass by design.
 
-- EP cho credential/role/input groups; BVA cho số lượng và số đo sau khi chốt miền
-  giá trị; decision table cho auth/permission; state transition cho cart/order.
-- Test cases nêu preconditions, data, steps, expected result và oracle.
-- Explicit waits theo UI/model readiness; không dùng sleep hoặc chỉ networkidle.
-- POM tách actions và assertions nghiệp vụ; config baseUrl/browser/headless.
-- Dữ liệu synthetic trong MongoDB test, namespace từng run; cleanup theo ID.
-- Secret từ môi trường; report không chứa credential/token/PII thật.
+Reports record source SHA/dirty state or source manifest, command, timestamps, actual
+environment and counts. CI retains native JUnit/HTML/logs/screenshots/traces14 days.
+The Stage8 policy protects empty, missing and under-collected reports. Full regression
+adds Firefox/Chromium compatibility;3D visual stays on its reviewed Windows profile.
 
-## Báo cáo và exit criteria
-
-PASS: assertion thực sự chạy và đúng. FAIL: assertion/runner lỗi có evidence.
-BLOCKED: thiếu điều kiện để đánh giá behavior. NOT RUN/PLANNED: chưa thực thi.
-Không dùng `if (visible)` để bỏ qua bước bắt buộc rồi tính Pass.
-
-Mỗi run ghi commit + dirty state hoặc source manifest, thời gian, môi trường,
-lệnh, counts, failure classification và evidence. Retest không ghi đè baseline cũ.
-CI phải upload report khi fail; không dùng continue-on-error để che lỗi.
-
-Milestone A chỉ đạt khi clone sạch chạy được, test data cô lập, 5 Selenium smoke
-tests lặp lại độc lập và có báo cáo. WebGL chỉ đạt khi có model/state evidence,
-không chỉ có thẻ canvas. Baseline visual cần review, không tự cập nhật mọi ảnh.
+Refactor: characterize first, extract one responsibility, rerun unit/API and complete
+browser regression, review source diff. Do not replace a baseline or count history as
+a new run. Current lint/build failures remain blocking and explicitly documented.
+Manual assistive technology checks and real devices need separate execution; these
+checks do not certify WCAG compliance or complete accessibility/security coverage.

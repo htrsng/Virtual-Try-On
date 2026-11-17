@@ -9,7 +9,7 @@ module.exports = {
   resetMocks: true,
   restoreMocks: true,
   coverageProvider: 'v8',
-  collectCoverageFrom: ['*.js', 'config/**/*.js', 'routes/**/*.js', 'test-support/**/*.js'],
+  collectCoverageFrom: ['*.js', 'config/**/*.js', 'routes/**/*.js', 'controllers/**/*.js', 'test-support/**/*.js'],
   coverageDirectory: '../.runtime/coverage/backend',
   coverageReporters: ['text-summary', 'json-summary', 'html'],
 };

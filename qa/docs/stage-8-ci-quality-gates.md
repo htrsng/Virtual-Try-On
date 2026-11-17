@@ -1,5 +1,9 @@
 # Giai đoạn 8 — CI, reporting và quality gates
 
+Stage9 extension: frontend minimum32, backend134, full regression additionally runs
+playwright-compat20 (Chromium/Firefox and three Chromium viewport widths). The table
+below preserves the original Stage8 scope; current results are in [Test Summary](test-summary.md).
+
 CI tự động chạy các checks độc lập trên PR vào main. Lint/build không được miễn
 trừ baseline lỗi và không chặn việc thu kết quả unit/API/browser ở job khác.
 Không có deployment/auto-merge: đây là kiểm chứng PR và regression architecture.

@@ -1,0 +1,9 @@
+ID,Charter,Preconditions,Steps,Expected result,Method,Status,Evidence
+MAN-01,EXP-01,Synthetic QA login screenshot and DOM,Inspect login controls and compare semantic names,Controls have meaningful names and native keyboard operation,Tool-assisted review,Finding confirmed before fix,BUG-A11Y-01 and compatibility before trace
+MAN-02,EXP-02,390x844 synthetic cart screenshot,Inspect bottom checkout and floating chat,Checkout unobscured by support widget,Visual review,Failed,BUG-UX-01 sample PNG
+MAN-03,EXP-01,Keyboard and isolated login,Tab through all controls and inspect focus order,Visible focus and logical order without traps,Manual,Not Run,Pending human keyboard session
+MAN-04,EXP-04,NVDA and Firefox,Read login errors and modal state,Meaningful announcements and dialog focus management,Manual,Not Run,Requires assistive technology execution
+MAN-05,EXP-02,Desktop browser with zoom,Set200percent zoom and complete checkout,Content reflows and primary action remains reachable,Manual,Not Run,Pending zoom exploration
+MAN-06,EXP-03,Seeded garment and real renderer,Review fit color silhouette across camera views,Fit judged against agreed product criteria,Manual,Not Run,Needs domain review beyond approved PNGs
+MAN-07,EXP-05,Physical iOS and Android devices,Run commerce and viewer in both orientations,Reachable controls and recoverable renderer,Manual,Not Run,Emulation does not substitute devices
+MAN-08,EXP-06,Approved external provider sandbox,Send confirmation email and inspect failure recovery,Correct recipient and predictable provider errors,Manual,Blocked,No approved sandbox configured

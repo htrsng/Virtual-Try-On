@@ -147,15 +147,17 @@ function LoginPage({ showToast }) {
                         </h2>
                         <p className="auth-form-subtitle">
                             {isRegister ? 'Đã có tài khoản? ' : 'Chưa có tài khoản? '}
-                            <span 
-                                className="auth-link" 
+                            <button
+                                type="button"
+                                className="auth-link"
+                                style={{ background: 'none', border: 0, padding: 0, font: 'inherit', cursor: 'pointer' }}
                                 onClick={() => {
                                     setIsRegister(!isRegister);
                                     resetForm();
                                 }}
                             >
                                 {isRegister ? 'Đăng nhập ngay' : 'Đăng ký miễn phí'}
-                            </span>
+                            </button>
                         </p>
                     </div>
 
@@ -186,6 +188,8 @@ function LoginPage({ showToast }) {
                                     className="modern-auth-input"
                                     type="text"
                                     placeholder="Họ và tên"
+                                    aria-label="Họ và tên"
+                                    autoComplete="name"
                                     value={fullName}
                                     onChange={e => setFullName(e.target.value)}
                                 />
@@ -193,6 +197,8 @@ function LoginPage({ showToast }) {
                                     className="modern-auth-input"
                                     type="tel"
                                     placeholder="Số điện thoại"
+                                    aria-label="Số điện thoại"
+                                    autoComplete="tel"
                                     value={phone}
                                     onChange={e => setPhone(e.target.value)}
                                 />
@@ -203,6 +209,8 @@ function LoginPage({ showToast }) {
                             className="modern-auth-input"
                             type="email"
                             placeholder="Email"
+                            aria-label="Email"
+                            autoComplete="email"
                             value={email}
                             onChange={e => setEmail(e.target.value)}
                             required
@@ -213,6 +221,8 @@ function LoginPage({ showToast }) {
                                 className="modern-auth-input"
                                 type={showPassword ? 'text' : 'password'}
                                 placeholder="Mật khẩu"
+                                aria-label="Mật khẩu"
+                                autoComplete={isRegister ? 'new-password' : 'current-password'}
                                 value={password}
                                 onChange={e => setPassword(e.target.value)}
                                 required
@@ -220,6 +230,8 @@ function LoginPage({ showToast }) {
                             <button
                                 type="button"
                                 className="input-icon-btn"
+                                aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                                aria-pressed={showPassword}
                                 onClick={() => setShowPassword((s) => !s)}
                             >
                                 {showPassword ? '🙈' : '👁️'}
@@ -243,6 +255,8 @@ function LoginPage({ showToast }) {
                                     className="modern-auth-input"
                                     type={showConfirmPassword ? 'text' : 'password'}
                                     placeholder="Nhập lại mật khẩu"
+                                    aria-label="Nhập lại mật khẩu"
+                                    autoComplete="new-password"
                                     value={confirmPass}
                                     onChange={e => setConfirmPass(e.target.value)}
                                     required
@@ -250,6 +264,8 @@ function LoginPage({ showToast }) {
                                 <button
                                     type="button"
                                     className="input-icon-btn"
+                                    aria-label={showConfirmPassword ? 'Ẩn nhập lại mật khẩu' : 'Hiện nhập lại mật khẩu'}
+                                    aria-pressed={showConfirmPassword}
                                     onClick={() => setShowConfirmPassword((s) => !s)}
                                 >
                                     {showConfirmPassword ? '🙈' : '👁️'}

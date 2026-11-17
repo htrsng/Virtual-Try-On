@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const root = path.join(__dirname, '..');
 const index = fs.readFileSync(path.join(root, 'server/index.js'), 'utf8');
+const addresses = fs.readFileSync(path.join(root, 'server/routes/addresses.routes.js'), 'utf8');
 const ai = fs.readFileSync(path.join(root, 'server/routes/ai.routes.js'), 'utf8');
 function extract(source, object, prefix = '') {
   const pattern = new RegExp(`${object}\\.(get|post|put|patch|delete)\\(\\s*(['"])([^'"]+)\\2\\s*,([^\\n]+)`, 'g');
@@ -64,14 +65,14 @@ function describe(row) {
   if (row.route.startsWith('/api/saved-outfits')) return [row.method === 'POST' ? '201' : '200', read ? 'success, owner outfits[]' : row.method === 'DELETE' ? 'success (owner scoped)' : 'success, outfit'];
   throw new Error(`Missing response description: ${row.method} ${row.route}`);
 }
-const rows = [...extract(index, 'app'), ...extract(ai, 'router', '/api/ai')].map(row => {
+const rows = [...extract(index, 'app'), ...extract(ai, 'router', '/api/ai'), ...extract(addresses, 'router', '/api/user/addresses').map(row => ({ ...row, route: row.route.replace(/\/$/, '') }))].map(row => {
   const inheritedAdmin = /^\/api\/(admin|users|coupons)(\/|$)/.test(row.route);
   const access = inheritedAdmin || row.handlers.includes('requireAdmin') ? 'Admin (stored role)' : row.handlers.includes('optionalAuthenticate') ? 'Public / optional verified user' : row.handlers.includes('authenticateToken') ? 'Authenticated owner' : 'Public';
   const [success, response] = describe(row);
   return { method: row.method, route: row.route, access, success, response };
 });
 const retired = ['/api/auth/create-admin', '/api/admin/reset-data', '/api/admin/clear-all-data'];
-const header = `# API inventory — Stage 2\n\nGenerated from server/index.js and server/routes/ai.routes.js by\n\`node scripts/export-api-inventory.cjs\`. ${rows.length} live route registrations + ${retired.length} retired paths.\nThe response descriptions are maintained explicitly in the exporter; review them with handler changes.\n\nAdmin includes inherited prefix guards for /api/admin, /api/users, /api/coupons.\nAuthenticated owner means DB identity from JWT, with resource filters described in\n[permission matrix](permission-matrix.md). Business API routes require DB readiness (503); health/live remains available during DB outages.\nPayment responses intentionally have no success path until a provider is connected.\n\n| Method | Route | Access | Success / intentional disabled status | Response data |\n|---|---|---|---|---|\n`;
+const header = `# API inventory - Stage 9\n\nGenerated from server/index.js, server/routes/ai.routes.js and server/routes/addresses.routes.js by\n\`node scripts/export-api-inventory.cjs\`. ${rows.length} live route registrations + ${retired.length} retired paths.\nThe response descriptions are maintained explicitly in the exporter; review them with handler changes.\n\nAdmin includes inherited prefix guards for /api/admin, /api/users, /api/coupons.\nAuthenticated owner means DB identity from JWT, with resource filters described in\n[permission matrix](permission-matrix.md). Business API routes require DB readiness (503); health/live remains available during DB outages.\nPayment responses intentionally have no success path until a provider is connected.\n\n| Method | Route | Access | Success / intentional disabled status | Response data |\n|---|---|---|---|---|\n`;
 const markdown = header + rows.map(row => `| ${row.method} | \`${row.route}\` | ${row.access} | ${row.success} | ${row.response} |`).join('\n')
   + '\n\nRetired paths (all methods, all environments, every role):\n\n' + retired.map(route => `- \`${route}\`: 404; no bootstrap/reset/clear handler remains.`).join('\n')
   + '\n\nErrors: 400 invalid input/JSON, 401 missing/invalid/expired/deleted identity, 403 non-admin,\n404 missing/foreign resources, 409 conflict/state/version/duplicate coupon, 413 oversized JSON,\n503 database/payment/AI unavailable. See [validation rules](validation-rules.md).\n';

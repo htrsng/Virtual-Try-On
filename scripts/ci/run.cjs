@@ -7,13 +7,14 @@ const { classify, xml } = require('./policy.cjs');
 const root = path.resolve(__dirname, '../..');
 const definitions = {
   'ci-harness': { dependencies: [], minimum: 12 },
-  lint: { dependencies: ['client'] }, build: { dependencies: ['client'] }, frontend: { dependencies: ['client'], minimum: 25 },
+  lint: { dependencies: ['client'] }, build: { dependencies: ['client'] }, frontend: { dependencies: ['client'], minimum: 32 },
   helpers: { dependencies: ['client'], minimum: 14 }, 'playwright-types': { dependencies: ['tests'] },
-  backend: { dependencies: ['server'], minimum: 128 },
+  backend: { dependencies: ['server'], minimum: 134 },
   'selenium-smoke': { dependencies: ['server', 'client'], minimum: 5 },
   'selenium-regression': { dependencies: ['server', 'client'], minimum: 22 },
   'playwright-3d': { dependencies: ['server', 'client', 'tests'], minimum: 6 },
   'playwright-regression': { dependencies: ['server', 'client', 'tests'], minimum: 12 },
+  'playwright-compat': { dependencies: ['server', 'client', 'tests'], minimum: 20 },
   'playwright-visual': { dependencies: ['server', 'client', 'tests'], minimum: 1 },
 };
 const [action, suite] = process.argv.slice(2);
@@ -74,6 +75,7 @@ function plans() {
     case 'selenium-smoke': case 'selenium-regression': return [() => node(['scripts/qa-selenium.cjs', '-Dbrowser=chrome', `-Dgroups=${suite.endsWith('smoke') ? 'smoke' : 'regression'}`, `-Dqa.commitSha=${state.environment.checkedOutSha}`], root, { NODE_ENV: 'test' })];
     case 'playwright-3d': return [() => node([...pw, '--project=3d-chromium'], tests, { NODE_ENV: 'test', QA_3D_VISUAL: '0', QA_3D_DIAGNOSTIC: '0' })];
     case 'playwright-regression': return [() => node(pw, tests, { NODE_ENV: 'test', QA_3D_VISUAL: '0', QA_3D_DIAGNOSTIC: '0' })];
+    case 'playwright-compat': return [() => node([...pw, '--config=playwright.compat.config.ts'], tests, { NODE_ENV: 'test' })];
     case 'playwright-visual': return [() => node([...pw, '--project=3d-visual'], tests, { NODE_ENV: 'test', QA_3D_VISUAL: '1', QA_3D_DIAGNOSTIC: '0' }),
       () => node(['scripts/qa-3d-diagnostic.cjs'], root, { NODE_ENV: 'test' })];
   }
@@ -164,6 +166,7 @@ async function main() {
       state.environment.seleniumBrowserVersions = [...new Set([...log.matchAll(/^Browser:\s*(.+)$/gm)].map(match => match[1].trim()))];
     }
     if (fs.existsSync(path.join(root, 'tests/node_modules/playwright-core/browsers.json'))) state.environment.chromium = read(path.join(root, 'tests/node_modules/playwright-core/browsers.json')).browsers.find(browser => browser.name === 'chromium');
+    if (suite === 'playwright-compat') state.environment.firefox = read(path.join(root, 'tests/node_modules/playwright-core/browsers.json'))?.browsers.find(browser => browser.name === 'firefox');
     save(); reports(); console.log(JSON.stringify({ suite, status: state.status, counts: state.counts, sha: state.environment.checkedOutSha }));
     process.exitCode = state.status === 'Passed' ? 0 : 1; return;
   }
@@ -172,7 +175,7 @@ async function main() {
   if (action === 'install') {
     for (const dependency of definitions[suite].dependencies) { const result = await command('npm', ['ci', '--include=dev'], path.join(root, dependency)); results.push(result); if (result.code) break; }
   } else if (action === 'browsers') {
-    if (suite.startsWith('playwright-') && suite !== 'playwright-types') results.push(await node(['node_modules/@playwright/test/cli.js', 'install', ...(process.platform === 'linux' ? ['--with-deps'] : []), 'chromium'], path.join(root, 'tests')));
+    if (suite.startsWith('playwright-') && suite !== 'playwright-types') results.push(await node(['node_modules/@playwright/test/cli.js', 'install', ...(process.platform === 'linux' ? ['--with-deps'] : []), 'chromium', ...(suite === 'playwright-compat' ? ['firefox'] : [])], path.join(root, 'tests')));
   } else {
     if (suite === 'playwright-visual' && process.platform !== 'win32') { state.blockedReason = 'Approved visual baselines are Windows-only; no cross-platform substitution'; results.push({ code: 1 }); }
     else for (const execute of plans()) { const result = await execute(); results.push(result); if (result.code) break; }
