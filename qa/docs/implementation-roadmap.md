@@ -9,9 +9,9 @@ sang `coursework/api-fuzzing/` hoặc tạo Playwright framework mới.
 | 0 Baseline | Inventory, setup, report, source manifest | Clone sạch chạy lại và biết rõ failures | Đã kiểm chứng clone local sạch tại `3d61097`, nhánh QA đã đồng bộ; xem baseline-report.md; CI chưa xác minh |
 | 1 Backend P0 | API inventory, RBAC, validation, server checkout, regression, before/after bugs | Important routes có quyền/data/state contract và regression Pass | Hoàn thành scope local: 120 backend tests + 2 UI safety Pass; xem stage-1-backend-report.md; CI chưa xác minh |
 | 2 Test environment | Owned MongoDB, fixtures, setup/reset/cleanup, URLs/health | Repeat run không ảnh hưởng dev hoặc data cũ | Hoàn thành local: backend 130/130 ×2, Playwright 6/6 ×2; xem stage-2-test-environment.md; QA foundation docs vẫn cần chốt coverage |
-| 3 Selenium | Java 17+, Maven, TestNG, POM, 5 smoke tests | Maven run độc lập có report/failure screenshots | Chưa triển khai |
+| 3 QA foundation | Strategy, feature inventory, test cases, RTM | Chốt coverage theo chức năng thực tế | Chưa chốt đầy đủ; không tự tạo 150 cases |
 | 4 Existing-test audit (yêu cầu hiện tại) | existing-test-audit.md, verified old suites, mocks/layers/CI logs | Mỗi suite có command/scope/result hoặc failure reason | Hoàn thành local: frontend21, helper14, backend128, Playwright6×2; static failures và candidate CI pending ghi riêng |
-| 5 Playwright | Mở rộng diagnostics/3D/visual sau smoke hiện có | Render/visual evidence tái lập và scope bổ trợ | Giai đoạn 2 đã ổn định 6 smoke/environment cases; chưa có visual/3D render regression |
+| 5 Selenium (yêu cầu mới 17/11/2026) | Java 17, Maven, TestNG, POM, smoke, reports | Suite độc lập, có failure evidence và cleanup | Local Edge 5/5 ×2, Chromium 5/5; xem stage-5-selenium.md; GitHub CI pending |
 | 6 3D | Model state, controlled camera, asset failure, visual | Reproducible render evidence | Chưa triển khai |
 | 7 Bug management | Repro, priority, evidence, retest | Đóng bug có retest | Baseline findings đã ghi; chưa retest fix |
 | 8 CI | Checks + smoke, isolated DB, always artifacts | Run thật từ commit sạch | Audit YAML đã có; chưa có pipeline mới |
@@ -95,3 +95,9 @@ Phân bổ dự kiến: Selenium 60, Playwright 35, API/integration 30, manual 2
 điều kiện bắt buộc để ứng tuyển. Không cần automation hóa toàn bộ manual cases.
 Artifacts lớn, trace/report/screenshots hàng loạt lưu qua CI với retention;
 Git chỉ giữ summary, tài liệu và evidence mẫu đã kiểm tra dữ liệu nhạy cảm.
+
+## Cập nhật giai đoạn 5
+
+Yêu cầu mới xác định giai đoạn 5 là Selenium. Framework nằm tại qa/selenium-java;
+Playwright/3D mở rộng vẫn là backlog. Xem [stage-5-selenium.md](stage-5-selenium.md)
+cho kiến trúc, smoke evidence và giới hạn; không coi QA foundation hoặc 150 cases đã hoàn thành.

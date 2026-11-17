@@ -24,6 +24,7 @@ dist-ssr
 *.sw?
 server/.env
 /.runtime/
+/qa/selenium-java/target/
 /tests/test-results/
 /tests/playwright-report/
 

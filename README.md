@@ -2,6 +2,10 @@
 
 Hệ thống web thời trang với phòng thử đồ 3D, quản lý sản phẩm/đơn hàng và AI stylist. Frontend React/TypeScript/Three.js kết nối backend Node.js/Express và MongoDB.
 
+## Selenium Java (giai đoạn 5)
+
+Framework, lệnh chạy smoke và evidence: [Selenium README](qa/selenium-java/README.md), [stage 5 report](qa/docs/stage-5-selenium.md).
+
 ## Cấu trúc
 
 ```text
