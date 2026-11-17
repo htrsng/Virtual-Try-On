@@ -1,0 +1,86 @@
+{
+  "approval": {
+    "status": "approved-by-user",
+    "date": "2026-11-17",
+    "response": "Duyệt hai baseline hiện tại"
+  },
+  "comparisonProfile": {
+    "platform": "win32",
+    "localOs": "Windows11 x64",
+    "ciOs": "Windows2022 candidate; CI run not verified",
+    "playwright": "1.60.0",
+    "chromium": "148.0.7778.96",
+    "renderer": "ANGLE SwiftShader",
+    "viewport": [
+      1440,
+      1000
+    ],
+    "deviceScaleFactor": 1,
+    "r3fDpr": 1,
+    "locale": "vi-VN",
+    "timezone": "UTC",
+    "colorScheme": "light",
+    "reducedMotion": "reduce",
+    "animation": "Avatar and garment actions time0 paused; qa3d=static only in owned QA mode",
+    "capture": "Native WebGL PNG; equal pixels across distinct rendered frames; no DOM overlays/fonts",
+    "maxDiffPixelRatio": 0.002,
+    "productId": 50101,
+    "size": "M",
+    "color": "#ffffff",
+    "lighting": "studio + pinned city HDR",
+    "body": {
+      "height": 165,
+      "weight": 55,
+      "chest": 85,
+      "waist": 68,
+      "hips": 92,
+      "shoulder": 38,
+      "arm": 26,
+      "thigh": 50,
+      "belly": 70,
+      "legLength": 95,
+      "skinTone": "#F2C9AC"
+    },
+    "camera": {
+      "front": [
+        0,
+        0.8,
+        5.2
+      ],
+      "left": [
+        5.2,
+        0.8,
+        0
+      ],
+      "target": [
+        0,
+        0.3,
+        0
+      ]
+    }
+  },
+  "baselinePngs": {
+    "shirt-m-front.png": {
+      "sha256": "d03596fb9a3ba30c5f5b278d0d22ffa114d2d4648b0222144515283e863fd461",
+      "dimensions": [
+        1048,
+        952
+      ]
+    },
+    "shirt-m-left.png": {
+      "sha256": "04a1efa28dad6338fe0d927cd31f7bb981c7f440293d0f5b5904137c7377d317",
+      "dimensions": [
+        1048,
+        952
+      ]
+    }
+  },
+  "assets": {
+    "/assets/models/avatar_morph.glb": "945989e9ed8879fb447b5df423f05d3c9f2f0296c9729d437de7b621b441143e",
+    "/models/Ao_Thun_sizeS.glb": "60f40da6651790e4dab44d0c36456e6e3c107c530f57600f709e63b9862ae512",
+    "/models/Ao_Thun_sizeM.glb": "7d6fafd4597481b20e4c0ab099ba9b48ec5a5fcb1331706075cdb095a10928c2",
+    "/models/Ao_Thun_sizeL.glb": "b88e325996ffcc7126ad5438ad0842093c4374cc8c4e9a92d9e0233971afce43",
+    "/models/QuanM.glb": "81d52ce7d47e0c23e63b0440a17d36dadc406bb6860b3ce8ed88f70034f9b2a5",
+    "/environments/potsdamer_platz_1k.hdr": "7afe4c2f9700ee78c7477c53fa355463d7dda1fdede401432d6b5f9ff0a95696"
+  }
+}

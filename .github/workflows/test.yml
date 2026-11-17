@@ -103,8 +103,9 @@ jobs:
           retention-days: 14
 
   e2e-tests:
-    name: Playwright E2E Tests
+    name: Playwright E2E and 3D Functional
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node.js
@@ -117,6 +118,8 @@ jobs:
         run: cd client && npm ci
       - name: Install Playwright Dependencies
         run: cd tests && npm ci
+      - name: Typecheck Playwright
+        run: npm run typecheck --prefix tests
       - name: Install Playwright Browsers
         run: cd tests && npx playwright install --with-deps chromium
       - name: Run E2E Tests
@@ -125,5 +128,40 @@ jobs:
         if: always()
         with:
           name: playwright-report
-          path: tests/playwright-report/
+          path: |
+            tests/playwright-report/
+            tests/test-results/
+          retention-days: 14
+
+  visual-3d:
+    name: Playwright 3D Visual (Windows SwiftShader)
+    runs-on: windows-2022
+    timeout-minutes: 20
+    env:
+      QA_3D_VISUAL: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --prefix server
+      - run: npm ci --prefix client
+      - run: npm ci --prefix tests
+      - run: npm run typecheck --prefix tests
+      - name: Install pinned Chromium
+        working-directory: tests
+        run: node node_modules/@playwright/test/cli.js install chromium
+      - name: Compare pinned 3D visual baselines
+        working-directory: tests
+        run: node node_modules/@playwright/test/cli.js test --project=3d-visual
+      - name: Verify wrong-model visual detector
+        run: node scripts/qa-3d-diagnostic.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-3d-visual
+          path: |
+            tests/playwright-report/
+            tests/test-results/
+            .runtime/qa3d-diagnostic/
           retention-days: 14

@@ -6,6 +6,7 @@ import { clone as cloneSkeleton } from 'three/examples/jsm/utils/SkeletonUtils.j
 
 import type { AvatarProps } from './types';
 import { updateAvatarMorph } from './useAvatarMorph';
+import { staticQaRender } from '../../../features/virtual-tryon/qaRender';
 
 const MODEL_PATH = '/assets/models/avatar_morph.glb';
 
@@ -215,7 +216,12 @@ export const Avatar: React.FC<AvatarProps & { skinColor?: string; opacity?: numb
     // 3. Logic Animation
     useEffect(() => {
         const actionName = names.find(n => n.toLowerCase().includes(pose.toLowerCase())) || names[0];
-        if (actionName && actions[actionName]) actions[actionName].reset().fadeIn(0.5).play();
+        if (actionName && actions[actionName]) {
+            const action = actions[actionName]!;
+            action.reset();
+            if (staticQaRender()) { action.play(); action.paused = true; action.getMixer().setTime(0); }
+            else { action.paused = false; action.fadeIn(0.5).play(); }
+        }
         return () => { actions[actionName]?.fadeOut(0.5); };
     }, [actions, names, pose]);
 
@@ -223,7 +229,7 @@ export const Avatar: React.FC<AvatarProps & { skinColor?: string; opacity?: numb
     const globalScale = THREE.MathUtils.clamp(safeGlobalHeight / 165, 0.75, 1.45);
 
     return (
-        <group ref={group} scale={[globalScale, globalScale, globalScale]}>
+        <group ref={group} userData={{ vfitRole: 'avatar', vfitAsset: MODEL_PATH }} scale={[globalScale, globalScale, globalScale]}>
             <primitive object={avatarScene} />
         </group>
     );

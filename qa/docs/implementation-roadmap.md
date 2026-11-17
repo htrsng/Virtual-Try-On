@@ -13,7 +13,7 @@ sang `coursework/api-fuzzing/` hoặc tạo Playwright framework mới.
 | 4 Existing-test audit (yêu cầu hiện tại) | existing-test-audit.md, verified old suites, mocks/layers/CI logs | Mỗi suite có command/scope/result hoặc failure reason | Hoàn thành local: frontend21, helper14, backend128, Playwright6×2; static failures và candidate CI pending ghi riêng |
 | 5 Selenium (yêu cầu mới 17/11/2026) | Java 17, Maven, TestNG, POM, smoke, reports | Suite độc lập, có failure evidence và cleanup | Local Edge 5/5 ×2, Chromium 5/5; xem stage-5-selenium.md; GitHub CI pending |
 | 6 Business E2E (yêu cầu mới) | UI checkout, API/MongoDB readback, regression, bugs | Critical flows có kết quả nghiệp vụ lưu trữ và isolation | Xem stage-6-business-e2e.md; Playwright render/visual vẫn là backlog |
-| 7 Bug management | Repro, priority, evidence, retest | Đóng bug có retest | Baseline findings đã ghi; chưa retest fix |
+| 7 Playwright 3D (yêu cầu mới) | Real viewer/state, approved baselines, pixel diffs/traces, reliability | Sai 3D tái hiện qua oracle thực | Xem stage-7-playwright-3d.md; CI chờ run thật |
 | 8 CI | Checks + smoke, isolated DB, always artifacts | Run thật từ commit sạch | Audit YAML đã có; chưa có pipeline mới |
 | 9 Portfolio | Coverage/results/bugs/limits/CV | Người khác chạy được smoke | Chưa đạt |
 
@@ -107,3 +107,9 @@ cho kiến trúc, smoke evidence và giới hạn; không coi QA foundation ho�
 Giai đoạn 6 theo yêu cầu mới là nghiệp vụ E2E toàn hệ thống. Ma trận chức năng thật,
 17 cases mới và giới hạn 3D/sorting/payment nằm trong [stage-6-business-e2e.md](stage-6-business-e2e.md).
 Kế hoạch Playwright visual/3D vẫn cần thực hiện, chưa coi asset/data assertions là render coverage.
+
+## Cập nhật giai đoạn 7
+
+Playwright hiện có đã được mở rộng cho 3D thay vì tạo framework trùng lặp. Baseline
+front/left được người dùng duyệt ngày17/11/2026. Bug reports và các giới hạn render/GPU
+được ghi tại [stage-7-playwright-3d.md](stage-7-playwright-3d.md); bug management tiếp tục xuyên suốt các giai đoạn.

@@ -2,6 +2,10 @@
 
 Hệ thống web thời trang với phòng thử đồ 3D, quản lý sản phẩm/đơn hàng và AI stylist. Frontend React/TypeScript/Three.js kết nối backend Node.js/Express và MongoDB.
 
+## Playwright 3D (giai đoạn 7)
+
+Viewer/WebGL interaction, model state, approved visual baselines và reliability: [Playwright README](tests/README.md), [3D report](qa/docs/stage-7-playwright-3d.md), [bugs/retest](qa/bug-reports/stage7-3d.md).
+
 ## Business E2E (giai đoạn 6)
 
 Selenium regression có 22 lượt chạy, gồm 17 business E2E cases mới. Xem [E2E report và coverage](qa/docs/stage-6-business-e2e.md), [test cases](qa/docs/e2e-test-cases.csv) và [bug reports](qa/bug-reports/stage6-business-e2e.md).

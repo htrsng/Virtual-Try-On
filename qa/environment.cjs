@@ -91,7 +91,7 @@ async function start(config = configuration()) {
     const env = { ...process.env, NODE_ENV: 'test', HOST: config.host, PORT: String(config.apiPort),
       MONGODB_URI: database.uri, JWT_SECRET: jwtSecret,
       GEMINI_API_KEY: '', EMAIL_USER: '', EMAIL_PASS: '', QA_RUN_ID: config.runId,
-      VITE_API_URL: config.apiURL, VITE_API_PROXY_TARGET: config.apiURL };
+      VITE_API_URL: config.apiURL, VITE_API_PROXY_TARGET: config.apiURL, VITE_QA_3D: 'true' };
     child('api', 'server', ['index.js'], env);
     child('ui', 'client', ['node_modules/vite/bin/vite.js', '--mode', 'qa', '--host', config.host, '--port', String(config.uiPort), '--strictPort'], env);
     const matches = async response => { const data = await response.json(); return data.status === 'ready' && data.runId === config.runId; };

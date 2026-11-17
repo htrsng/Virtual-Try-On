@@ -38,6 +38,7 @@ export default function CameraPresets({ activeView, isRotating, onSelectView, on
                 ))}
             </div>
             <div className="vto-camera__divider" />
+            <button className="vto-camera__btn" title="Đặt lại góc nhìn" onClick={() => onSelectView(CAMERA_VIEWS[0])}>↺</button>
             <button
                 className={`vto-camera__btn vto-camera__btn--rotate ${isRotating ? 'active' : ''}`}
                 onClick={onToggleRotate}

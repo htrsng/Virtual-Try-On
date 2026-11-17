@@ -1,5 +1,5 @@
 import { Suspense, useState, useRef, useMemo, useEffect, useCallback, type ReactNode } from 'react';
-import { Canvas, useThree } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows, Html, useProgress, Grid, MeshReflectorMaterial } from '@react-three/drei';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Avatar } from '../../three/controls/avatar/Avatar';
@@ -16,6 +16,9 @@ import TryOnToolbar from './components/TryOnToolbar';
 import SizeComparisonRoom from '../../pages/SizeComparisonRoom';
 
 import './VirtualTryOn.css';
+import ViewerDiagnostics from './ViewerDiagnostics';
+import ViewerBoundary from './ViewerBoundary';
+import { qa3dEnabled } from './qaRender';
 import * as THREE from 'three';
 
 type LocalGarmentSizeSpec = {
@@ -185,28 +188,31 @@ function Loader() {
 
 /* ─── Camera animator (inside Canvas) ─── */
 function CameraAnimator({ targetPosition, targetLookAt }: { targetPosition: [number, number, number]; targetLookAt: [number, number, number] }) {
-    const { camera } = useThree();
     const posRef = useRef(new THREE.Vector3(...targetPosition));
     const lookRef = useRef(new THREE.Vector3(...targetLookAt));
+    const transitioning = useRef(true);
 
     useEffect(() => {
         posRef.current.set(...targetPosition);
         lookRef.current.set(...targetLookAt);
+        transitioning.current = true;
     }, [targetPosition, targetLookAt]);
 
-    useEffect(() => {
-        // Smooth lerp via requestAnimationFrame
-        let frameId: number;
-        const animate = () => {
-            camera.position.lerp(posRef.current, 0.08);
-            camera.lookAt(lookRef.current);
-            if (camera.position.distanceTo(posRef.current) > 0.01) {
-                frameId = requestAnimationFrame(animate);
-            }
-        };
-        frameId = requestAnimationFrame(animate);
-        return () => cancelAnimationFrame(frameId);
-    }, [camera, targetPosition, targetLookAt]);
+    useFrame(({ camera, controls }) => {
+        if (!transitioning.current || !controls) return;
+        const orbit = controls as unknown as { enabled: boolean; enableDamping: boolean; target: THREE.Vector3; update: () => void };
+        // OrbitControls updates at priority -1. Pause it while this frame-loop transition owns the camera.
+        orbit.enabled = false;
+        camera.position.lerp(posRef.current, 0.08);
+        camera.lookAt(lookRef.current);
+        if (camera.position.distanceTo(posRef.current) <= 0.01) {
+            const damping = orbit.enableDamping;
+            orbit.enableDamping = false; orbit.update(); // drain pending angular/zoom deltas
+            camera.position.copy(posRef.current); orbit.target.copy(lookRef.current); orbit.update();
+            orbit.enableDamping = damping; orbit.enabled = true;
+            transitioning.current = false;
+        }
+    });
 
     return null;
 }
@@ -685,7 +691,8 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                     if (firstSizeConfig && firstSizeConfig.colors) {
                         defaultColor = Object.keys(firstSizeConfig.colors)[0] || '';
                     } else if (model3D.colors) {
-                        defaultColor = Object.keys(model3D.colors)[0] || '';
+                        defaultColor = Array.isArray(model3D.colors)
+                            ? (model3D.colors[0]?.hex || '') : (Object.keys(model3D.colors)[0] || '');
                     }
                 }
                 next[key] = prev[key] || defaultColor;
@@ -1133,8 +1140,8 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
     // Handlers
     const handleCameraView = useCallback((view: CameraView) => {
         setCameraView(view.id);
-        setCameraPos(view.position);
-        setCameraTarget(view.target);
+        setCameraPos([...view.position]);
+        setCameraTarget([...view.target]);
         if (isRotating) setIsRotating(false);
     }, [isRotating]);
 
@@ -1747,12 +1754,13 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                     <div className="vfit-canvas-shadow" />
                     <div className="vfit-canvas-rim" />
                     <div className="vfit-canvas-vignette" />
-                    <div style={{ flex: 1, position: 'relative', width: '100%', height: '100%', overflow: 'hidden', zIndex: 4 }}>
+                    <div data-testid="viewer-render" style={{ flex: 1, position: 'relative', width: '100%', height: '100%', overflow: 'hidden', zIndex: 4 }}>
+                        <ViewerBoundary>
                         <Canvas
                         ref={canvasRef}
                         eventSource={canvasEventSource}
                         frameloop={isWebglContextLost ? 'never' : 'always'}
-                        dpr={[1, 1.5]}
+                        dpr={qa3dEnabled ? 1 : [1, 1.5]}
                         camera={{ position: [0, 0.8, 5.2], fov: 32 }}
                         shadows
                         gl={{ antialias: true, preserveDrawingBuffer: true, powerPreference: 'high-performance' }}
@@ -1792,11 +1800,12 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                         <hemisphereLight args={[lightConfig.hemiSky, lightConfig.hemiGround, 0.35]} />
 
                         <CameraAnimator targetPosition={cameraPos} targetLookAt={cameraTarget} />
+                        {qa3dEnabled && <ViewerDiagnostics target={cameraTarget} />}
                         
 
 
                         <Suspense fallback={<Loader />}>
-                            <Environment preset="city" />
+                            <Environment files="/environments/potsdamer_platz_1k.hdr" />
                             <group position={[0, -1.15, 0]}>
                                 <Avatar body={currentBodyData} pose={'Idle'} skinColor="#F2C9AC" onSceneReady={setAvatarScene} />
 
@@ -1855,6 +1864,7 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                         </Suspense>
 
                         <OrbitControls
+                            makeDefault
                             target={cameraTarget}
                             autoRotate={isRotating}
                             autoRotateSpeed={2}
@@ -1865,6 +1875,7 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                             maxDistance={5.5}
                         />
                     </Canvas>
+                        </ViewerBoundary>
 
 
 
@@ -2035,6 +2046,7 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                                     {availableSizes.map(sz => (
                                         <button
                                             key={sz}
+                                            data-testid={`viewer-size-${sz}`}
                                             onClick={() => handleItemSizeChange(sz)}
                                             style={{
                                                 padding: '10px',

@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "playwright test",
+    "test:3d": "playwright test --project=3d-chromium",
+    "typecheck": "tsc --noEmit",
     "env:start": "node ../scripts/qa-environment.cjs start",
     "env:reset": "node ../scripts/qa-environment.cjs reset",
     "env:clear": "node ../scripts/qa-environment.cjs clear",
@@ -16,6 +18,8 @@
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
-    "@playwright/test": "^1.60.0"
+    "@playwright/test": "1.60.0",
+    "@types/node": "22.15.0",
+    "typescript": "5.9.3"
   }
 }

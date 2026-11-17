@@ -619,6 +619,7 @@ function App() {
 
     return (
       <VirtualTryOn
+        key={selectedItems?.map(item => `${item.id}:${item.size || ''}`).join('|') || String(product?.id)}
         product={product}
         outfitItems={outfitItems}
         onAddToCart={onAddToCart}
