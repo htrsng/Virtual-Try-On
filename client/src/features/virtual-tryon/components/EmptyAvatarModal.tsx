@@ -28,4 +28,3 @@ export default function EmptyAvatarModal({ isOpen, onCreateAvatar, onSkip }: Emp
         </div>
     );
 }
-

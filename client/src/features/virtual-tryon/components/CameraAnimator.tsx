@@ -31,4 +31,3 @@ export default function CameraAnimator({ targetPosition, targetLookAt }: { targe
 
     return null;
 }
-

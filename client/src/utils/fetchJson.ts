@@ -41,4 +41,3 @@ export const fetchJson = async <T,>(path: string): Promise<T> => {
     ? lastError
     : new Error(`Failed to fetch ${path}`);
 };
-

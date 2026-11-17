@@ -6,10 +6,10 @@
     "branch": "qa/stage-9-portfolio",
     "hashConvention": "SHA256 UTF8/binary bytes with CRLF normalized to LF; runtime assets excluded",
     "sourceHashes": {
-      "client/src/features/virtual-tryon/components/CameraAnimator.tsx": "93375d2005f9c5aee4ae1776c4b93acd434b976e4e90dfb743cff27a09adb576",
-      "client/src/features/virtual-tryon/components/EmptyAvatarModal.tsx": "6c91f72326d9932507ada63fcd1690dbf4618eb3310cef4a302a93a9a1e1ccef",
+      "client/src/features/virtual-tryon/components/CameraAnimator.tsx": "5778fcbc2adab73dc8bc4185cf264409bf27de9e0bf16cd0947dea6fc97e9acd",
+      "client/src/features/virtual-tryon/components/EmptyAvatarModal.tsx": "470d9c8f652491635c0110b5c5a2e28841aa8bff9e5a6717e11b37f2debfd167",
       "client/src/utils/fetchJson.test.ts": "6d24c60c52a5fd060dd7321827b0dc2aadb2382e70b6399cbdd722a3c397e10c",
-      "client/src/utils/fetchJson.ts": "cf6bab2fec5e1c7afe25b19bb125fbdcc1bd994be66876b8a811bc0cfc141550",
+      "client/src/utils/fetchJson.ts": "ff32d6b5cbd1506e4b505e47579b150e25175f4bcdd03156302aaa86921a869d",
       "server/controllers/addresses.controller.js": "42733ab188f9e35ccb236a09f6fa0fd9533008b99f3ebe2055b04048925647e6",
       "server/routes/addresses.routes.js": "014558cdde978ebc40dd6028e05a586a2e35b468d91dde0f580614fa82fa8595",
       "server/tests/addresses.test.js": "865e8a0d0fca0c2801e30d9b082433e5e3cd31baa3d8ed37dd8a52b8accc2697",
