@@ -3,6 +3,7 @@ const request = require('supertest');
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 const app = require('../index');
+const { actor } = require('./helpers');
 const { ProductModel, UserModel, OrderModel } = require('../models');
 
 describe('Atomic counters and compare-and-swap on MongoDB', () => {
@@ -21,10 +22,11 @@ describe('Atomic counters and compare-and-swap on MongoDB', () => {
     const data = kind==='user' ? {email:'cas@test.com',password:'hash',fullName:'initial'} :
       kind==='order' ? {userId:new mongoose.Types.ObjectId(),products:[],totalAmount:0,shippingInfo:{}} : {id:98765,name:'initial',price:200000,stock:10};
     const doc = await Model.create(data);
+    const admin = await actor('admin');
     const field = kind==='product' ? 'stock' : kind==='user' ? 'fullName' : 'status';
-    const values = kind==='product' ? [11,12] : ['first','second'];
+    const values = kind==='product' ? [11,12] : kind==='order' ? ['Đang giao','Đã hủy'] : ['first','second'];
     const url = kind==='product' ? `/api/products/${doc.id}` : kind==='user' ? `/api/users/${doc._id}` : `/api/orders/${doc._id}`;
-    const outcomes = await Promise.all(values.map(value => request(app).put(url).send({[field]:value,__v:0})));
+    const outcomes = await Promise.all(values.map(value => request(app).put(url).auth(admin.token, { type: 'bearer' }).send({[field]:value,__v:0})));
     expect(outcomes.map(r=>r.status).sort()).toEqual([200,409]);
     const saved=await Model.findById(doc._id);
     expect(saved.__v).toBe(1);

@@ -1,10 +1,15 @@
 module.exports = {
   testEnvironment: "node",
   setupFilesAfterEnv: ["<rootDir>/tests/setup.js"],
-  testMatch: ["<rootDir>/tests/**/*.test.js"],
+  testMatch: ["**/tests/**/*.test.js"],
+  globalSetup: '<rootDir>/tests/global-setup.js',
   verbose: true,
-  forceExit: true,
+  maxWorkers: 2,
   clearMocks: true,
   resetMocks: true,
   restoreMocks: true,
+  coverageProvider: 'v8',
+  collectCoverageFrom: ['*.js', 'config/**/*.js', 'routes/**/*.js', 'controllers/**/*.js', 'test-support/**/*.js'],
+  coverageDirectory: '../.runtime/coverage/backend',
+  coverageReporters: ['text-summary', 'json-summary', 'html'],
 };

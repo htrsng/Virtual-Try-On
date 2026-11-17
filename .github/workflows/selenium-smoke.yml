@@ -1,0 +1,15 @@
+name: Selenium Smoke
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: selenium-smoke-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  smoke:
+    uses: ./.github/workflows/_qa-job.yml
+    with:
+      suite: selenium-smoke

@@ -1,0 +1,47 @@
+{
+  "scope": "all",
+  "runs": [
+    {
+      "name": "backend-1",
+      "code": 0,
+      "durationMs": 74844,
+      "passed": 130,
+      "failed": 0,
+      "suites": 13
+    },
+    {
+      "name": "backend-2",
+      "code": 0,
+      "durationMs": 70568,
+      "passed": 130,
+      "failed": 0,
+      "suites": 13
+    },
+    {
+      "name": "browser-1",
+      "code": 0,
+      "durationMs": 27268,
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "runId": "repeat_c7bc75cb2a1944b49bb23cc6fc111c3a",
+      "database": "vfitai_test_repeat_c7bc75cb2a1944b49bb23cc6fc111c3a_48f6cf9f",
+      "cleanup": "stopped",
+      "portsReleased": true,
+      "resets": 7
+    },
+    {
+      "name": "browser-2",
+      "code": 0,
+      "durationMs": 27956,
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "runId": "repeat_029f7770b5444a9bb73ca16afe773e1b",
+      "database": "vfitai_test_repeat_029f7770b5444a9bb73ca16afe773e1b_23823944",
+      "cleanup": "stopped",
+      "portsReleased": true,
+      "resets": 7
+    }
+  ]
+}

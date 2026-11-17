@@ -1,0 +1,68 @@
+{
+  "date": "2026-11-17",
+  "timezone": "Asia/Saigon",
+  "inputCommit": "1914105cecf1635cfb238476e7bc8bfc79b18a50",
+  "branch": "qa/stage-4-existing-test-audit",
+  "environment": {
+    "os": "Windows 11 x64",
+    "node": "22.15.0",
+    "npm": "11.3.0",
+    "python": "3.13.2",
+    "mongo": "8.2.6",
+    "vitest": "4.1.8",
+    "playwright": "1.60.0"
+  },
+  "frontendBefore": {
+    "passed": 16,
+    "collectionFailedFiles": [
+      "VirtualTryOn.test.tsx"
+    ]
+  },
+  "frontendAfter": {
+    "passed": 21,
+    "failed": 0,
+    "files": 4
+  },
+  "backendAfter": {
+    "passed": 128,
+    "failed": 0,
+    "files": 13,
+    "duplicatesRemoved": 2
+  },
+  "componentSubset": {
+    "passed": 14,
+    "overlapsFullFrontend": true
+  },
+  "nativeHelperUnits": {
+    "passed": 14
+  },
+  "archivedReporting": {
+    "passed": 9
+  },
+  "archivedFuzzTools": {
+    "passed": 55
+  },
+  "archivedQualitySchema": {
+    "passed": 4
+  },
+  "archivedStubAcceptanceSmoke": {
+    "passed": 4,
+    "environment": "node_harness_stub"
+  },
+  "typecheck": {
+    "exit": 2,
+    "diagnostics": 109
+  },
+  "lint": {
+    "exit": 1,
+    "errors": 208,
+    "warnings": 14
+  },
+  "poisonEnvironmentSubset": {
+    "passed": 10,
+    "overlapsBackend": true,
+    "externalDevelopmentDatabaseUsed": false
+  },
+  "candidateGitHubCI": "NOT_RUN",
+  "historicalJobLogsRead": 6
+}

@@ -1,0 +1,1301 @@
+{
+  "date": "2026-11-17",
+  "baseCommit": "1ad8092e86108799208bab13225205a63a24c0ad",
+  "scope": {
+    "oldCases": 6,
+    "new3dFunctionalCases": 6,
+    "newVisualCases": 1,
+    "visualViews": 2,
+    "diagnosticCase": 1,
+    "defaultTotal": 12,
+    "withVisualTotal": 13
+  },
+  "baselineApproval": {
+    "status": "approved-by-user",
+    "date": "2026-11-17",
+    "response": "Duyệt hai baseline hiện tại"
+  },
+  "runs": [
+    {
+      "name": "wrong-size-before-fix",
+      "stats": {
+        "startTime": "2026-11-17T09:29:06.588Z",
+        "duration": 72834.54400000001,
+        "expected": 0,
+        "skipped": 0,
+        "unexpected": 1,
+        "flaky": 0
+      },
+      "reportSha256": "7a7c880049b63d8564d04508cdba167cfef0deab27f5dcd9a5858224abf3f843",
+      "detailScope": "historical failures only; passing totals retained in stats",
+      "tests": [
+        {
+          "title": "L1/L2 real GLBs render and size selection replaces geometry",
+          "project": "3d-chromium",
+          "status": "failed",
+          "durationMs": 67607,
+          "scene": {
+            "frozen": true,
+            "assets": [
+              {
+                "role": "avatar",
+                "url": "/assets/models/avatar_morph.glb",
+                "meshes": 3,
+                "vertices": 4705,
+                "bounds": [
+                  -0.5791,
+                  -1.1481,
+                  -0.1019,
+                  0.5759,
+                  0.6291,
+                  0.1487
+                ]
+              },
+              {
+                "role": "garment",
+                "url": "/models/Ao_Thun_sizeS.glb",
+                "meshes": 1,
+                "vertices": 821,
+                "bounds": [
+                  -0.3037,
+                  -0.12,
+                  -0.0807,
+                  0.3037,
+                  0.3556,
+                  0.1756
+                ]
+              }
+            ],
+            "camera": {
+              "position": [
+                0,
+                0.8000000000000005,
+                5.2
+              ],
+              "quaternion": [
+                -0.04791122467501182,
+                0,
+                0,
+                0.9988515978613342
+              ],
+              "distance": 5.223983154643591
+            },
+            "renderer": {
+              "calls": 6,
+              "triangles": 9182,
+              "geometries": 17,
+              "textures": 15,
+              "contextLost": false,
+              "width": 1048,
+              "height": 952,
+              "vendor": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+            },
+            "loading": false,
+            "loadingErrors": []
+          },
+          "diagnostics": {
+            "pageErrorCount": 0,
+            "renderErrorCount": 0,
+            "assetResponses": [
+              {
+                "path": "/assets/models/avatar_morph.glb",
+                "status": 200
+              },
+              {
+                "path": "/environments/potsdamer_platz_1k.hdr",
+                "status": 200
+              },
+              {
+                "path": "/models/Ao_Thun_sizeS.glb",
+                "status": 200
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "camera-target-and-resource-findings",
+      "stats": {
+        "startTime": "2026-11-17T12:39:28.947Z",
+        "duration": 278521.345,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 2,
+        "flaky": 0
+      },
+      "reportSha256": "442427a6159eebdae263dddaa2fb38862dc2fb8523db01248507516dec97f357",
+      "detailScope": "historical failures only; passing totals retained in stats",
+      "tests": [
+        {
+          "title": "L1/L2 camera preset, wheel zoom, drag rotate and reset affect actual camera",
+          "project": "3d-chromium",
+          "status": "timedOut",
+          "durationMs": 101444,
+          "scene": {
+            "frozen": true,
+            "assets": [
+              {
+                "role": "avatar",
+                "url": "/assets/models/avatar_morph.glb",
+                "meshes": 3,
+                "vertices": 4705,
+                "bounds": [
+                  -0.5791,
+                  -1.1481,
+                  -0.1019,
+                  0.5759,
+                  0.6291,
+                  0.1487
+                ]
+              },
+              {
+                "role": "garment",
+                "url": "/models/Ao_Thun_sizeM.glb",
+                "meshes": 1,
+                "vertices": 934,
+                "bounds": [
+                  -0.326,
+                  -0.2208,
+                  -0.083,
+                  0.3236,
+                  0.3567,
+                  0.1741
+                ]
+              }
+            ],
+            "camera": {
+              "position": [
+                5.2,
+                0.8000000000000005,
+                3.1840816777831187e-16
+              ],
+              "quaternion": [
+                -0.033878351862653096,
+                0.7062947382467678,
+                0.033878351862653096,
+                0.7062947382467678
+              ],
+              "distance": 5.223983154643591
+            },
+            "renderer": {
+              "calls": 6,
+              "triangles": 9404,
+              "geometries": 17,
+              "textures": 15,
+              "contextLost": false,
+              "width": 1048,
+              "height": 952,
+              "vendor": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+            },
+            "loading": false,
+            "loadingErrors": []
+          },
+          "diagnostics": {
+            "pageErrorCount": 0,
+            "renderErrorCount": 0,
+            "assetResponses": [
+              {
+                "path": "/assets/models/avatar_morph.glb",
+                "status": 200
+              },
+              {
+                "path": "/environments/potsdamer_platz_1k.hdr",
+                "status": 200
+              },
+              {
+                "path": "/models/Ao_Thun_sizeM.glb",
+                "status": 200
+              }
+            ]
+          }
+        },
+        {
+          "title": "L4 repeated size transitions settle with bounded renderer resources",
+          "project": "3d-chromium",
+          "status": "failed",
+          "durationMs": 45445,
+          "scene": {
+            "frozen": true,
+            "assets": [
+              {
+                "role": "avatar",
+                "url": "/assets/models/avatar_morph.glb",
+                "meshes": 3,
+                "vertices": 4705,
+                "bounds": [
+                  -0.5791,
+                  -1.1481,
+                  -0.1019,
+                  0.5759,
+                  0.6291,
+                  0.1487
+                ]
+              },
+              {
+                "role": "garment",
+                "url": "/models/Ao_Thun_sizeM.glb",
+                "meshes": 1,
+                "vertices": 934,
+                "bounds": [
+                  -0.326,
+                  -0.2208,
+                  -0.083,
+                  0.3236,
+                  0.3567,
+                  0.1741
+                ]
+              }
+            ],
+            "camera": {
+              "position": [
+                0,
+                0.8000000000000005,
+                5.2
+              ],
+              "quaternion": [
+                -0.04791122467501182,
+                0,
+                0,
+                0.9988515978613342
+              ],
+              "distance": 5.223983154643591
+            },
+            "renderer": {
+              "calls": 6,
+              "triangles": 9404,
+              "geometries": 19,
+              "textures": 27,
+              "contextLost": false,
+              "width": 1048,
+              "height": 952,
+              "vendor": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+            },
+            "loading": false,
+            "loadingErrors": []
+          },
+          "diagnostics": {
+            "pageErrorCount": 0,
+            "renderErrorCount": 0,
+            "assetResponses": [
+              {
+                "path": "/assets/models/avatar_morph.glb",
+                "status": 200
+              },
+              {
+                "path": "/environments/potsdamer_platz_1k.hdr",
+                "status": 200
+              },
+              {
+                "path": "/models/Ao_Thun_sizeM.glb",
+                "status": 200
+              },
+              {
+                "path": "/models/Ao_Thun_sizeS.glb",
+                "status": 200
+              },
+              {
+                "path": "/models/Ao_Thun_sizeL.glb",
+                "status": 200
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "six-functional-retest",
+      "stats": {
+        "startTime": "2026-11-17T12:45:29.323Z",
+        "duration": 224057.933,
+        "expected": 6,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "reportSha256": "fc6f7a48c54bfaac927a0a2fb6acb05faceb0c35253c93ff7261e6226b64e788",
+      "detailScope": "historical failures only; passing totals retained in stats",
+      "tests": []
+    },
+    {
+      "name": "approved-baseline-repeat",
+      "stats": {
+        "startTime": "2026-11-17T12:56:21.394Z",
+        "duration": 51641.529,
+        "expected": 2,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "reportSha256": "7d172570aa50b15dd3982342a9e58d1ba6b1ac7d53d5a6e8f7196fa082bec11f",
+      "detailScope": "historical failures only; passing totals retained in stats",
+      "tests": []
+    },
+    {
+      "name": "camera-race-found-in-regression",
+      "stats": {
+        "startTime": "2026-11-17T13:01:05.321Z",
+        "duration": 305769.377,
+        "expected": 12,
+        "skipped": 0,
+        "unexpected": 1,
+        "flaky": 0
+      },
+      "reportSha256": "1e76cb2a8d74958a52ee883e4635334222bf1057197bc5cdc67c416ae576ae40",
+      "detailScope": "historical failures only; passing totals retained in stats",
+      "tests": [
+        {
+          "title": "L1/L2 camera preset, wheel zoom, drag rotate and reset affect actual camera",
+          "project": "3d-chromium",
+          "status": "failed",
+          "durationMs": 46570,
+          "scene": {
+            "frozen": true,
+            "assets": [
+              {
+                "role": "avatar",
+                "url": "/assets/models/avatar_morph.glb",
+                "meshes": 3,
+                "vertices": 4705,
+                "bounds": [
+                  -0.614,
+                  -1.1481,
+                  -0.0874,
+                  0.614,
+                  0.6324,
+                  0.1487
+                ]
+              },
+              {
+                "role": "garment",
+                "url": "/models/Ao_Thun_sizeM.glb",
+                "meshes": 1,
+                "vertices": 934,
+                "bounds": [
+                  -0.326,
+                  -0.2208,
+                  -0.083,
+                  0.3236,
+                  0.3567,
+                  0.1741
+                ]
+              }
+            ],
+            "camera": {
+              "position": [
+                5.2,
+                0.8000000000000005,
+                3.1840816777831187e-16
+              ],
+              "quaternion": [
+                -0.033878351862653096,
+                0.7062947382467678,
+                0.033878351862653096,
+                0.7062947382467678
+              ],
+              "distance": 5.223983154643591
+            },
+            "renderer": {
+              "calls": 6,
+              "triangles": 9404,
+              "geometries": 17,
+              "textures": 15,
+              "contextLost": false,
+              "width": 1048,
+              "height": 952,
+              "vendor": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+            },
+            "loading": false,
+            "loadingErrors": []
+          },
+          "diagnostics": {
+            "pageErrorCount": 0,
+            "renderErrorCount": 0,
+            "assetResponses": [
+              {
+                "path": "/assets/models/avatar_morph.glb",
+                "status": 200
+              },
+              {
+                "path": "/environments/potsdamer_platz_1k.hdr",
+                "status": 200
+              },
+              {
+                "path": "/models/Ao_Thun_sizeM.glb",
+                "status": 200
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "camera-repeat-after-coordination-fix",
+      "stats": {
+        "startTime": "2026-11-17T13:08:27.378Z",
+        "duration": 142384.157,
+        "expected": 3,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "reportSha256": "1ef430e152772ea2e4d1de8b10e4021d27340bc594872b0fc1e03af7d1957aa6",
+      "detailScope": "historical failures only; passing totals retained in stats",
+      "tests": []
+    },
+    {
+      "name": "final-regression",
+      "stats": {
+        "startTime": "2026-11-17T13:11:44.351Z",
+        "duration": 205044.687,
+        "expected": 13,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "reportSha256": "c9ddeea723764ec89d285b9a03b55c068715837174cc54d0e280ffae3b37ee54",
+      "detailScope": "all final cases",
+      "tests": [
+        {
+          "title": "seeded customer: Home -> Product -> Cart -> Checkout",
+          "project": "chromium",
+          "status": "passed",
+          "durationMs": 13721
+        },
+        {
+          "title": "managed API and UI proxy share readiness and fresh fixtures",
+          "project": "chromium",
+          "status": "passed",
+          "durationMs": 437
+        },
+        {
+          "title": "owner fixtures authenticate and persist a server-priced checkout",
+          "project": "chromium",
+          "status": "passed",
+          "durationMs": 576
+        },
+        {
+          "title": "3D fixture assets are real GLB resources and owner closet has a model",
+          "project": "chromium",
+          "status": "passed",
+          "durationMs": 617
+        },
+        {
+          "title": "has title and loads home page",
+          "project": "chromium",
+          "status": "passed",
+          "durationMs": 5307
+        },
+        {
+          "title": "can open seeded product from home catalog",
+          "project": "chromium",
+          "status": "passed",
+          "durationMs": 5774
+        },
+        {
+          "title": "L1/L2 real GLBs render and size selection replaces geometry",
+          "project": "3d-chromium",
+          "status": "passed",
+          "durationMs": 33434,
+          "scene": {
+            "frozen": true,
+            "assets": [
+              {
+                "role": "avatar",
+                "url": "/assets/models/avatar_morph.glb",
+                "meshes": 3,
+                "vertices": 4705,
+                "bounds": [
+                  -0.5791,
+                  -1.1481,
+                  -0.1019,
+                  0.5759,
+                  0.6291,
+                  0.1487
+                ]
+              },
+              {
+                "role": "garment",
+                "url": "/models/Ao_Thun_sizeS.glb",
+                "meshes": 1,
+                "vertices": 821,
+                "bounds": [
+                  -0.3037,
+                  -0.12,
+                  -0.0807,
+                  0.3037,
+                  0.3556,
+                  0.1756
+                ]
+              }
+            ],
+            "camera": {
+              "position": [
+                0,
+                0.8000000000000005,
+                5.2
+              ],
+              "quaternion": [
+                -0.04791122467501182,
+                0,
+                0,
+                0.9988515978613342
+              ],
+              "distance": 5.223983154643591
+            },
+            "renderer": {
+              "calls": 6,
+              "triangles": 9182,
+              "geometries": 19,
+              "textures": 17,
+              "contextLost": false,
+              "width": 1048,
+              "height": 952,
+              "vendor": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+            },
+            "loading": false,
+            "loadingErrors": []
+          },
+          "diagnostics": {
+            "pageErrorCount": 0,
+            "renderErrorCount": 0,
+            "assetResponses": [
+              {
+                "path": "/assets/models/avatar_morph.glb",
+                "status": 200
+              },
+              {
+                "path": "/environments/potsdamer_platz_1k.hdr",
+                "status": 200
+              },
+              {
+                "path": "/models/Ao_Thun_sizeM.glb",
+                "status": 200
+              },
+              {
+                "path": "/models/Ao_Thun_sizeL.glb",
+                "status": 200
+              },
+              {
+                "path": "/models/Ao_Thun_sizeS.glb",
+                "status": 200
+              }
+            ]
+          }
+        },
+        {
+          "title": "L1/L2 camera preset, wheel zoom, drag rotate and reset affect actual camera",
+          "project": "3d-chromium",
+          "status": "passed",
+          "durationMs": 56334,
+          "scene": {
+            "frozen": true,
+            "assets": [
+              {
+                "role": "avatar",
+                "url": "/assets/models/avatar_morph.glb",
+                "meshes": 3,
+                "vertices": 4705,
+                "bounds": [
+                  -0.5791,
+                  -1.1481,
+                  -0.1019,
+                  0.5759,
+                  0.6291,
+                  0.1487
+                ]
+              },
+              {
+                "role": "garment",
+                "url": "/models/Ao_Thun_sizeM.glb",
+                "meshes": 1,
+                "vertices": 934,
+                "bounds": [
+                  -0.326,
+                  -0.2208,
+                  -0.083,
+                  0.3236,
+                  0.3567,
+                  0.1741
+                ]
+              }
+            ],
+            "camera": {
+              "position": [
+                0,
+                0.8000000000000005,
+                5.2
+              ],
+              "quaternion": [
+                -0.04791122467501182,
+                0,
+                0,
+                0.9988515978613342
+              ],
+              "distance": 5.223983154643591
+            },
+            "renderer": {
+              "calls": 6,
+              "triangles": 9404,
+              "geometries": 17,
+              "textures": 15,
+              "contextLost": false,
+              "width": 1048,
+              "height": 952,
+              "vendor": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+            },
+            "loading": false,
+            "loadingErrors": []
+          },
+          "diagnostics": {
+            "pageErrorCount": 0,
+            "renderErrorCount": 0,
+            "assetResponses": [
+              {
+                "path": "/assets/models/avatar_morph.glb",
+                "status": 200
+              },
+              {
+                "path": "/environments/potsdamer_platz_1k.hdr",
+                "status": 200
+              },
+              {
+                "path": "/models/Ao_Thun_sizeM.glb",
+                "status": 200
+              }
+            ]
+          }
+        },
+        {
+          "title": "L4 live animation and auto-rotate advance without context loss",
+          "project": "3d-chromium",
+          "status": "passed",
+          "durationMs": 26830,
+          "scene": {
+            "frozen": false,
+            "assets": [
+              {
+                "role": "avatar",
+                "url": "/assets/models/avatar_morph.glb",
+                "meshes": 3,
+                "vertices": 4705,
+                "bounds": [
+                  -0.614,
+                  -1.1481,
+                  -0.0874,
+                  0.614,
+                  0.6324,
+                  0.1487
+                ]
+              },
+              {
+                "role": "garment",
+                "url": "/models/Ao_Thun_sizeM.glb",
+                "meshes": 1,
+                "vertices": 934,
+                "bounds": [
+                  -0.3266,
+                  -0.221,
+                  -0.083,
+                  0.3257,
+                  0.3583,
+                  0.1741
+                ]
+              }
+            ],
+            "camera": {
+              "position": [
+                -0.5721562974178752,
+                0.8000000000000005,
+                5.168426953273605
+              ],
+              "quaternion": [
+                -0.04783844327241331,
+                -0.05503545295903841,
+                -0.002639847558393343,
+                0.9973342536320177
+              ],
+              "distance": 5.223983154643592
+            },
+            "renderer": {
+              "calls": 6,
+              "triangles": 9404,
+              "geometries": 17,
+              "textures": 15,
+              "contextLost": false,
+              "width": 1048,
+              "height": 952,
+              "vendor": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+            },
+            "loading": false,
+            "loadingErrors": []
+          },
+          "diagnostics": {
+            "pageErrorCount": 0,
+            "renderErrorCount": 0,
+            "assetResponses": [
+              {
+                "path": "/assets/models/avatar_morph.glb",
+                "status": 200
+              },
+              {
+                "path": "/environments/potsdamer_platz_1k.hdr",
+                "status": 200
+              },
+              {
+                "path": "/models/Ao_Thun_sizeM.glb",
+                "status": 200
+              }
+            ]
+          }
+        },
+        {
+          "title": "L4 delayed avatar exposes loading and completes within a cold-load budget",
+          "project": "3d-chromium",
+          "status": "passed",
+          "durationMs": 7047,
+          "cold-load-budget": {
+            "loadMs": 4054,
+            "budgetMs": 60000,
+            "includesControlledDelay": true
+          },
+          "scene": {
+            "frozen": true,
+            "assets": [
+              {
+                "role": "avatar",
+                "url": "/assets/models/avatar_morph.glb",
+                "meshes": 3,
+                "vertices": 4705,
+                "bounds": [
+                  -0.5791,
+                  -1.1481,
+                  -0.1019,
+                  0.5759,
+                  0.6291,
+                  0.1487
+                ]
+              },
+              {
+                "role": "garment",
+                "url": "/models/Ao_Thun_sizeM.glb",
+                "meshes": 1,
+                "vertices": 934,
+                "bounds": [
+                  -0.3249,
+                  -0.2208,
+                  -0.083,
+                  0.3247,
+                  0.3586,
+                  0.1743
+                ]
+              }
+            ],
+            "camera": {
+              "position": [
+                0,
+                0.8000000000000005,
+                5.2
+              ],
+              "quaternion": [
+                -0.04791122467501182,
+                0,
+                0,
+                0.9988515978613342
+              ],
+              "distance": 5.223983154643591
+            },
+            "renderer": {
+              "calls": 7,
+              "triangles": 9416,
+              "geometries": 17,
+              "textures": 15,
+              "contextLost": false,
+              "width": 1048,
+              "height": 952,
+              "vendor": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+            },
+            "loading": false,
+            "loadingErrors": []
+          },
+          "diagnostics": {
+            "pageErrorCount": 0,
+            "renderErrorCount": 0,
+            "assetResponses": [
+              {
+                "path": "/environments/potsdamer_platz_1k.hdr",
+                "status": 200
+              },
+              {
+                "path": "/models/Ao_Thun_sizeM.glb",
+                "status": 200
+              },
+              {
+                "path": "/assets/models/avatar_morph.glb",
+                "status": 200
+              }
+            ]
+          }
+        },
+        {
+          "title": "L4 asset 404 has an explicit error and reload recovers a real model",
+          "project": "3d-chromium",
+          "status": "passed",
+          "durationMs": 13173,
+          "scene": {
+            "frozen": true,
+            "assets": [
+              {
+                "role": "avatar",
+                "url": "/assets/models/avatar_morph.glb",
+                "meshes": 3,
+                "vertices": 4705,
+                "bounds": [
+                  -0.5791,
+                  -1.1481,
+                  -0.1019,
+                  0.5759,
+                  0.6291,
+                  0.1487
+                ]
+              },
+              {
+                "role": "garment",
+                "url": "/models/Ao_Thun_sizeM.glb",
+                "meshes": 1,
+                "vertices": 934,
+                "bounds": [
+                  -0.3249,
+                  -0.2208,
+                  -0.083,
+                  0.3247,
+                  0.3586,
+                  0.1743
+                ]
+              }
+            ],
+            "camera": {
+              "position": [
+                0,
+                0.8000000000000005,
+                5.2
+              ],
+              "quaternion": [
+                -0.04791122467501182,
+                0,
+                0,
+                0.9988515978613342
+              ],
+              "distance": 5.223983154643591
+            },
+            "renderer": {
+              "calls": 6,
+              "triangles": 9404,
+              "geometries": 17,
+              "textures": 16,
+              "contextLost": false,
+              "width": 1048,
+              "height": 952,
+              "vendor": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+            },
+            "loading": false,
+            "loadingErrors": []
+          },
+          "diagnostics": {
+            "pageErrorCount": 1,
+            "renderErrorCount": 1,
+            "assetResponses": [
+              {
+                "path": "/assets/models/avatar_morph.glb",
+                "status": 404
+              },
+              {
+                "path": "/environments/potsdamer_platz_1k.hdr",
+                "status": 200
+              },
+              {
+                "path": "/assets/models/avatar_morph.glb",
+                "status": 200
+              },
+              {
+                "path": "/environments/potsdamer_platz_1k.hdr",
+                "status": 200
+              },
+              {
+                "path": "/models/Ao_Thun_sizeM.glb",
+                "status": 200
+              }
+            ]
+          }
+        },
+        {
+          "title": "L4 repeated size transitions settle with bounded renderer resources",
+          "project": "3d-chromium",
+          "status": "passed",
+          "durationMs": 16548,
+          "gpu-resource-plateau": {
+            "warm": {
+              "calls": 6,
+              "triangles": 9404,
+              "geometries": 19,
+              "textures": 16,
+              "contextLost": false,
+              "width": 1048,
+              "height": 952,
+              "vendor": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+            },
+            "final": {
+              "calls": 6,
+              "triangles": 9404,
+              "geometries": 19,
+              "textures": 17,
+              "contextLost": false,
+              "width": 1048,
+              "height": 952,
+              "vendor": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+            },
+            "maximumAllowedGrowth": 2,
+            "note": "Renderer resource counts, not GPU byte usage or a production FPS benchmark"
+          },
+          "scene": {
+            "frozen": true,
+            "assets": [
+              {
+                "role": "avatar",
+                "url": "/assets/models/avatar_morph.glb",
+                "meshes": 3,
+                "vertices": 4705,
+                "bounds": [
+                  -0.5791,
+                  -1.1481,
+                  -0.1019,
+                  0.5759,
+                  0.6291,
+                  0.1487
+                ]
+              },
+              {
+                "role": "garment",
+                "url": "/models/Ao_Thun_sizeM.glb",
+                "meshes": 1,
+                "vertices": 934,
+                "bounds": [
+                  -0.326,
+                  -0.2208,
+                  -0.083,
+                  0.3236,
+                  0.3567,
+                  0.1741
+                ]
+              }
+            ],
+            "camera": {
+              "position": [
+                0,
+                0.8000000000000005,
+                5.2
+              ],
+              "quaternion": [
+                -0.04791122467501182,
+                0,
+                0,
+                0.9988515978613342
+              ],
+              "distance": 5.223983154643591
+            },
+            "renderer": {
+              "calls": 6,
+              "triangles": 9404,
+              "geometries": 19,
+              "textures": 17,
+              "contextLost": false,
+              "width": 1048,
+              "height": 952,
+              "vendor": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+            },
+            "loading": false,
+            "loadingErrors": []
+          },
+          "diagnostics": {
+            "pageErrorCount": 0,
+            "renderErrorCount": 0,
+            "assetResponses": [
+              {
+                "path": "/assets/models/avatar_morph.glb",
+                "status": 200
+              },
+              {
+                "path": "/environments/potsdamer_platz_1k.hdr",
+                "status": 200
+              },
+              {
+                "path": "/models/Ao_Thun_sizeM.glb",
+                "status": 200
+              },
+              {
+                "path": "/models/Ao_Thun_sizeS.glb",
+                "status": 200
+              },
+              {
+                "path": "/models/Ao_Thun_sizeL.glb",
+                "status": 200
+              }
+            ]
+          }
+        },
+        {
+          "title": "L3 @visual fixed front and side render match reviewed baselines",
+          "project": "3d-visual",
+          "status": "passed",
+          "durationMs": 14564,
+          "scene": {
+            "frozen": true,
+            "assets": [
+              {
+                "role": "avatar",
+                "url": "/assets/models/avatar_morph.glb",
+                "meshes": 3,
+                "vertices": 4705,
+                "bounds": [
+                  -0.5791,
+                  -1.1481,
+                  -0.1019,
+                  0.5759,
+                  0.6291,
+                  0.1487
+                ]
+              },
+              {
+                "role": "garment",
+                "url": "/models/Ao_Thun_sizeM.glb",
+                "meshes": 1,
+                "vertices": 934,
+                "bounds": [
+                  -0.326,
+                  -0.2208,
+                  -0.083,
+                  0.3236,
+                  0.3567,
+                  0.1741
+                ]
+              }
+            ],
+            "camera": {
+              "position": [
+                5.2,
+                0.8000000000000005,
+                3.1840816777831187e-16
+              ],
+              "quaternion": [
+                -0.033878351862653096,
+                0.7062947382467678,
+                0.033878351862653096,
+                0.7062947382467678
+              ],
+              "distance": 5.223983154643591
+            },
+            "renderer": {
+              "calls": 6,
+              "triangles": 9404,
+              "geometries": 17,
+              "textures": 16,
+              "contextLost": false,
+              "width": 1048,
+              "height": 952,
+              "vendor": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+            },
+            "loading": false,
+            "loadingErrors": []
+          },
+          "diagnostics": {
+            "pageErrorCount": 0,
+            "renderErrorCount": 0,
+            "assetResponses": [
+              {
+                "path": "/assets/models/avatar_morph.glb",
+                "status": 200
+              },
+              {
+                "path": "/environments/potsdamer_platz_1k.hdr",
+                "status": 200
+              },
+              {
+                "path": "/models/Ao_Thun_sizeM.glb",
+                "status": 200
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "final-profile-visual-repeat",
+      "stats": {
+        "startTime": "2026-11-17T13:15:58.845Z",
+        "duration": 21764.584000000003,
+        "expected": 1,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "reportSha256": "990411a056b4b15ad92a6bc15642e6a3dc9b195ad05262cdb07275a8a261c967",
+      "detailScope": "historical failures only; passing totals retained in stats",
+      "tests": []
+    }
+  ],
+  "interruptedRun": {
+    "name": "functional1",
+    "status": "interrupted; not counted as Pass"
+  },
+  "faultInjection": {
+    "reportSha256": "f4ec78a452852c8fc74e33b49930c9f726ccedff84a0065ba91beff291cee273",
+    "stats": {
+      "startTime": "2026-11-17T13:17:51.776Z",
+      "duration": 14519.201,
+      "expected": 0,
+      "skipped": 0,
+      "unexpected": 1,
+      "flaky": 0
+    },
+    "summary": {
+      "expectedFault": "HTTP200 shirt URL replaced by valid trousers GLB",
+      "testExit": 1,
+      "oracle": "pixel mismatch confirmed; no update-snapshots",
+      "diff": ".runtime\\qa3d-diagnostic\\test-results\\tryon-3d-L3-visual-diagnos-1c7ca-s-detected-by-visual-oracle-3d-visual\\shirt-m-front-diff.png",
+      "trace": ".runtime\\qa3d-diagnostic\\test-results\\tryon-3d-L3-visual-diagnos-1c7ca-s-detected-by-visual-oracle-3d-visual\\trace.zip",
+      "verdict": "detector verified"
+    },
+    "traceSha256": "53779f552bc179222db622be6db62c41d71b1f6ccddd147cea16465638f27906",
+    "diffSha256": "de062cd97a52b1149b10baeee4f69f28666314e68c825954897e5f8864928491",
+    "differentPixels": 13865,
+    "tests": [
+      {
+        "title": "L3 @visual @diagnostic valid but wrong GLB is detected by visual oracle",
+        "project": "3d-visual",
+        "status": "failed",
+        "durationMs": 10465,
+        "scene": {
+          "frozen": true,
+          "assets": [
+            {
+              "role": "avatar",
+              "url": "/assets/models/avatar_morph.glb",
+              "meshes": 3,
+              "vertices": 4705,
+              "bounds": [
+                -0.5791,
+                -1.1481,
+                -0.1019,
+                0.5759,
+                0.6291,
+                0.1487
+              ]
+            },
+            {
+              "role": "garment",
+              "url": "/models/Ao_Thun_sizeM.glb",
+              "meshes": 1,
+              "vertices": 508,
+              "bounds": [
+                -0.196,
+                -0.4262,
+                -0.0744,
+                0.1961,
+                -0.0172,
+                0.1699
+              ]
+            }
+          ],
+          "camera": {
+            "position": [
+              0,
+              0.8000000000000005,
+              5.2
+            ],
+            "quaternion": [
+              -0.04791122467501182,
+              0,
+              0,
+              0.9988515978613342
+            ],
+            "distance": 5.223983154643591
+          },
+          "renderer": {
+            "calls": 6,
+            "triangles": 8682,
+            "geometries": 17,
+            "textures": 15,
+            "contextLost": false,
+            "width": 1048,
+            "height": 952,
+            "vendor": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+          },
+          "loading": false,
+          "loadingErrors": []
+        },
+        "diagnostics": {
+          "pageErrorCount": 0,
+          "renderErrorCount": 0,
+          "assetResponses": [
+            {
+              "path": "/assets/models/avatar_morph.glb",
+              "status": 200
+            },
+            {
+              "path": "/environments/potsdamer_platz_1k.hdr",
+              "status": 200
+            },
+            {
+              "path": "/models/Ao_Thun_sizeM.glb",
+              "status": 200
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "otherChecks": {
+    "playwrightTypecheck": "Pass (strict isolated tsconfig)",
+    "frontendUnits": {
+      "passed": 25,
+      "files": 5
+    },
+    "frontendTypecheck": {
+      "status": "Fail",
+      "diagnostics": 109
+    },
+    "githubCi": "candidate YAML only; run not verified"
+  },
+  "bugs": {
+    "BUG-3D-01": "fixed; actual M mount and L/S replacement retested",
+    "BUG-3D-02": "fixed; renderer resource plateau retested"
+  },
+  "sourceSha256LF": {
+    ".github/workflows/test.yml": "124f3f9c46d0c512c0bba7aa3d7ab65175d77c69225ac8895c25500bd69fc752",
+    "client/src/App.tsx": "3b9555ed3ee5c840a79c2ed6032735ba28b0c407003913792f0c173b097f9e5a",
+    "client/src/contexts/FittingRoomContext.tsx": "4b3506f361753c8e025a79ebf52b7bf469e68d99995ee652417d1da7bc07c64d",
+    "client/src/features/virtual-tryon/GarmentModel.tsx": "c0a360315cf3f4a82b8f8561d09be98b4267109096af374c48e4d2ea3331f977",
+    "client/src/features/virtual-tryon/ViewerBoundary.tsx": "3415a20d08fa98f2e550f865ddbc874f326fc16c5ffb5f99fa6918f5457f77c1",
+    "client/src/features/virtual-tryon/ViewerDiagnostics.tsx": "a370b85c33fc70625a1220cd73834c88557842eaaf83a60cd0d7f589187fa504",
+    "client/src/features/virtual-tryon/VirtualTryOn.tsx": "e7deb20022133965b2c8a2b7c18cae7c14cf716cbe6b82fc691a608c713da33e",
+    "client/src/features/virtual-tryon/components/CameraPresets.tsx": "ab68f270653e2279688475d5d9bd8d05c2734e3ef700cac90bd2ffce6f9f0f6e",
+    "client/src/features/virtual-tryon/garmentBinding.ts": "1fa1e1248a74ff2ced9b10e653d20418759e4d2a00c40de36d0e4a5d1f284a96",
+    "client/src/features/virtual-tryon/qaRender.ts": "22200c368e952357e42400bdd555ef57d6d0a2c7d19cc033d43bc26f526045b1",
+    "client/src/three/controls/avatar/Avatar.tsx": "0502787daf338686506fa0ab125c847415e3330793c2a42ed8593195c782c8dd",
+    "client/src/three/controls/avatar/useAvatarMorph.ts": "ae0db2b12569bec1789f895006b6e6b410e17e268e22689752fc3ef2340720c6",
+    "qa/environment.cjs": "bf7a3ca4c52eba3126fbd85ff5396f83f67e2ede6e2be0611c2561df1f0e5f77",
+    "qa/test-data/catalog.json": "da888fc51d327a5dd39cd93e021ecf3c2d221aa21eb8abdfd315dbb3e86d708d",
+    "scripts/qa-3d-diagnostic.cjs": "2399b40b2d7f43b0060581d120f4a6445bec08361ec4b160a20600c2a2f3e396",
+    "tests/e2e/tryon-3d.spec.ts": "cf6ec3fac0f248c6421b277f8ac5e67ab301f33d81c97ba4a0afaa204c9381c5",
+    "tests/package-lock.json": "5ce2dbf4563a7a87f4a4f6e10278d4286af067a80d4e3e20ce0b3cbc9931f68d",
+    "tests/package.json": "3160b22ec6943e9f869f5cd0bf4694d9565014c55ea68253d388e6f31247e918",
+    "tests/playwright.config.ts": "ce4fe32455ba855ce1de070b87c026f530e8a389c1edf473220b893a06c97194",
+    "tests/tsconfig.json": "b03bef7ec35dcd5b444b1aa1c547991c84e8c4dd38d2dc8fcf1882066cb4f868",
+    "tests/viewer-fixtures.ts": "7eebd90a4b7a15f2beb3076da72242b0d2aa763acbf738e49a762f6ecb3bb297",
+    "tests/visual-baselines/render-profile.json": "beffb9377b0fffb2c59fcb81cc0158a1e3e193a3a218d9719e9c280c446618e0"
+  },
+  "sampleSha256": {
+    "wrong-glb-actual.png": "087434c66b26600c923abadb753aa58809e040bfe4edf4cf8b9c06fc62f1f42d",
+    "wrong-glb-diff.png": "de062cd97a52b1149b10baeee4f69f28666314e68c825954897e5f8864928491"
+  }
+}

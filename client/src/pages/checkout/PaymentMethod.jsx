@@ -8,13 +8,9 @@ const BADGES = {
         icon: '💵',
         text: 'Thanh toán khi nhận hàng. Có thể kiểm tra trước khi trả tiền.',
     },
-    Banking: {
+    banking: {
         icon: '🏦',
         text: 'Chuyển khoản ngân hàng. Đơn hàng sẽ được xác nhận sau khi nhận tiền.',
-    },
-    Online: {
-        icon: '💳',
-        text: 'Đơn hàng sẽ được xử lý ngay sau khi thanh toán thành công.',
     },
 };
 
@@ -41,7 +37,7 @@ export default function PaymentMethod({ paymentMethod, setPaymentMethod, t }) {
                             {icon}{' '}
                             {key === 'COD'
                                 ? t('cod_full')
-                                : key === 'Banking'
+                                : key === 'banking'
                                     ? t('banking_full')
                                     : t('online_full')}
                         </span>

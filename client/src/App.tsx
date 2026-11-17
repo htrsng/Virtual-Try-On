@@ -1,4 +1,5 @@
-import { useState, useEffect, lazy, Suspense, useCallback, useRef } from 'react';
+import { fetchJson } from './utils/fetchJson';
+import { useState, useEffect, lazy, Suspense, useCallback, useRef, type ReactNode } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 
 // --- 1. IMPORT CÁC COMPONENT CỦA WEB BÁN HÀNG ---
@@ -54,6 +55,7 @@ const AIOutfitRoom = lazy(() => import('./pages/AIOutfitRoom'));
 
 // --- 3. IMPORT CONTEXTS ---
 import { AuthProvider } from './contexts/AuthContext';
+import RequireAdmin from './components/RequireAdmin';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { WishlistProvider } from './contexts/WishlistContext';
 import { CompareProvider } from './contexts/CompareContext';
@@ -62,50 +64,6 @@ import { LanguageProvider } from './contexts/LanguageContext';
 // --- 4. IMPORT DỮ LIỆU MẪU (INITIAL DATA) ---
 import { initTopSearch, fallbackSuggestions, initCategories, initBanners } from './data/initialData';
 import { initFlashSaleProducts } from './data/flashSaleData';
-
-const API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
-
-const fetchJson = async <T,>(path: string): Promise<T> => {
-  const requestUrls = API_URL ? [`${API_URL}${path}`, path] : [path];
-  let lastError: unknown = null;
-
-  for (const requestUrl of requestUrls) {
-    try {
-      const response = await fetch(requestUrl);
-      const contentType = response.headers.get('content-type') || '';
-
-      if (!response.ok) {
-        const responseText = await response.text();
-        throw new Error(
-          `Request failed (${response.status}) for ${requestUrl}: ${responseText.slice(0, 180)}`,
-        );
-      }
-
-      if (!contentType.includes('application/json')) {
-        const responseText = await response.text();
-
-        if (requestUrl !== path) {
-          lastError = new Error(
-            `Non-JSON response from ${requestUrl}: ${responseText.slice(0, 180)}`,
-          );
-          continue;
-        }
-
-        throw new Error(
-          `Expected JSON from ${requestUrl} but received ${contentType || 'unknown content type'}: ${responseText.slice(0, 180)}`,
-        );
-      }
-
-      return (await response.json()) as T;
-    } catch (error) {
-      lastError = error;
-    }
-  }
-
-  throw lastError instanceof Error
-    ? lastError
-    : new Error(`Failed to fetch ${path}`);
-};
 
 // --- LOADING FALLBACK COMPONENT ---
 const PageLoader = () => (
@@ -174,6 +132,11 @@ const getReliableSoldCount = (rawSold: unknown, seed: number) => {
   // Deterministic fallback so products never show "Đã bán 0".
   return 120 + ((Math.abs(seed) * 137) % 3800);
 };
+
+// Stable component identity keeps routed form state when App updates a toast/cart.
+function RouteShell({ render }: { render: (location: ReturnType<typeof useLocation>) => ReactNode }) {
+  return render(useLocation());
+}
 
 function App() {
   // --- STATE QUẢN LÝ DỮ LIỆU ---
@@ -613,6 +576,7 @@ function App() {
 
     return (
       <VirtualTryOn
+        key={selectedItems?.map(item => `${item.id}:${item.size || ''}`).join('|') || String(product?.id)}
         product={product}
         outfitItems={outfitItems}
         onAddToCart={onAddToCart}
@@ -622,8 +586,7 @@ function App() {
     );
   };
 
-  const AppShell = () => {
-    const location = useLocation();
+  const renderAppShell = (location: ReturnType<typeof useLocation>) => {
     const isTryOnPage = location.pathname === '/try-on' || location.pathname === '/avatar-studio' || location.pathname === '/ai-outfit' || location.pathname === '/size-compare';
     const isAdminRoute = location.pathname.startsWith('/admin');
 
@@ -663,7 +626,7 @@ function App() {
 
             {/* 2. TRANG ADMIN */}
             <Route path="/admin/*" element={
-              <AdminLayout>
+              <RequireAdmin><AdminLayout>
                 <Routes>
                   <Route
                     index
@@ -783,7 +746,7 @@ function App() {
                     element={<AIManagerPage />}
                   />
                 </Routes>
-              </AdminLayout>
+              </AdminLayout></RequireAdmin>
             } />
 
             {/* 3. CÁC TRANG CHỨC NĂNG KHÁC */}
@@ -895,7 +858,7 @@ function App() {
               <LanguageProvider>
                 <BrowserRouter>
                   <ScrollToTop />
-                  <AppShell />
+                  <RouteShell render={renderAppShell} />
                 </BrowserRouter>
               </LanguageProvider>
             </CompareProvider>

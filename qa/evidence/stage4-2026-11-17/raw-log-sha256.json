@@ -1,0 +1,62 @@
+[
+  {
+    "file": "frontend-before.json",
+    "sha256": "4bb5d36d05ceb6e73a9d267cf922e16dff4be9942e64bec55f35b1edefae61f7"
+  },
+  {
+    "file": "frontend-ci.log",
+    "sha256": "a20f16838296fa91f9949da49273ea81a40c83975ede91054194d3d6cade1b98"
+  },
+  {
+    "file": "frontend-coverage.log",
+    "sha256": "599d55e89a60c5e7687f50622d2239249e8e2e4546c87d3c6f2417b1eb0f7ec8"
+  },
+  {
+    "file": "backend.log",
+    "sha256": "00a61edf40c71f6d39cc939383d161254751b8b0bf291184ddee295ae9c5bf40"
+  },
+  {
+    "file": "backend.json",
+    "sha256": "0e9f29daaeccf86e2135228476ec93eb2f08c0f6a8208afa1fa715ec23f8bdc5"
+  },
+  {
+    "file": "build.log",
+    "sha256": "599ecfe8117c43b874a43fa5a92878b200985d50258074d21e28e5055d2a5601"
+  },
+  {
+    "file": "lint.json",
+    "sha256": "ea3dc107db0ea733841696785fb1ea2c0ad227df2a9c470f237a8c629eeb10f0"
+  },
+  {
+    "file": "native-helpers.log",
+    "sha256": "e9a9292c486000ddd319df14a8d4c8ca3b2040c5fb0e15b548b1ca63550fbcbe"
+  },
+  {
+    "file": "component-subset.log",
+    "sha256": "c7862a80bf863935c9c4913297b21ea0eda32e33f08bb4859231217dc868c54c"
+  },
+  {
+    "file": "legacy-reporting.log",
+    "sha256": "e8569f5d877c0b69833af88baa433c2a266480d3d10bb40ab441ef11337d3b18"
+  },
+  {
+    "file": "legacy-fuzz-tools.log",
+    "sha256": "6fd23458d43fc3041dc9e46600a2e46014053ffd4b964357f92f999f5d21dce4"
+  },
+  {
+    "file": "legacy-branch-tools.log",
+    "sha256": "a1e63a809fee2bdc15aedc50c74a624f4237ff5de82f897888ac6c9fb649b5ba"
+  },
+  {
+    "file": "legacy-acceptance.log",
+    "sha256": "df9a72b6948607df8e21c5abb33730c89b8322cf1fa1a2a5c7227e578ae2d818"
+  },
+  {
+    "file": "helper-ci.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "file": "poison-env.log",
+    "sha256": "de35165807b9ef031dd2d4a132d5c9505f4faf5f775e435306f9ce385d8a0db1"
+  }
+]

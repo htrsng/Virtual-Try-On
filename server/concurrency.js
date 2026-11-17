@@ -8,7 +8,7 @@ async function versionedUpdate(Model, filter, body, extra = {}) {
   const { __v, _id, failedLoginCount, ...fields } = body;
   const query = expected === undefined ? filter : { ...filter, __v: expected };
   const updated = await Model.findOneAndUpdate(query,
-    { $set: { ...fields, ...extra }, $inc: { __v: 1 } }, { new: true });
+    { $set: { ...fields, ...extra }, $inc: { __v: 1 } }, { new: true, runValidators: true });
   if (!updated && expected !== undefined) {
     const existing = await Model.findOne(filter);
     if (existing) { const error = new Error('Stale version; reload before updating'); error.status = 409; throw error; }

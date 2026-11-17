@@ -1,0 +1,154 @@
+﻿[
+    {
+        "path":  "client/package-lock.json",
+        "sha256":  "261D18AA794A08DF5D9EEAD3F21293C94571B4B1296664BB2664C2D786D78051"
+    },
+    {
+        "path":  "client/src/components/AdminDataSync.jsx",
+        "sha256":  "104A9F06CC3588ADB4C0D41DB8101348BC436DC082179D61F647D0E339837CA9"
+    },
+    {
+        "path":  "client/src/components/OnlinePaymentModal.jsx",
+        "sha256":  "5E3B0A635E0221F198F2993BFA0C17E937C8DD6FE67A22F0BC654830089FDAC8"
+    },
+    {
+        "path":  "client/src/components/PaymentSafety.test.jsx",
+        "sha256":  "EFFD54E350A8E3797CA12EB503664AA87B894B782AD185650F1E00A3A8AC721B"
+    },
+    {
+        "path":  "client/src/pages/AdminProducts.jsx",
+        "sha256":  "B99FEE18E2BF0A23B3FDAE42B11C97AC9EF58AD3A543AD37EDF751C204A6AE8A"
+    },
+    {
+        "path":  "client/src/pages/checkout/PaymentMethod.jsx",
+        "sha256":  "360FD90D5A8D75FFE2C0FDCB8BE06B3FEBE6A96DEEF8D2571EE00290C1E3827C"
+    },
+    {
+        "path":  "client/src/pages/CheckoutPage.jsx",
+        "sha256":  "7B0A03DF3319EA2C1C21C8A3D7AB360E1D925910D20BE64EB07A2D0569190F32"
+    },
+    {
+        "path":  "client/src/pages/LoginPage.jsx",
+        "sha256":  "68DDAE0E8AA7690112A94BFCE68827DAA9F70596523AE9CC60D5F334537BBE03"
+    },
+    {
+        "path":  "client/src/pages/UserProfilePage.jsx",
+        "sha256":  "3EF80404183CF08CD739F5B7664E81D3B675575A395F775326A9C220847320AF"
+    },
+    {
+        "path":  "scripts/export-api-inventory.cjs",
+        "sha256":  "D57FBF5842DFFE721C16EE67A823D6CB9C38031C46361CDD1124341B7BEEC65F"
+    },
+    {
+        "path":  "server/.env.example",
+        "sha256":  "3D11E05688EA323040844F126E27A5B968C1DA3DFAC9115A304E721C71B6EEB2"
+    },
+    {
+        "path":  "server/checkout.js",
+        "sha256":  "94975EED3EDD2DBA6A1BF7CDE02B8ECF118C671C7AD79844DDCA9B49722E7300"
+    },
+    {
+        "path":  "server/concurrency.js",
+        "sha256":  "D37978732A13B9E000A3D4DFF1816A0BE5F63CD770E09D22FBBDBC66BFF512BC"
+    },
+    {
+        "path":  "server/config/env.js",
+        "sha256":  "284DF07027600A9621621229A2347EA5097148E230D149ACAFBAA9D69E58360D"
+    },
+    {
+        "path":  "server/config/mailer.js",
+        "sha256":  "4FC86049C07D46DE0EA21E399EBB50FABF9E1A9B354EAE716F42BA1CDFF195DB"
+    },
+    {
+        "path":  "server/index.js",
+        "sha256":  "0782821B0AE0251CF2BF1005AB0E7F8D9AB0CCBDC4915077B795FCA762C7741E"
+    },
+    {
+        "path":  "server/jest.config.js",
+        "sha256":  "F330CB36E07881776EF1B598FAFD34A52701192A5D169D6F91EFAA050834C03C"
+    },
+    {
+        "path":  "server/middleware.js",
+        "sha256":  "2F41470D5F07F49A1F88E78D3F7271154ED6FE0E08771097CEECFD9BDE2AE6AB"
+    },
+    {
+        "path":  "server/models.js",
+        "sha256":  "091353D905C5702FAD44046F09488EA9683E45B4F3886D46A8C3B4C1E14E66CA"
+    },
+    {
+        "path":  "server/package.json",
+        "sha256":  "11E3D6F7CFC6A85D353C2FC3DA5E226B6E001423A55898CFC9B0642506D2D6B6"
+    },
+    {
+        "path":  "server/package-lock.json",
+        "sha256":  "57F3234B7A7CCE9AED4B01C76E7CEA2FBB59A7194400B67908EE178EBAC89B49"
+    },
+    {
+        "path":  "server/routes/ai.routes.js",
+        "sha256":  "BA4AB504DEC51CC295AF680243535DC1558E68E28B98CA6D6B4557617E77DFA9"
+    },
+    {
+        "path":  "server/scripts/create-admin.js",
+        "sha256":  "036A5F0FCCB56AF747E631CA7D970AC7DD49477967A87F5AB822665D33E23432"
+    },
+    {
+        "path":  "server/tests/admin.test.js",
+        "sha256":  "83852BDF9342B4BC4E739BF99E708D90067BAD529AA45E16F92D0FB343C56E55"
+    },
+    {
+        "path":  "server/tests/ai_recommendation.test.js",
+        "sha256":  "C2A280E8CCEA8F5A88F77A50D4985475D78003F5D44C906E3C0B503794CC8F16"
+    },
+    {
+        "path":  "server/tests/auth.test.js",
+        "sha256":  "EF6AF0C1396951CC40541DBD4E20778968F6A5DB21FADBC95FE2186B985A0EC2"
+    },
+    {
+        "path":  "server/tests/checkout.test.js",
+        "sha256":  "D1EA872EA6440FAFFFE881C9818E968C38E8B10CF2F63E01342EE5DDD97D5F76"
+    },
+    {
+        "path":  "server/tests/concurrency.test.js",
+        "sha256":  "5531AB3A1A98C063BE4DA2778C28D74B14E400F9A1BDB2C624C8F1C3FB0EDB30"
+    },
+    {
+        "path":  "server/tests/environment.test.js",
+        "sha256":  "B79B9B689A789FBCAF77A3FC1C6275F3CAF8C9ED8E8772F45F8156237CE85ABD"
+    },
+    {
+        "path":  "server/tests/global-setup.js",
+        "sha256":  "D646FC34B6B59AC79EA2BAAE22E09400DC19E5DE1F878EE1535ABE3026BFB80E"
+    },
+    {
+        "path":  "server/tests/helpers.js",
+        "sha256":  "E08DEACD7B0F7C4108BBCCDCF652E866B6E8CA6C530D1411E5C930C467247C74"
+    },
+    {
+        "path":  "server/tests/order.test.js",
+        "sha256":  "522C4C14E65E7F534509F68E396418524C286768D7D082B6528CDF9915A408AF"
+    },
+    {
+        "path":  "server/tests/permissions.test.js",
+        "sha256":  "81563C69069AEF2DBBAE68919A4FCBA008B511B745E18ADFEB074D737CFEDEF4"
+    },
+    {
+        "path":  "server/tests/product.test.js",
+        "sha256":  "7B3AEE54122469F818CC3DDAAC5701472FFAC4AD80C469B94DE93F4BFB2E3797"
+    },
+    {
+        "path":  "server/tests/security.test.js",
+        "sha256":  "66B8CCC17C1B5B849FA2ACC0A6C880B4ABE345E10C3B42C34552746AEB2AADA7"
+    },
+    {
+        "path":  "server/tests/setup.js",
+        "sha256":  "0D063CE5EA7609B7428FE2BD9893776E27578CE41AC59556B102FECE097E551C"
+    },
+    {
+        "path":  "server/tests/validation.test.js",
+        "sha256":  "B7736C3B49C0EF7C32022B157C8359AEC53D2EA91E55A9E20050A509CD70C81B"
+    },
+    {
+        "path":  "server/validation.js",
+        "sha256":  "2F9B2354161EC489A54FB3C6B45F582CAA09CB2661160E714F11C6AF1961A5A1"
+    }
+]

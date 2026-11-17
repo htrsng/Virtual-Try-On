@@ -27,10 +27,16 @@ const loadEnvFile = (filePath) => {
     }
 };
 
-loadEnvFile(path.join(__dirname, "..", ".env"));
+// Tests never inherit a development database or external service credentials.
+if (process.env.NODE_ENV !== 'test') loadEnvFile(path.join(__dirname, "..", ".env"));
+
+const secret = process.env.JWT_SECRET;
+if (!secret || secret.length < 32 || ['your-secret-key-change-this-in-production', 'replace-with-a-long-random-secret'].includes(secret)) {
+    throw new Error('JWT_SECRET must be explicitly configured with at least 32 characters');
+}
 
 module.exports = {
-    JWT_SECRET: process.env.JWT_SECRET || "your-secret-key-change-this-in-production",
+    JWT_SECRET: secret,
     MONGODB_URI: process.env.MONGODB_URI,
     EMAIL_USER: process.env.EMAIL_USER || "",
     EMAIL_PASS: process.env.EMAIL_PASS || "",

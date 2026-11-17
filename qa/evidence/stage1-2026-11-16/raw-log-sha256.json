@@ -1,0 +1,26 @@
+﻿[
+    {
+        "log":  "before.log",
+        "sha256":  "269CA5A4F08858074E11C7E6257F917B4C7242A3878EAFB22A354C649CC5731F"
+    },
+    {
+        "log":  "pricing-before.log",
+        "sha256":  "54C3FA9793D4047B8A90AB1330912AEDA6D8E51CE1E3181948C1DE61ABEFDEF1"
+    },
+    {
+        "log":  "backend-final.log",
+        "sha256":  "C4C20DB33C9D756940DBEB1F8F1913A1E56B6C73221188E963F2452DA0EA3B4B"
+    },
+    {
+        "log":  "jest-results.json",
+        "sha256":  "DD1B4C98DB87591D828C0294DACB7C333FE321F6CD44532591FA174BD01A4D85"
+    },
+    {
+        "log":  "frontend-payment.log",
+        "sha256":  "3010DC50D58BEF7CECD0CFE24BCD878D168142322BB774BF6A8C82343A6B0EA6"
+    },
+    {
+        "log":  "jsx-syntax.log",
+        "sha256":  "BCD1F358920704D61DE5EEFD83E2223A9AD34F9770F833769D86D4780DA95900"
+    }
+]

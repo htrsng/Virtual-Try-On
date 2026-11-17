@@ -1,0 +1,55 @@
+﻿[
+    {
+        "value":  [
+                      {
+                          "file":  "backend-1.json",
+                          "sha256":  "3FE7C3CEA092F29DE49DD9AE79D20388D9FEE6097F8D811FF5BA101D3A54901C"
+                      },
+                      {
+                          "file":  "backend-1.log",
+                          "sha256":  "2F8E0599FA064CF190D866B9EA119F7D217D4ED6503147D09A61F4F75A9497D1"
+                      },
+                      {
+                          "file":  "backend-2.json",
+                          "sha256":  "3C92E453499AA93FF7541D97F9F1561D16D23F8F5D91EF0FB10A0911F1BFD61B"
+                      },
+                      {
+                          "file":  "backend-2.log",
+                          "sha256":  "28B07DB15A9889D7CA4BDD914FF652DCBCECBF5343EA1524C2771E5CE2EF737B"
+                      },
+                      {
+                          "file":  "browser-1.json",
+                          "sha256":  "1F81A6F8750201D83FF8830D2774988E0B51B1C1B628AD87B6971367BE1FE095"
+                      },
+                      {
+                          "file":  "browser-1.log",
+                          "sha256":  "B5ABFA802C6F4ACF69C48F086B3A1C90195A3A558498657F23758EBA48A48A02"
+                      },
+                      {
+                          "file":  "browser-2.json",
+                          "sha256":  "7BE8B1B8669D4931C0A15DA5A6D49DE50D14994315070C278E66150EFC036097"
+                      },
+                      {
+                          "file":  "browser-2.log",
+                          "sha256":  "277F3BB5BEA92B2C2238FCA8F9DA0C22FC323944F885627BCDEF8EF905F08FE2"
+                      },
+                      {
+                          "file":  "summary.json",
+                          "sha256":  "20A112302F7BDFA8AD029B417FB990CAB1CA9C0B48EC53BE504F7A1D042E0992"
+                      },
+                      {
+                          "file":  "control-check.log",
+                          "sha256":  "5ED507FA93BE501F0D38DC84A00494DEBD48A40DA67A6269937F03B2BDB87FD5"
+                      }
+                  ],
+        "Count":  10
+    },
+    {
+        "file":  "initial/backend-first.log",
+        "sha256":  "169FD7D4D0F79B8D3E9D99852822C228D1AB8553B2787D3E4D4D130869A23773"
+    },
+    {
+        "file":  "initial/playwright-first.log",
+        "sha256":  "8D4F268A84BDF065EADC255A2F692F8B2C460A78DCBE0F502D17BA8EC2253BED"
+    }
+]

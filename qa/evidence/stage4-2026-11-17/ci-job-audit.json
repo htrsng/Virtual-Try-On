@@ -1,0 +1,102 @@
+[
+  {
+    "runId": "44041049837",
+    "headSHA": "1914105cecf1635cfb238476e7bc8bfc79b18a50",
+    "jobId": 133895459084,
+    "name": "Playwright E2E Tests",
+    "conclusion": "failure",
+    "failedSteps": [
+      "Install Playwright Browsers"
+    ],
+    "skippedSteps": [
+      "Run E2E Tests",
+      "Post Setup Node.js"
+    ],
+    "cause": "Unsupported ubuntu26.04 runner; browser installation failed; tests not run",
+    "url": "https://github.com/htrsng/Virtual-Try-On/actions/runs/44041049837/job/133895459084",
+    "rawLogRead": true,
+    "rawLogSHA256": "281a686a7cb255e0573ce664c27147421ca8ca2c622b6d83546e5f82e7f86ee3"
+  },
+  {
+    "runId": "44041049837",
+    "headSHA": "1914105cecf1635cfb238476e7bc8bfc79b18a50",
+    "jobId": 133895459267,
+    "name": "Backend Tests",
+    "conclusion": "success",
+    "failedSteps": [],
+    "skippedSteps": [],
+    "cause": "130 tests /13 suites passed",
+    "url": "https://github.com/htrsng/Virtual-Try-On/actions/runs/44041049837/job/133895459267",
+    "rawLogRead": true,
+    "rawLogSHA256": "31248445c3b985c5a2f0aae8335d229c71113b2fa13e0af98fa48e437349465d"
+  },
+  {
+    "runId": "44041049837",
+    "headSHA": "1914105cecf1635cfb238476e7bc8bfc79b18a50",
+    "jobId": 133895459327,
+    "name": "Frontend Tests",
+    "conclusion": "failure",
+    "failedSteps": [
+      "Run Frontend Tests"
+    ],
+    "skippedSteps": [
+      "Post Setup Node.js"
+    ],
+    "cause": "useGLTF.preload missing from mock; 1 file collection failed",
+    "url": "https://github.com/htrsng/Virtual-Try-On/actions/runs/44041049837/job/133895459327",
+    "rawLogRead": true,
+    "rawLogSHA256": "cfc6925512893d13cc8ad9c90cff5510984f10fa05a96c9365343dae89a26872"
+  },
+  {
+    "runId": "43889465659",
+    "headSHA": "3d6109745e1ec6a3035f7af25ea586357784fa1a",
+    "jobId": 133376415102,
+    "name": "Playwright E2E Tests",
+    "conclusion": "failure",
+    "failedSteps": [
+      "Install Playwright Browsers"
+    ],
+    "skippedSteps": [
+      "Run E2E Tests",
+      "Post Setup Node.js"
+    ],
+    "cause": "Unsupported ubuntu26.04 runner; tests not run",
+    "url": "https://github.com/htrsng/Virtual-Try-On/actions/runs/43889465659/job/133376415102",
+    "rawLogRead": true,
+    "rawLogSHA256": "ae0b2f9d65da95b8d7679843309a2b5f1cad319b7489de23a337db0723a02917"
+  },
+  {
+    "runId": "43889465659",
+    "headSHA": "3d6109745e1ec6a3035f7af25ea586357784fa1a",
+    "jobId": 133376415760,
+    "name": "Backend Tests",
+    "conclusion": "failure",
+    "failedSteps": [
+      "Run Backend Tests"
+    ],
+    "skippedSteps": [
+      "Post Setup Node.js"
+    ],
+    "cause": "Auth syntax and test contract/fixture failures: 10 passed /6 failed; 4 suites failed",
+    "url": "https://github.com/htrsng/Virtual-Try-On/actions/runs/43889465659/job/133376415760",
+    "rawLogRead": true,
+    "rawLogSHA256": "eedcd8bbe2e242fd888fa028ae8ee50ace00742dc9604968acf22a53a417dbef"
+  },
+  {
+    "runId": "43889465659",
+    "headSHA": "3d6109745e1ec6a3035f7af25ea586357784fa1a",
+    "jobId": 133376415861,
+    "name": "Frontend Tests",
+    "conclusion": "failure",
+    "failedSteps": [
+      "Run Frontend Tests"
+    ],
+    "skippedSteps": [
+      "Post Setup Node.js"
+    ],
+    "cause": "useGLTF.preload missing from mock",
+    "url": "https://github.com/htrsng/Virtual-Try-On/actions/runs/43889465659/job/133376415861",
+    "rawLogRead": true,
+    "rawLogSHA256": "f82e790fc355af832d66bfd4cbbb1d2ba0b1e5c477462e22ee7147ca724c4bf9"
+  }
+]

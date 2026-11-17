@@ -1,0 +1,13 @@
+{
+  "apiStatus": 200,
+  "apiBodyType": "array",
+  "uiStatus": 200,
+  "proxyStatus": 200,
+  "reactRoot": true,
+  "browserExit": 0,
+  "ports": [
+    3300,
+    55173
+  ],
+  "database": "disposable MongoMemoryServer"
+}

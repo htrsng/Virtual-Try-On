@@ -19,6 +19,7 @@ import {
 } from './garmentBinding';
 
 import type { FitZone } from './components/SizeRecommendation';
+import { staticQaRender } from './qaRender';
 
 type GarmentSoftnessConfig = {
     morphInfluence?: number;
@@ -266,10 +267,29 @@ function GarmentInstance({
     const { actions, names } = useAnimations(gltf.animations, garmentScene);
 
     useEffect(() => {
+        const shared = new Set<THREE.Material | THREE.Texture | THREE.Skeleton>();
+        const owned = new Set<THREE.Material | THREE.Texture | THREE.Skeleton>();
+        const collect = (root: THREE.Object3D, resources: typeof shared) => root.traverse(child => {
+            const mesh = child as THREE.Mesh;
+            if (!mesh.isMesh) return;
+            if ((mesh as THREE.SkinnedMesh).isSkinnedMesh) resources.add((mesh as THREE.SkinnedMesh).skeleton);
+            for (const material of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {
+                resources.add(material);
+                for (const value of Object.values(material)) if (value instanceof THREE.Texture) resources.add(value);
+            }
+        });
+        collect(gltf.scene, shared); collect(garmentScene, owned);
+        return () => { for (const resource of owned) if (!shared.has(resource)) resource.dispose(); };
+    }, [gltf.scene, garmentScene]);
+
+    useEffect(() => {
         if (names.length > 0) {
             const actionName = names[0];
             if (actionName && actions[actionName]) {
-                actions[actionName].reset().fadeIn(0.5).play();
+                const action = actions[actionName]!;
+                action.reset();
+                if (staticQaRender()) { action.play(); action.paused = true; action.getMixer().setTime(0); }
+                else { action.paused = false; action.fadeIn(0.5).play(); }
             }
             return () => { actions[actionName]?.fadeOut(0.5); };
         }
@@ -313,11 +333,13 @@ function GarmentInstance({
 
         // Capture all meshes and their original parents before binding.
         // bindGarmentToAvatarSkeleton() may reparent meshes via attach().
-        const trackedMeshes: Array<{ mesh: THREE.Mesh; originalParent: THREE.Object3D | null }> = [];
+        const trackedMeshes: Array<{ mesh: THREE.Mesh; originalParent: THREE.Object3D | null;
+            originalGeometry: THREE.BufferGeometry; originalSkeleton?: THREE.Skeleton }> = [];
         garmentScene.traverse((child) => {
             if ((child as THREE.Mesh).isMesh) {
                 const mesh = child as THREE.Mesh;
-                trackedMeshes.push({ mesh, originalParent: mesh.parent });
+                trackedMeshes.push({ mesh, originalParent: mesh.parent, originalGeometry: mesh.geometry,
+                    originalSkeleton: (mesh as THREE.SkinnedMesh).isSkinnedMesh ? (mesh as THREE.SkinnedMesh).skeleton : undefined });
             }
         });
 
@@ -342,7 +364,11 @@ function GarmentInstance({
         // Cleanup: restore meshes to their original parent.
         // This keeps development StrictMode effect re-runs safe.
         return () => {
-            for (const { mesh, originalParent } of trackedMeshes) {
+            for (const { mesh, originalParent, originalGeometry, originalSkeleton } of trackedMeshes) {
+                if (mesh.geometry !== originalGeometry) { mesh.geometry.dispose(); mesh.geometry = originalGeometry; }
+                if (originalSkeleton && (mesh as THREE.SkinnedMesh).skeleton !== originalSkeleton) {
+                    (mesh as THREE.SkinnedMesh).skeleton.dispose(); (mesh as THREE.SkinnedMesh).skeleton = originalSkeleton;
+                }
                 if (!originalParent) {
                     mesh.parent?.remove(mesh);
                     continue;
@@ -382,6 +408,7 @@ function GarmentInstance({
     return (
         <primitive
             object={garmentScene}
+            userData={{ ...garmentScene.userData, vfitRole: 'garment', vfitAsset: garment.url }}
         />
     );
 }

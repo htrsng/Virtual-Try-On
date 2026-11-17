@@ -1,0 +1,42 @@
+﻿[
+    {
+        "log":  "stage0-server-install-local-binary.log",
+        "sha256":  "F3682177EE6DE792D682956721B6AAFD540907FD95E7A21ED728407B751FF316"
+    },
+    {
+        "log":  "stage0-client-install.log",
+        "sha256":  "82D87565BBE2A74637EE57F6DF377ECDB428D4B66E90C8907C0F3C3DB279BAA8"
+    },
+    {
+        "log":  "stage0-tests-install.log",
+        "sha256":  "6566D0E39E1E7D99FCCC8400A6E38A7F6A5B9A0E161CCE1F01F8FE8C5CF72E75"
+    },
+    {
+        "log":  "stage0-browser-install.log",
+        "sha256":  "70548324914F0A177AAE71A6C515164F4A2EFB258D24827B002D100B983581E7"
+    },
+    {
+        "log":  "backend-portable-glob-local.log",
+        "sha256":  "9983B7234D7414E5AF2AAC3C3CC0AFDA3A77B400663B66F9D2842D6ED12C3C29"
+    },
+    {
+        "log":  "backend.log",
+        "sha256":  "CF9F1019F20DC063743A068CE3C806B9760C17B0EAA6FFC4A180473FE62131A0"
+    },
+    {
+        "log":  "browser-inventory.log",
+        "sha256":  "5349204239226E752091753DF45660D3D09F0516F7D852ABEA223724DA6C3C27"
+    },
+    {
+        "log":  "build.log",
+        "sha256":  "0CFEB1C663D331CFFB11913BCEFEAF7DCDB9729F3D08B2259F789E0DCF39856A"
+    },
+    {
+        "log":  "lint.log",
+        "sha256":  "A2144976D043D4F2479B9DB59D4C887CC0A9D562A861917DE3F33C1752966395"
+    },
+    {
+        "log":  "unit.log",
+        "sha256":  "5B543EFA4DE5B2D642A0553374235961CD556E207F4BB42BF0EA3A249AFAAFEF"
+    }
+]

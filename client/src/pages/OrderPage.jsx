@@ -169,11 +169,11 @@ function OrderPage({ showToast }) {
                         const isCancelled = order.status === 'Đã hủy';
 
                         return (
-                            <div key={order._id} style={{ background: '#fff', borderRadius: 16, border: '1px solid #EDE8DF', overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', transition: 'box-shadow 0.2s' }}>
+                            <div key={order._id} data-testid={`order-${order._id}`} style={{ background: '#fff', borderRadius: 16, border: '1px solid #EDE8DF', overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', transition: 'box-shadow 0.2s' }}>
 
                                 {/* Card Header */}
                                 <div style={{ padding: '18px 22px', borderBottom: '1px solid #F3F0EB', display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', cursor: 'pointer', background: '#FDFBF8' }}
-                                    onClick={() => setExpandedId(isOpen ? null : order._id)}>
+                                    data-testid="order-expand" onClick={() => setExpandedId(isOpen ? null : order._id)}>
                                     <div style={{ flex: 1, minWidth: 0 }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
                                             <span style={{ fontWeight: 800, fontSize: 15, color: '#1C1009', letterSpacing: 0.3 }}>
@@ -323,7 +323,7 @@ function OrderPage({ showToast }) {
                                         {/* Action Buttons */}
                                         <div style={{ padding: '14px 22px', borderTop: '1px solid #F3F0EB', display: 'flex', gap: 10, justifyContent: 'flex-end', background: '#FAFAF9', flexWrap: 'wrap' }}>
                                             {order.status === 'Đang xử lý' && (
-                                                <button onClick={() => handleCancel(order._id)} style={{ padding: '9px 18px', background: '#fff', color: '#DC2626', border: '1.5px solid #DC2626', borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: 6 }}
+                                                <button data-testid="order-cancel" onClick={() => handleCancel(order._id)} style={{ padding: '9px 18px', background: '#fff', color: '#DC2626', border: '1.5px solid #DC2626', borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: 6 }}
                                                     onMouseEnter={e => { e.currentTarget.style.background = '#FEE2E2'; }}
                                                     onMouseLeave={e => { e.currentTarget.style.background = '#fff'; }}>
                                                     ❌ Hủy đơn hàng

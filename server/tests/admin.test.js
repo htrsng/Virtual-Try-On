@@ -1,39 +1,16 @@
-const request = require("supertest");
-const app = require("../index");
-const { UserModel } = require("../models");
-
-describe("Admin API", () => {
-  let adminToken;
-
-  beforeAll(async () => {
-    await request(app).post("/api/auth/register").send({
-      email: "admin_dash@test.com", password: "123", fullName: "Admin"
-    });
-    await UserModel.findOneAndUpdate({ email: "admin_dash@test.com" }, { role: "admin" });
-    const loginRes = await request(app).post("/api/auth/login").send({
-      email: "admin_dash@test.com", password: "123"
-    });
-    adminToken = loginRes.body.token;
+const request = require('supertest');
+const app = require('../index');
+const { actor } = require('./helpers');
+describe('Admin API', () => {
+  test('admin sees sync counts', async () => {
+    const { token } = await actor('admin');
+    const res = await request(app).get('/api/admin/sync-status').auth(token, { type: 'bearer' });
+    expect(res.status).toBe(200); expect(res.body.data.totalUsers).toBe(1); expect(res.body.data.totalOrders).toBe(0);
   });
-
-  it("should get sync status", async () => {
-    // Sync status doesn't seem to require token in some implementations, but let's test it.
-    const res = await request(app)
-      .get("/api/admin/sync-status")
-      .set("Authorization", `Bearer ${adminToken}`);
-
-    expect(res.statusCode).toEqual(200);
-    expect(res.body).toHaveProperty("status", "success");
-    expect(res.body.data).toHaveProperty("totalOrders");
-  });
-
-  it("should get all data for sync", async () => {
-    const res = await request(app)
-      .get("/api/admin/get-all-data")
-      .set("Authorization", `Bearer ${adminToken}`);
-
-    expect(res.statusCode).toEqual(200);
-    expect(res.body).toHaveProperty("status", "success");
-    expect(res.body.data).toHaveProperty("users");
+  test('admin sync returns aggregate data without user credentials', async () => {
+    const { token } = await actor('admin');
+    const res = await request(app).get('/api/admin/get-all-data').auth(token, { type: 'bearer' });
+    expect(res.status).toBe(200); expect(res.body.data.users).toBe(1); expect(res.body.data.products).toEqual([]);
+    expect(JSON.stringify(res.body)).not.toContain('password');
   });
 });

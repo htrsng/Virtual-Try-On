@@ -6,7 +6,9 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const { JWT_SECRET, MONGODB_URI, GEMINI_API_KEY } = require("./config/env");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const { requireDbReady, authenticateToken, requireAdmin } = require("./middleware");
+const { requireDbReady, authenticateToken, optionalAuthenticate, requireAdmin } = require("./middleware");
+const { validateRequest, sendError, safeUser, fields, ensure, email: validEmail, password: validPassword, text, objectId } = require('./validation');
+const { createOrder, changeOrderStatus } = require('./checkout');
 const {
   ProductModel,
   UserModel,
@@ -37,7 +39,29 @@ const { createAiRouter } = require("./routes/ai.routes");
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '100kb' }));
+const health = require('./health');
+app.get('/api/health/live', health.live);
+app.get('/api/health/ready', health.ready);
+// Retired operational endpoints are deliberately absent in every environment.
+app.use(['/api/auth/create-admin', '/api/admin/reset-data', '/api/admin/clear-all-data'], (req, res) =>
+  res.status(404).json({ code: 'NOT_FOUND', error: 'Endpoint retired' }));
+app.use('/api/admin', authenticateToken, requireAdmin);
+app.use('/api/users', authenticateToken, requireAdmin);
+app.use('/api/coupons', authenticateToken, requireAdmin);
+// Authenticate management requests before validation so callers cannot probe admin input contracts anonymously.
+app.use((req, res, next) => {
+  const url = req.path.toLowerCase().replace(/\/+$/, '') || '/';
+  const write = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method);
+  const management = (/^\/api\/(products|banner-contents)(?:\/|$)/.test(url) && write)
+    || url === '/api/products/next-id'
+    || (url === '/api/orders' && req.method === 'GET')
+    || (/^\/api\/orders\/[^/]+$/.test(url) && ['PUT', 'DELETE'].includes(req.method));
+  if (!management) return next();
+  authenticateToken(req, res, () => requireAdmin(req, res, next));
+});
+app.use('/api', requireDbReady);
+app.use(validateRequest);
 
 // ============================================================
 // GEMINI AI CLIENT INITIALIZATION
@@ -92,7 +116,7 @@ const buildProductLookupFilter = (productId) => {
   return { _id: trimmedId };
 };
 
-if (!MONGODB_URI) {
+if (!MONGODB_URI && process.env.NODE_ENV !== 'test') {
   console.error("❌ Thiếu MONGODB_URI. Hãy đặt giá trị này trong server/.env hoặc biến môi trường hệ thống.");
 }
 
@@ -101,26 +125,25 @@ if (MONGODB_URI) {
   mongoose
     .connect(MONGODB_URI)
     .then(() => {
-      console.log("✅ Đã kết nối thành công đến MongoDB Atlas!");
+      console.log("✅ Đã kết nối MongoDB");
       console.log("📊 Database:", mongoose.connection.name);
       console.log("🔗 Host:", mongoose.connection.host);
       console.log("📡 Connection state:", mongoose.connection.readyState); // 1 = connected
     })
     .catch((err) => {
-      console.error("❌ Lỗi kết nối MongoDB Atlas:", err);
+      console.error("❌ Lỗi kết nối MongoDB:", err);
       // Keep HTTP server alive so clients get explicit API errors instead of random 404s.
     });
 }
 
 // Theo dõi trạng thái database
 mongoose.connection.on("connected", () => {
+  if (process.env.NODE_ENV === 'test') return;
   console.log("🟢 MongoDB connected");
   seedBannerContents().catch((err) =>
     console.error("❌ Seed banner contents error:", err),
   );
-  normalizeProductNumericIds()
-    .then((result) => console.log(`✅ ${result.message}`))
-    .catch((err) => console.error("❌ Normalize product IDs error:", err));
+  // Product identity maintenance is explicit via the protected admin endpoint.
 });
 
 mongoose.connection.on("error", (err) => {
@@ -131,120 +154,19 @@ mongoose.connection.on("disconnected", () => {
   console.log("🟠 MongoDB disconnected");
 });
 
-// ===== ADDRESS MANAGEMENT ENDPOINTS =====
-
-// GET /api/user/addresses - Fetch all saved addresses for the authenticated user
-app.get('/api/user/addresses', authenticateToken, requireDbReady, async (req, res) => {
-  try {
-    const user = await UserModel.findById(req.user.id).select('addresses');
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    res.json({ addresses: user.addresses || [] });
-  } catch (err) {
-    console.error('Error fetching addresses:', err);
-    res.status(500).json({ error: 'Failed to fetch addresses' });
-  }
-});
-
-// POST /api/user/addresses - Add a new address for the authenticated user
-app.post('/api/user/addresses', authenticateToken, requireDbReady, async (req, res) => {
-  try {
-    const { fullName, phone, province, district, ward, street, isDefault, type } = req.body;
-
-    if (!fullName || !phone || !province || !district || !ward || !street) {
-      return res.status(400).json({ error: 'Missing required address fields' });
-    }
-
-    const newAddr = {
-      _id: new mongoose.Types.ObjectId(),
-      fullName,
-      phone,
-      province,
-      district,
-      ward,
-      street,
-      isDefault: !!isDefault,
-      type: type || 'home'
-    };
-
-    const user = await UserModel.findById(req.user.id);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    if (newAddr.isDefault) {
-      user.addresses.forEach((address) => {
-        address.isDefault = false;
-      });
-    }
-
-    user.addresses.push(newAddr);
-    await user.save();
-
-    res.json({ success: true, address: newAddr });
-  } catch (err) {
-    console.error('Error adding address:', err);
-    res.status(500).json({ error: 'Failed to add address' });
-  }
-});
-
-// PUT /api/user/addresses/:addressId - Update an existing address in place
-app.put('/api/user/addresses/:addressId', authenticateToken, requireDbReady, async (req, res) => {
-  try {
-    const { addressId } = req.params;
-    const { fullName, phone, province, district, ward, street, isDefault, type } = req.body;
-
-    if (!fullName || !phone || !province || !district || !ward || !street) {
-      return res.status(400).json({ error: 'Missing required address fields' });
-    }
-
-    const user = await UserModel.findById(req.user.id);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    const address = user.addresses.id(addressId);
-    if (!address) {
-      return res.status(404).json({ error: 'Address not found' });
-    }
-
-    address.fullName = fullName;
-    address.phone = phone;
-    address.province = province;
-    address.district = district;
-    address.ward = ward;
-    address.street = street;
-    address.isDefault = !!isDefault;
-    address.type = type || 'home';
-
-    if (address.isDefault) {
-      user.addresses.forEach((item) => {
-        if (String(item._id) !== String(address._id)) {
-          item.isDefault = false;
-        }
-      });
-    }
-
-    await user.save();
-    res.json({ success: true, address: address.toObject() });
-  } catch (err) {
-    console.error('Error updating address:', err);
-    res.status(500).json({ error: 'Failed to update address' });
-  }
-});
+// Global validation above deliberately precedes the address router.
+app.use('/api/user/addresses', require('./routes/addresses.routes'));
 
 app.get("/api/products", async (req, res) => {
   try {
-    await normalizeProductNumericIds();
     const products = await ProductModel.find().sort({ id: 1, _id: 1 });
     res.json(products.map(normalizeProductForClient));
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
-app.get("/api/products/next-id", authenticateToken, requireDbReady, async (req, res) => {
+app.get("/api/products/next-id", authenticateToken, requireAdmin, requireDbReady, async (req, res) => {
   try {
     const lastProduct = await ProductModel
       .findOne({ id: { $type: "number" } })
@@ -274,13 +196,18 @@ app.get("/api/products/:id/stock", async (req, res) => {
       variants: inventory.variants,
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
-app.put("/api/products/:id", async (req, res) => {
+app.put("/api/products/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const inventory = normalizeProductInventory(req.body);
+    const current = await ProductModel.findOne(buildProductLookupFilter(req.params.id));
+    if (!current) return res.status(404).json({ error: 'Product not found' });
+    ensure(req.body.id === undefined || req.body.id === current.id, 'Product numeric identity cannot be changed');
+    const source = { ...current.toObject(), ...req.body };
+    if (req.body.stock !== undefined && req.body.totalStock === undefined) source.totalStock = req.body.stock;
+    const inventory = normalizeProductInventory(source);
     const updatedProduct = await versionedUpdate(ProductModel,
       buildProductLookupFilter(req.params.id), req.body, inventory);
 
@@ -290,23 +217,22 @@ app.put("/api/products/:id", async (req, res) => {
 
     res.json(updatedProduct);
   } catch (err) {
-    res.status(err.status || 500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
-app.delete("/api/products/:id", async (req, res) => {
+app.delete("/api/products/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const deletedProduct = await ProductModel.findOneAndDelete({
-      ...buildProductLookupFilter(req.params.id),
-    });
-
-    if (!deletedProduct) {
-      return res.status(404).json({ error: "Không tìm thấy sản phẩm" });
-    }
+    const product = await ProductModel.findOne(buildProductLookupFilter(req.params.id));
+    if (!product) return res.status(404).json({ error: 'Product not found' });
+    if (await OrderModel.exists({ inventoryReserved: true, status: { $in: ['Đang xử lý', 'Đang giao'] },
+      'products.productId': { $in: [product.id, String(product._id)] } })) return res.status(409).json({ error: 'Product has reserved orders' });
+    const deletedProduct = await ProductModel.findOneAndDelete({ _id: product._id, __v: product.__v });
+    if (!deletedProduct) return res.status(409).json({ error: 'Product changed; reload before deleting' });
 
     res.json({ message: "Deleted" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -315,7 +241,7 @@ app.post("/api/admin/products/normalize-ids", async (req, res) => {
     const result = await normalizeProductNumericIds();
     res.json({ status: "success", ...result });
   } catch (err) {
-    res.status(500).json({ status: "error", error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -351,11 +277,11 @@ app.post("/api/admin/migrate-products", authenticateToken, requireAdmin, require
     });
   } catch (err) {
     console.error("Migration error:", err);
-    res.status(500).json({ error: "Migration failed", detail: err.message });
+    sendError(res, err);
   }
 });
 
-app.post("/api/products", async (req, res) => {
+app.post("/api/products", authenticateToken, requireAdmin, async (req, res) => {
   try {
     // Tìm ID lớn nhất hiện có hoặc nhận ID do frontend cấp
     const requestedId = Number(req.body.id);
@@ -381,17 +307,39 @@ app.post("/api/products", async (req, res) => {
     await newProduct.save();
 
     console.log("✅ Đã lưu với ID:", newProduct.id);
-    res.json(newProduct);
+    res.status(201).json(newProduct);
   } catch (err) {
     console.error("❌ Lỗi tạo sản phẩm:", err);
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
+});
+
+app.get('/api/products/:id', async (req, res) => {
+  try {
+    const product = await ProductModel.findOne(buildProductLookupFilter(req.params.id));
+    if (!product) return res.status(404).json({ error: 'Product not found' });
+    res.json(normalizeProductForClient(product));
+  } catch (error) { sendError(res, error); }
+});
+
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    fields(req.body, ['email', 'password', 'fullName', 'phone', 'address']);
+    ensure(validEmail(req.body.email) && validPassword(req.body.password), 'Valid email and password (8+ characters, at most 72 bytes) required');
+    for (const key of ['fullName', 'phone', 'address']) if (req.body[key] !== undefined) ensure(typeof req.body[key] === 'string' && req.body[key].length <= 500, `Invalid ${key}`);
+    const user = await UserModel.create({ ...req.body, email: req.body.email.trim().toLowerCase(),
+      password: await bcrypt.hash(req.body.password, 12), role: 'user' });
+    const token = jwt.sign({ id: String(user._id), email: user.email, role: 'user' }, JWT_SECRET, { expiresIn: '7d' });
+    res.status(201).json({ message: 'Đăng ký thành công', token, user: safeUser(user) });
+  } catch (error) { sendError(res, error); }
 });
 
 // 2. Đăng nhập
 app.post("/api/auth/login", async (req, res) => {
   try {
-    const emailInput = String(req.body?.email || "").trim();
+    fields(req.body, ['email', 'password']);
+    ensure(validEmail(req.body.email) && typeof req.body.password === 'string' && req.body.password.length > 0 && Buffer.byteLength(req.body.password) <= 72, 'Valid email and password required');
+    const emailInput = req.body.email.trim();
     const normalizedEmail = emailInput.toLowerCase();
     const password = String(req.body?.password || "");
 
@@ -400,14 +348,14 @@ app.post("/api/auth/login", async (req, res) => {
     }
 
     // Tìm user
-    let user = await UserModel.findOne({ email: normalizedEmail });
+    let user = await UserModel.findOne({ email: normalizedEmail }).select("+password");
     if (!user && emailInput !== normalizedEmail) {
-      user = await UserModel.findOne({ email: emailInput });
+      user = await UserModel.findOne({ email: emailInput }).select("+password");
     }
     if (!user) {
       return res
-        .status(404)
-        .json({ message: "Không tìm thấy tài khoản với email này" });
+        .status(401)
+        .json({ message: "Email hoặc mật khẩu không đúng" });
     }
 
     // Kiểm tra mật khẩu
@@ -443,7 +391,7 @@ app.post("/api/auth/login", async (req, res) => {
     });
   } catch (err) {
     console.error("Lỗi đăng nhập:", err);
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -457,10 +405,10 @@ app.get("/api/auth/me", authenticateToken, async (req, res) => {
       return res.status(404).json({ message: "Không tìm thấy người dùng" });
     }
     console.log("✅ User found:", user.email);
-    res.json(user);
+    res.json(safeUser(user));
   } catch (err) {
     console.error("❌ Error in /api/auth/me:", err);
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -477,100 +425,48 @@ app.put("/api/auth/profile", authenticateToken, async (req, res) => {
 
     res.json({
       message: "Cập nhật thông tin thành công",
-      user: updatedUser,
+      user: safeUser(updatedUser),
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
-// --- API TẠO ADMIN (Chỉ dùng 1 lần để setup) ---
-app.post("/api/auth/create-admin", async (req, res) => {
-  try {
-    const { email, password, secretKey } = req.body;
-
-    // Bảo vệ endpoint này bằng secret key
-    if (secretKey !== "ADMIN_SETUP_2024") {
-      return res.status(403).json({ message: "Secret key không đúng" });
-    }
-
-    if (!email || !password) {
-      return res.status(400).json({ message: "Email và password là bắt buộc" });
-    }
-
-    // Kiểm tra xem user đã tồn tại chưa
-    const existingUser = await UserModel.findOne({ email });
-    if (existingUser) {
-      // Nếu đã tồn tại, cập nhật thành admin
-      existingUser.role = "admin";
-      await existingUser.save();
-      return res.json({
-        message: "Đã cập nhật user thành admin",
-        user: {
-          id: existingUser._id,
-          email: existingUser.email,
-          role: existingUser.role,
-        },
-      });
-    }
-
-    // Tạo admin mới
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const adminUser = new UserModel({
-      email,
-      password: hashedPassword,
-      role: "admin",
-      fullName: "Administrator",
-    });
-    await adminUser.save();
-
-    res.json({
-      message: "Tạo tài khoản admin thành công",
-      user: {
-        id: adminUser._id,
-        email: adminUser.email,
-        role: adminUser.role,
-      },
-    });
-  } catch (err) {
-    console.error("Lỗi tạo admin:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
+// Admin bootstrap moved to scripts/create-admin.js (no public HTTP bootstrap).
 
 // --- API QUẢN TRỊ USER (chỉ admin) ---
 // 1. Lấy danh sách user
 app.get("/api/users", async (req, res) => {
   try {
     const users = await UserModel.find().select("-password");
-    res.json(users);
+    res.json(users.map(safeUser));
   } catch (err) {
     console.error("Lỗi lấy users:", err);
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
 // 2. Xóa user
 app.delete("/api/users/:id", async (req, res) => {
   try {
-    await UserModel.findByIdAndDelete(req.params.id);
+    if (req.params.id === req.user.id) return res.status(409).json({ error: 'Cannot delete your current admin account' });
+    const deleted = await UserModel.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ error: 'User not found' });
     res.json({ message: "User Deleted" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
 // 3. Sửa quyền (Admin/User)
 app.put("/api/users/:id", async (req, res) => {
   try {
+    if (req.params.id === req.user.id && req.body.role && req.body.role !== 'admin') return res.status(409).json({ error: 'Cannot demote your current admin account' });
     const updatedUser = await versionedUpdate(UserModel, { _id: req.params.id }, req.body);
     if (!updatedUser) return res.status(404).json({ error: "User not found" });
-    const safeUser = updatedUser.toObject ? updatedUser.toObject() : { ...updatedUser };
-    delete safeUser.password;
-    delete safeUser.failedLoginCount;
-    res.json(safeUser);
+    res.json(safeUser(updatedUser));
   } catch (err) {
-    res.status(err.status || 500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -579,9 +475,9 @@ app.get("/api/users/:id", async (req, res) => {
   try {
     const user = await UserModel.findById(req.params.id).select("-password");
     if (!user) return res.status(404).json({ message: "User not found" });
-    res.json(user);
+    res.json(safeUser(user));
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -591,7 +487,7 @@ app.get("/api/users/:id/orders", async (req, res) => {
     const orders = await OrderModel.find({ userId: req.params.id }).sort({ createdAt: -1 });
     res.json(orders);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -601,7 +497,7 @@ app.get("/api/users/:id/used-coupons", async (req, res) => {
     const usedCoupons = await UsedCouponModel.find({ userId: req.params.id }).sort({ usedAt: -1 });
     res.json(usedCoupons);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -621,11 +517,18 @@ app.get("/api/users/:id/stats", async (req, res) => {
       usedCoupons: usedCouponsCount
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
 // 8. Lấy danh sách user đã dùng coupon
+app.get('/api/used-coupons', authenticateToken, async (req, res) => {
+  try {
+    const usages = await UsedCouponModel.find({ userId: req.user.id }).select('couponCode').lean();
+    res.json({ coupons: usages.map(usage => usage.couponCode) });
+  } catch (error) { sendError(res, error); }
+});
+
 app.get("/api/coupons/:code/users", async (req, res) => {
   try {
     const usages = await UsedCouponModel.find({ couponCode: req.params.code })
@@ -633,7 +536,7 @@ app.get("/api/coupons/:code/users", async (req, res) => {
       .sort({ usedAt: -1 });
     res.json(usages);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -641,143 +544,13 @@ app.get("/api/coupons/:code/users", async (req, res) => {
 // 1. Tạo đơn hàng mới (cần token)
 app.post("/api/orders", authenticateToken, async (req, res) => {
   try {
-    console.log("📦 Nhận order request từ user:", req.user.id);
-    console.log("📦 Order data:", JSON.stringify(req.body, null, 2));
-
-    const {
-      products,
-      totalAmount,
-      shippingInfo,
-      paymentMethod,
-      discountCode,
-      discountAmount,
-      voucherCode,
-      voucherDiscount,
-      shippingFee,
-      shippingMethod,
-    } = req.body;
-
-    const normalizedDiscountCode = String(discountCode || "")
-      .trim()
-      .toUpperCase();
-
-    // Validate dữ liệu
-    if (!products || products.length === 0) {
-      console.log("❌ Giỏ hàng trống");
-      return res.status(400).json({ message: "Giỏ hàng trống" });
+    const order = await createOrder(req.user.id, req.body);
+    // Email is an optional side effect, never a source of totals or order state.
+    if (process.env.NODE_ENV !== 'test' && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+      sendOrderConfirmationEmail(req.user.email, order, order.shippingInfo).catch(() => console.error('Order email delivery failed'));
     }
-
-    if (!shippingInfo) {
-      console.log("❌ Thiếu thông tin shipping");
-      return res.status(400).json({ message: "Thiếu thông tin giao hàng" });
-    }
-
-    if (!shippingInfo.fullName) {
-      console.log("❌ Thiếu tên");
-      return res.status(400).json({ message: "Vui lòng nhập họ tên" });
-    }
-
-    if (!shippingInfo.phone) {
-      console.log("❌ Thiếu số điện thoại");
-      return res.status(400).json({ message: "Vui lòng nhập số điện thoại" });
-    }
-
-    if (!shippingInfo.address) {
-      console.log("❌ Thiếu địa chỉ");
-      return res.status(400).json({ message: "Vui lòng nhập địa chỉ" });
-    }
-
-    // Kiểm tra mã giảm giá đã sử dụng
-    if (normalizedDiscountCode) {
-      const existingUsage = await UsedCouponModel.findOne({
-        userId: req.user.id,
-        couponCode: normalizedDiscountCode,
-      });
-
-      if (existingUsage) {
-        console.log("❌ Mã giảm giá đã được sử dụng");
-        return res
-          .status(400)
-          .json({ message: "Mã giảm giá này bạn đã sử dụng rồi" });
-      }
-    }
-
-    console.log("✅ Validation passed, creating order...");
-
-    const newOrder = new OrderModel({
-      userId: req.user.id,
-      products,
-      totalAmount,
-      discountCode: normalizedDiscountCode,
-      discountAmount: discountAmount || 0,
-      voucherCode: voucherCode || "",
-      voucherDiscount: voucherDiscount || 0,
-      shippingFee: shippingFee || 0,
-      shippingMethod: shippingMethod || "Tiêu chuẩn",
-      shippingInfo,
-      paymentMethod: paymentMethod || "COD",
-    });
-
-    await newOrder.save();
-    console.log("✅ Đơn hàng đã lưu thành công:", newOrder._id);
-
-    // Lưu mã giảm giá đã sử dụng
-    if (normalizedDiscountCode) {
-      try {
-        await UsedCouponModel.create({
-          userId: req.user.id,
-          couponCode: normalizedDiscountCode,
-          orderId: newOrder._id,
-        });
-        console.log("✅ Đã lưu mã giảm giá đã sử dụng");
-      } catch (couponErr) {
-        console.log("⚠️ Lỗi lưu mã giảm giá:", couponErr.message);
-      }
-    }
-
-    if (normalizedDiscountCode.startsWith("NEWS10")) {
-      try {
-        await NewsletterModel.updateOne(
-          { couponCode: normalizedDiscountCode, isUsed: false },
-          { $set: { isUsed: true } },
-        );
-      } catch (newsletterErr) {
-        console.log(
-          "⚠️ Lỗi đánh dấu newsletter coupon:",
-          newsletterErr.message,
-        );
-      }
-    }
-
-    // Gửi email xác nhận đơn hàng
-    try {
-      const user = await UserModel.findById(req.user.id);
-      console.log("📧 User email:", user?.email);
-      if (user && user.email) {
-        await sendOrderConfirmationEmail(user.email, newOrder, shippingInfo);
-        console.log("✉️ Đã gửi email xác nhận đơn hàng tới:", user.email);
-      } else {
-        console.log("⚠️ Không tìm thấy email user, user:", user);
-      }
-    } catch (emailErr) {
-      console.error("⚠️ Không gửi được email:", emailErr.message);
-      console.error("⚠️ Chi tiết lỗi email:", emailErr);
-      // Không block response nếu gửi email lỗi
-    }
-
-    res.json({
-      message: "Đặt hàng thành công",
-      order: newOrder,
-    });
-  } catch (err) {
-    console.error("❌ Lỗi tạo đơn hàng:", err);
-    console.error("❌ Stack:", err.stack);
-    res.status(500).json({
-      message: "Lỗi server khi tạo đơn hàng",
-      error: err.message,
-      details: err.toString(),
-    });
-  }
+    res.status(201).json({ message: 'Đặt hàng thành công', order });
+  } catch (error) { sendError(res, error); }
 });
 
 // 2. Lấy đơn hàng của user hiện tại (cần token)
@@ -788,27 +561,28 @@ app.get("/api/orders/my-orders", authenticateToken, async (req, res) => {
     });
     res.json(orders);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
 // 3. Lấy tất cả đơn hàng (admin)
-app.get("/api/orders", async (req, res) => {
+app.get("/api/orders", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const orders = await OrderModel.find()
       .populate("userId", "email fullName")
       .sort({ createdAt: -1 });
     res.json(orders);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
 // 4. Cập nhật trạng thái đơn hàng (admin) + gửi notification
-app.put("/api/orders/:id", async (req, res) => {
+app.put("/api/orders/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
+    fields(req.body, ['status', '__v']);
     const { status } = req.body;
-    const updatedOrder = await versionedUpdate(OrderModel, { _id: req.params.id }, { status, __v: req.body.__v });
+    const updatedOrder = await changeOrderStatus(req.params.id, status, req.body.__v);
     if (!updatedOrder) return res.status(404).json({ error: "Order not found" });
 
     // Gửi thông báo cho user
@@ -851,59 +625,23 @@ app.put("/api/orders/:id", async (req, res) => {
 
     res.json(updatedOrder);
   } catch (err) {
-    res.status(err.status || 500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
 // 5. Xóa đơn hàng
-app.delete("/api/orders/:id", async (req, res) => {
-  try {
-    await OrderModel.findByIdAndDelete(req.params.id);
-    res.json({ message: "Đơn hàng đã được xóa" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+app.delete("/api/orders/:id", authenticateToken, requireAdmin, (req, res) => {
+  res.status(405).json({ error: 'Order audit records cannot be deleted; use status transitions', code: 'METHOD_NOT_ALLOWED' });
 });
 
 // 6. Hủy đơn hàng (chỉ cho user, chỉ với đơn Đang xử lý)
 app.put("/api/orders/:id/cancel", authenticateToken, async (req, res) => {
   try {
-    const { reason } = req.body;
-    const order = await OrderModel.findById(req.params.id);
-
-    if (!order) {
-      return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
-    }
-
-    // Kiểm tra quyền sở hữu
-    if (order.userId.toString() !== req.user.id) {
-      return res
-        .status(403)
-        .json({ message: "Bạn không có quyền hủy đơn hàng này" });
-    }
-
-    // Chỉ cho phép hủy đơn đang xử lý
-    if (order.status !== "Đang xử lý") {
-      return res
-        .status(400)
-        .json({ message: "Chỉ có thể hủy đơn hàng đang xử lý" });
-    }
-
-    order.status = "Đã hủy";
-    order.cancelledAt = new Date();
-    order.cancelReason = reason || "Khách hàng hủy đơn";
-    await order.save();
-
-    // KHÔNG hoàn lại coupon khi hủy đơn: mã đã dùng sẽ mất luôn
-
-    res.json({
-      message: "Đã hủy đơn hàng thành công",
-      order,
-    });
-  } catch (err) {
-    console.error("Lỗi hủy đơn hàng:", err);
-    res.status(500).json({ error: err.message });
-  }
+    fields(req.body, ['reason']);
+    if (req.body.reason !== undefined) ensure(text(req.body.reason, 500), 'Invalid cancellation reason');
+    const order = await changeOrderStatus(req.params.id, 'Đã hủy', undefined, req.user.id, req.body.reason);
+    res.json({ message: 'Đã hủy đơn hàng thành công', order });
+  } catch (error) { sendError(res, error); }
 });
 
 // =============================================
@@ -964,7 +702,7 @@ app.get("/api/virtual-closet", authenticateToken, requireDbReady, async (req, re
       groupedByCategory,
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -994,7 +732,7 @@ app.get("/api/virtual-closet/category/:category", authenticateToken, requireDbRe
 
     res.json({ items: normalized, count: normalized.length });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -1035,7 +773,7 @@ app.post("/api/virtual-closet/wear/:itemId", authenticateToken, requireDbReady, 
       wornCount: item?.wornCount || item?.wearCount || 0,
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -1056,7 +794,7 @@ app.delete("/api/virtual-closet/:itemId", authenticateToken, requireDbReady, asy
 
     res.json({ message: "Item removed from closet", totalItems: closet.items.length });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -1096,7 +834,7 @@ app.get("/api/virtual-closet/stats/summary", authenticateToken, requireDbReady, 
       lastSyncedAt: closet.lastSyncedAt,
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -1145,7 +883,7 @@ app.post("/api/virtual-closet/add", authenticateToken, requireDbReady, async (re
       item: closet.items[closet.items.length - 1],
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -1281,7 +1019,7 @@ app.get("/api/banner-contents", async (req, res) => {
     const banners = await BannerContentModel.find();
     res.json(banners);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -1298,12 +1036,12 @@ app.get("/api/banner-contents/:bannerId", async (req, res) => {
     }
     res.json(banner);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
 // 3. Tạo banner content mới
-app.post("/api/banner-contents", async (req, res) => {
+app.post("/api/banner-contents", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { bannerId, title, content, imageUrl } = req.body;
 
@@ -1322,12 +1060,12 @@ app.post("/api/banner-contents", async (req, res) => {
     await newBanner.save();
     res.json(newBanner);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
 // 4. Cập nhật banner content
-app.put("/api/banner-contents/:bannerId", async (req, res) => {
+app.put("/api/banner-contents/:bannerId", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { title, content, imageUrl, isActive } = req.body;
     const updatedBanner = await BannerContentModel.findOneAndUpdate(
@@ -1348,12 +1086,12 @@ app.put("/api/banner-contents/:bannerId", async (req, res) => {
 
     res.json(updatedBanner);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
 // 5. Xóa banner content
-app.delete("/api/banner-contents/:bannerId", async (req, res) => {
+app.delete("/api/banner-contents/:bannerId", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const deleted = await BannerContentModel.findOneAndDelete({
       bannerId: req.params.bannerId,
@@ -1363,7 +1101,7 @@ app.delete("/api/banner-contents/:bannerId", async (req, res) => {
     }
     res.json({ message: "Banner đã được xóa" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -1376,7 +1114,7 @@ app.get("/api/wishlist", authenticateToken, async (req, res) => {
     const wishlist = await WishlistModel.findOne({ userId: req.user.id });
     res.json(wishlist ? wishlist.products : []);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -1407,7 +1145,7 @@ app.post("/api/wishlist/add", authenticateToken, async (req, res) => {
     await wishlist.save();
     res.json({ message: "Đã thêm vào yêu thích", products: wishlist.products });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -1424,7 +1162,7 @@ app.post("/api/wishlist/remove", authenticateToken, async (req, res) => {
     await wishlist.save();
     res.json({ message: "Đã xóa khỏi yêu thích", products: wishlist.products });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -1457,7 +1195,7 @@ app.post("/api/wishlist/sync", authenticateToken, async (req, res) => {
     await wishlist.save();
     res.json({ message: "Đã đồng bộ", products: wishlist.products });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -1531,16 +1269,17 @@ app.get("/api/products/:productId/can-review", authenticateToken, async (req, re
       message: "Bạn cần mua sản phẩm này trước khi đánh giá",
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
 // 1. Lấy đánh giá theo sản phẩm
 app.get("/api/reviews/:productId", async (req, res) => {
   try {
+    const id = req.params.productId;
     const reviews = await ReviewModel.find({
-      productId: req.params.productId,
-    }).sort({ createdAt: -1 });
+      productId: { $in: /^\d+$/.test(id) ? [id, Number(id)] : [id] },
+    }).select('-userId -__v').sort({ createdAt: -1 });
     const avgRating =
       reviews.length > 0
         ? (
@@ -1553,7 +1292,7 @@ app.get("/api/reviews/:productId", async (req, res) => {
       totalReviews: reviews.length,
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -1580,7 +1319,7 @@ app.post("/api/reviews", authenticateToken, async (req, res) => {
     const review = new ReviewModel({
       productId,
       userId: req.user.id,
-      userName: user ? user.fullName || user.email : "Ẩn danh",
+      userName: user?.fullName || "Ẩn danh",
       rating,
       comment: comment || "",
       images: images || [],
@@ -1588,7 +1327,7 @@ app.post("/api/reviews", authenticateToken, async (req, res) => {
     await review.save();
     res.json({ message: "Đánh giá thành công", review });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -1600,9 +1339,10 @@ app.post("/api/reviews/:id/like", async (req, res) => {
       { $inc: { likes: 1 } },
       { new: true },
     );
-    res.json(review);
+    if (!review) return res.status(404).json({ error: 'Review not found' });
+    res.json({ _id: review._id, likes: review.likes });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -1640,38 +1380,14 @@ function getBotReply(message) {
 }
 
 // 1. Gửi tin nhắn chat
-app.post("/api/chat/send", async (req, res) => {
+app.post("/api/chat/send", optionalAuthenticate, async (req, res) => {
   try {
-    const { message, userId: clientUserId } = req.body;
+    const { message } = req.body;
     if (!message || !message.trim()) {
       return res.status(400).json({ error: "Message is required" });
     }
 
-    // Ủu tiên userId từ token (nếu có), sau đó mới dùng client-sent
-    let validUserId = null;
-    const authHeader = req.headers["authorization"];
-    if (authHeader && authHeader.startsWith("Bearer ")) {
-      try {
-        const decoded = jwt.verify(authHeader.split(" ")[1], JWT_SECRET);
-        if (decoded?.id) {
-          validUserId = decoded.id;
-          console.log(`💬 Chat from user: ${decoded.email} (${validUserId})`);
-        }
-      } catch (e) {
-        console.log("💬 Chat token invalid:", e.message);
-      }
-    }
-    if (
-      !validUserId &&
-      clientUserId &&
-      /^[0-9a-fA-F]{24}$/.test(String(clientUserId))
-    ) {
-      validUserId = clientUserId;
-      console.log(`💬 Chat from clientUserId: ${validUserId}`);
-    }
-    if (!validUserId) {
-      console.log("💬 Chat from anonymous (no userId)");
-    }
+    const validUserId = req.user?.id;
 
     // Lưu tin nhắn user
     const userMsgData = { sender: "user", message: message.trim() };
@@ -1689,7 +1405,7 @@ app.post("/api/chat/send", async (req, res) => {
     res.json({ userMessage: userMsg, botReply: botMsg });
   } catch (err) {
     console.error("Chat send error:", err);
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -1701,7 +1417,7 @@ app.get("/api/chat/history", authenticateToken, async (req, res) => {
       .limit(100);
     res.json(messages);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -1749,7 +1465,7 @@ app.get("/api/admin/chat/conversations", async (req, res) => {
 
     res.json(conversations);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -1766,7 +1482,7 @@ app.get("/api/admin/chat/messages/:userId", async (req, res) => {
     );
     res.json(messages);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -1787,7 +1503,7 @@ app.post("/api/admin/chat/reply", async (req, res) => {
     await msg.save();
     res.json(msg);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -1806,7 +1522,7 @@ app.get("/api/notifications", authenticateToken, async (req, res) => {
     });
     res.json({ notifications, unreadCount });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -1819,7 +1535,7 @@ app.put("/api/notifications/read", authenticateToken, async (req, res) => {
     );
     res.json({ message: "Đã đánh dấu tất cả đã đọc" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -1844,9 +1560,10 @@ async function createNotification(
 // API GỢI Ý SẢN PHẨM THÔNG MINH (RECOMMENDATIONS)
 // =============================================
 // 1. Ghi nhận lượt xem sản phẩm
-app.post("/api/view-history", async (req, res) => {
+app.post("/api/view-history", authenticateToken, async (req, res) => {
   try {
-    const { userId, productId, category } = req.body;
+    const { productId, category } = req.body;
+    const userId = req.user.id;
     if (!productId) return res.status(400).json({ message: "Thiếu productId" });
 
     if (userId) {
@@ -1858,14 +1575,15 @@ app.post("/api/view-history", async (req, res) => {
     }
     res.json({ message: "OK" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
 // 2. Lấy sản phẩm gợi ý cho user
-app.get("/api/recommendations", async (req, res) => {
+app.get("/api/recommendations", optionalAuthenticate, async (req, res) => {
   try {
-    const { userId, productId, category, limit = 8 } = req.query;
+    const { productId, category, limit = 8 } = req.query;
+    const userId = req.user?.id;
     let recommendedIds = [];
 
     // Chiến lược 1: Dựa trên lịch sử xem của user
@@ -1915,7 +1633,7 @@ app.get("/api/recommendations", async (req, res) => {
 
     res.json(uniqueProducts.slice(0, parseInt(limit)));
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    sendError(res, err);
   }
 });
 
@@ -1923,67 +1641,20 @@ app.get("/api/recommendations", async (req, res) => {
 // API THANH TOÁN TRỰC TUYẾN (PAYMENT GATEWAY - Mô phỏng)
 // =============================================
 // 1. Tạo giao dịch thanh toán
-app.post("/api/payment/create", authenticateToken, async (req, res) => {
+app.post('/api/payment/create', authenticateToken, async (req, res) => {
   try {
-    const { orderId, amount, method } = req.body;
-    // Mô phỏng tạo link thanh toán
-    const paymentId =
-      "PAY_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
-    const paymentData = {
-      paymentId,
-      orderId,
-      amount,
-      method, // momo, zalopay, vnpay, stripe
-      status: "pending",
-      createdAt: new Date(),
-      // Mô phỏng URL thanh toán
-      paymentUrl: `https://payment.vfitai.com/pay/${paymentId}`,
-      qrCode:
-        method === "momo"
-          ? `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=momo://pay?amount=${amount}&id=${paymentId}`
-          : null,
-    };
-
-    // Mô phỏng: sau 3 giây tự động xác nhận thành công
-    setTimeout(async () => {
-      try {
-        const order = await OrderModel.findById(orderId);
-        if (order && order.status === "Đang xử lý") {
-          order.paymentMethod = method;
-          await order.save();
-          // Tạo thông báo
-          await createNotification(
-            req.user.id,
-            "Thanh toán thành công",
-            `Đơn hàng #${orderId} đã được thanh toán qua ${method}`,
-            "order",
-            "/profile",
-          );
-        }
-      } catch (e) {
-        console.error("Lỗi xác nhận thanh toán:", e);
-      }
-    }, 3000);
-
-    res.json(paymentData);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+    fields(req.body, ['orderId', 'amount', 'method']);
+    ensure(objectId(req.body.orderId), 'Invalid orderId');
+    const order = await OrderModel.findOne({ _id: req.body.orderId, userId: req.user.id });
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+    // Fake payment links and delayed automatic success have been removed.
+    res.status(503).json({ code: 'PAYMENT_UNAVAILABLE', error: 'Online payment provider is not configured' });
+  } catch (error) { sendError(res, error); }
+});
+app.get('/api/payment/status/:paymentId', authenticateToken, (req, res) => {
+  res.status(404).json({ code: 'PAYMENT_NOT_FOUND', error: 'Payment not found' });
 });
 
-// 2. Kiểm tra trạng thái thanh toán
-app.get("/api/payment/status/:paymentId", async (req, res) => {
-  try {
-    // Mô phỏng: luôn trả về thành công
-    res.json({
-      paymentId: req.params.paymentId,
-      status: "success",
-      message: "Thanh toán thành công",
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 // =============================================
 // ADMIN DATA SYNC & MANAGEMENT APIs
@@ -2020,18 +1691,13 @@ app.get("/api/admin/sync-status", async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Lỗi check sync status:", error);
-    res.status(500).json({ error: error.message });
+    sendError(res, error);
   }
 });
 
 // 2. Lấy tất cả dữ liệu để đồng bộ
 app.get("/api/admin/get-all-data", async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(" ")[1];
-
-    // Verify token (optional - có thể bỏ để test)
-    // if (!token) return res.status(401).json({ message: "No token" });
-
     const orders = await OrderModel.find().lean();
     const users = await UserModel.find().lean();
     const products = new Map();
@@ -2084,100 +1750,11 @@ app.get("/api/admin/get-all-data", async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Lỗi lấy dữ liệu:", error);
-    res.status(500).json({ error: error.message });
+    sendError(res, error);
   }
 });
 
-// 3. Xóa TẤT CẢ dữ liệu (DANGER - chỉ dùng khi muốn reset hoàn toàn)
-app.post("/api/admin/clear-all-data", async (req, res) => {
-  try {
-    const { confirm } = req.body;
-
-    if (confirm !== "CLEAR_ALL_DATA") {
-      return res.status(400).json({
-        error: "Xác nhận không đúng. Gửi { confirm: 'CLEAR_ALL_DATA' }",
-      });
-    }
-
-    // Delete all data
-    const deletedOrders = await OrderModel.deleteMany({});
-    const deletedUsers = await UserModel.deleteMany({});
-    const deletedCoupons = await UsedCouponModel.deleteMany({});
-
-    console.log(`
-    ⚠️  XÓA DỮ LIỆU HOÀN TOÀN:
-    - Orders: ${deletedOrders.deletedCount}
-    - Users: ${deletedUsers.deletedCount}
-    - Coupons: ${deletedCoupons.deletedCount}
-    `);
-
-    res.json({
-      status: "success",
-      message: "✅ Đã xóa tất cả dữ liệu",
-      deleted: {
-        orders: deletedOrders.deletedCount,
-        users: deletedUsers.deletedCount,
-        coupons: deletedCoupons.deletedCount,
-      },
-    });
-  } catch (error) {
-    console.error("❌ Lỗi xóa dữ liệu:", error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// 4. Reset dữ liệu về trạng thái ban đầu (tạo test data)
-app.post("/api/admin/reset-data", async (req, res) => {
-  try {
-    // Xóa all data trước
-    await OrderModel.deleteMany({});
-    await UserModel.deleteMany({});
-    await UsedCouponModel.deleteMany({});
-
-    // Tạo user test
-    const hashPassword = await bcrypt.hash("123456", 10);
-    const testUser = new UserModel({
-      email: "test@example.com",
-      password: hashPassword,
-      fullName: "Test User",
-      phone: "0123456789",
-      address: "123 Main St",
-      city: "Hà Nội",
-      district: "Ba Đình",
-      ward: "Phường Cống Vị",
-      role: "user",
-    });
-    await testUser.save();
-
-    // Tạo admin
-    const adminPassword = await bcrypt.hash("admin123", 10);
-    const admin = new UserModel({
-      email: "admin@example.com",
-      password: adminPassword,
-      fullName: "Admin",
-      phone: "0999999999",
-      address: "Admin Address",
-      city: "Hà Nội",
-      district: "Hoàn Kiếm",
-      ward: "Phường Hàng Bạc",
-      role: "admin",
-    });
-    await admin.save();
-
-    res.json({
-      status: "success",
-      message: "✅ Đã reset dữ liệu về ban đầu",
-      data: {
-        testUser: testUser.email,
-        admin: admin.email,
-        password: "123456 / admin123",
-      },
-    });
-  } catch (error) {
-    console.error("❌ Lỗi reset dữ liệu:", error);
-    res.status(500).json({ error: error.message });
-  }
-});
+// Destructive reset/clear handlers removed. Test fixture cleanup belongs to the disposable DB runner.
 
 // 5. API endpoint kiểm tra dữ liệu đồng bộ có vấn đề không
 app.post("/api/admin/check-sync", async (req, res) => {
@@ -2192,9 +1769,8 @@ app.post("/api/admin/check-sync", async (req, res) => {
       return res.json({
         status: "warning",
         isSynced: false,
-        message: "❌ Dữ liệu chưa được đồng bộ. Vui lòng clear và reset",
-        suggestion:
-          "Gọi POST /api/admin/clear-all-data rồi POST /api/admin/reset-data",
+        message: "Chưa có đủ dữ liệu để thống kê đồng bộ",
+        suggestion: "Kiểm tra nguồn dữ liệu và cấu hình kết nối; dữ liệu hiện có được giữ nguyên",
       });
     }
 
@@ -2208,13 +1784,13 @@ app.post("/api/admin/check-sync", async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    sendError(res, error);
   }
 });
 
 // THÊM THÔNG BÁO KHI ĐƠN HÀNG THAY ĐỔI TRẠNG THÁI
 // Override API cập nhật trạng thái đơn hàng để gửi notification
-const originalOrderUpdate = app.put;
+// Order transitions are handled by checkout.js.
 
 // ============================================================
 // AI OUTFIT GENERATOR ROUTES
@@ -2230,10 +1806,18 @@ app.use(
   }),
 );
 
+app.use((req, res) => res.status(404).json({ code: 'NOT_FOUND', error: 'Route not found' }));
+app.use((error, req, res, next) => {
+  if (res.headersSent) return next(error);
+  if (error.type === 'entity.parse.failed') return res.status(400).json({ code: 'INVALID_JSON', error: 'Invalid JSON body' });
+  if (error.type === 'entity.too.large') return res.status(413).json({ code: 'PAYLOAD_TOO_LARGE', error: 'Request body too large' });
+  sendError(res, error);
+});
 const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || '127.0.0.1';
 if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`Server đang chạy tại http://localhost:${PORT}`);
+  app.listen(PORT, HOST, () => {
+    console.log(`Server đang chạy tại http://${HOST}:${PORT}`);
   });
 }
 

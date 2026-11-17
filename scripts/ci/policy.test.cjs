@@ -1,0 +1,20 @@
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const { classify, xml } = require('./policy.cjs');
+const base = { phase: 'run', exitCode: 0, minimum: 5, reportRequired: true };
+test('all required assertions pass', () => assert.equal(classify({ ...base, counts: { passed: 5, failed: 0, skipped: 0 } }).status, 'Passed'));
+test('assertion failure is Failed', () => assert.equal(classify({ ...base, exitCode: 1, counts: { passed: 4, failed: 1, skipped: 0 } }).status, 'Failed'));
+test('browser provisioning failure is infrastructure', () => assert.equal(classify({ ...base, exitCode: 1, text: "Executable doesn't exist" }).status, 'InfrastructureFailure'));
+test('dependency install failure is infrastructure', () => assert.equal(classify({ phase: 'install', exitCode: 1 }).status, 'InfrastructureFailure'));
+test('all skipped is not a passing gate', () => assert.equal(classify({ ...base, counts: { passed: 0, failed: 0, skipped: 5 } }).status, 'Skipped'));
+test('partial skip cannot silently pass a required suite', () => assert.equal(classify({ ...base, counts: { passed: 5, failed: 0, skipped: 1 } }).status, 'Failed'));
+test('empty suite is blocked', () => assert.equal(classify({ ...base, counts: { passed: 0, failed: 0, skipped: 0 } }).status, 'Blocked'));
+test('under-collection is blocked despite runner exit zero', () => assert.equal(classify({ ...base, counts: { passed: 4, failed: 0, skipped: 0 } }).status, 'Blocked'));
+test('missing report cannot establish successful assertions', () => assert.equal(classify(base).status, 'Blocked'));
+test('failed static command is Failed without fabricating tests', () => assert.equal(classify({ phase: 'run', exitCode: 2 }).status, 'Failed'));
+test('unsupported baseline platform records explicit blocking reason', () => assert.equal(classify({ ...base, blockedReason: 'Windows baseline unavailable on Linux' }).status, 'Blocked'));
+test('report failure text is escaped instead of interpreted as HTML/XML', () => {
+  const value = xml('<script a="x">&owned</script>');
+  assert.equal(value, '&lt;script a=&quot;x&quot;&gt;&amp;owned&lt;/script&gt;');
+  assert.equal(xml('\u001b[31massertion failed\u001b[0m\u0000'), 'assertion failed');
+});
