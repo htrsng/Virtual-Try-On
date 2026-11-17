@@ -1,0 +1,37 @@
+﻿[
+    {
+        "url":  "/assets/models/avatar_morph.glb",
+        "bytes":  1709560,
+        "sha256":  "945989E9ED8879FB447B5DF423F05D3C9F2F0296C9729D437DE7B621B441143E"
+    },
+    {
+        "url":  "/models/Ao_Thun_sizeS.glb",
+        "bytes":  516444,
+        "sha256":  "60F40DA6651790E4DAB44D0C36456E6E3C107C530F57600F709E63B9862AE512"
+    },
+    {
+        "url":  "/models/Ao_Thun_sizeM.glb",
+        "bytes":  585384,
+        "sha256":  "7D6FAFD4597481B20E4C0AB099BA9B48EC5A5FCB1331706075CDB095A10928C2"
+    },
+    {
+        "url":  "/models/Ao_Thun_sizeL.glb",
+        "bytes":  562088,
+        "sha256":  "B88E325996FFCC7126AD5438AD0842093C4374CC8C4E9A92D9E0233971AFCE43"
+    },
+    {
+        "url":  "/models/QuanS.glb",
+        "bytes":  387224,
+        "sha256":  "C2A2421E17B033975D59EBE4765856820343A71163B3A3BC4D01F7E969E2D8C9"
+    },
+    {
+        "url":  "/models/QuanM.glb",
+        "bytes":  387224,
+        "sha256":  "81D52CE7D47E0C23E63B0440A17D36DADC406BB6860B3CE8ED88F70034F9B2A5"
+    },
+    {
+        "url":  "/models/QuanL.glb",
+        "bytes":  426628,
+        "sha256":  "57A64BD5C157694940C486DB5DD0DA3784D746E2836DD32976E52C96B49F5EE9"
+    }
+]

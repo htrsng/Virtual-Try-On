@@ -1,16 +1,18 @@
-# API inventory — Stage 1
+# API inventory — Stage 2
 
 Generated from server/index.js and server/routes/ai.routes.js by
-`node scripts/export-api-inventory.cjs`. 71 live route registrations + 3 retired paths.
+`node scripts/export-api-inventory.cjs`. 73 live route registrations + 3 retired paths.
 The response descriptions are maintained explicitly in the exporter; review them with handler changes.
 
 Admin includes inherited prefix guards for /api/admin, /api/users, /api/coupons.
 Authenticated owner means DB identity from JWT, with resource filters described in
-[permission matrix](permission-matrix.md). All live API routes require DB readiness (503).
+[permission matrix](permission-matrix.md). Business API routes require DB readiness (503); health/live remains available during DB outages.
 Payment responses intentionally have no success path until a provider is connected.
 
 | Method | Route | Access | Success / intentional disabled status | Response data |
 |---|---|---|---|---|
+| GET | `/api/health/live` | Public | 200 | status=alive, service; independent of database |
+| GET | `/api/health/ready` | Public | 200/503 | status, service, database readiness; test runId when managed |
 | GET | `/api/user/addresses` | Authenticated owner | 200 | addresses[] (owner) |
 | POST | `/api/user/addresses` | Authenticated owner | 200 | success, address (owner) |
 | PUT | `/api/user/addresses/:addressId` | Authenticated owner | 200 | success, address (owner) |

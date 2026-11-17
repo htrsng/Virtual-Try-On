@@ -4,6 +4,7 @@ module.exports = {
   testMatch: ["**/tests/**/*.test.js"],
   globalSetup: '<rootDir>/tests/global-setup.js',
   verbose: true,
+  maxWorkers: 2,
   clearMocks: true,
   resetMocks: true,
   restoreMocks: true,

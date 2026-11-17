@@ -1,5 +1,80 @@
 # Environment setup
 
+## Giai đoạn 2 — môi trường QA hiện tại
+
+Xem [thiết kế và kết quả](stage-2-test-environment.md) và
+[fixture contract](../test-data/README.md). Các phần Giai đoạn 0/1 bên dưới giữ lịch sử.
+Đã đo trên Windows 11, Node 22.15.0, npm 11.3.0, MongoDB 8.2.6, Playwright 1.60.0.
+CI dùng Node 22; Linux/Actions chưa xác minh. Dùng lockfiles, không cài global Jest/Playwright.
+
+Từ root, cài dependencies và browser:
+
+```powershell
+# Optional: đặt trước npm ci nếu đã có mongod tin cậy, tránh download binary lớn.
+$env:MONGOMS_SYSTEM_BINARY = 'C:\tools\mongodb\bin\mongod.exe'
+$env:MONGOMS_RUNTIME_DOWNLOAD = 'false'
+npm ci --prefix server
+npm ci --prefix client
+npm ci --prefix tests
+node tests/node_modules/@playwright/test/cli.js install chromium
+node scripts/qa-repeat.cjs all
+```
+
+Thay đường dẫn ví dụ bằng binary tồn tại; bỏ cả hai dòng MONGOMS nếu muốn package tự tải
+binary. Máy đo dùng `.runtime/tools/mongod.exe`; binary và Mongo data không nằm trong Git.
+Không cần `.env` của server, MongoDB service development hoặc admin account sẵn có để test.
+
+Lệnh riêng, tránh PowerShell làm mất các flags sau npm:
+
+```powershell
+node scripts/qa-repeat.cjs backend   # 2 lần full backend, serial
+node scripts/qa-repeat.cjs browser   # 2 lần full Playwright
+node scripts/qa-environment-check.cjs
+```
+
+Raw results đi vào `.runtime/qa-repeat/<run>/`; summary chỉ đếm từng run riêng, không
+cộng hai lượt thành số test cases mới. Playwright tự tạo môi trường, reset/clear từng
+case và stop sau suite; không dùng lại server đang nghe 3000/5173.
+
+### Chạy QA tương tác / dùng cho Selenium sau này
+
+Tạo `qa/.env` từ `qa/.env.example` nếu chưa có. Không ghi đè file đã cấu hình.
+Node nạp file này **chủ động**; application `server/.env` không được launcher đọc.
+
+```powershell
+# Terminal 1: giữ launcher chạy.
+node --env-file=qa/.env scripts/qa-environment.cjs start
+
+# Terminal 2, cùng runId/config:
+node --env-file=qa/.env scripts/qa-environment.cjs status
+node --env-file=qa/.env scripts/qa-environment.cjs reset
+node --env-file=qa/.env scripts/qa-environment.cjs clear
+node --env-file=qa/.env scripts/qa-environment.cjs stop
+```
+
+Default UI `http://127.0.0.1:55173`, API `http://127.0.0.1:3300`.
+QA_RUN_ID chỉ 1..40 ký tự thường/số/_/-. Đổi ports qua QA_API_PORT/QA_UI_PORT;
+URL/proxy tự suy ra, không sửa tests. Ports phải trống, khác nhau, 1024..65535;
+host chỉ 127.0.0.1. External QA_MONGODB_URI/QA_DATABASE_URI bị từ chối.
+
+Manifest `.runtime/qa/<runId>/environment.json` chứa accounts admin/customer/other và
+capability local khi đang chạy; chỉ đọc tại máy test, không commit hoặc đưa vào report.
+JWT/password tạo ngẫu nhiên, không có secret trong `.env.example` hay catalog JSON.
+`clear` để DB rỗng và ready=503; `reset` seed lại rồi ready=200; `stop` dừng owned
+processes/Mongo, trả ports và scrub manifest. Reset/clear chỉ dùng giữa tests; không
+thực hiện khi test/transaction còn chạy. Không có HTTP reset endpoint.
+
+### Dependency/lifecycle troubleshooting
+
+- EPERM/spawn failure là lỗi môi trường thực thi, không xem là lỗi ứng dụng; cần
+  environment cho phép Node/browser/mongod tạo subprocess.
+- EADDRINUSE: dừng đúng environment của bạn hoặc chọn ports khác; launcher từ chối reuse.
+- Stale owner.lock sau hard-kill: không tự adopt/kill PID hoặc xóa DB; dùng runId mới
+  và kiểm tra đúng process cũ. Không trỏ cleanup vào development URI.
+- Chromium thiếu: cài lại bằng Playwright CLI ở trên, không đổi browser để che kết quả.
+- First-start Mongo/download có thể chậm: lifecycle có startup timeout riêng, còn
+  assertions UI chờ checkpoint cụ thể; không dùng networkidle hoặc sleep để chờ data.
+
 ## Giai đoạn 1 — cấu hình hiện tại
 
 Backend hardening nằm ở nhánh `qa/stage-1-backend-p0`; xem

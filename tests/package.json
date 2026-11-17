@@ -4,7 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "playwright test"
+    "test": "playwright test",
+    "env:start": "node ../scripts/qa-environment.cjs start",
+    "env:reset": "node ../scripts/qa-environment.cjs reset",
+    "env:clear": "node ../scripts/qa-environment.cjs clear",
+    "env:stop": "node ../scripts/qa-environment.cjs stop",
+    "test:repeat": "node ../scripts/qa-repeat.cjs all"
   },
   "keywords": [],
   "author": "",

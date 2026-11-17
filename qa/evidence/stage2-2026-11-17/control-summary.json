@@ -1,0 +1,15 @@
+﻿{
+    "runId":  "control_3547bb3520d84bf69ba9c710557d84cf",
+    "portCollisionRefused":  true,
+    "forgedCapabilityRefused":  true,
+    "cliReset":  true,
+    "cliClear":  true,
+    "cliStop":  true,
+    "readinessTransitions":  [
+                                 200,
+                                 503,
+                                 200
+                             ],
+    "portsReleased":  true,
+    "credentialsScrubbed":  true
+}

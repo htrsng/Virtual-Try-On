@@ -40,6 +40,9 @@ const { createAiRouter } = require("./routes/ai.routes");
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '100kb' }));
+const health = require('./health');
+app.get('/api/health/live', health.live);
+app.get('/api/health/ready', health.ready);
 // Retired operational endpoints are deliberately absent in every environment.
 app.use(['/api/auth/create-admin', '/api/admin/reset-data', '/api/admin/clear-all-data'], (req, res) =>
   res.status(404).json({ code: 'NOT_FOUND', error: 'Endpoint retired' }));
@@ -1911,9 +1914,10 @@ app.use((error, req, res, next) => {
   sendError(res, error);
 });
 const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || '127.0.0.1';
 if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`Server đang chạy tại http://localhost:${PORT}`);
+  app.listen(PORT, HOST, () => {
+    console.log(`Server đang chạy tại http://${HOST}:${PORT}`);
   });
 }
 

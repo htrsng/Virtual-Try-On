@@ -7,6 +7,8 @@ on:
       - "client/**"
       - "server/**"
       - "tests/**"
+      - "qa/**"
+      - "scripts/**"
       - ".github/workflows/test.yml"
   pull_request:
     branches: [ "main" ]
@@ -14,6 +16,8 @@ on:
       - "client/**"
       - "server/**"
       - "tests/**"
+      - "qa/**"
+      - "scripts/**"
       - ".github/workflows/test.yml"
 
 jobs:
@@ -25,9 +29,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 22
       - name: Install Dependencies
-        run: cd server && npm install
+        run: cd server && npm ci
       - name: Run Backend Tests
         run: cd server && npm test
 
@@ -39,9 +43,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 22
       - name: Install Dependencies
-        run: cd client && npm install
+        run: cd client && npm ci
       - name: Run Frontend Tests
         run: cd client && npm test -- --run
 
@@ -53,13 +57,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 22
       - name: Install Server Dependencies
-        run: cd server && npm install
+        run: cd server && npm ci
       - name: Install Client Dependencies
-        run: cd client && npm install
+        run: cd client && npm ci
       - name: Install Playwright Dependencies
-        run: cd tests && npm install
+        run: cd tests && npm ci
       - name: Install Playwright Browsers
         run: cd tests && npx playwright install --with-deps
       - name: Run E2E Tests

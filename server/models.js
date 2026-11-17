@@ -17,6 +17,7 @@ const calculateTotalStock = (variants = [], fallbackStock = 0) => {
 const normalizeProductInventory = (body = {}) => {
   const variants = Array.isArray(body.variants)
     ? body.variants.map((variant) => ({
+      ...(variant?._id ? { _id: variant._id } : {}),
       color: {
         name: variant?.color?.name || variant?.name || variant?.color || "Mặc định",
         hex: variant?.color?.hex || variant?.hex || "#ffffff",
@@ -24,6 +25,7 @@ const normalizeProductInventory = (body = {}) => {
       },
       sizes: Array.isArray(variant?.sizes)
         ? variant.sizes.map((size) => ({
+          ...(size?._id ? { _id: size._id } : {}),
           size: size?.size || size?.label || "M",
           stock: Number(size?.stock) || 0,
           sku: size?.sku || "",

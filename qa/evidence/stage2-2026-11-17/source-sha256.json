@@ -1,0 +1,114 @@
+﻿[
+    {
+        "path":  ".github/workflows/test.yml",
+        "sha256":  "787D42D51A26F4BA1BB6CB0085CC1F39156F339AE3CF2108D6DF2E02A72E3FB8"
+    },
+    {
+        "path":  "client/package-lock.json",
+        "sha256":  "261D18AA794A08DF5D9EEAD3F21293C94571B4B1296664BB2664C2D786D78051"
+    },
+    {
+        "path":  "qa/.env.example",
+        "sha256":  "D8A8CCECD0FAA5DC2ECCCE51B622B58C0C2126E3926E8D2CF99AD93A06C4D34C"
+    },
+    {
+        "path":  "qa/config.cjs",
+        "sha256":  "13821AEA97DE49DAD7E10504E69525924B32F155534C925649FD61B02FC0C578"
+    },
+    {
+        "path":  "qa/environment.cjs",
+        "sha256":  "7B45D68FA2011E421650392E16EAB846A8439A328F86A03D1471C58EC536C396"
+    },
+    {
+        "path":  "qa/test-data/catalog.json",
+        "sha256":  "DA888FC51D327A5DD39CD93E021ECF3C2D221AA21EB8ABDFD315DBB3E86D708D"
+    },
+    {
+        "path":  "scripts/export-api-inventory.cjs",
+        "sha256":  "1EFC2AFB28AE14FF3C6A865D9EDA9848B884AE415CDE8C0681B68D78330A6A3B"
+    },
+    {
+        "path":  "scripts/qa-environment.cjs",
+        "sha256":  "B4DAF8D57C20D91813AE3A404365B5B02125BDFC1E8E70B60EF2130F30716B02"
+    },
+    {
+        "path":  "scripts/qa-environment-check.cjs",
+        "sha256":  "0733A526073E855071C13CD52495EA3D1EEEF83E3482E3543425E4D5E89BD528"
+    },
+    {
+        "path":  "scripts/qa-repeat.cjs",
+        "sha256":  "3BDCC277BA75C68F682B6270DE097B996A298AEC79E5AA3093611C7107272069"
+    },
+    {
+        "path":  "server/.env.example",
+        "sha256":  "39253F5B69905DE29C943F1248D2993FBA093191D6B7FB162F00E254410C4BA4"
+    },
+    {
+        "path":  "server/health.js",
+        "sha256":  "84F05C345D992BE8D24BA876BEAD9FE0E717DAA01A006115B9DDEB744964F080"
+    },
+    {
+        "path":  "server/index.js",
+        "sha256":  "AF2CBE47C74A6B55364A496FAB9F2C50F9AE10CC382E61F525A788CC7E37E31C"
+    },
+    {
+        "path":  "server/jest.config.js",
+        "sha256":  "DFD4FE8AC9AB3769AF21636954752D987FD2B6C699D7201BC745A364FB8E1205"
+    },
+    {
+        "path":  "server/models.js",
+        "sha256":  "EF2D6704E62D95BF6C8DABF9889A2111E4FC9E7C8BFF3C65BE3C30E1B85A754F"
+    },
+    {
+        "path":  "server/package-lock.json",
+        "sha256":  "57F3234B7A7CCE9AED4B01C76E7CEA2FBB59A7194400B67908EE178EBAC89B49"
+    },
+    {
+        "path":  "server/tests/setup.js",
+        "sha256":  "DFD5CB27A3C0D87D081F6A3A3475572A04AC55CD555EC82A87B9A4A7B60B49C1"
+    },
+    {
+        "path":  "server/tests/test-data.test.js",
+        "sha256":  "F9574655C816BCB2F5B6E9518A11066C8A409339545ACE3A58EBDDC9254E3478"
+    },
+    {
+        "path":  "server/test-support/owned-database.js",
+        "sha256":  "B194E3E8E30BB1665AA32265A2875E98484D5A34A5720FB96E39A09EFA5FC153"
+    },
+    {
+        "path":  "server/test-support/seed.js",
+        "sha256":  "4DCAF655B0A3F44AC762E8E8F74EF83FC35D522F0CA143C1277341CD293C70D9"
+    },
+    {
+        "path":  "tests/e2e/checkout-journey.spec.ts",
+        "sha256":  "A7DF40D9C86EF7511FED71126B470B4B8487F53BD2FF568B97413FB59180A519"
+    },
+    {
+        "path":  "tests/e2e/environment.spec.ts",
+        "sha256":  "44442C4A19B45FE7FE71E9D8F8C80FA2928B298E0CEF4EFB22E21B1E4CE64C7E"
+    },
+    {
+        "path":  "tests/e2e/home.spec.ts",
+        "sha256":  "6F0872480978ACDAF14C47F91C80708C6E6B87840AD6999AD09138953F7FC05F"
+    },
+    {
+        "path":  "tests/fixtures.ts",
+        "sha256":  "DC3BA9CFCDD06AB5D90DACF7DD800C13C9F1F98226C304780106B28C20BA0D02"
+    },
+    {
+        "path":  "tests/global-setup.ts",
+        "sha256":  "03180B7B8396B06E18A98338E66ABC102F701A78C13615786BFA95EA94B997D8"
+    },
+    {
+        "path":  "tests/package.json",
+        "sha256":  "E7BD69555EEACB86F358EFB63D1E3C375120E8CA2B1B249B1C2D41C94DC8EFFC"
+    },
+    {
+        "path":  "tests/package-lock.json",
+        "sha256":  "259DDE46C4ED7E6209906400FE055E11070F4805B26621F410B428BCB48D9EF3"
+    },
+    {
+        "path":  "tests/playwright.config.ts",
+        "sha256":  "AD86FED75AC5098B936B4452836295367A87B6EEA65D02E65E35BA8531D494E9"
+    }
+]

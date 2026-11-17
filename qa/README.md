@@ -7,6 +7,9 @@ Bài fuzzing môn học giữ riêng tại `archive/coursework-api-fuzzing/`.
 
 ## Tài liệu và bằng chứng
 
+- [Giai đoạn 2 — test environment](docs/stage-2-test-environment.md): isolated launcher,
+  [test data](test-data/README.md), health checks và kết quả chạy lặp hai lần.
+
 - [Giai đoạn 1 — backend P0](docs/stage-1-backend-report.md): Development Fix,
   QA regression và các giới hạn triển khai.
 - [API inventory](docs/api-inventory.md), [permission matrix](docs/permission-matrix.md),
@@ -26,7 +29,7 @@ Bài fuzzing môn học giữ riêng tại `archive/coursework-api-fuzzing/`.
 - [Findings](bug-reports/BASELINE-001.md): vấn đề đã quan sát và cách xử lý.
 - [Evidence](evidence/baseline-2026-11-16): số liệu, source hashes và API catalog.
 
-Chưa tạo Selenium framework hoặc workflow mới. Các kết quả baseline đo trên
-working tree đã khôi phục tại thời điểm chưa commit; không phải kết quả GitHub
-Actions hoặc bản clone sạch. Source ứng dụng sau đó được lưu trong commit
-`c83799e`; baseline cũ vẫn được giữ nguyên. Xem báo cáo trước khi dùng số liệu cho CV.
+Selenium framework chưa triển khai. Báo cáo `baseline-test-report.md` giữ khảo sát
+lịch sử trên working tree khôi phục chưa commit; source sau đó lưu tại `c83799e`.
+Clean-clone verification và kết quả Giai đoạn 1/2 có báo cáo riêng phía trên;
+không thay baseline cũ bằng số liệu mới hoặc coi local results là GitHub Actions.

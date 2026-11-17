@@ -9,7 +9,8 @@ client/       Frontend React, Vite và tài nguyên 3D
 server/       Backend Express, Mongoose models, services và backend tests
 tests/        Playwright browser tests gốc
 doc/          Tài liệu ứng dụng và ghi nhận khôi phục
-scripts/      Script khởi chạy web local
+scripts/      Launcher web/QA, seed lifecycle và repeat checks
+qa/           QA docs, fixtures, isolated environment và evidence summaries
 archive/      Coursework kiểm thử và báo cáo lịch sử
 ```
 
@@ -60,6 +61,12 @@ File `.env`, binary MongoDB và database local không được commit. Muốn d�
 Đây chưa phải kết quả kiểm tra toàn bộ hệ thống: chưa submit đơn hàng, xác minh thanh toán/email/Gemini hoặc toàn bộ luồng 3D. Chi tiết nguồn khôi phục, cấu hình và phạm vi xác minh ở [doc/RESTORED_WEB.md](doc/RESTORED_WEB.md).
 
 ## Hướng kiểm thử
+
+Giai đoạn 2 có môi trường QA riêng, tự seed/reset/cleanup và health checks.
+Chạy `node scripts/qa-repeat.cjs all`: đã xác minh **backend 130/130 Pass ×2** và
+**Playwright 6/6 Pass ×2**. Test không dùng database/server development.
+Xem [setup hiện tại](qa/docs/environment-setup.md),
+[fixture contract](qa/test-data/README.md) và [stage report](qa/docs/stage-2-test-environment.md).
 
 [Giai đoạn 1 — Backend P0](qa/docs/stage-1-backend-report.md) có API inventory,
 permission matrix, validation rules và regression evidence. Backend: **120 tests / 12 suites

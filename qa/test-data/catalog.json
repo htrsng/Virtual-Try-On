@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "clock": "2026-01-01T00:00:00.000Z",
+  "avatar": "/assets/models/avatar_morph.glb",
+  "products": [
+    {
+      "_id": "000000000000000000050101", "id": 50101, "name": "QA Cotton Shirt",
+      "category": "Áo", "price": 200000, "originalPrice": 250000, "status": "active",
+      "img": "/favicon.svg", "images": ["/favicon.svg"],
+      "variants": [{ "_id": "000000000000000000006001", "color": { "name": "White", "hex": "#ffffff" }, "sizes": [
+        { "_id": "000000000000000000006101", "size": "S", "stock": 4, "sku": "QA-SHIRT-W-S" },
+        { "_id": "000000000000000000006102", "size": "M", "stock": 5, "sku": "QA-SHIRT-W-M" },
+        { "_id": "000000000000000000006103", "size": "L", "stock": 3, "sku": "QA-SHIRT-W-L" }
+      ] }],
+      "model3D": { "enable": true, "colors": [{ "name": "White", "hex": "#ffffff" }], "sizes": {
+        "S": { "url": "/models/Ao_Thun_sizeS.glb", "autoNormalize": false, "followAvatarBones": true },
+        "M": { "url": "/models/Ao_Thun_sizeM.glb", "autoNormalize": false, "followAvatarBones": true },
+        "L": { "url": "/models/Ao_Thun_sizeL.glb", "autoNormalize": false, "followAvatarBones": true }
+      } }
+    },
+    {
+      "_id": "000000000000000000050102", "id": 50102, "name": "QA Trousers",
+      "category": "Quần", "price": 300000, "status": "active", "stock": 6,
+      "img": "/favicon.svg", "model3D": { "enable": true, "sizes": {
+        "S": { "url": "/models/QuanS.glb" }, "M": { "url": "/models/QuanM.glb" }, "L": { "url": "/models/QuanL.glb" }
+      } }
+    },
+    { "_id": "000000000000000000050103", "id": 50103, "name": "QA Unavailable Shirt", "category": "Áo", "price": 150000, "status": "inactive", "stock": 0 }
+  ]
+}

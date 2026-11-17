@@ -1,0 +1,26 @@
+﻿{
+    "date":  "2026-11-17",
+    "timezone":  "Asia/Saigon",
+    "inputCommit":  "4caae89",
+    "branch":  "qa/stage-2-test-environment",
+    "node":  "22.15.0",
+    "npm":  "11.3.0",
+    "mongo":  "8.2.6",
+    "playwright":  "1.60.0",
+    "os":  "Windows 11 x64",
+    "fixtureVersion":  1,
+    "backend":  {
+                    "suitesPerRun":  13,
+                    "consecutivePassedRuns":  2,
+                    "testsPerRun":  130
+                },
+    "playwrightTests":  {
+                            "workers":  1,
+                            "consecutivePassedRuns":  2,
+                            "skipped":  0,
+                            "testsPerRun":  6
+                        },
+    "cliControlVerified":  true,
+    "developmentDatabaseUsed":  false,
+    "ciVerified":  false
+}

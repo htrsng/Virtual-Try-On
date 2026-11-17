@@ -9,6 +9,8 @@ function extract(source, object, prefix = '') {
   return [...source.matchAll(pattern)].map(match => ({ method: match[1].toUpperCase(), route: prefix + match[3], handlers: match[4] }));
 }
 const descriptions = {
+  '/api/health/live': ['200', 'status=alive, service; independent of database'],
+  '/api/health/ready': ['200/503', 'status, service, database readiness; test runId when managed'],
   '/api/auth/register': ['201', 'message, token, user (safe identity/profile)'],
   '/api/auth/login': ['200', 'message, token, user (identity/profile)'],
   '/api/auth/me': ['200', 'safe user identity/profile, addresses, version'],
@@ -69,7 +71,7 @@ const rows = [...extract(index, 'app'), ...extract(ai, 'router', '/api/ai')].map
   return { method: row.method, route: row.route, access, success, response };
 });
 const retired = ['/api/auth/create-admin', '/api/admin/reset-data', '/api/admin/clear-all-data'];
-const header = `# API inventory — Stage 1\n\nGenerated from server/index.js and server/routes/ai.routes.js by\n\`node scripts/export-api-inventory.cjs\`. ${rows.length} live route registrations + ${retired.length} retired paths.\nThe response descriptions are maintained explicitly in the exporter; review them with handler changes.\n\nAdmin includes inherited prefix guards for /api/admin, /api/users, /api/coupons.\nAuthenticated owner means DB identity from JWT, with resource filters described in\n[permission matrix](permission-matrix.md). All live API routes require DB readiness (503).\nPayment responses intentionally have no success path until a provider is connected.\n\n| Method | Route | Access | Success / intentional disabled status | Response data |\n|---|---|---|---|---|\n`;
+const header = `# API inventory — Stage 2\n\nGenerated from server/index.js and server/routes/ai.routes.js by\n\`node scripts/export-api-inventory.cjs\`. ${rows.length} live route registrations + ${retired.length} retired paths.\nThe response descriptions are maintained explicitly in the exporter; review them with handler changes.\n\nAdmin includes inherited prefix guards for /api/admin, /api/users, /api/coupons.\nAuthenticated owner means DB identity from JWT, with resource filters described in\n[permission matrix](permission-matrix.md). Business API routes require DB readiness (503); health/live remains available during DB outages.\nPayment responses intentionally have no success path until a provider is connected.\n\n| Method | Route | Access | Success / intentional disabled status | Response data |\n|---|---|---|---|---|\n`;
 const markdown = header + rows.map(row => `| ${row.method} | \`${row.route}\` | ${row.access} | ${row.success} | ${row.response} |`).join('\n')
   + '\n\nRetired paths (all methods, all environments, every role):\n\n' + retired.map(route => `- \`${route}\`: 404; no bootstrap/reset/clear handler remains.`).join('\n')
   + '\n\nErrors: 400 invalid input/JSON, 401 missing/invalid/expired/deleted identity, 403 non-admin,\n404 missing/foreign resources, 409 conflict/state/version/duplicate coupon, 413 oversized JSON,\n503 database/payment/AI unavailable. See [validation rules](validation-rules.md).\n';
