@@ -1,0 +1,33 @@
+path,runner,layer,cases,result,command_group,notes
+client/src/components/PaymentSafety.test.jsx,Vitest,DOM unit/component,2,PASS,frontend,No WebGL/backend; mock boundaries described in audit
+client/src/components/ProductList.test.jsx,Vitest,DOM unit/component,8,PASS,frontend,No WebGL/backend; mock boundaries described in audit
+client/src/components/Toast.test.jsx,Vitest,DOM unit/component,6,PASS,frontend,No WebGL/backend; mock boundaries described in audit
+client/src/features/virtual-tryon/VirtualTryOn.test.tsx,Vitest,DOM component composition,5,PASS,frontend,No WebGL/backend; mock boundaries described in audit
+server/tests/auth.test.js,Jest,HTTP/model/owned DB integration,8,PASS,backend,"Real temporary replica set, not development Mongo"
+server/tests/permissions.test.js,Jest,HTTP/model/owned DB integration,29,PASS,backend,"Real temporary replica set, not development Mongo"
+server/tests/checkout.test.js,Jest,HTTP/model/owned DB integration,28,PASS,backend,"Real temporary replica set, not development Mongo"
+server/tests/test-data.test.js,Jest,HTTP/model/owned DB integration,10,PASS,backend,"Real temporary replica set, not development Mongo"
+server/tests/security.test.js,Jest,HTTP/model/owned DB integration,15,PASS,backend,"Real temporary replica set, not development Mongo"
+server/tests/validation.test.js,Jest,HTTP/model/owned DB integration,16,PASS,backend,"Real temporary replica set, not development Mongo"
+server/tests/admin.test.js,Jest,HTTP/model/owned DB integration,2,PASS,backend,"Real temporary replica set, not development Mongo"
+server/tests/ai_recommendation.test.js,Jest,HTTP/model/owned DB integration,2,PASS,backend,"Real temporary replica set, not development Mongo"
+server/tests/environment.test.js,Jest,Process/config + DB integration,5,PASS,backend,"Real temporary replica set, not development Mongo"
+server/tests/product.test.js,Jest,HTTP/model/owned DB integration,4,PASS,backend,"Real temporary replica set, not development Mongo"
+server/tests/models.test.js,Jest,HTTP/model/owned DB integration,3,PASS,backend,"Real temporary replica set, not development Mongo"
+server/tests/concurrency.test.js,Jest,HTTP/model/owned DB integration,4,PASS,backend,"Real temporary replica set, not development Mongo"
+server/tests/order.test.js,Jest,HTTP/model/owned DB integration,2,PASS,backend,"Real temporary replica set, not development Mongo"
+tests/e2e/home.spec.ts,Playwright,Browser UI smoke,2,PASS,browser-repeat,"2 runs passed, 0 skipped; request-only cases do not prove browser rendering"
+tests/e2e/checkout-journey.spec.ts,Playwright,Browser UI flow to checkout,1,PASS,browser-repeat,"2 runs passed, 0 skipped; request-only cases do not prove browser rendering"
+tests/e2e/environment.spec.ts,Playwright,API/proxy/asset integration,3,PASS,browser-repeat,"2 runs passed, 0 skipped; request-only cases do not prove browser rendering"
+archive/coursework-api-fuzzing/automation-testing/tests/fetch-timeout.test.mjs,node:test,Application helper unit,4,PASS,native-helpers,Active client utility imported; legacy file location
+archive/coursework-api-fuzzing/automation-testing/tests/size-recommendation.test.mjs,node:test,Application helper unit,10,PASS,native-helpers,Active client utility imported; legacy file location
+archive/coursework-api-fuzzing/api-testing/tests/test_replay_contract.py,unittest,Archived tool/stub regression,5,PASS,archived-reporting,Separate archived target/tooling; not app server coverage
+archive/coursework-api-fuzzing/api-testing/tests/test_reporting.py,unittest,Archived tool/stub regression,4,PASS,archived-reporting,Separate archived target/tooling; not app server coverage
+archive/coursework-api-fuzzing/fuzz-testing/tests/test_boundaries.py,unittest,Archived tool/stub regression,6,PASS,archived-fuzz-tools,Separate archived target/tooling; not app server coverage
+archive/coursework-api-fuzzing/fuzz-testing/tests/test_campaign.py,unittest,Archived tool/stub regression,17,PASS,archived-fuzz-tools,Separate archived target/tooling; not app server coverage
+archive/coursework-api-fuzzing/fuzz-testing/tests/test_concolic.py,unittest,Archived tool/stub regression,5,PASS,archived-fuzz-tools,Separate archived target/tooling; not app server coverage
+archive/coursework-api-fuzzing/fuzz-testing/tests/test_finding_types.py,unittest,Archived tool/stub regression,4,PASS,archived-fuzz-tools,Separate archived target/tooling; not app server coverage
+archive/coursework-api-fuzzing/fuzz-testing/tests/test_run_fuzzing.py,unittest,Archived tool/stub regression,2,PASS,archived-fuzz-tools,Separate archived target/tooling; not app server coverage
+archive/coursework-api-fuzzing/fuzz-testing/tests/test_state_capture.py,unittest,Archived tool/stub regression,5,PASS,archived-fuzz-tools,Separate archived target/tooling; not app server coverage
+archive/coursework-api-fuzzing/fuzz-testing/tests/test_state_oracles.py,unittest,Archived tool/stub regression,16,PASS,archived-fuzz-tools,Separate archived target/tooling; not app server coverage
+archive/coursework-api-fuzzing/fuzz-testing/tools/tests/test_quality_schema.py,unittest,Archived tool/stub regression,4,PASS,archived-quality-schema,Separate archived target/tooling; not app server coverage

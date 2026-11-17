@@ -1,0 +1,72 @@
+{
+  "frontend": {
+    "files": 130,
+    "totals": {
+      "lines": {
+        "total": 7573,
+        "covered": 651,
+        "skipped": 0,
+        "pct": 8.59
+      },
+      "statements": {
+        "total": 8375,
+        "covered": 672,
+        "skipped": 0,
+        "pct": 8.02
+      },
+      "functions": {
+        "total": 2390,
+        "covered": 138,
+        "skipped": 0,
+        "pct": 5.77
+      },
+      "branches": {
+        "total": 7307,
+        "covered": 311,
+        "skipped": 0,
+        "pct": 4.25
+      },
+      "branchesTrue": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    }
+  },
+  "backend": {
+    "files": 19,
+    "totals": {
+      "lines": {
+        "total": 4114,
+        "covered": 2152,
+        "skipped": 0,
+        "pct": 52.3
+      },
+      "statements": {
+        "total": 4114,
+        "covered": 2152,
+        "skipped": 0,
+        "pct": 52.3
+      },
+      "functions": {
+        "total": 65,
+        "covered": 50,
+        "skipped": 0,
+        "pct": 76.92
+      },
+      "branches": {
+        "total": 630,
+        "covered": 424,
+        "skipped": 0,
+        "pct": 67.3
+      },
+      "branchesTrue": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    }
+  }
+}

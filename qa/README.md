@@ -7,6 +7,9 @@ Bài fuzzing môn học giữ riêng tại `archive/coursework-api-fuzzing/`.
 
 ## Tài liệu và bằng chứng
 
+- [Giai đoạn 4 — existing test audit](docs/existing-test-audit.md): từng test file,
+  mocks/isolation, coverage, CI job logs, duplicate removal và hướng dẫn chạy.
+
 - [Giai đoạn 2 — test environment](docs/stage-2-test-environment.md): isolated launcher,
   [test data](test-data/README.md), health checks và kết quả chạy lặp hai lần.
 

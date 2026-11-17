@@ -15,6 +15,7 @@ test('owner fixtures authenticate and persist a server-priced checkout', async (
   expect(login.status()).toBe(200); const { token } = await login.json();
   const headers = { Authorization: `Bearer ${token}` };
   const before = await request.get('/api/orders/my-orders', { headers });
+  expect(before.status()).toBe(200);
   expect((await before.json()).length).toBe(2);
   const placed = await request.post('/api/orders', { headers, data: {
     products: [{ productId: 50101, quantity: 1, color: 'White', size: 'M' }],
@@ -22,11 +23,17 @@ test('owner fixtures authenticate and persist a server-priced checkout', async (
   } });
   expect(placed.status()).toBe(201); expect((await placed.json()).order.totalAmount).toBe(230000);
   const after = await request.get('/api/orders/my-orders', { headers });
-  expect((await after.json()).length).toBe(3);
+  expect(after.status()).toBe(200);
+  const saved = await after.json();
+  expect(saved).toHaveLength(3);
+  const order = await placed.json();
+  expect(saved.find((item: { _id: string }) => item._id === order.order._id).totalAmount).toBe(230000);
 });
 
 test('3D fixture assets are real GLB resources and owner closet has a model', async ({ request, qaData }) => {
-  const catalog = await (await request.get('/api/products')).json();
+  const catalogResponse = await request.get('/api/products');
+  expect(catalogResponse.status()).toBe(200);
+  const catalog = await catalogResponse.json();
   expect(catalog.find((product: { id: number }) => product.id === 50101).model3D.enable).toBe(true);
   const login = await request.post('/api/auth/login', { data: qaData.accounts.customer });
   expect(login.status()).toBe(200); const { token } = await login.json();

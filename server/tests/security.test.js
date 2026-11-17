@@ -7,14 +7,7 @@ const { UserModel, OrderModel, ChatMessageModel } = require('../models');
 const { JWT_SECRET } = require('../config/env');
 
 describe('Stage 1 P0 security regression', () => {
-  test('anonymous cannot list users', async () => {
-    await actor();
-    expect((await request(app).get('/api/users')).status).toBe(401);
-  });
-  test('ordinary user cannot read admin sync data', async () => {
-    const { token } = await actor();
-    expect((await request(app).get('/api/admin/get-all-data').auth(token, { type: 'bearer' })).status).toBe(403);
-  });
+  // Anonymous/user denial for these paths is covered by permissions.test.js's full matrix.
   test('server recalculates forged order totals from catalog', async () => {
     const { token } = await actor(); const item = await product();
     const res = await request(app).post('/api/orders').auth(token, { type: 'bearer' }).send({

@@ -15,7 +15,8 @@ export default defineConfig({
     : [['line'], ['html', { open: 'never' }]],
   use: {
     baseURL: qa.uiURL,
-    trace: 'on-first-retry',
+    trace: 'retain-on-failure',
+    screenshot: 'only-on-failure',
   },
   projects: [
     {

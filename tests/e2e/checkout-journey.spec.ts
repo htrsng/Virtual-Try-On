@@ -19,5 +19,11 @@ test('seeded customer: Home -> Product -> Cart -> Checkout', async ({ page, requ
   await expect(page.locator('.cp-checkout-btn')).toBeEnabled();
   await page.locator('.cp-checkout-btn').click();
   await expect(page).toHaveURL(/\/checkout\/cart$/);
-  await expect(page.getByText('QA Cotton Shirt', { exact: true }).first()).toBeVisible();
+  const summary = page.locator('.co-summary');
+  await summary.getByRole('button', { name: 'Xem sản phẩm đã chọn (1)', exact: true }).click();
+  const selected = summary.locator('.co-mini-product');
+  await expect(selected).toHaveCount(1);
+  await expect(selected.getByText('QA Cotton Shirt', { exact: true })).toBeVisible();
+  await expect(selected.locator('.co-mini-product__meta')).toContainText('Size M');
+  await expect(selected.locator('.co-mini-product__meta')).toContainText('x1');
 });

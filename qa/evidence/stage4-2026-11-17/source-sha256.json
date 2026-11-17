@@ -1,0 +1,70 @@
+[
+  {
+    "path": ".github/workflows/test.yml",
+    "sha256": "5bf6c172cca8d26121b841a41279881eaf1e3b75d1f8b6423e0269e0daaa0475"
+  },
+  {
+    "path": "archive/coursework-api-fuzzing/automation-testing/tests/fetch-timeout.test.mjs",
+    "sha256": "229a0030a21b4eeee25eaa0f8abe2e90ab03e0c92d9b9740f210c523a9ba9a9d"
+  },
+  {
+    "path": "archive/coursework-api-fuzzing/automation-testing/tests/size-recommendation.test.mjs",
+    "sha256": "1727f97141ebdf9bf2dda2501e5e725bb4fec4732c6d3258b8135f2df62bdc76"
+  },
+  {
+    "path": "client/package-lock.json",
+    "sha256": "9a91f3d8a75299351711ace0c39933374cdd31cc3088707bb842354ef7165ba9"
+  },
+  {
+    "path": "client/package.json",
+    "sha256": "e48f49fde5ac489169e11244cdc666d20bca7562b1969208e44b9320f6d97ef9"
+  },
+  {
+    "path": "client/src/features/virtual-tryon/VirtualTryOn.test.tsx",
+    "sha256": "01ab10e2dbc927b9515baaea1ba874c9a76bdf7d824defd88363c1b36e9883ff"
+  },
+  {
+    "path": "client/tests/setup.ts",
+    "sha256": "f71ca1cf640eac1977e9a2c151d989dbaebb2eaea41c87bfee752c8734520fc9"
+  },
+  {
+    "path": "client/vite.config.ts",
+    "sha256": "19a3804b2bc3e4acf10fab9cd7ecc1f2ada98808bbe5f8d92bb9d594772a8c3f"
+  },
+  {
+    "path": "client/vitest.ci.config.ts",
+    "sha256": "e76be44470706063d59345179d205f87c88dd963d4505fc745ed27d09e936e56"
+  },
+  {
+    "path": "client/vitest.components.config.ts",
+    "sha256": "2db4db61c799b1b54ea06b32811b84fe535b0c16819f7c841454305f6522512f"
+  },
+  {
+    "path": "server/jest.config.js",
+    "sha256": "a967e4ef7cb2c0cafe1de580d0bfa65e4b036e187cbd6471e00e7a08c8c40775"
+  },
+  {
+    "path": "server/package-lock.json",
+    "sha256": "57f3234b7a7cce9aed4b01c76e7cea2fbb59a7194400b67908ee178ebac89b49"
+  },
+  {
+    "path": "server/tests/security.test.js",
+    "sha256": "8a667dd428cee51b3d49533ed2dc28785f3a4aa43854837badc4d41fd22927f3"
+  },
+  {
+    "path": "tests/e2e/checkout-journey.spec.ts",
+    "sha256": "a638c42a1c2ddc3c3b1b05c40ef617d150f691b503527fb9cc54a2b47c1afe5b"
+  },
+  {
+    "path": "tests/e2e/environment.spec.ts",
+    "sha256": "d18befb67d211ca58806640ee8fce73faecc276ef32b4a6b11869f140d65d954"
+  },
+  {
+    "path": "tests/package-lock.json",
+    "sha256": "259dde46c4ed7e6209906400fe055e11070f4805b26621f410b428bcb48d9ef3"
+  },
+  {
+    "path": "tests/playwright.config.ts",
+    "sha256": "3ddbf1c43283bf9e418b02e82544e1c0dfac8255562692f9eb947ec5435b235d"
+  }
+]

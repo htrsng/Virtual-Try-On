@@ -10,7 +10,7 @@ sang `coursework/api-fuzzing/` hoặc tạo Playwright framework mới.
 | 1 Backend P0 | API inventory, RBAC, validation, server checkout, regression, before/after bugs | Important routes có quyền/data/state contract và regression Pass | Hoàn thành scope local: 120 backend tests + 2 UI safety Pass; xem stage-1-backend-report.md; CI chưa xác minh |
 | 2 Test environment | Owned MongoDB, fixtures, setup/reset/cleanup, URLs/health | Repeat run không ảnh hưởng dev hoặc data cũ | Hoàn thành local: backend 130/130 ×2, Playwright 6/6 ×2; xem stage-2-test-environment.md; QA foundation docs vẫn cần chốt coverage |
 | 3 Selenium | Java 17+, Maven, TestNG, POM, 5 smoke tests | Maven run độc lập có report/failure screenshots | Chưa triển khai |
-| 4 Integration | UI write → API → Mongo → read-back + failure | Persistence và failure path có evidence | Chưa triển khai |
+| 4 Existing-test audit (yêu cầu hiện tại) | existing-test-audit.md, verified old suites, mocks/layers/CI logs | Mỗi suite có command/scope/result hoặc failure reason | Hoàn thành local: frontend21, helper14, backend128, Playwright6×2; static failures và candidate CI pending ghi riêng |
 | 5 Playwright | Mở rộng diagnostics/3D/visual sau smoke hiện có | Render/visual evidence tái lập và scope bổ trợ | Giai đoạn 2 đã ổn định 6 smoke/environment cases; chưa có visual/3D render regression |
 | 6 3D | Model state, controlled camera, asset failure, visual | Reproducible render evidence | Chưa triển khai |
 | 7 Bug management | Repro, priority, evidence, retest | Đóng bug có retest | Baseline findings đã ghi; chưa retest fix |
@@ -18,6 +18,10 @@ sang `coursework/api-fuzzing/` hoặc tạo Playwright framework mới.
 | 9 Portfolio | Coverage/results/bugs/limits/CV | Người khác chạy được smoke | Chưa đạt |
 
 ## Hành động ưu tiên sau baseline
+
+Yêu cầu mới ngày17/11/2026 ưu tiên audit Giai đoạn4 trước framework mới; không coi
+Giai đoạn3/Selenium đã thực hiện. Integration mở rộng vẫn là backlog sau framework,
+không phải nội dung đã hoàn thành khi đánh dấu audit này.
 
 1. Chốt contract login/registration/product/order và giải quyết test syntax/mock.
    Không đổi expected results chỉ để làm suite xanh.

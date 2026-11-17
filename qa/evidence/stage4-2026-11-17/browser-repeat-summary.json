@@ -1,0 +1,31 @@
+{
+  "scope": "browser",
+  "runs": [
+    {
+      "name": "browser-1",
+      "code": 0,
+      "durationMs": 23427,
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "runId": "repeat_2ee63d601e4349208c451b3a4982f429",
+      "database": "vfitai_test_repeat_2ee63d601e4349208c451b3a4982f429_404eb19e",
+      "cleanup": "stopped",
+      "portsReleased": true,
+      "resets": 7
+    },
+    {
+      "name": "browser-2",
+      "code": 0,
+      "durationMs": 18586,
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "runId": "repeat_af3bc8ff4e1142cbaad3a51674e930c7",
+      "database": "vfitai_test_repeat_af3bc8ff4e1142cbaad3a51674e930c7_1643b1ab",
+      "cleanup": "stopped",
+      "portsReleased": true,
+      "resets": 7
+    }
+  ]
+}

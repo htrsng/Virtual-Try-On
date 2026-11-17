@@ -8,4 +8,8 @@ module.exports = {
   clearMocks: true,
   resetMocks: true,
   restoreMocks: true,
+  coverageProvider: 'v8',
+  collectCoverageFrom: ['*.js', 'config/**/*.js', 'routes/**/*.js', 'test-support/**/*.js'],
+  coverageDirectory: '../.runtime/coverage/backend',
+  coverageReporters: ['text-summary', 'json-summary', 'html'],
 };

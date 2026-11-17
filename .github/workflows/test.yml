@@ -9,6 +9,7 @@ on:
       - "tests/**"
       - "qa/**"
       - "scripts/**"
+      - "archive/coursework-api-fuzzing/automation-testing/tests/**"
       - ".github/workflows/test.yml"
   pull_request:
     branches: [ "main" ]
@@ -18,12 +19,13 @@ on:
       - "tests/**"
       - "qa/**"
       - "scripts/**"
+      - "archive/coursework-api-fuzzing/automation-testing/tests/**"
       - ".github/workflows/test.yml"
 
 jobs:
   backend-tests:
     name: Backend Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node.js
@@ -33,11 +35,20 @@ jobs:
       - name: Install Dependencies
         run: cd server && npm ci
       - name: Run Backend Tests
-        run: cd server && npm test
+        working-directory: server
+        run: |
+          mkdir -p ../.runtime/ci
+          node node_modules/jest/bin/jest.js --runInBand --json --outputFile=../.runtime/ci/backend.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-test-results
+          path: .runtime/ci/backend.json
+          retention-days: 14
 
   frontend-tests:
     name: Frontend Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node.js
@@ -47,11 +58,25 @@ jobs:
       - name: Install Dependencies
         run: cd client && npm ci
       - name: Run Frontend Tests
-        run: cd client && npm test -- --run
+        working-directory: client
+        run: node node_modules/vitest/vitest.mjs run --config vitest.ci.config.ts
+      - name: Run application helper unit tests
+        run: |
+          mkdir -p .runtime/ci
+          node --experimental-strip-types --test --test-reporter=junit --test-reporter-destination=.runtime/ci/helper-units.xml archive/coursework-api-fuzzing/automation-testing/tests/fetch-timeout.test.mjs archive/coursework-api-fuzzing/automation-testing/tests/size-recommendation.test.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-test-results
+          path: |
+            .runtime/ci/frontend.json
+            .runtime/ci/frontend.xml
+            .runtime/ci/helper-units.xml
+          retention-days: 14
 
   e2e-tests:
     name: Playwright E2E Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node.js
@@ -65,7 +90,7 @@ jobs:
       - name: Install Playwright Dependencies
         run: cd tests && npm ci
       - name: Install Playwright Browsers
-        run: cd tests && npx playwright install --with-deps
+        run: cd tests && npx playwright install --with-deps chromium
       - name: Run E2E Tests
         run: cd tests && npm test
       - uses: actions/upload-artifact@v4

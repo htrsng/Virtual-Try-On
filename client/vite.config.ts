@@ -8,6 +8,13 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./tests/setup.ts'],
     globals: true,
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.{js,jsx,ts,tsx}'],
+      exclude: ['src/**/*.test.*', 'src/**/*.d.ts'],
+      reportsDirectory: '../.runtime/coverage/frontend',
+      reporter: ['text-summary', 'json-summary', 'html'],
+    },
   },
   plugins: [react()],
   server: {

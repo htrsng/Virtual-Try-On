@@ -62,6 +62,12 @@ File `.env`, binary MongoDB và database local không được commit. Muốn d�
 
 ## Hướng kiểm thử
 
+[Giai đoạn 4 — kiểm toán tests hiện có](qa/docs/existing-test-audit.md): frontend
+**21 Pass**, helper units **14 Pass**, backend **128 Pass**, Playwright **6/6 Pass ×2**.
+Đã sửa mock GLTF và đọc logs từng CI job; E2E CI cũ fail do Ubuntu26.04 không được
+Playwright1.60 hỗ trợ, độc lập với lỗi frontend. Candidate đã pin Ubuntu24.04;
+CI mới chờ chạy. Build/lint vẫn Fail và coverage gaps được ghi rõ trong audit.
+
 Giai đoạn 2 có môi trường QA riêng, tự seed/reset/cleanup và health checks.
 Chạy `node scripts/qa-repeat.cjs all`: đã xác minh **backend 130/130 Pass ×2** và
 **Playwright 6/6 Pass ×2**. Test không dùng database/server development.
