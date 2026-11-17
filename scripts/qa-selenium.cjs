@@ -36,7 +36,7 @@ async function main() {
     await environment.stop();
     await freePort(config.apiPort); await freePort(config.uiPort);
     const stopped = JSON.parse(fs.readFileSync(config.manifest, 'utf8'));
-    if (stopped.status !== 'stopped' || stopped.accounts || stopped.token) throw new Error('QA manifest cleanup failed');
+    if (stopped.status !== 'stopped' || stopped.accounts || stopped.token || stopped.testSessions) throw new Error('QA manifest cleanup failed');
     const summary = { runId: config.runId, mavenExit, durationMs: Date.now() - started,
       cleanup: 'stopped; manifest scrubbed; API/UI ports released' };
     fs.writeFileSync(path.join(config.runtime, 'selenium-summary.json'), JSON.stringify(summary, null, 2));

@@ -22,6 +22,9 @@ async function main() {
   };
   try {
     assert.equal((await command('status')).dataState, 'ready');
+    const sessions = JSON.parse(fs.readFileSync(config.manifest, 'utf8')).testSessions;
+    const expired = await fetch(`${config.apiURL}/api/auth/me`, { headers: { Authorization: `Bearer ${sessions.expiredCustomer}` } });
+    assert.equal(expired.status, 401);
     const { UserModel, ProductModel, OrderModel } = require('../server/models');
     await ProductModel.updateOne({ id: 50101 }, { name: 'mutated by environment check' });
     assert.equal((await command('reset')).state, 'ready');
@@ -44,8 +47,9 @@ async function main() {
   await freePort(config.apiPort); await freePort(config.uiPort);
   const manifest = JSON.parse(fs.readFileSync(config.manifest, 'utf8'));
   assert.equal(manifest.status, 'stopped'); assert.equal(manifest.accounts, undefined); assert.equal(manifest.token, undefined);
+  assert.equal(manifest.testSessions, undefined);
   const result = { runId: config.runId, portCollisionRefused: true, forgedCapabilityRefused: true,
-    cliReset: true, cliClear: true, cliStop: true, readinessTransitions: [200, 503, 200], portsReleased: true, credentialsScrubbed: true };
+    cliReset: true, cliClear: true, cliStop: true, expiredSignedSessionRejected: true, readinessTransitions: [200, 503, 200], portsReleased: true, credentialsScrubbed: true };
   fs.writeFileSync(path.join(config.runtime, 'verification.json'), JSON.stringify(result, null, 2));
   console.log(JSON.stringify(result));
 }

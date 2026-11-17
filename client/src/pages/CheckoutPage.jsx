@@ -386,13 +386,11 @@ function CheckoutPage({ onCheckoutSuccess, showToast, suggestionProducts, onAddT
                         return;
                     }
 
-                    const checkResponse = await fetch('/api/check-coupon-used', {
-                        method: 'POST',
+                    const checkResponse = await fetch('/api/used-coupons', {
                         headers: {
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({ couponCode: normalizedCode })
+                        }
                     });
 
                     if (!checkResponse.ok) {
@@ -402,7 +400,7 @@ function CheckoutPage({ onCheckoutSuccess, showToast, suggestionProducts, onAddT
                     }
 
                     const checkData = await checkResponse.json();
-                    if (checkData.used) {
+                    if ((checkData.coupons || []).includes(normalizedCode)) {
                         setDiscountError(t('coupon_already_used'));
                         setAppliedDiscount(null);
                         return;
@@ -431,18 +429,21 @@ function CheckoutPage({ onCheckoutSuccess, showToast, suggestionProducts, onAddT
                         return;
                     }
 
-                    const checkUsedResponse = await fetch('/api/check-coupon-used', {
-                        method: 'POST',
+                    const checkUsedResponse = await fetch('/api/used-coupons', {
                         headers: {
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({ couponCode: normalizedCode })
+                        }
                     });
 
+                    if (!checkUsedResponse.ok) {
+                        setDiscountError(t('cannot_check_coupon'));
+                        setAppliedDiscount(null);
+                        return;
+                    }
                     if (checkUsedResponse.ok) {
                         const checkData = await checkUsedResponse.json();
-                        if (checkData.used) {
+                        if ((checkData.coupons || []).includes(normalizedCode)) {
                             setDiscountError(t('coupon_already_used'));
                             setAppliedDiscount(null);
                             return;

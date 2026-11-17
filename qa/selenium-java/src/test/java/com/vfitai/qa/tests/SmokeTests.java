@@ -6,7 +6,7 @@ import org.testng.Assert;
 import org.testng.annotations.*;
 
 public class SmokeTests extends BaseTest {
-    @Test(groups = {"smoke", "auth"})
+    @Test(groups = {"smoke", "regression", "auth"})
     public void customerCanLoginThroughUi() throws Exception {
         var account = environment.customer(); var login = new LoginPage(driver).open(environment.ui());
         login.submit(account.get("email").getAsString(), account.get("password").getAsString());
@@ -14,7 +14,7 @@ public class SmokeTests extends BaseTest {
     }
     @DataProvider(name = "invalidPasswords")
     public Object[][] invalidPasswords() { return new Object[][] {{"wrong-password-123"}, {"another-invalid-password"}}; }
-    @Test(groups = {"smoke", "auth"}, dataProvider = "invalidPasswords")
+    @Test(groups = {"smoke", "regression", "auth"}, dataProvider = "invalidPasswords")
     public void invalidLoginHasNoSession(String password) throws Exception {
         var login = new LoginPage(driver).open(environment.ui());
         login.submit(environment.customer().get("email").getAsString(), password);
@@ -22,12 +22,12 @@ public class SmokeTests extends BaseTest {
         Assert.assertFalse(login.hasSession(), "Rejected login must not establish a session");
         Assert.assertTrue(driver.getCurrentUrl().endsWith("/login"));
     }
-    @Test(groups = {"smoke", "catalog"})
+    @Test(groups = {"smoke", "regression", "catalog"})
     public void catalogLinkOpensCorrectProduct() throws Exception {
         Assert.assertEquals(new ProductPage(driver).openFromHome(environment.ui()).title(), "QA Cotton Shirt");
         Assert.assertTrue(driver.getCurrentUrl().endsWith("/product/50101"));
     }
-    @Test(groups = {"smoke", "checkout"})
+    @Test(groups = {"smoke", "regression", "checkout"})
     public void selectedCartItemReachesCheckout() throws Exception {
         var account = environment.customer(); var login = new LoginPage(driver).open(environment.ui());
         login.submit(account.get("email").getAsString(), account.get("password").getAsString()); login.awaitHome(environment.ui());

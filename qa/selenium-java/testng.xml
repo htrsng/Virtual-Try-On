@@ -1,5 +1,6 @@
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
 <suite name="VFitAI UI" parallel="none"><test name="UI tests"><classes>
   <class name="com.vfitai.qa.tests.SmokeTests"/>
+  <class name="com.vfitai.qa.tests.BusinessE2ETests"/>
   <class name="com.vfitai.qa.tests.DiagnosticsProbe"/>
 </classes></test></suite>

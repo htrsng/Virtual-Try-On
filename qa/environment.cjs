@@ -84,8 +84,12 @@ async function start(config = configuration()) {
     database = await createOwnedDatabase({ runId: config.runId });
     state.fixture = await database.reset(); state.accounts = database.credentials; state.dataState = 'ready'; state.resets++;
     state.databaseName = database.name;
+    const jwtSecret = randomBytes(48).toString('hex');
+    // Negative-session fixture signed by this disposable API's key; never expose the key.
+    state.testSessions = { expiredCustomer: require('../server/node_modules/jsonwebtoken').sign(
+      { id: state.fixture.ids.customer }, jwtSecret, { algorithm: 'HS256', expiresIn: -1 }) };
     const env = { ...process.env, NODE_ENV: 'test', HOST: config.host, PORT: String(config.apiPort),
-      MONGODB_URI: database.uri, JWT_SECRET: randomBytes(48).toString('hex'),
+      MONGODB_URI: database.uri, JWT_SECRET: jwtSecret,
       GEMINI_API_KEY: '', EMAIL_USER: '', EMAIL_PASS: '', QA_RUN_ID: config.runId,
       VITE_API_URL: config.apiURL, VITE_API_PROXY_TARGET: config.apiURL };
     child('api', 'server', ['index.js'], env);

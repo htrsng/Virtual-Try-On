@@ -2,6 +2,10 @@
 
 Hệ thống web thời trang với phòng thử đồ 3D, quản lý sản phẩm/đơn hàng và AI stylist. Frontend React/TypeScript/Three.js kết nối backend Node.js/Express và MongoDB.
 
+## Business E2E (giai đoạn 6)
+
+Selenium regression có 22 lượt chạy, gồm 17 business E2E cases mới. Xem [E2E report và coverage](qa/docs/stage-6-business-e2e.md), [test cases](qa/docs/e2e-test-cases.csv) và [bug reports](qa/bug-reports/stage6-business-e2e.md).
+
 ## Selenium Java (giai đoạn 5)
 
 Framework, lệnh chạy smoke và evidence: [Selenium README](qa/selenium-java/README.md), [stage 5 report](qa/docs/stage-5-selenium.md).

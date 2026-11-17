@@ -55,6 +55,16 @@ handling without registering a fake application bug.
 
 ## Reports and extension
 
+Stage 6 adds [17 business E2E cases](../docs/e2e-test-cases.csv), including UI COD
+submission followed by real API/MongoDB readback, stock reservation/restoration,
+discounts, owner isolation, admin delivery/closet sync, sessions and catalog/cart.
+Run `node scripts/qa-selenium.cjs -Dgroups=e2e` for these cases or
+`node scripts/qa-selenium.cjs -Dgroups=regression` for all 22 invocations including
+the original smoke suite. `auth`, `catalog` and other overlapping groups now select
+cases across both classes. No invocation is counted twice when multiple groups match.
+See [stage 6 report](../docs/stage-6-business-e2e.md) for exact UI/API boundaries,
+known coverage gaps and bug retests. CI now runs `regression` with Chrome.
+
 Maven/TestNG XML, HTML, stack traces and Reporter logs:
 `qa/selenium-java/target/surefire-reports/`. Failure screenshots:
 `target/screenshots/`; local reset diagnostics: `target/qa-control.log`.

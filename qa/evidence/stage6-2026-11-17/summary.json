@@ -1,0 +1,194 @@
+{
+  "date": "2026-11-17",
+  "baseCommit": "f7cab1a8fdfcfad3816a5d08c9f525cb04eecb15",
+  "environment": {
+    "os": "Windows 11 x64",
+    "node": "22.15.0",
+    "java": "17.0.12",
+    "maven": "3.9.10",
+    "mongodb": "8.2.6",
+    "selenium": "4.38.0",
+    "testng": "7.11.0"
+  },
+  "scope": {
+    "newBusinessMethods": 13,
+    "newBusinessInvocations": 17,
+    "smokeInvocations": 5,
+    "regressionInvocations": 22,
+    "githubCi": "not verified"
+  },
+  "runs": [
+    {
+      "name": "initial-business",
+      "runId": "sel_d9039105",
+      "tests": 11,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 148.532,
+      "reportSha256": "f56636da7f1ec99dbd6c4a7e48b5071a3806913d597c3c59013d47dcd7f95058",
+      "failedMethods": [
+        "cartQuantityPersistsThenRemovalPersists",
+        "ownerCancellationPersistsAndRestoresStock",
+        "uiCheckoutPersistsServerTotalsAndStock[standard, GIAM10, 210000](3)"
+      ],
+      "after": "stopped; accounts/capability/testSessions scrubbed",
+      "resetsIncludingStartup": 12,
+      "mavenExit": 1,
+      "durationMs": 153180,
+      "cleanup": "stopped; manifest scrubbed; API/UI ports released"
+    },
+    {
+      "name": "admin-before",
+      "runId": "sel_a080ec01",
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 21.533,
+      "reportSha256": "05ce8c2e7ba1c54c9cf8636ec4cdd1e7086d746a69afca4060583e34131720e5",
+      "failedMethods": [
+        "customerCannotEnterAdminOrReadAdminOrders"
+      ],
+      "after": "stopped; accounts/capability/testSessions scrubbed",
+      "resetsIncludingStartup": 2,
+      "mavenExit": 1,
+      "durationMs": 26161,
+      "cleanup": "stopped; manifest scrubbed; API/UI ports released"
+    },
+    {
+      "name": "coupon-remount-retest",
+      "runId": "sel_32596a5a",
+      "tests": 14,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 140.067,
+      "reportSha256": "d61b8d6bd1ffd073c9df2390ceffd60f62dccfda416010fd36098017f4a61002",
+      "failedMethods": [
+        "uiCheckoutPersistsServerTotalsAndStock[standard, GIAM10, 210000](3)"
+      ],
+      "after": "stopped; accounts/capability/testSessions scrubbed",
+      "resetsIncludingStartup": 15,
+      "mavenExit": 1,
+      "durationMs": 144737,
+      "cleanup": "stopped; manifest scrubbed; API/UI ports released"
+    },
+    {
+      "name": "regression-edge",
+      "runId": "sel_863507cc",
+      "tests": 22,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 161.989,
+      "reportSha256": "25cf5add40dea51bf102644a37b07c72c6de3e96488dcfef39a3af263d09d416",
+      "failedMethods": [],
+      "after": "stopped; accounts/capability/testSessions scrubbed",
+      "resetsIncludingStartup": 23,
+      "mavenExit": 0,
+      "durationMs": 166957,
+      "cleanup": "stopped; manifest scrubbed; API/UI ports released"
+    },
+    {
+      "name": "regression-chromium",
+      "runId": "sel_fd72f71f",
+      "tests": 22,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 165.827,
+      "reportSha256": "45992bb5042f6744f347295c7425f0029acc2f434bed67282f24e6d520f377e3",
+      "failedMethods": [],
+      "after": "stopped; accounts/capability/testSessions scrubbed",
+      "resetsIncludingStartup": 23,
+      "mavenExit": 0,
+      "durationMs": 169157,
+      "cleanup": "stopped; manifest scrubbed; API/UI ports released"
+    }
+  ],
+  "caseIdsPassedOnBothBrowsers": [
+    "E2E-ORD-01",
+    "E2E-ORD-02",
+    "E2E-ORD-03",
+    "E2E-ORD-04",
+    "E2E-ORD-05",
+    "E2E-ORD-06",
+    "E2E-AUTH-01",
+    "E2E-AUTH-02",
+    "E2E-AUTH-03",
+    "E2E-ACL-01",
+    "E2E-ACL-02",
+    "E2E-ACL-03",
+    "E2E-CAT-01",
+    "E2E-CAT-02",
+    "E2E-CAT-03",
+    "E2E-CAT-04",
+    "E2E-CART-01"
+  ],
+  "otherChecks": {
+    "frontend": {
+      "files": 5,
+      "passed": 25
+    },
+    "playwright": {
+      "startTime": "2026-11-17T09:17:34.996Z",
+      "duration": 18984.206000000002,
+      "expected": 6,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "environment": {
+      "runId": "control_175428337f1a46afb521aafa695137a2",
+      "portCollisionRefused": true,
+      "forgedCapabilityRefused": true,
+      "cliReset": true,
+      "cliClear": true,
+      "cliStop": true,
+      "expiredSignedSessionRejected": true,
+      "readinessTransitions": [
+        200,
+        503,
+        200
+      ],
+      "portsReleased": true,
+      "credentialsScrubbed": true
+    },
+    "typescript": {
+      "exit": 2,
+      "diagnostics": 109
+    }
+  },
+  "bugs": {
+    "BUG-E2E-01": "fixed; retest pass",
+    "BUG-E2E-02": "fixed; retest pass",
+    "BUG-E2E-03": "fixed; retest pass"
+  },
+  "sourceSha256LF": {
+    ".github/workflows/test.yml": "77a022c6c70d7a27ba8c45a93e1349e217e3519f98401b210948d7f8b11c033f",
+    "client/src/App.tsx": "5ae446be396ba8e8176d523445310f3aec8243102d8321085fe5b90f2f992963",
+    "client/src/components/RequireAdmin.jsx": "efed0973449549d6028a120fea7d03492a9d6ce592342373c820e024bbdf42e0",
+    "client/src/components/RequireAdmin.test.jsx": "3d94b6cc796ec7fa7fab2328d1989290a7b409c7af7513c51c1d621d7913de4e",
+    "client/src/pages/CheckoutPage.jsx": "ad2041ee0c23df42e1160ebceb1a4725a001e79383b47e80947d4ddeadae7e0c",
+    "client/src/pages/OrderPage.jsx": "27d9af208760f4b0e0561a3b9c484017b60adf2a21297c44b6fac7ab4e23217a",
+    "qa/environment.cjs": "2fec63f34efefab08a01084c7b457be47aec8f1088742c609c04a9f4f0a8e8cd",
+    "qa/selenium-java/pom.xml": "56636c5b83e42271270b9c3b849dc97f8a98a7a92e8f115c2763f7f84088009e",
+    "qa/selenium-java/src/test/java/com/vfitai/qa/pages/CartPage.java": "9c95e7760f5491016c2b56f13affa6849447d3c1bc1c5243e05b11f85bc7fe4a",
+    "qa/selenium-java/src/test/java/com/vfitai/qa/pages/CheckoutPage.java": "d54696fec1efce2880eca6290c1605a0347252b791f9b1b275171480a3fd9c26",
+    "qa/selenium-java/src/test/java/com/vfitai/qa/pages/Header.java": "df18e16e1ceed0d4cfeb32f6dcc9b604f1cb8091ffaca09d1eb03467f330b1c0",
+    "qa/selenium-java/src/test/java/com/vfitai/qa/pages/LoginPage.java": "d1433104d9cf4f0020693b34bff4213434dd92899ea769f96c5b22071a03e279",
+    "qa/selenium-java/src/test/java/com/vfitai/qa/pages/OrdersPage.java": "9efbcdd06bb8a67e00b5f06cd3efb20a72956878a094b4f74438f58b8adc113e",
+    "qa/selenium-java/src/test/java/com/vfitai/qa/tests/BusinessE2ETests.java": "9f7498cf40a5d0843f41434b7a98fad5f314df2612ab2834d7626c6bed10669e",
+    "qa/selenium-java/src/test/java/com/vfitai/qa/tests/SmokeTests.java": "3ee8f75b5fa06e2c92f02301f55f476eecf9334f3fa0ac66415a57d54bb4bd30",
+    "qa/selenium-java/src/test/java/com/vfitai/qa/utils/ApiClient.java": "9f2f5cd07fd1a2b2351c00a377bace28a068a4c21ec931ab184418378958e38d",
+    "qa/selenium-java/testng.xml": "52ebbdc934483bd117ee75ddae81f4753b1df56da80cd30ddcbb25a8fe123fcc",
+    "qa/test-data/catalog.json": "da888fc51d327a5dd39cd93e021ecf3c2d221aa21eb8abdfd315dbb3e86d708d",
+    "scripts/qa-environment-check.cjs": "8ef7aa3df39732799de8a39d37a05081d5cc95710820cde926a7cc2f68d4a75e",
+    "scripts/qa-selenium.cjs": "dc71f8bf8d481e180dfb006142f5685d78a1416fa24f857ca6946924aa408ba4"
+  },
+  "sampleSha256": {
+    "admin-ui-before.png": "386946282a3c8ada2cd256d4cef84349311a6abb2867d4bdf05eb144274548a7",
+    "coupon-before.png": "47c4d82b70b25c47c3e327cd841a8d2885bccdaff2ef74bb35218666dccd3deb"
+  }
+}

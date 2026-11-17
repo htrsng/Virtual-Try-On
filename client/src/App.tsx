@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense, useCallback, useRef } from 'react';
+import { useState, useEffect, lazy, Suspense, useCallback, useRef, type ReactNode } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 
 // --- 1. IMPORT CÁC COMPONENT CỦA WEB BÁN HÀNG ---
@@ -54,6 +54,7 @@ const AIOutfitRoom = lazy(() => import('./pages/AIOutfitRoom'));
 
 // --- 3. IMPORT CONTEXTS ---
 import { AuthProvider } from './contexts/AuthContext';
+import RequireAdmin from './components/RequireAdmin';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { WishlistProvider } from './contexts/WishlistContext';
 import { CompareProvider } from './contexts/CompareContext';
@@ -174,6 +175,11 @@ const getReliableSoldCount = (rawSold: unknown, seed: number) => {
   // Deterministic fallback so products never show "Đã bán 0".
   return 120 + ((Math.abs(seed) * 137) % 3800);
 };
+
+// Stable component identity keeps routed form state when App updates a toast/cart.
+function RouteShell({ render }: { render: (location: ReturnType<typeof useLocation>) => ReactNode }) {
+  return render(useLocation());
+}
 
 function App() {
   // --- STATE QUẢN LÝ DỮ LIỆU ---
@@ -622,8 +628,7 @@ function App() {
     );
   };
 
-  const AppShell = () => {
-    const location = useLocation();
+  const renderAppShell = (location: ReturnType<typeof useLocation>) => {
     const isTryOnPage = location.pathname === '/try-on' || location.pathname === '/avatar-studio' || location.pathname === '/ai-outfit' || location.pathname === '/size-compare';
     const isAdminRoute = location.pathname.startsWith('/admin');
 
@@ -663,7 +668,7 @@ function App() {
 
             {/* 2. TRANG ADMIN */}
             <Route path="/admin/*" element={
-              <AdminLayout>
+              <RequireAdmin><AdminLayout>
                 <Routes>
                   <Route
                     index
@@ -783,7 +788,7 @@ function App() {
                     element={<AIManagerPage />}
                   />
                 </Routes>
-              </AdminLayout>
+              </AdminLayout></RequireAdmin>
             } />
 
             {/* 3. CÁC TRANG CHỨC NĂNG KHÁC */}
@@ -895,7 +900,7 @@ function App() {
               <LanguageProvider>
                 <BrowserRouter>
                   <ScrollToTop />
-                  <AppShell />
+                  <RouteShell render={renderAppShell} />
                 </BrowserRouter>
               </LanguageProvider>
             </CompareProvider>

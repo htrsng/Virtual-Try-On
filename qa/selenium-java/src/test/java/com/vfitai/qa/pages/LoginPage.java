@@ -20,4 +20,5 @@ public final class LoginPage extends BasePage {
         visible(By.cssSelector("a[href='/product/50101']"));
     }
     public boolean hasSession() { return Boolean.TRUE.equals(((JavascriptExecutor)driver).executeScript("return !!localStorage.getItem('token')")); }
+    public String sessionToken() { return (String)((JavascriptExecutor)driver).executeScript("return localStorage.getItem('token')"); }
 }

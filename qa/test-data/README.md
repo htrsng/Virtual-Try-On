@@ -38,3 +38,10 @@ bắt đầu rỗng; mỗi test tự tạo fixture, teardown tự clear. Một N
 Mongoose default connection; cần worker/process riêng nếu muốn chạy nhiều environment.
 Playwright hiện chạy 1 worker để tránh reset chung giữa tests đang chạy song song.
 Không reset giữa transaction/test đang chạy; CLI reset là thao tác tại boundary của test.
+# Stage 6 session fixture
+
+The owned QA launcher also puts `testSessions.expiredCustomer` in its local runtime
+manifest. It is a JWT signed with the disposable API's random key and already
+expired (`expiresIn: -1`), used to distinguish expiry from malformed-token coverage.
+The signing key is never exposed in the manifest. Stop scrubs `testSessions` along
+with accounts/control capability. Do not publish environment manifests or tokens.

@@ -12,7 +12,7 @@ sang `coursework/api-fuzzing/` hoặc tạo Playwright framework mới.
 | 3 QA foundation | Strategy, feature inventory, test cases, RTM | Chốt coverage theo chức năng thực tế | Chưa chốt đầy đủ; không tự tạo 150 cases |
 | 4 Existing-test audit (yêu cầu hiện tại) | existing-test-audit.md, verified old suites, mocks/layers/CI logs | Mỗi suite có command/scope/result hoặc failure reason | Hoàn thành local: frontend21, helper14, backend128, Playwright6×2; static failures và candidate CI pending ghi riêng |
 | 5 Selenium (yêu cầu mới 17/11/2026) | Java 17, Maven, TestNG, POM, smoke, reports | Suite độc lập, có failure evidence và cleanup | Local Edge 5/5 ×2, Chromium 5/5; xem stage-5-selenium.md; GitHub CI pending |
-| 6 3D | Model state, controlled camera, asset failure, visual | Reproducible render evidence | Chưa triển khai |
+| 6 Business E2E (yêu cầu mới) | UI checkout, API/MongoDB readback, regression, bugs | Critical flows có kết quả nghiệp vụ lưu trữ và isolation | Xem stage-6-business-e2e.md; Playwright render/visual vẫn là backlog |
 | 7 Bug management | Repro, priority, evidence, retest | Đóng bug có retest | Baseline findings đã ghi; chưa retest fix |
 | 8 CI | Checks + smoke, isolated DB, always artifacts | Run thật từ commit sạch | Audit YAML đã có; chưa có pipeline mới |
 | 9 Portfolio | Coverage/results/bugs/limits/CV | Người khác chạy được smoke | Chưa đạt |
@@ -101,3 +101,9 @@ Git chỉ giữ summary, tài liệu và evidence mẫu đã kiểm tra dữ li�
 Yêu cầu mới xác định giai đoạn 5 là Selenium. Framework nằm tại qa/selenium-java;
 Playwright/3D mở rộng vẫn là backlog. Xem [stage-5-selenium.md](stage-5-selenium.md)
 cho kiến trúc, smoke evidence và giới hạn; không coi QA foundation hoặc 150 cases đã hoàn thành.
+
+## Cập nhật giai đoạn 6
+
+Giai đoạn 6 theo yêu cầu mới là nghiệp vụ E2E toàn hệ thống. Ma trận chức năng thật,
+17 cases mới và giới hạn 3D/sorting/payment nằm trong [stage-6-business-e2e.md](stage-6-business-e2e.md).
+Kế hoạch Playwright visual/3D vẫn cần thực hiện, chưa coi asset/data assertions là render coverage.
