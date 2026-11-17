@@ -7,9 +7,10 @@ const output = path.join(root, '.runtime', 'qa3d-diagnostic');
 async function main() {
   fs.mkdirSync(output, { recursive: true });
   const report = path.join(output, 'report.json');
+  for (const file of [report, path.join(output, 'summary.json')]) if (fs.existsSync(file)) fs.unlinkSync(file);
   const child = spawn(process.execPath, ['node_modules/@playwright/test/cli.js', 'test', '--project=3d-visual', '--grep', '@diagnostic', '--output', path.join(output, 'test-results')],
     { cwd: path.join(root, 'tests'), windowsHide: true, stdio: 'inherit', env: { ...process.env,
-      QA_3D_VISUAL: '1', QA_3D_DIAGNOSTIC: '1', QA_PW_JSON: report } });
+      CI_REPORT_DIR: '', QA_3D_VISUAL: '1', QA_3D_DIAGNOSTIC: '1', QA_PW_JSON: report } });
   const exit = await new Promise((resolve, reject) => { child.once('error', reject); child.once('exit', resolve); });
   if (!fs.existsSync(report)) throw new Error('Diagnostic report missing');
   const data = JSON.parse(fs.readFileSync(report, 'utf8')); const results = [];

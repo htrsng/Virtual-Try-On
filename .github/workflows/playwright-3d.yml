@@ -1,0 +1,25 @@
+name: Playwright 3D
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: playwright-3d-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  three-d:
+    name: 3D / ${{ matrix.suite }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - suite: playwright-3d
+            runner: ubuntu-24.04
+          - suite: playwright-visual
+            runner: windows-2022
+    uses: ./.github/workflows/_qa-job.yml
+    with:
+      suite: ${{ matrix.suite }}
+      runner: ${{ matrix.runner }}

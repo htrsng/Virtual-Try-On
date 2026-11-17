@@ -2,6 +2,11 @@
 
 Hệ thống web thời trang với phòng thử đồ 3D, quản lý sản phẩm/đơn hàng và AI stylist. Frontend React/TypeScript/Three.js kết nối backend Node.js/Express và MongoDB.
 
+## CI quality gates (giai đoạn 8)
+
+PR smoke, API/integration, quality và 3D workflows; full regression theo lịch/manual.
+Xem [CI/reporting guide](qa/docs/stage-8-ci-quality-gates.md). Lint/build baseline đang Fail và không được miễn trừ.
+
 ## Playwright 3D (giai đoạn 7)
 
 Viewer/WebGL interaction, model state, approved visual baselines và reliability: [Playwright README](tests/README.md), [3D report](qa/docs/stage-7-playwright-3d.md), [bugs/retest](qa/bug-reports/stage7-3d.md).

@@ -1,0 +1,22 @@
+name: Code Quality
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: code-quality-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  quality:
+    name: Code quality / ${{ matrix.suite }}
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [lint, build, frontend, helpers, playwright-types, ci-harness]
+    uses: ./.github/workflows/_qa-job.yml
+    with:
+      suite: ${{ matrix.suite }}

@@ -14,7 +14,7 @@ sang `coursework/api-fuzzing/` hoặc tạo Playwright framework mới.
 | 5 Selenium (yêu cầu mới 17/11/2026) | Java 17, Maven, TestNG, POM, smoke, reports | Suite độc lập, có failure evidence và cleanup | Local Edge 5/5 ×2, Chromium 5/5; xem stage-5-selenium.md; GitHub CI pending |
 | 6 Business E2E (yêu cầu mới) | UI checkout, API/MongoDB readback, regression, bugs | Critical flows có kết quả nghiệp vụ lưu trữ và isolation | Xem stage-6-business-e2e.md; Playwright render/visual vẫn là backlog |
 | 7 Playwright 3D (yêu cầu mới) | Real viewer/state, approved baselines, pixel diffs/traces, reliability | Sai 3D tái hiện qua oracle thực | Xem stage-7-playwright-3d.md; CI chờ run thật |
-| 8 CI | Checks + smoke, isolated DB, always artifacts | Run thật từ commit sạch | Audit YAML đã có; chưa có pipeline mới |
+| 8 CI | Five scoped workflows + reusable runner, metadata, JUnit/HTML/artifacts | PR checks đủ dữ liệu phân tích mọi Fail | Xem stage-8-ci-quality-gates.md; lint/build vẫn Fail, remote proof ở PR checks |
 | 9 Portfolio | Coverage/results/bugs/limits/CV | Người khác chạy được smoke | Chưa đạt |
 
 ## Hành động ưu tiên sau baseline
@@ -113,3 +113,10 @@ Kế hoạch Playwright visual/3D vẫn cần thực hiện, chưa coi asset/dat
 Playwright hiện có đã được mở rộng cho 3D thay vì tạo framework trùng lặp. Baseline
 front/left được người dùng duyệt ngày17/11/2026. Bug reports và các giới hạn render/GPU
 được ghi tại [stage-7-playwright-3d.md](stage-7-playwright-3d.md); bug management tiếp tục xuyên suốt các giai đoạn.
+
+## Cập nhật giai đoạn 8
+
+CI tách theo scope, giữ lỗi lint/build hiện hữu thành Failed, dùng owned QA data và
+artifact whitelist. Scheduled/manual full regression chỉ active sau khi workflow ở
+default branch. Kết quả remote đối chiếu theo PR head/checkout merge SHA, không lấy
+local Pass thay CI. Branch protection và merge main cần được review riêng.

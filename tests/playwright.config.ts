@@ -1,8 +1,15 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices, type ReporterDescription } from '@playwright/test';
+import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 const { configuration } = require('../qa/config.cjs');
 process.env.QA_RUN_ID ||= `pw_${randomUUID().replaceAll('-', '')}`;
 const qa = configuration();
+const ciOutput = process.env.CI_REPORT_DIR;
+const reporters: ReporterDescription[] = ciOutput
+  ? [['line'], ['json', { outputFile: path.join(ciOutput, 'playwright.json') }],
+    ['junit', { outputFile: path.join(ciOutput, 'playwright.xml') }],
+    ['html', { outputFolder: path.join(ciOutput, 'playwright-report'), open: 'never' }]]
+  : process.env.QA_PW_JSON ? [['line'], ['json', { outputFile: process.env.QA_PW_JSON }]] : [['line'], ['html', { open: 'never' }]];
 
 export default defineConfig({
   testDir: './e2e',
@@ -12,9 +19,10 @@ export default defineConfig({
   workers: 1,
   timeout: 90000,
   snapshotPathTemplate: '{testDir}/../visual-baselines/{projectName}/{platform}/{arg}{ext}',
-  reporter: process.env.QA_PW_JSON
-    ? [['line'], ['json', { outputFile: process.env.QA_PW_JSON }]]
-    : [['line'], ['html', { open: 'never' }]],
+  reporter: reporters,
+  outputDir: ciOutput ? path.join(ciOutput, 'test-results') : undefined,
+  metadata: { commitSha: process.env.CI_COMMIT_SHA || process.env.GITHUB_SHA || 'local',
+    node: process.version, platform: process.platform, runId: process.env.GITHUB_RUN_ID || 'local' },
   use: {
     baseURL: qa.uiURL,
     trace: 'retain-on-failure',

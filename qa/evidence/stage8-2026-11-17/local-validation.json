@@ -1,0 +1,339 @@
+{
+  "date": "2026-11-17",
+  "scope": "local staged worktree validation; GitHub results are recorded in PR checks/artifacts",
+  "results": [
+    {
+      "suite": "ci-harness",
+      "status": "Passed",
+      "reason": "run exit 0",
+      "counts": {
+        "passed": 12,
+        "failed": 0,
+        "skipped": 0
+      },
+      "diagnostics": null,
+      "checkedOutSha": "581d1ccfcda44046942a6792f9f7f7b7caf31f00",
+      "dirty": true,
+      "node": "v22.15.0",
+      "platform": "win32",
+      "reportSha256": "87daef7932235c6f23acee9a2d55827bf3faa3e20d048273dccdf59caa010fb4",
+      "phases": {
+        "run": 0
+      }
+    },
+    {
+      "suite": "frontend",
+      "status": "Passed",
+      "reason": "run exit 0",
+      "counts": {
+        "passed": 25,
+        "failed": 0,
+        "skipped": 0
+      },
+      "diagnostics": null,
+      "checkedOutSha": "581d1ccfcda44046942a6792f9f7f7b7caf31f00",
+      "dirty": true,
+      "node": "v22.15.0",
+      "platform": "win32",
+      "reportSha256": "9630f0990166c638647ae4074b50d5c754c0770e9a571daabe1fb5285d5365de",
+      "phases": {
+        "run": 0
+      }
+    },
+    {
+      "suite": "backend",
+      "status": "Passed",
+      "reason": "run exit 0",
+      "counts": {
+        "passed": 128,
+        "failed": 0,
+        "skipped": 0
+      },
+      "diagnostics": null,
+      "checkedOutSha": "581d1ccfcda44046942a6792f9f7f7b7caf31f00",
+      "dirty": true,
+      "node": "v22.15.0",
+      "platform": "win32",
+      "reportSha256": "d95814b4cd0633431386ae91db9f91c509341292a4d7c0966423f02f4d850530",
+      "phases": {
+        "run": 0
+      }
+    },
+    {
+      "suite": "helpers",
+      "status": "Passed",
+      "reason": "run exit 0",
+      "counts": {
+        "passed": 14,
+        "failed": 0,
+        "skipped": 0
+      },
+      "diagnostics": null,
+      "checkedOutSha": "581d1ccfcda44046942a6792f9f7f7b7caf31f00",
+      "dirty": true,
+      "node": "v22.15.0",
+      "platform": "win32",
+      "reportSha256": "768bf582457ebbf27b487e97b2a792cff5bb442e56239f4d146d85d93bd9131b",
+      "phases": {
+        "run": 0
+      }
+    },
+    {
+      "suite": "playwright-types",
+      "status": "Passed",
+      "reason": "run exit 0",
+      "counts": null,
+      "diagnostics": null,
+      "checkedOutSha": "581d1ccfcda44046942a6792f9f7f7b7caf31f00",
+      "dirty": true,
+      "node": "v22.15.0",
+      "platform": "win32",
+      "reportSha256": "ea3c996c53d25bcfb564970cfd9a5f45f0283886ad8f90b879535cb361c30409",
+      "phases": {
+        "run": 0
+      }
+    },
+    {
+      "suite": "selenium-smoke",
+      "status": "Passed",
+      "reason": "run exit 0",
+      "counts": {
+        "passed": 5,
+        "failed": 0,
+        "skipped": 0
+      },
+      "diagnostics": null,
+      "checkedOutSha": "581d1ccfcda44046942a6792f9f7f7b7caf31f00",
+      "dirty": true,
+      "node": "v22.15.0",
+      "platform": "win32",
+      "reportSha256": "9bec46a8ef1fdb8a78c40a9f6c215bfdcd33dc2c4381a71dc904d307276cec22",
+      "phases": {
+        "run": 0
+      }
+    },
+    {
+      "suite": "lint",
+      "status": "Failed",
+      "reason": "ESLint: 213 errors, 14 warnings; full findings in eslint.json",
+      "counts": null,
+      "diagnostics": {
+        "errors": 213,
+        "warnings": 14,
+        "affectedFiles": [
+          {
+            "path": "client/src/App.tsx",
+            "errors": 9,
+            "warnings": 0
+          },
+          {
+            "path": "client/src/components/AIOutfitChat.tsx",
+            "errors": 3,
+            "warnings": 0
+          },
+          {
+            "path": "client/src/components/AIOutfitSidebar.tsx",
+            "errors": 2,
+            "warnings": 0
+          },
+          {
+            "path": "client/src/components/Portal.tsx",
+            "errors": 1,
+            "warnings": 1
+          },
+          {
+            "path": "client/src/components/ai-outfit/OutfitCard.tsx",
+            "errors": 3,
+            "warnings": 0
+          },
+          {
+            "path": "client/src/components/outfit/AIOutfitSuggestionsPanel.tsx",
+            "errors": 4,
+            "warnings": 0
+          },
+          {
+            "path": "client/src/components/outfit/AvatarPanel.tsx",
+            "errors": 13,
+            "warnings": 1
+          },
+          {
+            "path": "client/src/components/outfit/FloatingAISuggestions.tsx",
+            "errors": 1,
+            "warnings": 0
+          },
+          {
+            "path": "client/src/components/outfit/OutfitCard.tsx",
+            "errors": 18,
+            "warnings": 0
+          },
+          {
+            "path": "client/src/components/outfit/OutfitColorPicker.tsx",
+            "errors": 1,
+            "warnings": 0
+          },
+          {
+            "path": "client/src/components/outfit/TryOnPanel.tsx",
+            "errors": 8,
+            "warnings": 2
+          },
+          {
+            "path": "client/src/components/tryon/PhotoUploadFlow.tsx",
+            "errors": 1,
+            "warnings": 0
+          },
+          {
+            "path": "client/src/components/tryon/TryOnScene.tsx",
+            "errors": 1,
+            "warnings": 0
+          },
+          {
+            "path": "client/src/contexts/FittingRoomContext.tsx",
+            "errors": 1,
+            "warnings": 0
+          },
+          {
+            "path": "client/src/features/virtual-tryon/GarmentModel.tsx",
+            "errors": 15,
+            "warnings": 2
+          },
+          {
+            "path": "client/src/features/virtual-tryon/ViewerDiagnostics.tsx",
+            "errors": 3,
+            "warnings": 0
+          },
+          {
+            "path": "client/src/features/virtual-tryon/VirtualTryOn.tsx",
+            "errors": 30,
+            "warnings": 4
+          },
+          {
+            "path": "client/src/features/virtual-tryon/components/BodyPresets.tsx",
+            "errors": 2,
+            "warnings": 0
+          },
+          {
+            "path": "client/src/features/virtual-tryon/components/SizeCompare3DCanvas.tsx",
+            "errors": 4,
+            "warnings": 0
+          },
+          {
+            "path": "client/src/features/virtual-tryon/components/SizeRecommendation.tsx",
+            "errors": 2,
+            "warnings": 0
+          },
+          {
+            "path": "client/src/features/virtual-tryon/components/VirtualClosetItem.tsx",
+            "errors": 6,
+            "warnings": 0
+          },
+          {
+            "path": "client/src/features/virtual-tryon/components/VirtualPersonalClosetDrawer.tsx",
+            "errors": 1,
+            "warnings": 1
+          },
+          {
+            "path": "client/src/features/virtual-tryon/garmentBinding.ts",
+            "errors": 3,
+            "warnings": 0
+          },
+          {
+            "path": "client/src/hooks/useOutfitGenerator.ts",
+            "errors": 6,
+            "warnings": 1
+          },
+          {
+            "path": "client/src/pages/AIOutfitGenerator.tsx",
+            "errors": 11,
+            "warnings": 2
+          },
+          {
+            "path": "client/src/pages/AIOutfitRoom.tsx",
+            "errors": 5,
+            "warnings": 0
+          },
+          {
+            "path": "client/src/pages/AIOutfitRoom_new.tsx",
+            "errors": 1,
+            "warnings": 0
+          },
+          {
+            "path": "client/src/pages/AvatarStudioPage.tsx",
+            "errors": 6,
+            "warnings": 0
+          },
+          {
+            "path": "client/src/pages/CartPage.tsx",
+            "errors": 2,
+            "warnings": 0
+          },
+          {
+            "path": "client/src/pages/SizeComparisonRoom.tsx",
+            "errors": 22,
+            "warnings": 0
+          },
+          {
+            "path": "client/src/services/aiOutfitService.ts",
+            "errors": 12,
+            "warnings": 0
+          },
+          {
+            "path": "client/src/three/controls/avatar/Avatar.tsx",
+            "errors": 1,
+            "warnings": 0
+          },
+          {
+            "path": "client/src/utils/fetchWithTimeout.ts",
+            "errors": 1,
+            "warnings": 0
+          },
+          {
+            "path": "client/src/utils/generateLocalOutfits.ts",
+            "errors": 10,
+            "warnings": 0
+          },
+          {
+            "path": "client/src/utils/glb.ts",
+            "errors": 3,
+            "warnings": 0
+          },
+          {
+            "path": "client/update3D.cjs",
+            "errors": 1,
+            "warnings": 0
+          }
+        ]
+      },
+      "checkedOutSha": "581d1ccfcda44046942a6792f9f7f7b7caf31f00",
+      "dirty": true,
+      "node": "v22.15.0",
+      "platform": "win32",
+      "reportSha256": "9af0d397bc4dff40f090c09c17082ca6b200020d59426482d6a32c75509a6a50",
+      "phases": {
+        "run": 1
+      }
+    },
+    {
+      "suite": "build",
+      "status": "Failed",
+      "reason": "Frontend build failed with 109 TypeScript diagnostics; no build bypass",
+      "counts": null,
+      "diagnostics": {
+        "typescript": 109
+      },
+      "checkedOutSha": "581d1ccfcda44046942a6792f9f7f7b7caf31f00",
+      "dirty": true,
+      "node": "v22.15.0",
+      "platform": "win32",
+      "reportSha256": "0ba03e9377ee332e7a2158a177f1093506f03da4cc3ee21fead90df7aa8c4502",
+      "phases": {
+        "run": 2
+      }
+    }
+  ],
+  "workflowValidation": {
+    "tool": "actionlint",
+    "version": "1.7.12",
+    "status": "Passed",
+    "downloadSha256": "6e7241b51e6817ea6a047693d8e6fed13b31819c9a0dd6c5a726e1592d22f6e9"
+  }
+}

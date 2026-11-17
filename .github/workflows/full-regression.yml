@@ -1,0 +1,27 @@
+name: Full Regression
+on:
+  schedule:
+    - cron: '0 19 * * 0' # Monday02:00 Asia/Saigon
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: full-regression-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  regression:
+    name: Full / ${{ matrix.suite }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - suite: selenium-regression
+            runner: ubuntu-24.04
+          - suite: playwright-regression
+            runner: ubuntu-24.04
+          - suite: playwright-visual
+            runner: windows-2022
+    uses: ./.github/workflows/_qa-job.yml
+    with:
+      suite: ${{ matrix.suite }}
+      runner: ${{ matrix.runner }}
