@@ -1,109 +1,52 @@
-# VFitAI - Full-Stack & 3D QA Automation
+# VFitAI
 
-React / TypeScript / Three.js / Express / MongoDB
-Selenium / Java / TestNG / Maven / POM / Playwright
+VFitAI là web bán quần áo có phòng thử đồ 3D. Người mua có thể xem sản phẩm, chọn size, thử đồ trên avatar, thêm vào giỏ và đặt hàng COD. Dự án dùng React, TypeScript và Three.js ở frontend, Express và MongoDB ở backend.
 
-E-commerce and 3D virtual try-on with UI-to-API-to-MongoDB verification, isolated
-synthetic data, reviewed visual baselines and CI failure evidence.
-**Quality completion: strict lint/build pass locally; human/device acceptance remains pending.**
+## Chạy dự án
 
-## Review the portfolio
-
-- [Test Summary](qa/docs/test-summary.md): verified results, environment, CI links and limitations.
-- [Feature Inventory](qa/docs/feature-inventory.md), [RTM](qa/docs/rtm.md), [Bug Register](qa/bug-reports/bug-register.md).
-- [Selenium framework](qa/selenium-java/README.md): fresh driver per test, explicit waits, POM, failure screenshots.
-- [Playwright 3D](qa/docs/stage-7-playwright-3d.md): mounted GLB/state, camera, resource lifecycle, visual comparison and wrong-model detector.
-- [CI/reporting](qa/docs/stage-8-ci-quality-gates.md): SHA/environment, JUnit/HTML, screenshots and traces.
-- [Quality completion](qa/docs/quality-completion.md), [manual acceptance](qa/docs/manual-acceptance-checklist.md), [Stage 9 history](qa/docs/stage-9-portfolio.md).
-
-## Verified status
-
-[Current Test Summary](qa/docs/test-summary.md) records lint0 errors/0 warnings,
-production build Pass, frontend38, backend134, Selenium22, default Playwright12,
-compatibility20, accessibility21 and production smoke4 passing locally. Approved
-Windows visual comparison and wrong-model detection remain separate checks.
-Clean CI source/checkout proof is linked from [PR #5](https://github.com/htrsng/Virtual-Try-On/pull/5).
-Historical failed gates are preserved in their original stage reports.
-
-[Human acceptance checklist](qa/docs/manual-acceptance-checklist.md) is ready for
-NVDA/VoiceOver, native zoom200% and real phones; these have not been signed off.
-[Product scope](qa/docs/feature-status.md) distinguishes incomplete integrations.
-
-Online payment has no provider (API503); social login and password recovery have
-no complete flow. Live Gemini/email integrations are not E2E-verified. Browser
-repeats are execution counts, not new business cases;150 cases remains a target.
-
-## Run smoke from a clean clone
-
-Requires Node22, Java17, Maven3.9+, and Chrome or Edge. The QA launcher creates its
-own MongoDB replica set; no real account, development database or application
-`.env` is needed. First run needs network for dependencies, MongoDB8.2.6 and drivers.
+Cần Node.js 22 và npm. Chạy các lệnh sau từ thư mục gốc sau khi clone:
 
 ```sh
 npm ci --prefix server
 npm ci --prefix client
 npm ci --prefix tests
+```
+
+Nếu muốn mở web để phát triển, làm theo [hướng dẫn cấu hình MongoDB và tệp môi trường](qa/docs/environment-setup.md). Web dev mặc định ở cổng `5173`, API ở `3000`.
+
+Nếu chỉ chạy test, dùng các lệnh bên dưới. Môi trường QA tự tạo MongoDB replica set và tài khoản mẫu. Lần đầu có thể cần mạng để tải MongoDB, browser hoặc driver.
+
+```sh
+npm --prefix server test
+npm --prefix client run test:ci
+node tests/node_modules/@playwright/test/cli.js install chromium
+npm --prefix tests test
+```
+
+Selenium cần thêm Java 17, Maven 3.9+ và Chrome hoặc Edge:
+
+```sh
 node scripts/qa-selenium.cjs -Dbrowser=chrome -Dgroups=smoke
 ```
 
-Run browser suites sequentially (default QA ports are shared):
+Chạy Playwright và Selenium lần lượt nếu dùng cổng QA mặc định (`3300` cho API, `55173` cho UI). Cách chạy hồi quy, đổi cổng và tìm báo cáo có trong [hướng dẫn Selenium](qa/selenium-java/README.md) và [hướng dẫn Playwright](tests/README.md).
 
-```sh
-node tests/node_modules/@playwright/test/cli.js install chromium firefox
-npm --prefix tests test
-node scripts/qa-selenium.cjs -Dbrowser=chrome -Dgroups=regression
-node scripts/ci/run.cjs init playwright-compat
-node scripts/ci/run.cjs run playwright-compat
-node scripts/ci/run.cjs finalize playwright-compat
-node scripts/ci/run.cjs init playwright-accessibility
-node scripts/ci/run.cjs run playwright-accessibility
-node scripts/ci/run.cjs finalize playwright-accessibility
-node scripts/ci/run.cjs init playwright-production
-node scripts/ci/run.cjs run playwright-production
-node scripts/ci/run.cjs finalize playwright-production
-```
+## Tìm code và bài test
 
-Compatibility covers desktop Chromium/Firefox plus tablet768 and mobile390 Chromium.
-Device emulation does not replace physical devices/Safari. Reviewed visual baselines
-apply only to the fixed Windows render profile; never auto-update them to hide a diff.
-See [browser test guide](tests/README.md) for visual and diagnostic commands.
+| Thư mục | Nội dung |
+| --- | --- |
+| `client/` | Giao diện, phòng thử đồ 3D và test Vitest |
+| `server/` | API, nghiệp vụ, model MongoDB và test Jest/Supertest |
+| `tests/` | Playwright cho luồng web, trình duyệt, accessibility và 3D |
+| `qa/selenium-java/` | Selenium/TestNG cho đăng nhập, giỏ hàng, đặt và quản lý đơn |
+| `qa/` | Dữ liệu mẫu, test cases, kết quả và báo cáo lỗi |
+| `scripts/`, `.github/workflows/` | Khởi động môi trường test, chạy CI và xuất báo cáo |
+| `archive/` | Bài tập API/fuzzing trên ứng dụng đích riêng |
 
-```sh
-npm --prefix client run test:ci
-npm --prefix server test
-npm --prefix client run lint
-npm --prefix client run build
-```
+## Tình trạng kiểm thử
 
-Generated reports: `.runtime/`, `tests/playwright-report/`,
-`qa/selenium-java/target/` (ignored). CI artifacts retain14 days; open the runs in
-Test Summary to download JUnit/HTML/traces. Never upload QA environment manifests,
-which contain synthetic credentials. Only curated samples/summaries are committed.
+Checkout COD có test từ thao tác trên web đến đối chiếu đơn đã lưu qua API. Bộ 3D kiểm tra việc tải model, đổi size, camera và khôi phục sau lỗi tải. Xem [kết quả kiểm thử và link CI](qa/docs/test-summary.md), [phạm vi chức năng](qa/docs/feature-status.md) và [danh sách lỗi đã ghi nhận](qa/bug-reports/bug-register.md).
 
-## Application setup and structure
+Thanh toán online chưa có provider. Đăng nhập mạng xã hội và khôi phục mật khẩu chưa có luồng hoàn chỉnh. Gemini và email chưa được xác minh end-to-end với dịch vụ thật. Các bước kiểm tra bằng trình đọc màn hình và điện thoại thật nằm trong [checklist nghiệm thu thủ công](qa/docs/manual-acceptance-checklist.md).
 
-[Environment setup](qa/docs/environment-setup.md) documents MongoDB replica sets,
-JWT secret, `.env.example`, UI5173/API3000 and Windows `scripts/start-web.ps1`.
-QA uses API3300/UI55173 and a temporary database; readiness checks precede tests.
-
-```text
-client/           React/TypeScript/Three.js application and component tests
-server/           Routes/controllers, business logic, models and API tests
-tests/            Existing Playwright functional, 3D, visual and compatibility tests
-qa/docs/          Strategy, inventory, cases, RTM, manual testing and summary
-qa/selenium-java/ Maven/TestNG/POM smoke and business regression
-qa/test-data/     Synthetic fixtures and lifecycle contract
-qa/bug-reports/   Confirmed findings, fixes and retests
-qa/evidence/      Curated summaries and sample evidence
-scripts/          Owned QA lifecycle and CI reporting
-.github/          Scoped workflows and reusable job
-doc/              Application and restoration documentation
-archive/          Historical coursework
-```
-
-[Stage 9 report](qa/docs/stage-9-portfolio.md) separates Development Fix/refactor
-from QA work. [Roadmap](qa/docs/implementation-roadmap.md) keeps dependencies and
-future scope. Earlier baseline reports are historical, not current status.
-
-API fuzzing remains in the [Coursework Archive](archive/coursework-api-fuzzing/README.md)
-and is not counted as VFitAI backend coverage.
+Kết quả chạy local nằm trong `.runtime/`, `tests/playwright-report/` hoặc `qa/selenium-java/target/`. Artifacts trên GitHub Actions được lưu 14 ngày. Giữ tệp `environment.json` của lần chạy ở máy local vì có thông tin đăng nhập mẫu.
