@@ -1,9 +1,9 @@
-# Ánh sáng phòng thử đồ 3D
+# 3D fitting-room lighting
 
-`potsdamer_platz_1k.hdr` là ảnh HDR của preset `city` trong Drei. Phòng thử đồ tải bản lưu trong dự án để dùng cùng một môi trường ánh sáng khi chạy web và khi chụp ảnh kiểm thử.
+`potsdamer_platz_1k.hdr` is the HDR image for Drei’s `city` preset. The fitting room loads the copy in this repository so the storefront and visual tests use the same lighting environment.
 
-- [Tệp dùng trong preset Drei](https://raw.githubusercontent.com/pmndrs/drei-assets/456060a26bbeb8fdf79326f224b6d99b8bcce736/hdri/potsdamer_platz_1k.hdr)
-- [Ảnh gốc Potsdamer Platz của Greg Zaal](https://polyhaven.com/a/potsdamer_platz)
-- [Giấy phép CC0 của Poly Haven](https://polyhaven.com/license)
+- [Drei preset asset](https://raw.githubusercontent.com/pmndrs/drei-assets/456060a26bbeb8fdf79326f224b6d99b8bcce736/hdri/potsdamer_platz_1k.hdr)
+- [Original Potsdamer Platz image by Greg Zaal](https://polyhaven.com/a/potsdamer_platz)
+- [Poly Haven CC0 license](https://polyhaven.com/license)
 
-Khi đổi ảnh HDR, kiểm tra lại kết quả render theo [hướng dẫn ảnh chuẩn WebGL](../../../tests/visual-baselines/README.md).
+If the HDR image changes, review the render using the [WebGL baseline guide](../../../tests/visual-baselines/README.md).

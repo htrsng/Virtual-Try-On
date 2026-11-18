@@ -1,46 +1,33 @@
-# Stored-state oracles v1 — 15/11/2026
+# Stored-state oracles v1 — November 15, 2026
 
-Đợt này sửa độ tin cậy của harness/oracle, **không sửa routes hoặc models của target**.
-Baseline và snapshot giai đoạn trước được giữ nguyên. API/replay ở đây dùng contract
-`http-and-stored-state-v1`; xem [quy tắc](../../qa/state-oracle-contract.md).
+This revision strengthens the harness and oracles while keeping the target routes and models at their previous revision. It preserves the earlier snapshots. Acceptance and replay use `http-and-stored-state-v1`. [Oracle rules](../../qa/state-oracle-contract.md).
 
-## Kết quả đã chạy
+## Execution results
 
-| Kiểm tra | Kết quả | Bằng chứng |
-|---|---|---|
-| Regression fuzz-tool/oracle/harness | 55/55 đạt: 34 test trước đó + 16 oracle + 5 integration mới | [Log](fuzz-regression.txt) |
-| Reporting/replay regression | 9/9 đạt | [Log](reporting-regression.txt) |
-| Acceptance mới | 51 scenario: 19 PASS / 32 FAIL, 0 ERROR/NOT_RUN | [Report](api/report.md), [JUnit](api/junit.xml) |
-| Testcase tổng hợp | 29 ca: 9 PASS / 20 FAIL | [Traceability](api/report.json) |
-| Replay cùng phiên bản nguồn | 20 testcase FAIL × 2 lượt, 40 lượt tái hiện | [Report](replay/report.md) |
-| So sánh kết quả nghiệp vụ | Không scenario nào đổi PASS/FAIL so với baseline | [Comparison](comparison.json) |
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Fuzz tool, oracle, and harness regression | 55/55 passed: 34 existing, 16 oracle, and 5 new integration checks | [Log](fuzz-regression.txt) |
+| Reporting and replay regression | 9/9 passed | [Log](reporting-regression.txt) |
+| Acceptance scenarios | 51 executed: 19 PASS, 32 FAIL, 0 ERROR or NOT_RUN | [Report](api/report.md) · [JUnit](api/junit.xml) |
+| Aggregated test cases | 29 cases: 9 PASS, 20 FAIL | [Traceability](api/report.json) |
+| Replay on the same source | 20 failing cases × 2 attempts, 40 failures reproduced | [Report](replay/report.md) |
+| Comparison to baseline | All scenarios retained their PASS or FAIL status | [Comparison](comparison.json) |
 
-Acceptance exit 1 là kết quả đúng vì target còn vi phạm yêu cầu. Replay exit 0
-nghĩa vi phạm tái hiện, không phải đã sửa. 52 mutation observation có snapshot
-trước/sau, gồm cả bước setup trong chuỗi; không phải 52 testcase mới.
+Acceptance exited 1 because of target violations. Replay exited 0 because the expected failures recurred. Before-and-after snapshots cover 52 mutation observations, including fixture setup steps.
 
-## Kiểm chứng điểm mù của oracle cũ
+## Check gaps in the old oracle
 
-[Probe](old-oracle-probe.json) nạp riêng `oracles.py` từ commit `1d3468b` trong một
-process Python và chạy 16 test mới: có **27 assertion failure tính cả subtest**,
-không có lỗi runner. Các failure được kỳ vọng để chỉ ra false-green của oracle cũ;
-không phải số lỗi ứng dụng. [Log chi tiết](old-oracle-probe.txt).
+The [probe](old-oracle-probe.json) loaded `oracles.py` from commit `1d3468b` in a separate Python process and ran 16 new tests. It recorded **27 assertion failures including subtests**, with zero runner errors. The expected failures reveal gaps in the previous oracle. [Detailed log](old-oracle-probe.txt).
 
-Test tích hợp dùng faulty app riêng trong `fuzz-testing/tests/fixtures/` để kiểm tra
-“ghi dữ liệu rồi trả 4xx”. Fixture không được API acceptance hay fuzz campaign load.
+Integration tests use a deliberately faulty fixture under `fuzz-testing/tests/fixtures/` to verify detection of writes followed by a 4xx response. Acceptance and campaign runs use the normal coursework target.
 
-## Môi trường và nguồn
+## Environment and source
 
-Windows, Python 3.13.2, Node.js 22.15.0. Bộ regression đầy đủ chạy ngoài sandbox
-để tránh lỗi ACL thư mục tạm đã biết. API và replay chạy cùng mã trong workspace.
-CI vẫn cấu hình Python 3.12/Node 24; chưa xác nhận workflow remote cho đợt này.
+The run used Windows, Python 3.13.2, and Node.js 22.15.0. Full regression ran outside the sandbox to avoid temporary-directory ACL errors. Acceptance and replay used the same workspace source. CI specified Python 3.12 and Node.js 24. Remote execution had yet to be verified.
 
-`git_commit` trong API report là commit nền `1d3468b` trước khi commit thay đổi mới,
-không phải worktree sạch khi chạy. Source hash trong report xác định mã đã dùng;
-[comparison](comparison.json) ghi khác biệt với baseline. Artifact hashes nằm trong
-[manifest](snapshot-sha256.json). Các đường dẫn tuyệt đối thuộc máy lúc chạy.
+The API report’s `git_commit` field records base commit `1d3468b`. Source hashes identify the files used. The [comparison](comparison.json) records differences from the baseline, and the [manifest](snapshot-sha256.json) records artifact hashes. Absolute paths refer to the original machine.
 
-## Lệnh tái hiện từ repo root
+## Rerun from the coursework root
 
 ```sh
 python -m unittest discover -s fuzz-testing/tests -p "test_*.py"
@@ -48,6 +35,4 @@ python api-testing/run_suite.py --suite full --output reports/runs/state-demo-ap
 python api-testing/replay_failures.py --report reports/runs/state-demo-api/report.json --repeats 2 --output reports/runs/state-demo-replay
 ```
 
-Chạy riêng các lệnh vì acceptance có thể exit 1. Output phải mới; không ghi đè
-bằng chứng. Replay từ baseline cũ trên mã mới sẽ từ chối hash lệch, đúng thiết kế.
-Chưa có bản sửa target hoặc retest sau sửa; mọi bug ứng dụng vẫn OPEN.
+Run the commands separately because acceptance can exit 1. Use fresh output directories. Replay rejects older reports when source hashes differ. The target fixes and post-fix retests remain pending, and the application defects are still OPEN.

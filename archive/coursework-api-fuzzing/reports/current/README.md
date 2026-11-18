@@ -1,21 +1,14 @@
-# Current QA evidence — 15/11/2026
+# Supplemental QA evidence — November 15, 2026
 
-Snapshot bổ sung sau baseline, không ghi đè bằng chứng cũ:
+This snapshot supplements the baseline.
 
-- `replay/`: 20 testcase FAIL, một representative mỗi testcase, 2 lượt trên state mới;
-  40 lượt tái hiện. Input report SHA và source manifest được kiểm tra trước execution.
-- `frontend/`: 14 component checks đạt; typecheck/lint fail; bundle NOT_RUN.
-  Phạm vi và source hashes nằm trong report; JUnit và log được giữ cùng snapshot.
-- `reporting-regression.txt`: 9 test contract reporting/replay đạt.
-- `quality-schema-regression.txt`: 4 test bảo vệ ý nghĩa schema advisory đạt.
-- `fuzz-quality/report.json`: campaign 28 mutation HTTP, seed 7, mọi input được ghi;
-  tỷ lệ schema advisory khác với tính hợp lệ nghiệp vụ đầy đủ.
-- `snapshot-sha256.json`: hash các artifact chọn lọc; README chỉ giải thích scope.
+- `replay/` records 20 failing cases, one representative scenario per case, and 2 attempts on fresh state for each. All 40 failures recurred. The runner checked the input report hash and source manifest before executing.
+- `frontend/` records 14 passing component checks, failed typecheck and lint, and bundle status NOT_RUN. The snapshot includes scope, source hashes, JUnit, and logs.
+- `reporting-regression.txt` records 9 passing reporting and replay contract tests.
+- `quality-schema-regression.txt` records 4 passing schema-advisory checks.
+- `fuzz-quality/report.json` records 28 mutated HTTP inputs with seed 7. Schema advisory rates and full business validity are separate measurements.
+- `snapshot-sha256.json` records hashes of curated artifacts.
 
-Chạy trên Windows/Python 3.13.2/Node 22.15.0 trong workspace. Frontend cần chạy
-ngoài sandbox do esbuild/worker spawn; đây không phải kết quả GitHub Actions.
-Mã nguồn được hash theo từng suite, không coi commit nền là bằng chứng worktree sạch.
+The runs used Windows, Python 3.13.2, and Node.js 22.15.0. Frontend checks ran outside the sandbox so esbuild and workers could spawn. These are local workspace results, identified by suite-specific source hashes.
 
-Các đường dẫn tuyệt đối trong report thuộc máy lúc thực thi. Để xem, dùng
-[Evidence index](../../qa/evidence-index.md); để chạy lại, dùng output mới theo README.
-Không suy ra API production, WebGL/E2E hoặc toàn bộ frontend đã đạt kiểm thử.
+Absolute paths refer to the original machine. Use the [evidence index](../../qa/evidence-index.md) to find reports and follow the coursework README to rerun into a fresh output directory. Production API, browser E2E, WebGL, and full frontend checks are outside the recorded results.

@@ -1,59 +1,41 @@
-# Baseline QA portfolio — 15/11/2026
+# QA portfolio baseline — November 15, 2026
 
-Lần chạy: `reports/runs/portfolio-verified-20261115/`, bắt đầu từ repo tại commit
-`414d49a` cùng các file portfolio mới chưa commit. Đây là commit nền, không phải
-cam kết worktree sạch khi chạy. Hash từng file mã API/target nằm trong
-[`api/report.json`](api/report.json); hash các artifact snapshot nằm trong
-[`snapshot-sha256.json`](snapshot-sha256.json).
+Run output: `reports/runs/portfolio-verified-20261115/`. The run used base commit `414d49a` plus uncommitted portfolio files. See [API source hashes](api/report.json) and [snapshot hashes](snapshot-sha256.json).
 
-**Môi trường:** Windows, Python 3.13.2, Node.js 22.15.0; chạy ngoài sandbox để
-Node có quyền spawn và Python tạo thư mục tạm. CI cấu hình Python 3.12/Node 24,
-chưa xác nhận workflow remote cho thay đổi này trước khi push.
+The run used Windows, Python 3.13.2, and Node.js 22.15.0. It ran outside the sandbox so Node could spawn processes and Python could create temporary directories. CI specified Python 3.12 and Node.js 24. The remote workflow was unverified for these changes when the snapshot was recorded.
 
-## Lệnh và kết quả
+## Commands and results
 
 ```sh
 python tools/run_checks.py --suite full --output reports/runs/portfolio-verified-20261115
 ```
 
-| Nhóm | Kết quả | Bằng chứng |
-|---|---|---|
-| Unit trên mã TypeScript ứng dụng | 14 PASS, 0 FAIL | [JUnit](unit-junit.xml) |
-| Regression reporting | 4/4 đạt | [Log](reporting-regression.txt) |
-| Regression công cụ fuzzing | 34/34 đạt | [Log](fuzz-tool-regression.txt) |
-| API full — scenario | 51 thực thi: 19 PASS, 32 FAIL, 0 ERROR | [Report](api/report.md), [JUnit](api/junit.xml) |
-| API full — testcase | 29 testcase: 9 PASS, 20 FAIL; 0 NOT_RUN | [JSON và source hash](api/report.json) |
-| Fuzzing ngắn, có Z3 | Hoàn tất, exit 0; vẫn có quan sát vi phạm | [Summary](fuzz-summary.json), [log](fuzz-smoke.txt) |
-| Manual/UI | 12 testcase thiết kế, NOT_RUN | [Catalogue](../../manual-testing/test-cases.md) |
+| Group | Result | Evidence |
+| --- | --- | --- |
+| Application TypeScript unit tests | 14 PASS, 0 FAIL | [JUnit](unit-junit.xml) |
+| Reporting regression | 4/4 passed | [Log](reporting-regression.txt) |
+| Fuzz-tool regression | 34/34 passed | [Log](fuzz-tool-regression.txt) |
+| Full API suite by scenario | 51 executed: 19 PASS, 32 FAIL, 0 ERROR | [Report](api/report.md) · [JUnit](api/junit.xml) |
+| Full API suite by case | 29 cases: 9 PASS, 20 FAIL, 0 NOT_RUN | [JSON and source hashes](api/report.json) |
+| Short campaign with Z3 | Completed with exit 0 and observed violations | [Summary](fuzz-summary.json) · [Log](fuzz-smoke.txt) |
+| Manual UI | 12 cases designed, NOT_RUN | [Catalog](../../manual-testing/test-cases.md) |
 
-Lệnh full trả **exit 1**, đúng contract vì acceptance target còn vi phạm yêu cầu.
-Không có lỗi runner trong lần full này. Các bước được giữ trong
-[`execution-summary.json`](execution-summary.json).
+The full command exited **1** for acceptance violations, with zero runner errors. [Execution summary](execution-summary.json).
 
-Smoke API được chạy riêng cùng phiên bản source:
+API smoke ran separately against the same source:
 
 ```sh
 python api-testing/run_suite.py --suite smoke --output reports/runs/portfolio-smoke-20261115
 ```
 
-Bốn scenario TC-AUTH-5, TC-OS-5, TC-PRD-4 và TC-ORD-19 đều PASS, exit 0. Report
-smoke đầy đủ chỉ lưu local; snapshot ở đây tập trung full suite.
+TC-AUTH-5, TC-OS-5, TC-PRD-4, and TC-ORD-19 all passed and the command exited 0. The full smoke report was retained locally.
 
-## Cách đọc và tái hiện
+## Read and rerun the snapshot
 
-Chọn một testcase trong report, chạy `api-testing/run_suite.py --suite full
---testcase <TC-ID>` với output mới. ID actor và timestamp có thể khác; so sánh
-oracle và hành vi, không so sánh JSON byte-for-byte của các lần chạy.
+Select a case from the report and run `api-testing/run_suite.py --suite full --testcase <TC-ID>` with a fresh output directory. Actor IDs and timestamps can vary. Compare the oracle and behavior across runs.
 
-File API giữ nguyên bằng chứng request/response và metadata của lần chạy. Các đường
-dẫn tuyệt đối trong JSON/log chỉ vị trí local lúc chạy. Log `.log` được chép sang
-`.txt` trong snapshot; log fuzzing bỏ dòng trống thừa cuối file, giữ nguyên nội dung đo.
-Trường `log` của execution summary giữ tên gốc. `fuzz-summary`
-là bản chọn lọc; bằng chứng concolic/coverage chi tiết vẫn trong thư mục lần chạy local.
+The API files retain request and response evidence and run metadata. Absolute paths refer to the original machine. The snapshot uses `.txt` copies of `.log` files, and the fuzzing log omits trailing blank lines. The execution summary keeps original names in its `log` field. `fuzz-summary` is curated. Detailed branch and coverage evidence remains in the local run directory.
 
-Không cộng số unit test, regression, scenario, testcase và input fuzzing thành một
-chỉ số coverage hoặc số lỗi độc lập. Ba bug report chỉ minh họa ba triệu chứng từ
-full suite, chưa bao quát 20 testcase FAIL hoặc xác nhận mọi lỗi gốc.
+Each metric has its own unit: unit tests, regressions, scenarios, test cases, and fuzz inputs. The three historical bug reports illustrated selected symptoms among the 20 failing cases.
 
-Lần đầu chạy trong sandbox gặp `spawn EPERM` và `PermissionError`; không dùng kết
-quả đó làm baseline. Không đổi assertion hoặc bỏ qua test để có lần chạy đạt.
+The initial sandbox run hit `spawn EPERM` and `PermissionError` and was excluded from the baseline. The recorded run kept the assertions and case selection intact.

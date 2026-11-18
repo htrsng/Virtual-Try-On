@@ -1,29 +1,20 @@
 # Application unit automation
 
-**14 unit test** chạy trực tiếp trên hai hàm TypeScript của ứng dụng gốc:
+**14 unit tests** exercise two TypeScript helpers from the original application:
 
-- `calculateRecommendedSize`: fallback, chọn size phù hợp, cận dưới/trên, phân biệt
-  tops/bottoms, fit score, giữ input và tính ổn định khi đổi thứ tự chart.
-- `fetchWithTimeout`: method/body, response, abort khi timeout, giữ nguyên network
-  error và HTTP 4xx. Mock fetch ở ranh giới mạng; không gọi dịch vụ ngoài.
+- `calculateRecommendedSize` covers fallbacks, size selection, boundaries, tops versus bottoms, fit scores, input preservation, and stability when charts are reordered.
+- `fetchWithTimeout` covers method and body forwarding, responses, abort on timeout, network errors, and HTTP 4xx. The tests mock fetch at the network boundary.
 
-Từ thư mục này, dùng Node.js >=22.15 (CI dùng 24):
+From this directory, use Node.js 22.15 or later. CI uses Node.js 24.
 
 ```sh
 npm test
 ```
 
-Không cần npm install: suite dùng `node:test` và khả năng strip TypeScript của Node,
-import trực tiếp mã nguồn trong `archive/vfitai/client/src/utils/`. Không dùng mã
-copy làm target. Test không render React, không xác nhận WebGL hay browser E2E.
+The suite uses `node:test` and Node’s TypeScript stripping, so it requires no npm install. It imports the helpers directly from the application source. React rendering, WebGL, and browser E2E are outside this suite.
 
-Chạy `python tools/run_checks.py --suite smoke` từ repo root để lưu JUnit và log
-cùng API/reporting/fuzz-tool regression. Unit application result được đếm riêng.
-Playwright cũ vẫn trong archive và chưa được tính vào kết quả portfolio.
+From the coursework root, run `python tools/run_checks.py --suite smoke` to save JUnit and logs alongside the API, reporting, and fuzz-tool regression checks. Application unit results are counted separately. Archived Playwright work is excluded from the coursework results.
 
-## React component scope riêng
+## React component tests
 
-Đã bổ sung 14 component test ProductList/Toast bằng Vitest/Testing Library trên mã
-frontend gốc. Chạy `python tools/run_frontend_checks.py` từ repo root sau khi cài
-dependency frontend. Không cộng 14 component case với unit logic để suy ra E2E.
-[Scope, mocks và lỗi build/lint còn mở](../qa/frontend-quality.md).
+Vitest and Testing Library cover 14 ProductList and Toast cases against the original frontend. After installing frontend dependencies, run `python tools/run_frontend_checks.py` from the coursework root. Component and unit tests have separate scopes. [Scope, mocks, and recorded build/lint issues](../qa/frontend-quality.md).

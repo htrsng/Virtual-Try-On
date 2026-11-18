@@ -1,12 +1,7 @@
 # Manual testing
 
-[12 testcase chức năng](test-cases.md) được thiết kế cho UI của VFitAI gốc, theo
-luồng đăng nhập, giỏ hàng, checkout, đơn, user, product và size recommendation.
+The [12 functional cases](test-cases.md) cover the original VFitAI UI: login, cart, checkout, orders, users, products, and size recommendations.
 
-Hiện tất cả là **NOT_RUN**. Để thực thi cần frontend trong `archive/vfitai/client/`
-và backend hoặc mock API có contract được ghi rõ. Không dùng API harness để tuyên bố
-đã kiểm thử E2E UI. Mã Playwright cũ trong archive chưa được tính là automation đạt.
+All cases are **NOT_RUN**. Running them requires the VFitAI frontend and a backend or mock API with a documented contract. The simulated API harness and archived Playwright work provide no UI E2E result for these cases.
 
-Khi chạy, tạo execution record mới với ngày, build/commit, môi trường, actual result,
-PASS/FAIL/BLOCKED và ảnh hoặc trace; không sửa expected result để khớp lỗi hiện có.
-NOT_RUN là chưa thử; BLOCKED chỉ dùng khi đã thử nhưng không đủ điều kiện thực hiện.
+For each run, record the date, build or commit, environment, actual result, PASS/FAIL/BLOCKED status, and a screenshot or trace. Keep the expected result tied to the requirement. Use NOT_RUN before execution and BLOCKED when an attempted case cannot proceed.

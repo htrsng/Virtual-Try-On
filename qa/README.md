@@ -1,26 +1,25 @@
-# Tài liệu kiểm thử VFitAI
+# VFitAI QA documentation
 
-Dùng trang này để tìm test theo nghiệp vụ, xem bằng chứng của một lần chạy hoặc chọn tầng phù hợp khi bổ sung ca hồi quy.
+Use this guide to find tests by feature, review run evidence, or pick a test layer for a new regression case.
 
-| Việc cần làm | Bắt đầu ở đâu |
+| Task | Start here |
 | --- | --- |
-| Kiểm tra quyền truy cập, giá, coupon và tồn kho | [Jest/Supertest](../server/tests/README.md) |
-| Kiểm tra đặt COD và quản lý đơn qua giao diện | [Selenium/TestNG](selenium-java/README.md) |
-| Kiểm tra model 3D, tương thích browser và accessibility | [Playwright](../tests/README.md) |
-| Tra yêu cầu, test case và kết quả | [Phạm vi chức năng](docs/feature-inventory.md) · [RTM](docs/rtm.md) · [Test Summary](docs/test-summary.md) |
-| Xem lỗi đã xác nhận và đợt kiểm tra lại | [Bug Register](bug-reports/bug-register.md) |
+| Check permissions, pricing, coupons, or stock | [Jest/Supertest](../server/tests/README.md) |
+| Check COD checkout and order management through the UI | [Selenium/TestNG](selenium-java/README.md) |
+| Check 3D models, browser compatibility, or accessibility | [Playwright](../tests/README.md) |
+| Look up requirements, cases, and results | [Feature inventory](docs/feature-inventory.md) · [Traceability Matrix](docs/rtm.md) · [Test Summary](docs/test-summary.md) |
+| Review confirmed defects and retests | [Bug Register](bug-reports/bug-register.md) |
 
-## Chạy hoặc viết thêm bài test
+## Run or extend the tests
 
-- [Môi trường QA](docs/environment-setup.md) và [dữ liệu mẫu](test-data/README.md) hướng dẫn tạo dữ liệu riêng cho mỗi lần chạy.
-- [Selenium](selenium-java/README.md) dùng cho luồng mua hàng và quản lý đơn. [Playwright](../tests/README.md) có các bài kiểm tra browser, accessibility và phòng thử đồ 3D.
-- Khi thêm test API, tra [danh sách endpoint](docs/api-inventory.md), [ma trận quyền](docs/permission-matrix.md) và [quy tắc kiểm tra dữ liệu](docs/validation-rules.md).
-- Tra [test cases](docs/test-cases.csv), [ca nghiệp vụ E2E](docs/e2e-test-cases.csv), [danh mục test tự động](docs/automated-test-catalog.csv) và [ma trận truy vết](docs/rtm.md) để tìm ca đã có.
+- Set up an isolated run with the [QA environment guide](docs/environment-setup.md) and [test fixtures](test-data/README.md).
+- For a new API test, check the [endpoint inventory](docs/api-inventory.md), [permissions matrix](docs/permission-matrix.md), and [validation rules](docs/validation-rules.md).
+- Find existing coverage in the [test cases](docs/test-cases.csv), [business E2E cases](docs/e2e-test-cases.csv), [automated test catalog](docs/automated-test-catalog.csv), and [traceability matrix](docs/rtm.md).
 
-## Đọc báo cáo
+## Read the reports
 
-- [Hướng dẫn CI và báo cáo](docs/stage-8-ci-quality-gates.md) chỉ nơi tìm log, ảnh chụp, trace và kết quả từng job.
-- [Kết quả đợt rà soát chất lượng](docs/quality-completion.md) ghi các kiểm tra đã thực hiện. [Checklist nghiệm thu](docs/manual-acceptance-checklist.md) dùng khi kiểm tra bằng thiết bị thật hoặc công cụ hỗ trợ.
-- [Kế hoạch kiểm thử](docs/test-strategy.md), [ghi chú kiểm thử thủ công](docs/manual-testing.md) và [lộ trình](docs/implementation-roadmap.md) giúp chọn phần cần bổ sung.
+- Find logs, screenshots, traces, and job results in the [CI guide](docs/stage-8-ci-quality-gates.md).
+- See the [quality review](docs/quality-completion.md) for completed checks and the [acceptance checklist](docs/manual-acceptance-checklist.md) for physical devices and assistive technology.
+- Use the [test strategy](docs/test-strategy.md), [manual testing notes](docs/manual-testing.md), and [roadmap](docs/implementation-roadmap.md) to plan new coverage.
 
-Khi trích số liệu, lấy số ca từ danh mục và kết quả thực thi từ báo cáo của lần chạy tương ứng. Checklist nghiệm thu ghi phần cần người kiểm thử thực hiện.
+Use the catalog for case counts and the corresponding run report for execution results. The acceptance checklist tracks work that requires a person to carry out.

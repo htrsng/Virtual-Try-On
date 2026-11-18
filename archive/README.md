@@ -1,7 +1,7 @@
 # Archive
 
-[coursework-api-fuzzing](coursework-api-fuzzing/README.md) lưu bộ bài tập API/fuzzing, công cụ và các báo cáo lịch sử.
+[API fuzzing coursework](coursework-api-fuzzing/README.md) contains the coursework, tooling, and historical reports.
 
-Ứng dụng VFitAI đã được khôi phục về các thư mục gốc `client/`, `server/`, `doc/` và `tests/`. Backend sử dụng Express, Mongoose và MongoDB.
+The VFitAI application was restored to its original `client/`, `server/`, `doc/`, and `tests/` directories. The backend uses Express, Mongoose, and MongoDB.
 
-Xem [hướng dẫn chạy web](../README.md) và [ghi nhận khôi phục](../doc/RESTORED_WEB.md).
+See the [application setup guide](../README.md) and [restoration notes](../doc/RESTORED_WEB.md).

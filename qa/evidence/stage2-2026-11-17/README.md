@@ -1,23 +1,13 @@
-# Giai đoạn 2 evidence — 17/11/2026
+# Stage 2 evidence — November 17, 2026
 
-Input `4caae89`, nhánh `qa/stage-2-test-environment`. Candidate source/config/fixtures
-được nhận diện qua SHA-256; không nhúng commit SHA tự tham chiếu vào chính manifest.
+Input `4caae89`, branch `qa/stage-2-test-environment`. SHA-256 hashes identify candidate source, configuration, and fixtures.
 
-- `execution-summary.json`: môi trường đo và kết quả tổng hợp.
-- `repeat-summary.json`: hai lượt backend (130 Pass/13 suites mỗi lượt), hai lượt
-  Playwright (6 Pass, 0 skipped mỗi lượt); runId/database khác nhau, mỗi browser suite
-  có 7 resets gồm seed ban đầu và 6 cases, cleanup stopped và ports released.
-- `control-summary.json`: CLI reset/clear/stop, health transitions, refusal cổng bận /
-  capability giả, credentials scrubbed. CLI stop chờ cleanup xong trước khi trả thành công.
-- `source-sha256.json`, `asset-sha256.json`: candidate source và 7 GLB assets hiện có.
-- `raw-log-sha256.json`: fingerprints của raw logs/JSON (local, không phải CI artifacts).
+- `execution-summary.json` records the test environment and overall results.
+- `repeat-summary.json` records two backend runs with 130 passes across 13 suites each and two Playwright runs with 6 passes and zero skips each. Run IDs and databases differed. Each browser suite performed 7 resets, including initial seeding and 6 cases. Cleanup stopped services and freed ports.
+- `control-summary.json` records reset, clear, stop, health transitions, rejection of occupied ports and invalid capabilities, and credential cleanup. The CLI waits for cleanup before returning success from stop.
+- `source-sha256.json` and `asset-sha256.json` identify candidate source and 7 existing GLB assets.
+- `raw-log-sha256.json` fingerprints local logs and JSON.
 
-Final repeat raw files: `.runtime/qa-repeat/1794900303253-9b0229f9/`.
-CLI raw log: `.runtime/stage2/control-check.log`. Không commit các raw files, runtime
-manifests chứa credentials/capabilities, Mongo data, traces hoặc reports sinh tự động.
-Các lượt khảo sát fail không được dùng thay final results; xem
-[findings/retest](../../bug-reports/STAGE2-ENV.md).
+Repeat output is under `.runtime/qa-repeat/1794900303253-9b0229f9/`. The CLI log is `.runtime/stage2/control-check.log`. Keep raw files, runtime manifests containing credentials and capabilities, MongoDB data, traces, and generated reports local. Diagnostic failures and final results are tracked separately. [Findings and retest](../../bug-reports/STAGE2-ENV.md).
 
-[Setup](../../docs/environment-setup.md), [stage report](../../docs/stage-2-test-environment.md),
-[fixture contract](../../test-data/README.md). Số test invocations không phải coverage
-phần trăm của kế hoạch 150 cases; chưa xác minh Linux/Actions, visual render hoặc payment thật.
+Counts are test executions. Coverage against the 150-case plan, Linux/Actions, visual rendering, and live payment remain unverified here. [Setup](../../docs/environment-setup.md) · [Stage report](../../docs/stage-2-test-environment.md) · [Fixture contract](../../test-data/README.md).

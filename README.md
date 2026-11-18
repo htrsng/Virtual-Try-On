@@ -1,58 +1,58 @@
-# VFitAI — Thử đồ 3D và kiểm thử tự động
+# VFitAI — 3D Virtual Try-On and QA Automation
 
-VFitAI là web bán quần áo có phòng thử đồ 3D, từ xem sản phẩm, chọn size đến đặt hàng COD. Bộ kiểm thử tập trung vào ba câu hỏi: đơn hàng có được tính và lưu đúng, quyền truy cập có được kiểm soát, và phòng thử đồ có hoạt động khi đổi size hoặc gặp lỗi tải model.
+VFitAI is a clothing storefront with a 3D fitting room. Shoppers can browse products, select sizes, and place cash-on-delivery (COD) orders. The test suite focuses on order totals and persistence, access control, and fitting-room behavior when shoppers change sizes or a model fails to load.
 
-[![Kiểm thử API](https://github.com/htrsng/Virtual-Try-On/actions/workflows/backend-tests.yml/badge.svg?branch=main)](https://github.com/htrsng/Virtual-Try-On/actions/workflows/backend-tests.yml)
-[![Selenium Smoke](https://github.com/htrsng/Virtual-Try-On/actions/workflows/selenium-smoke.yml/badge.svg?event=pull_request)](https://github.com/htrsng/Virtual-Try-On/actions/workflows/selenium-smoke.yml)
-[![Playwright và 3D](https://github.com/htrsng/Virtual-Try-On/actions/workflows/playwright-3d.yml/badge.svg?event=pull_request)](https://github.com/htrsng/Virtual-Try-On/actions/workflows/playwright-3d.yml)
+[![API tests](https://github.com/htrsng/Virtual-Try-On/actions/workflows/backend-tests.yml/badge.svg?branch=main)](https://github.com/htrsng/Virtual-Try-On/actions/workflows/backend-tests.yml)
+[![Selenium smoke tests](https://github.com/htrsng/Virtual-Try-On/actions/workflows/selenium-smoke.yml/badge.svg?event=pull_request)](https://github.com/htrsng/Virtual-Try-On/actions/workflows/selenium-smoke.yml)
+[![Playwright and 3D tests](https://github.com/htrsng/Virtual-Try-On/actions/workflows/playwright-3d.yml/badge.svg?event=pull_request)](https://github.com/htrsng/Virtual-Try-On/actions/workflows/playwright-3d.yml)
 
-## Phạm vi kiểm thử theo nghiệp vụ
+## Test coverage by feature
 
-| Nhóm chức năng | Phạm vi tiêu biểu |
+| Feature | What the tests cover |
 | --- | --- |
-| Đăng nhập và phân quyền | Đăng nhập đúng/sai, phiên hết hạn, quyền khách hàng và quản trị viên. |
-| Sản phẩm và giỏ hàng | Tìm kiếm, lọc danh mục, mở sản phẩm, chọn size, đổi số lượng và xoá khỏi giỏ. |
-| Checkout, đơn hàng và tồn kho | Giá và phí do server tính, coupon, đặt COD, huỷ đơn, chuyển trạng thái và tranh mua sản phẩm cuối cùng. |
-| Thử đồ 3D | Tải GLB, đổi geometry theo size, xoay/zoom camera, animation, tài nguyên renderer và phục hồi sau lỗi tải. |
-| Gợi ý outfit bằng AI | Vitest giả lập service để kiểm tra trạng thái chờ và lỗi khi tinh chỉnh gợi ý. API outfit với Gemini thật chưa được xác minh. |
-| Toàn vẹn dữ liệu | Kiểm tra bản ghi trong MongoDB, phạm vi dữ liệu theo chủ sở hữu và tồn kho khi checkout bị từ chối. |
+| Authentication and authorization | Valid and invalid logins, expired sessions, customer and administrator permissions. |
+| Products and cart | Search, category filtering, product pages, size selection, quantity changes, and item removal. |
+| Checkout, orders, and inventory | Server-calculated pricing and fees, coupons, COD, cancellations, order transitions, and concurrent purchases of the last unit. |
+| 3D virtual try-on | GLB loading, geometry changes by size, camera rotation and zoom, animation, renderer resources, and load-error recovery. |
+| AI outfit recommendations | Vitest uses a mocked service to check pending and error states during recommendation refinement. The outfit API has yet to be verified against live Gemini. |
+| Data integrity | MongoDB persistence, owner-scoped access, and stock preservation when checkout is rejected. |
 
-Jest/Supertest kiểm tra API và trạng thái dữ liệu. Vitest kiểm tra hành vi UI ở tầng component. Selenium chạy luồng mua hàng qua trình duyệt, còn Playwright kiểm tra luồng web và renderer 3D.
+Jest and Supertest exercise the API and persisted state. Vitest covers component behavior. Selenium drives purchase flows in a browser, and Playwright checks web flows and the 3D renderer.
 
-## Kết quả chạy test
+## Test execution summary
 
-Kết quả local ngày **18/11/2026** trên Windows, Node.js 22.15.0, Java 17 và MongoDB 8.2.6. Báo cáo ghi commit nền `b0fc753` cùng các thay đổi local và mã băm source. [Bằng chứng lần chạy](qa/evidence/quality-completion-2026-11-18/execution-summary.json).
+Local results from **November 18, 2026** on Windows with Node.js 22.15.0, Java 17, and MongoDB 8.2.6. The run used base commit `b0fc753` plus local changes documented by source hashes. [Execution evidence](qa/evidence/quality-completion-2026-11-18/execution-summary.json).
 
-| Lớp kiểm thử | Kết quả local | Tài liệu |
+| Test layer | Local result | Guide |
 | --- | --- | --- |
-| API và tích hợp — Jest/Supertest | 134/134 đạt | [Test API](server/tests/README.md) |
-| Frontend — Vitest/Testing Library | 38/38 đạt | [Báo cáo kết quả](qa/docs/test-summary.md) |
-| Nghiệp vụ E2E — Selenium/TestNG | 22/22 đạt, gồm 5 lượt smoke | [Selenium](qa/selenium-java/README.md) |
-| Web và 3D — Playwright | 12/12 mặc định, gồm 6 ca WebGL. So ảnh Windows 1/1 đạt. | [Playwright](tests/README.md) · [Ảnh chuẩn](tests/visual-baselines/README.md) |
-| Thủ công | 8 ca đã thiết kế. Nghiệm thu thiết bị thật đang chờ. | [Checklist nghiệm thu](qa/docs/manual-acceptance-checklist.md) |
+| API and integration — Jest/Supertest | 134/134 passed | [API tests](server/tests/README.md) |
+| Frontend — Vitest/Testing Library | 38/38 passed | [Test summary](qa/docs/test-summary.md) |
+| Business E2E — Selenium/TestNG | 22/22 passed, including 5 smoke instances | [Selenium](qa/selenium-java/README.md) |
+| Web and 3D — Playwright | 12/12 default tests passed, including 6 WebGL cases. The Windows visual check also passed (1/1). | [Playwright](tests/README.md) · [Visual baselines](tests/visual-baselines/README.md) |
+| Manual | 8 cases designed. Physical-device acceptance is pending. | [Acceptance checklist](qa/docs/manual-acceptance-checklist.md) |
 
-**217 test tự động trong danh mục** gồm 134 Jest, 38 Vitest, 22 Selenium và 23 Playwright. Mỗi dòng dữ liệu tham số được tính riêng. Ca Playwright chạy lại trên nhiều browser hoặc cấu hình được gộp theo file và tên test. Báo cáo kết quả ghi riêng các lượt chạy compatibility, accessibility và production preview. [Danh mục test tự động](qa/docs/automated-test-catalog.csv) · [Báo cáo kết quả](qa/docs/test-summary.md).
+The **217 automated test instances** in the catalog break down into 134 Jest, 38 Vitest, 22 Selenium, and 23 Playwright instances. Each parameterized data row counts separately. Playwright cases repeated across browsers or configurations are counted once by file and test title. The summary lists compatibility, accessibility, and production-preview executions separately. [Automated test catalog](qa/docs/automated-test-catalog.csv) · [Test summary](qa/docs/test-summary.md).
 
-**GitHub Actions** ghi kết quả theo từng revision. Ví dụ, PR #7 ghi 13 check đạt cho commit `360e518`. Các badge ở đầu trang dẫn tới lịch sử từng workflow. [Checks PR #7](https://github.com/htrsng/Virtual-Try-On/pull/7/checks).
+**GitHub Actions** reports results by revision. For example, PR #7 recorded 13 passing checks for commit `360e518`. The badges link to each workflow’s run history. [PR #7 checks](https://github.com/htrsng/Virtual-Try-On/pull/7/checks).
 
-## Ba kiểm tra tiêu biểu
+## Three representative QA checks
 
-- **Đặt hàng COD từ giao diện.** Selenium chọn sản phẩm, đặt đơn và đối chiếu đơn đã lưu qua API, gồm tổng tiền và tồn kho sau khi đặt. [Test Selenium](qa/selenium-java/src/test/java/com/vfitai/qa/tests/BusinessE2ETests.java#L47) · [Bằng chứng E2E](qa/docs/stage-6-business-e2e.md).
-- **Hai khách tranh mua sản phẩm cuối cùng.** Jest gửi hai request đồng thời và kiểm tra chỉ một đơn được tạo, tồn kho còn 0. [Test checkout](server/tests/checkout.test.js#L58) · [Báo cáo backend](qa/docs/stage-1-backend-report.md).
-- **Thay model và phục hồi lỗi ở phòng thử đồ.** Playwright kiểm tra geometry khi đổi size, camera, animation và tải lại sau lỗi GLB 404. Một ca chẩn đoán riêng xác nhận bộ so ảnh phát hiện khi GLB hợp lệ nhưng sai loại. [Test WebGL](tests/e2e/tryon-3d.spec.ts) · [Bằng chứng 3D](qa/docs/stage-7-playwright-3d.md).
+- **Place a COD order through the UI.** Selenium selects a product and submits the order, then reads it back through the API to verify the total and inventory after purchase. [Selenium test](qa/selenium-java/src/test/java/com/vfitai/qa/tests/BusinessE2ETests.java#L47) · [E2E evidence](qa/docs/stage-6-business-e2e.md).
+- **Handle two shoppers competing for the last unit.** Jest sends two requests concurrently and checks that exactly one order is created and stock reaches zero. [Checkout test](server/tests/checkout.test.js#L58) · [Backend report](qa/docs/stage-1-backend-report.md).
+- **Change sizes and recover from a model load failure.** Playwright checks geometry, camera movement, animation, and recovery after a GLB returns HTTP 404. A separate diagnostic confirms that the image comparison detects a valid GLB for the wrong item. [WebGL tests](tests/e2e/tryon-3d.spec.ts) · [3D evidence](qa/docs/stage-7-playwright-3d.md).
 
-## Tài liệu và bằng chứng QA
+## QA documentation and evidence
 
-| Cần xem | Tài liệu |
+| What to look up | Where to find it |
 | --- | --- |
-| Chiến lược kiểm thử và yêu cầu được bao phủ | [Test Strategy](qa/docs/test-strategy.md) · [RTM](qa/docs/rtm.md) |
-| Kết quả, môi trường và bằng chứng chạy | [Test Summary](qa/docs/test-summary.md) · [Bằng chứng local](qa/evidence/quality-completion-2026-11-18/) |
-| Lỗi đã ghi nhận và kiểm tra lại | [Bug Register](qa/bug-reports/bug-register.md) |
-| Lịch sử CI và cách mở artifacts | [GitHub Actions](https://github.com/htrsng/Virtual-Try-On/actions) · [Hướng dẫn CI](qa/docs/stage-8-ci-quality-gates.md) |
+| Test strategy and requirements coverage | [Test Strategy](qa/docs/test-strategy.md) · [Traceability Matrix](qa/docs/rtm.md) |
+| Results, environment, and execution evidence | [Test Summary](qa/docs/test-summary.md) · [Local evidence](qa/evidence/quality-completion-2026-11-18/) |
+| Confirmed defects and retests | [Bug Register](qa/bug-reports/bug-register.md) |
+| CI run history and artifacts | [GitHub Actions](https://github.com/htrsng/Virtual-Try-On/actions) · [CI guide](qa/docs/stage-8-ci-quality-gates.md) |
 
-## Chạy dự án và kiểm thử
+## Run the application and tests
 
-Cần Node.js 22 và npm. Chạy các lệnh sau từ thư mục gốc sau khi clone:
+Use Node.js 22 and npm. After cloning, run these commands from the repository root.
 
 ```sh
 npm ci --prefix server
@@ -60,9 +60,9 @@ npm ci --prefix client
 npm ci --prefix tests
 ```
 
-Nếu muốn mở web để phát triển, làm theo [hướng dẫn cấu hình MongoDB và tệp môi trường](qa/docs/environment-setup.md). Web dev mặc định ở cổng `5173`, API ở `3000`.
+For application development, follow the [MongoDB and environment setup guide](qa/docs/environment-setup.md). The development UI defaults to port `5173` and the API to `3000`.
 
-Nếu chỉ chạy test, dùng các lệnh bên dưới. Môi trường QA tự tạo MongoDB replica set và tài khoản mẫu trên máy chạy test. Các lệnh test dùng database tạm riêng, không cần URI MongoDB Atlas hoặc tệp `server/.env`. Lần đầu có thể cần mạng để tải MongoDB, browser hoặc driver.
+The QA environment starts a temporary local MongoDB replica set and creates test accounts. The test commands require neither a MongoDB Atlas URI nor `server/.env`. The first run may need network access to download MongoDB, browsers, or drivers.
 
 ```sh
 npm --prefix server test
@@ -71,31 +71,31 @@ node tests/node_modules/@playwright/test/cli.js install chromium
 npm --prefix tests test
 ```
 
-Selenium cần thêm Java 17, Maven 3.9+ và Chrome hoặc Edge:
+Selenium also requires Java 17, Maven 3.9+, and Chrome or Edge.
 
 ```sh
 node scripts/qa-selenium.cjs -Dbrowser=chrome -Dgroups=smoke
 ```
 
-Chạy Playwright và Selenium lần lượt nếu dùng cổng QA mặc định (`3300` cho API, `55173` cho UI). Cách chạy hồi quy, đổi cổng và tìm báo cáo có trong [hướng dẫn Selenium](qa/selenium-java/README.md) và [hướng dẫn Playwright](tests/README.md).
+Run Playwright and Selenium one at a time when using the default QA ports (`3300` for the API and `55173` for the UI). See the [Selenium guide](qa/selenium-java/README.md) and [Playwright guide](tests/README.md) for regression runs, port overrides, and reports.
 
-Kết quả local nằm trong `.runtime/`, `tests/playwright-report/` hoặc `qa/selenium-java/target/`. Artifacts GitHub Actions được lưu 14 ngày. Giữ tệp `environment.json` của lần chạy ở máy local vì có thông tin đăng nhập mẫu.
+Local results are stored under `.runtime/`, `tests/playwright-report/`, or `qa/selenium-java/target/`. GitHub Actions retains artifacts for 14 days. Keep the run’s `environment.json` local because it contains test credentials.
 
-## Tìm code và bài test
+## Repository layout
 
-| Thư mục | Nội dung |
+| Directory | Contents |
 | --- | --- |
-| `client/` | Giao diện, phòng thử đồ 3D và test Vitest |
-| `server/` | API, nghiệp vụ, model MongoDB và test Jest/Supertest |
-| `tests/` | Playwright cho luồng web, trình duyệt, accessibility và 3D |
-| `qa/selenium-java/` | Selenium/TestNG cho đăng nhập, giỏ hàng, đặt và quản lý đơn |
-| `qa/` | Dữ liệu mẫu, test cases, kết quả và báo cáo lỗi |
-| `scripts/`, `.github/workflows/` | Khởi động môi trường test, chạy CI và xuất báo cáo |
-| `doc/` | Tài liệu và ảnh giao diện ứng dụng |
-| [`archive/coursework-api-fuzzing/`](archive/coursework-api-fuzzing/README.md) | Bài tập API/fuzzing chạy trên ứng dụng Express đích riêng. Kết quả lưu trong archive. |
+| `client/` | Storefront UI, 3D fitting room, and Vitest tests |
+| `server/` | API, business logic, MongoDB models, and Jest/Supertest tests |
+| `tests/` | Playwright web, browser, accessibility, and 3D checks |
+| `qa/selenium-java/` | Selenium/TestNG coverage for login, cart, checkout, and order management |
+| `qa/` | Fixtures, test cases, results, and bug reports |
+| `scripts/`, `.github/workflows/` | Test environment launchers, CI jobs, and reports |
+| `doc/` | Application documentation and UI screenshots |
+| [`archive/coursework-api-fuzzing/`](archive/coursework-api-fuzzing/README.md) | API fuzzing coursework against a separate Express target, with its own results |
 
-## Giới hạn hiện tại
+## Known limitations
 
-- Thanh toán online chưa có provider. Đăng nhập mạng xã hội và khôi phục mật khẩu chưa có luồng hoàn chỉnh.
-- Test AI hiện dùng service giả lập ở UI. Tích hợp Gemini và email thật chưa được xác minh end-to-end.
-- Kiểm thử browser dùng viewport giả lập cho mobile. Safari/iOS, điện thoại thật và trình đọc màn hình còn trong [checklist nghiệm thu](qa/docs/manual-acceptance-checklist.md).
+- Online payments have no configured provider. Social login and password recovery are incomplete.
+- AI UI tests use a mocked service. Live Gemini and email integrations have yet to be verified end to end.
+- Mobile browser checks use emulated viewports. Safari/iOS, physical devices, and screen readers remain in the [acceptance checklist](qa/docs/manual-acceptance-checklist.md).

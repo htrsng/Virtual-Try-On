@@ -1,24 +1,24 @@
-# Dữ liệu mẫu của môi trường QA
+# QA test fixtures
 
-Playwright và Selenium đặt lại dữ liệu trước mỗi ca. Jest bắt đầu với database rỗng để mỗi ca tự tạo dữ liệu cần thiết. Khi cần cả bộ dữ liệu mẫu trong Jest, gọi `global.qaTestDatabase.reset()`.
+Playwright and Selenium reset data before each case. Jest starts with an empty database so each case can create the data it needs. To load all fixtures in Jest, call `global.qaTestDatabase.reset()`.
 
-## Chọn dữ liệu cho ca test
+## Choose fixtures for a case
 
-| Dữ liệu | Giá trị dùng trong test |
+| Fixture | Test values |
 | --- | --- |
-| Tài khoản | Admin, khách mua hàng và khách thứ hai. Email có dạng `role+runId@example.test`. |
-| QA Cotton Shirt | Mã 50101, giá 200.000 đồng, màu White. Size S/M/L có tồn kho lần lượt 4/5/3. |
-| QA Trousers | Mã 50102, giá 300.000 đồng, tồn kho 6. |
-| QA Unavailable Shirt | Mã 50103, đã tắt bán, tồn kho 0. |
-| Đơn hàng mẫu | Một đơn đang xử lý và một đơn đã giao, tổng 230.000 đồng mỗi đơn. |
-| Tủ đồ và outfit | Khách mua hàng có áo size M trong tủ đồ. |
-| Phiên thử đồ | Áo size M. Thời điểm tạo được làm mới để phiên chưa hết hạn khi test bắt đầu. |
-| Banner và newsletter | Mỗi loại một bản ghi. Mã `NEWS10QA` thuộc khách mua hàng. |
+| Accounts | Administrator, shopper, and second shopper. Emails use `role+runId@example.test`. |
+| QA Cotton Shirt | ID 50101, VND 200,000, White. Stock for sizes S/M/L is 4/5/3. |
+| QA Trousers | ID 50102, VND 300,000, stock 6. |
+| QA Unavailable Shirt | ID 50103, inactive, stock 0. |
+| Example orders | One processing and one delivered order, each totaling VND 230,000. |
+| Closet and outfits | The shopper has a size M shirt in the closet. |
+| Try-on session | Size M shirt. The creation time is refreshed so the session is active when the test starts. |
+| Banner and newsletter | One record each. Coupon `NEWS10QA` belongs to the shopper. |
 
-Đơn mẫu là dữ liệu lịch sử với `inventoryReserved=false`. Đơn tạo qua API vẫn trừ tồn kho qua transaction. Model 3D lấy từ `client/public/`, gồm avatar và các size S/M/L của áo, quần. [Danh mục mẫu](catalog.json).
+Fixture orders are historical records with `inventoryReserved=false`. Orders created through the API deduct inventory within a transaction. The 3D assets come from `client/public/` and include the avatar plus shirts and trousers in sizes S/M/L. [Fixture catalog](catalog.json).
 
-## Đặt lại dữ liệu
+## Reset test data
 
-Dùng phương thức reset/clear của [helper quản lý database QA](../../server/test-support/owned-database.js). Helper kiểm tra connection, tên database và marker sở hữu trước khi xoá dữ liệu. Chỉ reset giữa các ca vì các bài trong cùng suite dùng chung môi trường.
+Use the reset and clear methods in the [QA database helper](../../server/test-support/owned-database.js). It verifies the connection, database name, and ownership marker before deleting data. Reset between cases because the suite shares an environment.
 
-Mật khẩu được tạo khi mở môi trường và dùng lại qua các lần reset. Manifest local có tài khoản mẫu và một JWT đã hết hạn để kiểm tra phiên đăng nhập. Launcher xoá các giá trị này khi dừng. Giữ manifest trong `.runtime/qa/` ở máy local.
+Passwords are generated at startup and reused across resets. The local manifest contains test accounts and an expired JWT for session checks. The launcher removes these values on shutdown. Keep the manifest under `.runtime/qa/` on the local machine.

@@ -1,22 +1,22 @@
-# Ảnh chuẩn WebGL
+# WebGL visual baselines
 
-Hai ảnh góc trước và góc trái được duyệt ngày 17/11/2026. Mã băm của từng ảnh và cấu hình đã dùng nằm trong [render-profile.json](render-profile.json).
+The front and left views were approved on November 17, 2026. See [render-profile.json](render-profile.json) for the image hashes and render settings.
 
-Bộ test chụp áo QA Cotton Shirt (`50101`), màu White, size M, trên avatar mặc định. Ảnh được lấy trực tiếp từ canvas WebGL khi các khung hình đã ổn định. Cấu hình dùng Windows, Playwright 1.60.0, Chromium 148.0.7778.96, ANGLE SwiftShader, viewport 1440 × 1000 và DPR 1. Ngưỡng chênh lệch là 0,2% số pixel.
+The test captures the default avatar wearing the white QA Cotton Shirt (`50101`) in size M. It reads pixels directly from the WebGL canvas once frames stabilize. The profile uses Windows, Playwright 1.60.0, Chromium 148.0.7778.96, ANGLE SwiftShader, a 1440 × 1000 viewport, and a device pixel ratio of 1. The pixel difference threshold is 0.2%.
 
-Đợt local ngày 18/11/2026 ghi một ca so ảnh Windows đạt với hai góc chụp. Kết quả áp dụng cho sản phẩm và profile trên. [Báo cáo chạy](../../qa/docs/test-summary.md).
+On November 18, 2026, one Windows visual case passed across both camera angles. The result applies to the product and profile above. [Execution report](../../qa/docs/test-summary.md).
 
-## Chạy so ảnh
+## Run the image comparison
 
-Từ thư mục `tests/`, chạy bằng PowerShell:
+From `tests/` in PowerShell:
 
 ```powershell
 $env:QA_3D_VISUAL = '1'
 node node_modules/@playwright/test/cli.js test --project=3d-visual
 ```
 
-## Khi ảnh khác
+## Investigate an image difference
 
-Trước tiên, mở ảnh thực tế và ảnh diff để xác định nguyên nhân. Nếu thay đổi là chủ đích, tạo ảnh ứng viên ở máy local bằng `--update-snapshots`, duyệt từng ảnh và cập nhật mã băm trong profile. Ảnh xuất từ CI Linux nằm trong artifact `visual-candidates/` với `approved: false`. Dùng profile và ảnh được duyệt riêng cho mỗi hệ điều hành.
+Open the actual image and the diff to identify the cause. For an intentional change, generate candidates locally with `--update-snapshots`, review each image, and update the hashes in the profile. Linux CI exports images in the `visual-candidates/` artifact with `approved: false`. Use an approved profile and images for each operating system.
 
-Từ thư mục gốc, chạy `node scripts/qa-3d-diagnostic.cjs` để kiểm tra bộ so ảnh có phát hiện model sai hay không. Ca bên trong tạo ảnh diff và trace theo chủ đích. [Chi tiết kiểm thử 3D](../../qa/docs/stage-7-playwright-3d.md).
+From the repository root, run `node scripts/qa-3d-diagnostic.cjs` to verify that the comparator detects the wrong model. The diagnostic intentionally generates a diff and trace. [3D testing details](../../qa/docs/stage-7-playwright-3d.md).

@@ -1,16 +1,16 @@
-# Kiểm thử API VFitAI
+# VFitAI API testing
 
-Các bài test gọi API Express qua Supertest rồi đối chiếu response và dữ liệu MongoDB khi thao tác có ghi dữ liệu. Suite dùng Jest 30, Supertest 7 và `mongodb-memory-server` 11.
+The suite uses Jest 30, Supertest 7, and `mongodb-memory-server` 11. Tests call the Express API and check responses and MongoDB state for operations that write data.
 
-| Rủi ro | Ca kiểm thử tiêu biểu |
+| Risk | Representative test |
 | --- | --- |
-| Sai quyền hoặc lộ dữ liệu tài khoản | [Quyền admin và quyền truy cập](permissions.test.js) · [Dữ liệu trả về và ràng buộc tài khoản](security.test.js) |
-| Sai giá, coupon hoặc tồn kho | [Checkout và hai yêu cầu tranh sản phẩm cuối cùng](checkout.test.js#L58) |
-| Truy cập dữ liệu của tài khoản khác | [Địa chỉ giao hàng và phạm vi chủ sở hữu](addresses.test.js#L43) |
+| Incorrect access or exposure of account data | [Admin permissions](permissions.test.js) · [Response fields and account restrictions](security.test.js) |
+| Incorrect pricing, coupons, or inventory | [Checkout and concurrent purchases of the last unit](checkout.test.js#L58) |
+| Access to another account’s data | [Shipping address ownership](addresses.test.js#L43) |
 
-## Cách chạy
+## Run the tests
 
-Cần Node.js 22 và npm. Từ thư mục gốc:
+Use Node.js 22 and npm. Run from the repository root.
 
 ```sh
 npm ci --prefix server
@@ -18,10 +18,10 @@ npm --prefix server test
 npm --prefix server test -- --coverage
 ```
 
-Jest dùng MongoDB replica set tạm và tự dọn dữ liệu sau mỗi ca. Lần đầu có thể cần tải binary MongoDB. Khi đã có binary tương thích, đặt `MONGOMS_SYSTEM_BINARY` theo [hướng dẫn môi trường](../../qa/docs/environment-setup.md). Suite dùng cấu hình test riêng để chạy độc lập với Atlas và tài khoản thật.
+Jest starts a temporary MongoDB replica set and clears test data after each case. The first run may download MongoDB. To use an existing compatible binary, set `MONGOMS_SYSTEM_BINARY` as described in the [environment guide](../../qa/docs/environment-setup.md). The test configuration runs independently of Atlas and live accounts.
 
-## Kết quả và giới hạn
+## Results and limitations
 
-Các file `*.test.js` chứa kịch bản theo nhóm nghiệp vụ. `setup.js` quản lý vòng đời database và `helpers.js` hỗ trợ tạo dữ liệu. Đợt chạy local ngày 18/11/2026 ghi 134/134 ca đạt. Coverage HTML nằm trong `.runtime/coverage/backend/`. [Báo cáo và link CI](../../qa/docs/test-summary.md).
+Files named `*.test.js` group cases by feature. `setup.js` manages the database lifecycle, and `helpers.js` creates test data. On November 18, 2026, all 134 local cases passed. Coverage HTML is written to `.runtime/coverage/backend/`. [Test report and CI links](../../qa/docs/test-summary.md).
 
-Các ca chat và gợi ý sản phẩm kiểm tra API nội bộ. Tích hợp API outfit với Gemini và việc gửi email thật chưa được xác minh trong suite. Thanh toán online được kiểm tra ở trạng thái provider chưa cấu hình. [Danh sách endpoint](../../qa/docs/api-inventory.md).
+Chat and product recommendation tests exercise internal APIs. The suite has yet to verify the outfit endpoint against live Gemini or verify email delivery. Online payment tests cover the behavior when the provider is unconfigured. [API inventory](../../qa/docs/api-inventory.md).

@@ -1,5 +1,5 @@
-# Bằng chứng mới sau khi đổi cấu trúc
+# Evidence after the directory migration
 
-`smoke-summary.json` là bản tóm tắt từ lệnh trong `docs/verification.md`. Các đường dẫn bên trong trỏ đến thư mục đầu ra cục bộ của lần chạy, không phải toàn bộ file được đưa lên Git. Chạy lại lệnh để tạo đầy đủ yêu cầu, phản hồi và phép đo liên quan.
+`smoke-summary.json` summarizes the run documented in `docs/verification.md`. Its paths refer to local run output. Rerun the documented check to generate the complete request, response, and measurement files.
 
-Không xuất thông tin xác thực của phiên kiểm thử vào bản tóm tắt công khai. Không diễn giải số quan sát như số lỗi gốc độc lập.
+Keep test-session credentials out of public summaries. Multiple observations can share a root cause.

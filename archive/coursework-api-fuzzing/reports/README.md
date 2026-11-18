@@ -1,21 +1,16 @@
-# Báo cáo kiểm thử
+# Test reports
 
-- `runs/<id>/`: kết quả chạy mới, Git bỏ qua. Mỗi lần chạy có output riêng.
-- `baseline/`: snapshot chọn lọc được commit để reviewer kiểm chứng portfolio.
-- `state-oracles-v1/`: API/replay hiện hành sau khi làm chặt oracle và bổ sung
-  snapshot trước/sau; baseline cũ giữ nguyên, source hash mới được lưu riêng.
-- `current/`: replay, component/build/lint và fuzz-quality snapshot bổ sung;
-  [evidence index](../qa/evidence-index.md) chỉ rõ ngày, nguồn và phạm vi từng loại.
-- `../fuzz-testing/evidence/`: bằng chứng fuzzing có trước lần chuyển thành QA portfolio.
+- `runs/<id>/` contains new run output. Git ignores these per-run directories.
+- `baseline/` contains the curated historical portfolio snapshot.
+- `state-oracles-v1/` contains acceptance and replay results after strengthening oracles and adding before-and-after snapshots. It records separate source hashes.
+- `current/` contains supplemental replay, component, build, lint, and fuzz-quality evidence. The [evidence index](../qa/evidence-index.md) records dates, sources, and scope.
+- `../fuzz-testing/evidence/` contains earlier fuzzing evidence.
 
-Chạy từ repo root:
+From the coursework root:
 
 ```sh
 python tools/run_checks.py --suite smoke
 python tools/run_checks.py --suite full
 ```
 
-Full suite có thể trả exit 1 do các acceptance testcase thất bại trên target còn lỗi.
-Đọc `api/report.md` để phân biệt FAIL với ERROR; `summary.md` giữ mã thoát từng bước.
-Unit test, test hạ tầng, scenario API và input fuzzing là các đại lượng khác nhau.
-Không cộng chúng thành số testcase độc lập hoặc một tỷ lệ pass chung.
+The full suite may exit 1 when a known acceptance case fails. Read `api/report.md` to distinguish FAIL from ERROR. `summary.md` records each step’s exit code. Unit tests, infrastructure tests, API scenarios, and fuzz inputs are reported separately.

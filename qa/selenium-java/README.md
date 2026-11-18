@@ -1,12 +1,12 @@
-# Kiểm thử nghiệp vụ bằng Selenium
+# Business flow testing with Selenium
 
-Luồng tiêu biểu là đăng nhập, chọn áo, đặt COD trên giao diện rồi đọc lại đơn qua API để kiểm tra tổng tiền, phí ship, giảm giá và tồn kho. Các ca khác kiểm tra huỷ đơn, chuyển trạng thái và quyền truy cập. [Test nghiệp vụ](src/test/java/com/vfitai/qa/tests/BusinessE2ETests.java#L47) · [Bằng chứng E2E](../docs/stage-6-business-e2e.md).
+A representative case signs in, selects a shirt, and places a cash-on-delivery (COD) order through the UI. It then reads the order back through the API to check the total, shipping fee, discount, and remaining stock. Other cases cover cancellations, order status changes, and access control. [Business tests](src/test/java/com/vfitai/qa/tests/BusinessE2ETests.java#L47) · [E2E evidence](../docs/stage-6-business-e2e.md).
 
-## Cách chạy
+## Run the tests
 
-Bộ test dùng Selenium 4.38.0, TestNG 7.11.0, Java 17, Maven 3.9+, Node.js 22 và Chrome hoặc Edge. Selenium Manager tìm driver phù hợp với trình duyệt. Lần chạy đầu có thể cần mạng để tải driver, các gói Maven hoặc MongoDB.
+The suite uses Selenium 4.38.0, TestNG 7.11.0, Java 17, Maven 3.9+, Node.js 22, and Chrome or Edge. Selenium Manager resolves the matching driver. The first run may need network access to download the driver, Maven dependencies, or MongoDB.
 
-Chạy từ thư mục gốc:
+Run from the repository root.
 
 ```sh
 npm ci --prefix server
@@ -14,32 +14,32 @@ npm ci --prefix client
 node scripts/qa-selenium.cjs -Dbrowser=chrome -Dgroups=smoke
 ```
 
-Đổi thành `-Dbrowser=edge` để chạy Edge, hoặc thêm `-Dheadless=false` để xem browser thao tác. Nếu browser cài ngoài vị trí mặc định, đặt `SELENIUM_BROWSER_BINARY` trỏ đến tệp thực thi.
+Use `-Dbrowser=edge` to run Edge or add `-Dheadless=false` to watch the browser. If the browser is installed in a custom location, set `SELENIUM_BROWSER_BINARY` to its executable path.
 
-## Chọn nhóm test
+## Choose a test group
 
-| Nhóm | Nội dung |
+| Group | Coverage |
 | --- | --- |
-| `smoke` | 5 lượt chạy. Kiểm tra đăng nhập đúng/sai, mở sản phẩm và đưa mặt hàng đã chọn tới checkout. |
-| `e2e` | Kiểm tra đặt COD, tổng tiền, tồn kho, coupon, trạng thái đơn, quyền truy cập và thao tác giỏ hàng. |
-| `regression` | Chạy cả smoke và các ca nghiệp vụ, tổng cộng 22 lượt theo cấu hình hiện tại. |
+| `smoke` | 5 executions covering valid and invalid login, opening a product, and taking a selected item to checkout. |
+| `e2e` | COD orders, totals, stock, coupons, order status, access control, and cart operations. |
+| `regression` | 22 executions across smoke and business cases. |
 
-Ví dụ chạy đầy đủ: `node scripts/qa-selenium.cjs -Dbrowser=chrome -Dgroups=regression`. CI chạy smoke trên PR. Workflow hồi quy đầy đủ chạy theo lịch hoặc khi kích hoạt thủ công. [Danh sách ca nghiệp vụ](../docs/e2e-test-cases.csv).
+Run the full suite with `node scripts/qa-selenium.cjs -Dbrowser=chrome -Dgroups=regression`. CI runs smoke on pull requests. The full regression workflow runs on a schedule or by manual dispatch. [Business case list](../docs/e2e-test-cases.csv).
 
-## Môi trường và báo cáo
+## Environment and reports
 
-Launcher tự mở MongoDB replica set, API và giao diện, đợi dịch vụ sẵn sàng rồi chạy TestNG. Mỗi ca có WebDriver mới và dữ liệu mẫu được đặt lại. Launcher dừng các dịch vụ sau khi Maven kết thúc. Nếu chạy đồng thời với Playwright, đặt `QA_API_PORT` và `QA_UI_PORT` thành hai cổng trống khác với cặp mặc định `3300` và `55173`. Có thể đặt `MONGOMS_SYSTEM_BINARY` để dùng bản `mongod` tương thích đã cài. [Hướng dẫn cấu hình môi trường](../docs/environment-setup.md).
+The launcher starts a MongoDB replica set, the API, and the UI. It waits for readiness, starts TestNG, and stops the services after Maven exits. Each case gets a fresh WebDriver and reset fixtures. To run alongside Playwright, assign `QA_API_PORT` and `QA_UI_PORT` to free ports other than the defaults (`3300` and `55173`). Set `MONGOMS_SYSTEM_BINARY` to use an installed compatible `mongod`. [Environment guide](../docs/environment-setup.md).
 
-Tìm báo cáo Maven/TestNG trong `qa/selenium-java/target/surefire-reports/`, ảnh lỗi trong `qa/selenium-java/target/screenshots/` và log reset trong `qa/selenium-java/target/qa-control.log`. Sao chép bằng chứng cần giữ trước lượt chạy mới. Giữ manifest chứa tài khoản mẫu trong `.runtime/qa/` ở máy local.
+Find Maven/TestNG reports in `qa/selenium-java/target/surefire-reports/`, failure screenshots in `qa/selenium-java/target/screenshots/`, and reset logs in `qa/selenium-java/target/qa-control.log`. Copy any evidence you need before the next run. Keep the manifest with test account credentials local under `.runtime/qa/`.
 
-Nhóm `diagnostics` cố tình làm một ca thất bại để kiểm tra việc chụp ảnh và dọn môi trường. Kết quả dự kiến là mã thoát khác 0 và có ảnh lỗi.
+The `diagnostics` group deliberately fails one case to verify screenshot capture and cleanup. Expect a nonzero exit code and a failure screenshot.
 
-## Khi thêm ca mới
+## Add a case
 
-Đặt thao tác UI dùng lại trong Page Object và để assertion nghiệp vụ trong test. Chờ theo điều kiện như nút khả dụng, nội dung xuất hiện hoặc chuyển trang. Giữ các phương thức TestNG và DataProvider chạy tuần tự khi chúng cùng dùng thao tác reset trên một database.
+Place reusable UI actions in Page Objects and keep business assertions in the test. Wait for observable conditions such as an enabled button, visible content, or navigation. Keep TestNG methods and DataProviders serial while they share database resets.
 
-## Tìm bài test, kết quả và giới hạn
+## Find tests, results, and limits
 
-Trong `src/test/java/com/vfitai/qa/`, thư mục `tests/` chứa kịch bản, `pages/` chứa Page Objects, còn `base/` và `utils/` quản lý browser và môi trường. Đợt chạy local ngày 18/11/2026 ghi 22/22 lượt hồi quy đạt. [Báo cáo QA](../docs/test-summary.md).
+Under `src/test/java/com/vfitai/qa/`, `tests/` contains scenarios, `pages/` contains Page Objects, and `base/` and `utils/` manage the browser and environment. On November 18, 2026, all 22 local regression executions passed. [QA report](../docs/test-summary.md).
 
-Smoke dừng ở tóm tắt checkout. Để kiểm tra thao tác đặt COD và dữ liệu đã lưu, chọn `e2e` hoặc `regression`. Phần render WebGL và so ảnh nằm trong [bộ Playwright](../../tests/README.md).
+Smoke ends at checkout summary. Choose `e2e` or `regression` to exercise COD submission and inspect the saved order. [Playwright](../../tests/README.md) covers WebGL rendering and image comparison.

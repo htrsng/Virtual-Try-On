@@ -1,18 +1,10 @@
-# Baseline evidence — 16/11/2026
+# Baseline evidence — November 16, 2026
 
-- `execution-summary.json`: lệnh, thời gian UTC, environment, exit codes, kết quả
-  và giới hạn. Ngày hiển thị dùng Asia/Saigon.
-- `diagnostics.json`: TypeScript/ESLint diagnostics và Jest assertions/failures;
-  đường dẫn workspace được thay bằng `<repo>` khi nằm trong message.
-- `source-sha256.json`: 213 source/config files của ứng dụng, tests, launcher và
-  workflow, không gồm `.env`, node_modules, binary 3D, database hoặc output.
-  Đây là snapshot source được đo, chưa phải Git commit khôi phục.
-- `api-endpoints.csv`: 71 khai báo route từ index và AI router; thông tin guard
-  là middleware khai báo trực tiếp, không phải chứng nhận authorization.
-- `raw-log-sha256.json`: checksum raw logs local, không phải link tải artifacts.
-- `coursework-component-check.json`: kiểm tra lại runner component trong archive
-  sau khi cập nhật đường dẫn client; jsdom component scope, không phải fuzzing run.
+- `execution-summary.json` records commands, UTC timestamps, environment, exit codes, results, and limits. Display dates use Asia/Saigon.
+- `diagnostics.json` contains TypeScript and ESLint diagnostics and Jest assertion results. Messages use `<repo>` in place of the workspace path.
+- `source-sha256.json` records hashes of 213 application, test, launcher, and workflow files. It excludes environment files, dependencies, 3D binaries, database files, and generated output. It identifies the measured source snapshot.
+- `api-endpoints.csv` lists 71 route declarations from the main server and AI router. Guard entries describe declared middleware.
+- `raw-log-sha256.json` records local raw log hashes.
+- `coursework-component-check.json` records a jsdom component rerun after the archived runner’s client path was updated.
 
-Baseline không chứng minh tất cả chức năng chạy đúng. Playwright có exit 1 nhưng
-được phân loại BLOCKED vì browser chưa launch; không ghi thành lỗi nghiệp vụ.
-Raw logs giữ trong `.runtime/` trên máy đã chạy; thư mục đó không được commit.
+Playwright exited 1 and was classified BLOCKED because the browser had yet to launch. The baseline records this as an environment issue. Raw logs remain in the local Git-ignored `.runtime/` directory.
