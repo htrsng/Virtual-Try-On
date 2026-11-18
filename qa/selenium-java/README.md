@@ -1,85 +1,35 @@
-# Selenium Java — VFitAI
+# Chạy Selenium cho VFitAI
 
-Java 17, Maven 3.9+, Node 22, npm, Chrome or Edge installed. Exact test dependencies
-are pinned in `pom.xml`. Selenium Manager resolves the matching driver on first run;
-internet access is needed for Maven, driver and MongoDB downloads. No development
-MongoDB, real account or application `.env` is needed.
+Bộ test dùng Java 17, Maven 3.9+, Node.js 22 và Chrome hoặc Edge. Selenium Manager tìm driver phù hợp với trình duyệt. Lần chạy đầu có thể cần mạng để tải driver, các gói Maven hoặc MongoDB.
 
-From a clean clone, run from the repository root:
+Chạy từ thư mục gốc:
 
 ```sh
 npm ci --prefix server
 npm ci --prefix client
-node scripts/qa-selenium.cjs -Dbrowser=chrome
+node scripts/qa-selenium.cjs -Dbrowser=chrome -Dgroups=smoke
 ```
 
-Windows with Edge: `node scripts/qa-selenium.cjs` (default browser=edge).
-For an interactive browser append `-Dheadless=false`. Set `SELENIUM_BROWSER_BINARY`
-to an installed browser executable if it is outside the normal location. Selenium's
-standard `webdriver.chrome.driver` / `webdriver.edge.driver` JVM properties can
-provide a preinstalled driver in restricted environments.
+Đổi thành `-Dbrowser=edge` để chạy Edge, hoặc thêm `-Dheadless=false` để xem browser thao tác. Nếu browser cài ngoài vị trí mặc định, đặt `SELENIUM_BROWSER_BINARY` trỏ đến tệp thực thi.
 
-The launcher starts the existing owned QA MongoDB replica set, API and Vite UI,
-waits for readiness, runs Maven and stops services in `finally`, preserving Maven's
-exit status. Run IDs are unique; ports default to API 3300 / UI 55173. Override
-`QA_API_PORT` / `QA_UI_PORT` for simultaneous **separate suites**. Occupied ports
-are refused. `MONGOMS_SYSTEM_BINARY` may point to a compatible local `mongod`;
-set `MONGOMS_RUNTIME_DOWNLOAD=false` to disallow automatic MongoDB downloads.
+## Chọn nhóm test
 
-Each invocation resets owned fixtures, creates a new WebDriver/profile, runs
-independent assertions, captures failures, quits the browser and clears test data.
-The generated account credentials stay in the ignored `.runtime/qa/<runId>/`
-manifest and are scrubbed at shutdown. Never upload that manifest.
-Tests are serial because reset/clear affects the suite database. Do not turn on
-TestNG parallel methods or parallel DataProviders without per-test environments.
+| Nhóm | Nội dung |
+| --- | --- |
+| `smoke` | 5 lượt chạy. Kiểm tra đăng nhập đúng/sai, mở sản phẩm và đưa mặt hàng đã chọn tới checkout. |
+| `e2e` | Kiểm tra đặt COD, tổng tiền, tồn kho, coupon, trạng thái đơn, quyền truy cập và thao tác giỏ hàng. |
+| `regression` | Chạy cả smoke và các ca nghiệp vụ, tổng cộng 22 lượt theo cấu hình hiện tại. |
 
-## Scope and commands
+Ví dụ chạy đầy đủ: `node scripts/qa-selenium.cjs -Dbrowser=chrome -Dgroups=regression`. CI chạy smoke trên PR. Workflow hồi quy đầy đủ chạy theo lịch hoặc khi kích hoạt thủ công. [Danh sách ca nghiệp vụ](../docs/e2e-test-cases.csv).
 
-| Method | Assertions | Group |
-| --- | --- | --- |
-| customerCanLoginThroughUi | actual UI login redirects home and establishes session | auth |
-| invalidLoginHasNoSession (2 data rows) | visible error, no session, stays at login | auth |
-| catalogLinkOpensCorrectProduct | fixture catalog link, exact title and URL | catalog |
-| selectedCartItemReachesCheckout | selection gates checkout, one correct shirt/size/quantity | checkout |
+## Môi trường và báo cáo
 
-Five invocations, four scenarios. All belong to `smoke`; use
-`node scripts/qa-selenium.cjs -Dgroups=auth` to select a group. No retries or
-method dependencies. Login UI is exercised directly, not bypassed via API/token.
-The checkout scenario stops at the summary: order submission/payment, RBAC,
-WebGL rendering and visual regression are outside this smoke suite.
+Launcher tự mở MongoDB replica set, API và giao diện, đợi dịch vụ sẵn sàng rồi chạy TestNG. Mỗi ca có WebDriver mới và dữ liệu mẫu được đặt lại. Launcher dừng các dịch vụ sau khi Maven kết thúc. Nếu chạy đồng thời với Playwright, đặt `QA_API_PORT` và `QA_UI_PORT` thành hai cổng trống khác với cặp mặc định `3300` và `55173`. Có thể đặt `MONGOMS_SYSTEM_BINARY` để dùng bản `mongod` tương thích đã cài. [Hướng dẫn cấu hình môi trường](../docs/environment-setup.md).
 
-`node scripts/qa-selenium.cjs -Dgroups=diagnostics` deliberately fails one probe.
-Expected: nonzero exit, PNG screenshot, failure report, stopped services and a
-scrubbed manifest. It is excluded from default smoke and CI. This validates error
-handling without registering a fake application bug.
+Tìm báo cáo Maven/TestNG trong `qa/selenium-java/target/surefire-reports/`, ảnh lỗi trong `qa/selenium-java/target/screenshots/` và log reset trong `qa/selenium-java/target/qa-control.log`. Sao chép bằng chứng cần giữ trước lượt chạy mới. Giữ manifest chứa tài khoản mẫu trong `.runtime/qa/` ở máy local.
 
-## Reports and extension
+Nhóm `diagnostics` cố tình làm một ca thất bại để kiểm tra việc chụp ảnh và dọn môi trường. Kết quả dự kiến là mã thoát khác 0 và có ảnh lỗi.
 
-Stage 6 adds [17 business E2E cases](../docs/e2e-test-cases.csv), including UI COD
-submission followed by real API/MongoDB readback, stock reservation/restoration,
-discounts, owner isolation, admin delivery/closet sync, sessions and catalog/cart.
-Run `node scripts/qa-selenium.cjs -Dgroups=e2e` for these cases or
-`node scripts/qa-selenium.cjs -Dgroups=regression` for all 22 invocations including
-the original smoke suite. `auth`, `catalog` and other overlapping groups now select
-cases across both classes. No invocation is counted twice when multiple groups match.
-See [stage 6 report](../docs/stage-6-business-e2e.md) for exact UI/API boundaries,
-known coverage gaps and bug retests. CI now runs `regression` with Chrome.
+## Khi thêm ca mới
 
-Maven/TestNG XML, HTML, stack traces and Reporter logs:
-`qa/selenium-java/target/surefire-reports/`. Failure screenshots:
-`target/screenshots/`; local reset diagnostics: `target/qa-control.log`.
-All generated output is ignored. Reports are overwritten by subsequent runs;
-copy needed results to `.runtime/` before rerunning. CI uploads only reports and
-screenshots for 14 days, never the credential-bearing environment directory.
-
-`BaseTest` owns lifecycle only. `DriverFactory` configures browser/timeouts;
-`QaEnvironment` calls the guarded local reset/clear CLI. Page Objects encapsulate
-real pages and operations; tests own assertions. Locators use semantic input types,
-product href and scoped application classes, with text only for size/summary.
-Implicit wait is zero; explicit waits use DOM, navigation or cart state. No fixed
-sleeps. Add a page/component only when an actual repeated UI interaction needs it.
-
-The current configuration uses WebDriver only, not CDP. A warning about a browser
-CDP version does not imply WebDriver failure; browser/network diagnostics remain
-the Playwright workstream. See [execution evidence](../docs/stage-5-selenium.md)
-for tested versions, results and limitations.
+Đặt thao tác UI dùng lại trong Page Object và để assertion nghiệp vụ trong test. Chờ theo điều kiện như nút khả dụng, nội dung xuất hiện hoặc chuyển trang. Giữ các phương thức TestNG và DataProvider chạy tuần tự khi chúng cùng dùng thao tác reset trên một database.

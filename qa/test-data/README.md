@@ -1,47 +1,20 @@
-# Test data contract
+# Dữ liệu mẫu của môi trường QA
 
-Fixtures chỉ được ghi qua `server/test-support/owned-database.js`, không gọi trực
-tiếp `seed()` hoặc đưa URI development vào script. Seed yêu cầu handle sở hữu được
-ghi trong WeakMap, connection/client đúng instance, database có prefix test và marker
-khớp capability; `NODE_ENV=test` một mình không đủ để được reset.
+Playwright và Selenium đặt lại dữ liệu trước mỗi ca. Jest bắt đầu với database rỗng để mỗi ca tự tạo dữ liệu cần thiết. Khi cần cả bộ dữ liệu mẫu trong Jest, gọi `global.qaTestDatabase.reset()`.
 
-| Fixture | Identity / giá trị | Dùng cho |
-|---|---|---|
-| Admin, customer, other | IDs 101/102/103 dạng ObjectId cố định; email `role+runId@example.test` | RBAC, login, owner isolation |
-| QA Cotton Shirt | Product 50101, giá 200k, White S/M/L stock 4/5/3 | UI smoke, checkout, stock, model theo size |
-| QA Trousers | Product 50102, giá 300k, stock 6 | Multi-product/3D baseline |
-| QA Unavailable Shirt | Product 50103, inactive, stock 0 | Negative checkout |
-| Processing/delivered order | IDs 201/202, total 230k, customer owner | Order list, cancellation, closet baseline |
-| Virtual closet + saved outfit | Customer có một purchased shirt size M | Owner closet, outfit persistence |
-| Try-on session | ID 401, shirt M; createdAt mới mỗi reset | Session API, tránh TTL xóa fixture ngay |
-| Banner + newsletter | Một record mỗi loại; NEWS10QA thuộc customer | UI shell và promotion tests |
+| Dữ liệu | Giá trị dùng trong test |
+| --- | --- |
+| Tài khoản | Admin, khách mua hàng và khách thứ hai. Email có dạng `role+runId@example.test`. |
+| QA Cotton Shirt | Mã 50101, giá 200.000 đồng, màu White. Size S/M/L có tồn kho lần lượt 4/5/3. |
+| QA Trousers | Mã 50102, giá 300.000 đồng, tồn kho 6. |
+| QA Unavailable Shirt | Mã 50103, đã tắt bán, tồn kho 0. |
+| Đơn hàng mẫu | Một đơn đang xử lý và một đơn đã giao, tổng 230.000 đồng mỗi đơn. |
+| Tủ đồ và outfit | Khách mua hàng có áo size M trong tủ đồ. |
+| Phiên thử đồ | Áo size M. Thời điểm tạo được làm mới để phiên chưa hết hạn khi test bắt đầu. |
+| Banner và newsletter | Mỗi loại một bản ghi. Mã `NEWS10QA` thuộc khách mua hàng. |
 
-Numeric suffix trong bảng chỉ để đọc; ObjectId đầy đủ nằm trong seed contract.
-Product và nested variant/size IDs cố định để reset không phá tham chiếu. Fixed clock
-`2026-01-01T00:00:00Z` dùng cho dữ liệu lịch sử; TTL session cố ý dùng thời gian hiện tại.
-Passwords được tạo ngẫu nhiên mỗi environment, giữ nguyên qua các reset của environment
-đó; bcrypt salt có thể thay đổi. Không có password/JWT cố định trong fixtures JSON.
+Đơn mẫu là dữ liệu lịch sử với `inventoryReserved=false`. Đơn tạo qua API vẫn trừ tồn kho qua transaction. Model 3D lấy từ `client/public/`, gồm avatar và các size S/M/L của áo, quần. [Danh mục mẫu](catalog.json).
 
-Các đơn seed là historical snapshots `inventoryReserved=false`, không giữ kho hiện tại.
-Order mới qua API vẫn reserve stock bằng transaction như Giai đoạn 1. Cleanup giữ marker
-và unique indexes, xóa data trong tất cả collections còn lại của **database do run sở hữu**,
-kể cả collection mới mà test tạo thêm. Mỗi reset xóa mutations/coupon usage rồi seed lại.
+Dùng API reset/clear của [helper quản lý database QA](../../server/test-support/owned-database.js). Helper kiểm tra connection, tên database và marker sở hữu trước khi xoá dữ liệu. Chỉ reset giữa các ca vì các bài trong cùng suite dùng chung môi trường.
 
-Model fixtures dùng 7 GLB files đã có trong `client/public`: avatar morph, shirt S/M/L,
-trousers S/M/L. Không copy binary vào QA; product images dùng favicon local để smoke
-không cần CDN. Kiểm tra GLB header/resource và model references không chứng minh hình
-render đúng, morph đúng hoặc đạt visual regression; đó vẫn là scope giai đoạn 3D sau.
-
-Test authors: dùng `tests/fixtures.ts` cho Playwright (auto reset/clear mỗi case) hoặc
-`global.qaTestDatabase.reset()` khi cần full catalog trong Jest. Suite Jest mặc định
-bắt đầu rỗng; mỗi test tự tạo fixture, teardown tự clear. Một Node process sở hữu một
-Mongoose default connection; cần worker/process riêng nếu muốn chạy nhiều environment.
-Playwright hiện chạy 1 worker để tránh reset chung giữa tests đang chạy song song.
-Không reset giữa transaction/test đang chạy; CLI reset là thao tác tại boundary của test.
-# Stage 6 session fixture
-
-The owned QA launcher also puts `testSessions.expiredCustomer` in its local runtime
-manifest. It is a JWT signed with the disposable API's random key and already
-expired (`expiresIn: -1`), used to distinguish expiry from malformed-token coverage.
-The signing key is never exposed in the manifest. Stop scrubs `testSessions` along
-with accounts/control capability. Do not publish environment manifests or tokens.
+Mật khẩu được tạo khi mở môi trường và dùng lại qua các lần reset. Manifest local có tài khoản mẫu và một JWT đã hết hạn để kiểm tra phiên đăng nhập. Launcher xoá các giá trị này khi dừng. Giữ manifest trong `.runtime/qa/` ở máy local.
