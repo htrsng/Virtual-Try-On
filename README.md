@@ -2,9 +2,9 @@
 
 VFitAI is a clothing storefront with a 3D fitting room. Shoppers can browse products, select sizes, and place cash-on-delivery (COD) orders. The test suite focuses on order totals and persistence, access control, and fitting-room behavior when shoppers change sizes or a model fails to load.
 
-[![API tests](https://github.com/htrsng/Virtual-Try-On/actions/workflows/backend-tests.yml/badge.svg?branch=main)](https://github.com/htrsng/Virtual-Try-On/actions/workflows/backend-tests.yml)
-[![Selenium smoke tests](https://github.com/htrsng/Virtual-Try-On/actions/workflows/selenium-smoke.yml/badge.svg?event=pull_request)](https://github.com/htrsng/Virtual-Try-On/actions/workflows/selenium-smoke.yml)
-[![Playwright and 3D tests](https://github.com/htrsng/Virtual-Try-On/actions/workflows/playwright-3d.yml/badge.svg?event=pull_request)](https://github.com/htrsng/Virtual-Try-On/actions/workflows/playwright-3d.yml)
+[![API tests](https://github.com/htrsng/vfitai-qa-automation/actions/workflows/backend-tests.yml/badge.svg?branch=main)](https://github.com/htrsng/vfitai-qa-automation/actions/workflows/backend-tests.yml)
+[![Selenium smoke tests](https://github.com/htrsng/vfitai-qa-automation/actions/workflows/selenium-smoke.yml/badge.svg?event=pull_request)](https://github.com/htrsng/vfitai-qa-automation/actions/workflows/selenium-smoke.yml)
+[![Playwright and 3D tests](https://github.com/htrsng/vfitai-qa-automation/actions/workflows/playwright-3d.yml/badge.svg?event=pull_request)](https://github.com/htrsng/vfitai-qa-automation/actions/workflows/playwright-3d.yml)
 
 ## Test coverage by feature
 
@@ -21,7 +21,9 @@ Jest and Supertest exercise the API and persisted state. Vitest covers component
 
 ## Test execution summary
 
-Local results from **November 18, 2026** on Windows with Node.js 22.15.0, Java 17, and MongoDB 8.2.6. The run used base commit `b0fc753` plus local changes documented by source hashes. [Execution evidence](qa/evidence/quality-completion-2026-11-18/execution-summary.json).
+The clean main revision `284da4f` passed the Backend API Integration and Code Quality workflows. See the [revision-specific results](qa/docs/test-summary.md#clean-main-verification) for the local rerun and CI links.
+
+The original quality-completion results were recorded on **November 18, 2026** on Windows with Node.js 22.15.0, Java 17, and MongoDB 8.2.6. The run used base commit `b0fc753` plus local changes documented by source hashes. [Execution evidence](qa/evidence/quality-completion-2026-11-18/execution-summary.json).
 
 | Test layer | Local result | Guide |
 | --- | --- | --- |
@@ -31,14 +33,14 @@ Local results from **November 18, 2026** on Windows with Node.js 22.15.0, Java 1
 | Web and 3D — Playwright | 12/12 default tests passed, including 6 WebGL cases. The Windows visual check also passed (1/1). | [Playwright](tests/README.md) · [Visual baselines](tests/visual-baselines/README.md) |
 | Manual | 8 cases designed. Physical-device acceptance is pending. | [Acceptance checklist](qa/docs/manual-acceptance-checklist.md) |
 
-The **217 automated test instances** in the catalog break down into 134 Jest, 38 Vitest, 22 Selenium, and 23 Playwright instances. Each parameterized data row counts separately. Playwright cases repeated across browsers or configurations are counted once by file and test title. The summary lists compatibility, accessibility, and production-preview executions separately. [Automated test catalog](qa/docs/automated-test-catalog.csv) · [Test summary](qa/docs/test-summary.md).
+The **217 automated test instances** in the catalog break down into 134 Jest, 38 Vitest, 22 Selenium, and 23 Playwright instances. Each parameterized data row counts separately. Playwright cases repeated across browsers or configurations are counted once by file and test title. The 23 Playwright instances comprise 12 default cases, 2 compatibility-only cases, 7 accessibility cases, 1 production-only case, and 1 Windows visual case. The summary lists repeated browser executions separately. [Automated test catalog](qa/docs/automated-test-catalog.csv) · [Test summary](qa/docs/test-summary.md).
 
-**GitHub Actions** reports results by revision. For example, PR #7 recorded 13 passing checks for commit `360e518`. The badges link to each workflow’s run history. [PR #7 checks](https://github.com/htrsng/Virtual-Try-On/pull/7/checks).
+**GitHub Actions** reports results by revision. For example, PR #7 recorded 13 passing checks for commit `360e518`. The badges link to each workflow’s run history. [PR #7 checks](https://github.com/htrsng/vfitai-qa-automation/pull/7/checks).
 
 ## Three representative QA checks
 
-- **Place a COD order through the UI.** Selenium selects a product and submits the order, then reads it back through the API to verify the total and inventory after purchase. [Selenium test](qa/selenium-java/src/test/java/com/vfitai/qa/tests/BusinessE2ETests.java#L47) · [E2E evidence](qa/docs/stage-6-business-e2e.md).
-- **Handle two shoppers competing for the last unit.** Jest sends two requests concurrently and checks that exactly one order is created and stock reaches zero. [Checkout test](server/tests/checkout.test.js#L58) · [Backend report](qa/docs/stage-1-backend-report.md).
+- **Place a COD order through the UI.** Selenium selects a product and submits the order, then reads it back through the API to verify the total and inventory after purchase. [Selenium test](qa/selenium-java/src/test/java/com/vfitai/qa/tests/BusinessE2ETests.java#L47) · [E2E evidence](qa/docs/stage-6-business-e2e.md) · [Business E2E defects](qa/bug-reports/stage6-business-e2e.md).
+- **Handle two shoppers competing for the last unit.** Jest sends two requests concurrently and checks that exactly one order is created and stock reaches zero. [Checkout test](server/tests/checkout.test.js#L58) · [Backend report](qa/docs/stage-1-backend-report.md) · [Defect DATA-02](qa/bug-reports/bug-register.md).
 - **Change sizes and recover from a model load failure.** Playwright checks geometry, camera movement, animation, and recovery after a GLB returns HTTP 404. A separate diagnostic confirms that the image comparison detects a valid GLB for the wrong item. [WebGL tests](tests/e2e/tryon-3d.spec.ts) · [3D evidence](qa/docs/stage-7-playwright-3d.md).
 
 ## QA documentation and evidence
@@ -48,7 +50,7 @@ The **217 automated test instances** in the catalog break down into 134 Jest, 38
 | Test strategy and requirements coverage | [Test Strategy](qa/docs/test-strategy.md) · [Traceability Matrix](qa/docs/rtm.md) |
 | Results, environment, and execution evidence | [Test Summary](qa/docs/test-summary.md) · [Local evidence](qa/evidence/quality-completion-2026-11-18/) |
 | Confirmed defects and retests | [Bug Register](qa/bug-reports/bug-register.md) |
-| CI run history and artifacts | [GitHub Actions](https://github.com/htrsng/Virtual-Try-On/actions) · [CI guide](qa/docs/stage-8-ci-quality-gates.md) |
+| CI run history and artifacts | [GitHub Actions](https://github.com/htrsng/vfitai-qa-automation/actions) · [CI guide](qa/docs/stage-8-ci-quality-gates.md) |
 
 ## Run the application and tests
 

@@ -1,12 +1,28 @@
 # Test Summary -18 November2026
 
-Current quality-completion work is based on b0fc753 plus a dirty local worktree.
+The original quality-completion run used base commit `b0fc753` plus local changes.
 [Curated evidence](../evidence/quality-completion-2026-11-18/README.md) records exact
 source hashes, commands, timestamps and environments. Clean CI source/checkout
-SHAs are recorded in [PR5 checks](https://github.com/htrsng/Virtual-Try-On/pull/5).
-Do not infer main verification until that exact revision has been integrated and checked.
+SHAs are recorded in [PR5 checks](https://github.com/htrsng/vfitai-qa-automation/pull/5).
 
-## Current local results
+## Clean main verification
+
+On November 18, 2026, the local rerun started from a clean checkout of [`284da4f`](https://github.com/htrsng/vfitai-qa-automation/commit/284da4f65b0bed6650a5e88c73795af6888cf592) on Windows with Node.js 22.15.0 and a temporary MongoDB replica set using the local 8.2.6 binary.
+
+| Check | Local result |
+| --- | --- |
+| ESLint | Passed |
+| Production build | Passed |
+| Vitest | 38/38 passed |
+| Jest/Supertest | 134/134 passed on an isolated rerun |
+| Playwright default | 12/12 passed, including 6 WebGL cases |
+| Selenium regression | 22/22 passed on an isolated rerun |
+
+In the initial parallel run, Jest reported 133/134 with one 5-second timeout. Selenium reported 21/22: the cancellation case read stock 5 immediately after ordering, where it expected 4 before cancellation. Both suites passed when rerun separately on the same SHA. The cause of the initial failures was not established. Compatibility, accessibility, production-preview, and visual-baseline results below are from the original run.
+
+GitHub Actions recorded two successful push workflows for this exact SHA. [Backend API Integration](https://github.com/htrsng/vfitai-qa-automation/actions/runs/44326117471) · [Code Quality](https://github.com/htrsng/vfitai-qa-automation/actions/runs/44326116957).
+
+## Original quality-completion results
 
 Windows, Node22.15.0, Java17.0.12, Maven3.9.10, MongoDB8.2.6 owned replica sets.
 Playwright1.60.0: Chromium148.0.7778.96/revision1223, Firefox150.0.2/revision1522.
@@ -47,10 +63,10 @@ screenshots/traces; artifacts retain14 days. Reports record actual checkout and
 source-head SHA, not merely a branch name. Linux3D also exports candidate images
 for independent review; export success does not approve a visual baseline.
 
-Historical Stage9 sourceb0fc753: [quality44106899752](https://github.com/htrsng/Virtual-Try-On/actions/runs/44106899752),
-[backend44106900052](https://github.com/htrsng/Virtual-Try-On/actions/runs/44106900052),
-[smoke44106899894](https://github.com/htrsng/Virtual-Try-On/actions/runs/44106899894),
-[3D44106899733](https://github.com/htrsng/Virtual-Try-On/actions/runs/44106899733).
+Historical Stage9 sourceb0fc753: [quality44106899752](https://github.com/htrsng/vfitai-qa-automation/actions/runs/44106899752),
+[backend44106900052](https://github.com/htrsng/vfitai-qa-automation/actions/runs/44106900052),
+[smoke44106899894](https://github.com/htrsng/vfitai-qa-automation/actions/runs/44106899894),
+[3D44106899733](https://github.com/htrsng/vfitai-qa-automation/actions/runs/44106899733).
 Those passed backend134/frontend32/smoke5/3D6/visual1 but failed lint213+14/build109;
 they are not current clean-gate evidence and remain preserved as before-fix history.
 
