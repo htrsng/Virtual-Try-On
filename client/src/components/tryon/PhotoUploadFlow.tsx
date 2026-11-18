@@ -19,7 +19,7 @@ export default function PhotoUploadFlow({ onComplete, onSwitchToManual }: PhotoU
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [frontPhoto, setFrontPhoto] = useState<string | null>(null);
   const [sidePhoto, setSidePhoto] = useState<string | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [, setIsAnalyzing] = useState(false);
   const [analysisMessage, setAnalysisMessage] = useState('Đang chuẩn bị...');
   const [estimatedMeasurements, setEstimatedMeasurements] = useState<MeasurementData | null>(null);
 

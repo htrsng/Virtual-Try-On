@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { MessageCircle, X } from 'lucide-react'
 import ResultPanel from './ResultPanel'
-import type { OutfitResult, ChatMessage, ViewAngle, OutfitItem } from '../../types/outfit'
+import type { OutfitResult, ChatMessage, OutfitItem } from '../../types/outfit'
 
 interface FloatingAISuggestionsProps {
     outfits: OutfitResult[]

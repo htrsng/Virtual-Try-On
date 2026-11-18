@@ -1,0 +1,132 @@
+/* Keep controls reachable at narrow widths and zoom without suppressing overflow. */
+.shopee-header {
+    height: auto;
+    min-height: 90px;
+}
+.header-content {
+    flex-wrap: wrap;
+}
+.header-actions {
+    flex-wrap: wrap;
+    min-width: 0;
+}
+.header-actions-group {
+    flex-wrap: wrap;
+    min-width: 0;
+    max-width: 100%;
+}
+.header-content .search-box {
+    flex: 1 1 240px;
+    min-width: 0;
+}
+.auth-split-wrapper {
+    flex-wrap: wrap;
+}
+.auth-sidebar {
+    flex: 1 1 360px;
+    min-width: 0;
+}
+.auth-form-area {
+    flex: 1 1 440px;
+    min-width: 0;
+}
+.social-login-group {
+    flex-wrap: wrap;
+}
+.social-btn {
+    min-width: 0;
+}
+.social-btn:disabled {
+    cursor: not-allowed;
+}
+.auth-feature-status {
+    color: #555;
+    font-size: 13px;
+    margin: 8px 0;
+}
+.forgot-password span {
+    cursor: default;
+    text-decoration: none;
+}
+button,
+.input-icon-btn {
+    min-width: 32px;
+    min-height: 32px;
+}
+.vf-hero__dot,
+.vf-hero__dot.active {
+    width: 32px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    background: transparent;
+    box-shadow: none;
+}
+.vf-hero__dot::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 3px;
+    background: #fff;
+}
+.vf-hero__dot.active::after {
+    width: 22px;
+    background: #d4a942;
+}
+.reviews-block .review-score-value {
+    color: #82600d;
+}
+.checkout-container .product-total,
+.checkout-container .shipping-price {
+    color: #82600d;
+}
+.checkout-container .shipping-time {
+    color: #555d69;
+}
+.checkout-container .apply-btn:not(:disabled) {
+    background: #237546;
+}
+[data-theme="dark"] .reviews-block .review-score-value,
+[data-theme="dark"] .checkout-container .product-total,
+[data-theme="dark"] .checkout-container .shipping-price {
+    color: #f3d48c;
+}
+[data-theme="dark"] .checkout-container .shipping-time {
+    color: #d1d5db;
+}
+:focus-visible,
+.modern-auth-input:focus-visible {
+    outline: 3px solid #174b76;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px #fff;
+}
+
+@media (max-width: 768px) {
+    .shopee-header {
+        height: auto;
+        min-height: 65px;
+        padding: 10px 0;
+    }
+    .header-content {
+        display: grid;
+        grid-template-columns: 110px minmax(0, 1fr);
+        gap: 10px;
+    }
+    .header-content .search-box {
+        width: 100%;
+        max-width: none;
+        height: 38px;
+    }
+    .header-actions {
+        grid-column: 1 / -1;
+        width: 100%;
+        justify-content: space-between;
+        gap: 8px;
+    }
+    .header-link {
+        display: inline-flex;
+        align-items: center;
+        min-height: 32px;
+        padding: 6px 8px;
+    }
+}

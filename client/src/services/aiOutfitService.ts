@@ -1,3 +1,5 @@
+import type { CatalogProduct } from '../types/catalog';
+import type { AIResponse, SuggestedItem, AvatarInput } from '../types/aiResponse';
 import type { OutfitResult, OutfitFilter, OutfitItem } from '../types/outfit'
 
 const SYSTEM_ADDITION = `
@@ -71,8 +73,8 @@ const buildPromptFromFilter = (filter: OutfitFilter): string => {
 const buildSystemAddendum = (): string => SYSTEM_ADDITION.trim()
 
 // ── Parse response từ backend thành OutfitResult[] ──
-const parseBackendResponse = (data: any): OutfitResult[] => {
-  const normalizeItem = (item: any, source: 'closet' | 'shop'): OutfitItem => ({
+const parseBackendResponse = (data: AIResponse): OutfitResult[] => {
+  const normalizeItem = (item: SuggestedItem, source: 'closet' | 'shop'): OutfitItem => ({
     id: String(item.itemId ?? item.id ?? item.productId ?? Math.random()),
     name: item.name ?? 'Sản phẩm',
     category: mapCategory(item.slot ?? item.category),
@@ -88,14 +90,14 @@ const parseBackendResponse = (data: any): OutfitResult[] => {
     model3D: item.model3D ?? item.model3d ?? undefined,
   })
 
-  const closetItems = (data.outfit ?? []).map((item: any) => normalizeItem(item, 'closet'))
-  const shopItems = (data.suggestions ?? []).map((item: any) => normalizeItem(item, 'shop'))
+  const closetItems = (data.outfit ?? []).map((item: SuggestedItem) => normalizeItem(item, 'closet'))
+  const shopItems = (data.suggestions ?? []).map((item: SuggestedItem) => normalizeItem(item, 'shop'))
 
   const outfitVariants: OutfitItem[][] = []
 
   if (Array.isArray(data.outfits) && data.outfits.length > 0) {
-    data.outfits.forEach((variant: any) => {
-      outfitVariants.push((variant.items ?? []).map((item: any) => normalizeItem(item, item.type === 'closet' ? 'closet' : 'shop')))
+    data.outfits.forEach((variant) => {
+      outfitVariants.push((variant.items ?? []).map((item: SuggestedItem) => normalizeItem(item, item.type === 'closet' ? 'closet' : 'shop')))
     })
   } else {
     const base = [...closetItems, ...shopItems]
@@ -135,8 +137,8 @@ const parseBackendResponse = (data: any): OutfitResult[] => {
 }
 
 // Helper: map slot name sang category
-const mapCategory = (slot: string): 'top' | 'bottom' | 'shoes' | 'accessory' | 'outerwear' => {
-  const map: Record<string, any> = {
+const mapCategory = (slot?: string): 'top' | 'bottom' | 'shoes' | 'accessory' | 'outerwear' => {
+  const map: Record<string, OutfitItem['category']> = {
     tops: 'top', top: 'top',
     bottoms: 'bottom', bottom: 'bottom',
     outerwear: 'outerwear',
@@ -144,11 +146,11 @@ const mapCategory = (slot: string): 'top' | 'bottom' | 'shoes' | 'accessory' | '
     accessory: 'accessory', accessories: 'accessory',
     dress: 'bottom', dresses: 'bottom',
   }
-  return map[slot?.toLowerCase()] ?? 'top'
+  return map[(slot || '').toLowerCase()] ?? 'top'
 }
 
 // Helper: tính match score dựa trên số items từ closet
-const calculateMatchScore = (items: any[]): number => {
+const calculateMatchScore = (items: OutfitItem[]): number => {
   const total = items.length
   if (total === 0) return 70
   // Tính dựa trên số lượng items, max 99
@@ -158,8 +160,8 @@ const calculateMatchScore = (items: any[]): number => {
 // ── API call chính ──
 export const generateOutfit = async (
   filter: OutfitFilter,
-  closetItems: any[] = [],
-  avatarData: any = {},
+  closetItems: CatalogProduct[] = [],
+  avatarData: AvatarInput = {},
   userId?: string
 ): Promise<{ outfits: OutfitResult[], message: string, suggestions: string[] }> => {
 
@@ -234,8 +236,8 @@ export const generateOutfit = async (
 export const refineOutfit = async (
   message: string,
   currentOutfits: OutfitResult[],
-  closetItems: any[] = [],
-  avatarData: any = {}
+  closetItems: CatalogProduct[] = [],
+  avatarData: AvatarInput = {}
 ): Promise<{ outfits: OutfitResult[], reply: string, suggestions: string[] }> => {
 
   const token = getToken()

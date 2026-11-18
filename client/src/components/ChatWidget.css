@@ -1,0 +1,14 @@
+.support-chat-launcher {
+    bottom: 20px;
+}
+
+@media (max-width: 768px) {
+    .support-chat-launcher--cart {
+        bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+    }
+}
+
+.support-chat-launcher:focus-visible {
+    outline: 3px solid #174b76;
+    outline-offset: 4px;
+}

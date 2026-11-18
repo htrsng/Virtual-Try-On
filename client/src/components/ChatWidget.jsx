@@ -2,10 +2,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import axios from 'axios';
+import { useLocation } from 'react-router-dom';
+import './ChatWidget.css';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
 function ChatWidget() {
+    const { pathname } = useLocation();
+    const hasCartBar = ['/cart', '/checkout', '/checkout/choseproduct'].includes(pathname);
+    const launcherRef = useRef(null);
+    const chatInputRef = useRef(null);
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([]);
     const [inputMessage, setInputMessage] = useState('');
@@ -14,6 +20,19 @@ function ChatWidget() {
     const messagesEndRef = useRef(null);
     const { user, isAuthenticated } = useAuth();
     const { t } = useLanguage();
+
+    useEffect(() => {
+        if (!isOpen) return;
+        chatInputRef.current?.focus();
+        const closeOnEscape = event => {
+            if (event.key === 'Escape') {
+                setIsOpen(false);
+                launcherRef.current?.focus();
+            }
+        };
+        document.addEventListener('keydown', closeOnEscape);
+        return () => document.removeEventListener('keydown', closeOnEscape);
+    }, [isOpen]);
 
     // Lấy userId từ cả 2 format (login trả về .id, /auth/me trả về ._id)
     const getUserId = () => user?.id || user?._id || null;
@@ -156,10 +175,14 @@ function ChatWidget() {
         <>
             {/* Chat Button */}
             <button
+                ref={launcherRef}
+                className={`support-chat-launcher${hasCartBar ? ' support-chat-launcher--cart' : ''}`}
+                aria-label={isOpen ? 'Đóng hỗ trợ' : 'Mở hỗ trợ'}
+                aria-expanded={isOpen}
+                aria-controls="support-chat-panel"
                 onClick={() => setIsOpen(!isOpen)}
                 style={{
                     position: 'fixed',
-                    bottom: '20px',
                     right: '20px',
                     width: '60px',
                     height: '60px',
@@ -184,7 +207,7 @@ function ChatWidget() {
 
             {/* Chat Window */}
             {isOpen && (
-                <div style={{
+                <div id="support-chat-panel" role="region" aria-label="Hỗ trợ VFitAI" style={{
                     position: 'fixed',
                     bottom: '90px',
                     right: '20px',
@@ -224,7 +247,8 @@ function ChatWidget() {
                             </div>
                         </div>
                         <button
-                            onClick={() => setIsOpen(false)}
+                            aria-label="Đóng cửa sổ hỗ trợ"
+                            onClick={() => { setIsOpen(false); launcherRef.current?.focus(); }}
                             style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'white', fontSize: '20px', cursor: 'pointer' }}
                         >✕</button>
                     </div>
@@ -329,6 +353,8 @@ function ChatWidget() {
                         background: 'white',
                     }}>
                         <input
+                            ref={chatInputRef}
+                            aria-label="Tin nhắn hỗ trợ"
                             type="text"
                             value={inputMessage}
                             onChange={(e) => setInputMessage(e.target.value)}
@@ -347,6 +373,7 @@ function ChatWidget() {
                             onBlur={e => e.target.style.borderColor = '#ddd'}
                         />
                         <button
+                            aria-label="Gửi tin nhắn"
                             onClick={() => sendMessage()}
                             disabled={!inputMessage.trim()}
                             style={{

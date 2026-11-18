@@ -1,13 +1,11 @@
-import { Suspense, memo, useMemo, useRef, useState, useEffect, useCallback } from 'react'
+import { memo, useMemo, useRef, useState, useEffect, useCallback } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
-import { OrbitControls, Grid, Html } from '@react-three/drei'
+import { OrbitControls } from '@react-three/drei'
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
 import * as THREE from 'three'
-import { Avatar } from '../../three/controls/avatar/Avatar'
-import GarmentModel from '../../features/virtual-tryon/GarmentModel'
 import TryOnScene from '../tryon/TryOnScene'
 import { useFittingRoom } from '../../contexts/FittingRoomContext'
-import { OutfitResult, ViewAngle } from '../../types/outfit'
+import type { OutfitResult, ViewAngle } from '../../types/outfit'
 
 interface AvatarPanelProps {
   selectedOutfit: OutfitResult | null
@@ -26,29 +24,6 @@ const CAMERA_PRESETS: Record<ViewAngle, { position: [number, number, number], ta
   right: { position: [4.2, 0.7, 0], target: [0, 0.4, 0] },
 }
 
-function LoadingScreen() {
-  return (
-    <Html center>
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 10,
-      }}>
-        <div style={{
-          width: 34,
-          height: 34,
-          borderRadius: '50%',
-          border: '3px solid rgba(255,255,255,0.4)',
-          borderTopColor: '#10b981',
-          animation: 'spin 0.8s linear infinite',
-        }} />
-        <span style={{ color: '#e2e8f0', fontSize: 12 }}>Đang tải avatar...</span>
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      </div>
-    </Html>
-  )
-}
 
 function CameraViewController({ view, controlsRef }: { view: ViewAngle, controlsRef: React.RefObject<OrbitControlsImpl | null> }) {
   const { camera } = useThree()
@@ -69,12 +44,9 @@ function AvatarPanel({
   isGenerating,
   viewAngle,
   onViewChange,
-  outfits = [],
-  activeOutfitIndex = 0,
-  onSelectOutfit = () => { },
 }: AvatarPanelProps) {
   const { currentAvatar, layeredGarments } = useFittingRoom()
-  const [avatarScene, setAvatarScene] = useState<THREE.Group | null>(null)
+  const [, setAvatarScene] = useState<THREE.Group | null>(null)
   const [isWebglContextLost, setIsWebglContextLost] = useState(false)
   const [lossCount, setLossCount] = useState(0)
   const [fallbackMode, setFallbackMode] = useState(false)
@@ -117,7 +89,7 @@ function AvatarPanel({
     webglContextHandlersRef.current = { handleContextLost, handleContextRestored }
     canvas.addEventListener('webglcontextlost', handleContextLost, false)
     canvas.addEventListener('webglcontextrestored', handleContextRestored, false)
-  }, [])
+  }, [fallbackMode])
 
   useEffect(() => {
     return () => {
@@ -176,9 +148,6 @@ function AvatarPanel({
 
   const cameraPreset = useMemo(() => CAMERA_PRESETS[viewAngle], [viewAngle])
 
-  const topItem = selectedOutfit?.items.find(i => i.category === 'top')
-  const bottomItem = selectedOutfit?.items.find(i => i.category === 'bottom')
-  const shoeItem = selectedOutfit?.items.find(i => i.category === 'shoes')
 
   return (
     <div style={panelStyle} className="vfit-container" data-theme={bgTheme}>

@@ -1,16 +1,17 @@
 import CameraAnimator from './components/CameraAnimator';
 import EmptyAvatarModal from './components/EmptyAvatarModal';
-import { Suspense, useState, useRef, useMemo, useEffect, useCallback, type ReactNode } from 'react';
+import { Suspense, useState, useRef, useMemo, useEffect, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Environment, ContactShadows, Html, useProgress, Grid, MeshReflectorMaterial } from '@react-three/drei';
+import { OrbitControls, Environment, ContactShadows, Html, useProgress, Grid } from '@react-three/drei';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Avatar } from '../../three/controls/avatar/Avatar';
-import { useFittingRoom, type GarmentSlot, type Profile, type SilentWearItem } from '../../contexts/FittingRoomContext';
+import { useFittingRoom, type GarmentSlot, type SilentWearItem } from '../../contexts/FittingRoomContext';
 import { MODEL_INJECTION } from '../../data/ThreeDConfig.js';
 import GarmentModel from './GarmentModel';
 import CameraPresets from './components/CameraPresets';
 import type { CameraView } from './components/CameraPresets';
-import SizeRecommendation, { recommendSizes } from './components/SizeRecommendation';
+import SizeRecommendation from './components/SizeRecommendation';
+import { recommendSizes } from './components/sizeRecommendationEngine';
 import { ColorSelector } from './components/ProductOptions';
 import VirtualPersonalClosetDrawer, { type ClosetItem } from './components/VirtualPersonalClosetDrawer';
 import OutfitPanel from './components/OutfitPanel';
@@ -71,78 +72,10 @@ type LocalColorOption = {
 
 type RecommendationResult = ReturnType<typeof recommendSizes>[number];
 type RecommendationZone = RecommendationResult['zones'][number];
-type RecommendationFitLevel = RecommendationZone['fit'];
 const RAW_API_URL = import.meta.env.VITE_API_URL || '';
 const API_URL = RAW_API_URL.startsWith(':') ? `http://localhost${RAW_API_URL}` : RAW_API_URL;
 
 /* ─── Accordion ─── */
-function Accordion({ title, icon, defaultOpen = false, children, onLayoutChange }: {
-    title: string;
-    icon: ReactNode;
-    defaultOpen?: boolean;
-    children: ReactNode;
-    onLayoutChange?: () => void;
-}) {
-    const [isOpen, setIsOpen] = useState(defaultOpen);
-    const bodyInnerRef = useRef<HTMLDivElement | null>(null);
-    const [contentHeight, setContentHeight] = useState(0);
-
-    useEffect(() => {
-        const element = bodyInnerRef.current;
-        if (!element) {
-            return;
-        }
-
-        const updateHeight = () => {
-            setContentHeight(element.scrollHeight);
-            onLayoutChange?.();
-        };
-
-        updateHeight();
-
-        if (typeof ResizeObserver === 'undefined') {
-            return;
-        }
-
-        const observer = new ResizeObserver(() => {
-            updateHeight();
-        });
-
-        observer.observe(element);
-
-        return () => {
-            observer.disconnect();
-        };
-    }, [children, onLayoutChange]);
-
-    useEffect(() => {
-        onLayoutChange?.();
-    }, [isOpen, onLayoutChange]);
-
-    return (
-        <div className={`vto-accordion ${isOpen ? 'open' : ''}`}>
-            <button
-                type="button"
-                className="vto-accordion__header"
-                onClick={() => setIsOpen((open) => !open)}
-                aria-expanded={isOpen}
-            >
-                <span className="vto-accordion__title">
-                    <span className="vto-accordion__title-icon">{icon}</span>
-                    {title}
-                </span>
-                <span className="vto-accordion__chevron">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="6 9 12 15 18 9" /></svg>
-                </span>
-            </button>
-            <div className="vto-accordion__body" style={{ maxHeight: isOpen ? `${contentHeight}px` : '0px' }}>
-                <div ref={bodyInnerRef} className="vto-accordion__body-inner">
-                    {children}
-                </div>
-            </div>
-        </div>
-    );
-}
 
 /* ─── Loader ─── */
 function Loader() {
@@ -160,6 +93,8 @@ function Loader() {
 /* ─── Camera animator (inside Canvas) ─── */
 /* ─── Types ─── */
 type TryOnProduct = {
+    sku?: string;
+    currentVariant?: { sizes?: { size: string; stock: number }[] };
     id: number | string;
     name: string;
     price: number | string;
@@ -185,6 +120,7 @@ type ProductWithModel = TryOnProduct & {
                 envMapIntensity?: number;
             };
             fabric?: LocalFabricProfile;
+            colors?: LocalColorOption[];
         }>;
         fabric?: LocalFabricProfile;
         colors?: LocalColorOption[];
@@ -207,199 +143,7 @@ type SavedOutfit = {
     createdAt?: string;
 };
 
-type SizeCompareViewportProps = {
-    panelLabel: string;
-    productName: string;
-    bodyData: Profile;
-    modelConfig?: ProductWithModel['model3D'];
-    selectedSize: string;
-    availableSizes: string[];
-    onSelectSize: (size: string) => void;
-    selectedColor: string;
-    selectedFabric?: LocalFabricProfile;
-    fitScore?: number;
-    fitZones?: RecommendationZone[];
-    heatmapEnabled: boolean;
-    pose?: string;
-};
 
-function SizeCompareViewport({
-    panelLabel,
-    productName,
-    bodyData,
-    modelConfig,
-    selectedSize,
-    availableSizes,
-    onSelectSize,
-    selectedColor,
-    selectedFabric,
-    fitScore,
-    fitZones,
-    heatmapEnabled,
-    pose,
-}: SizeCompareViewportProps) {
-    const [avatarScene, setAvatarScene] = useState<THREE.Group | null>(null);
-    const [isSizeSwitching, setIsSizeSwitching] = useState(false);
-    const previousSizeRef = useRef(selectedSize);
-    const sizeSwitchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const baseQuickSizes = ['S', 'M', 'L'];
-    const quickSizeItems = [
-        ...baseQuickSizes.map((label) => {
-            const matchedSize = availableSizes.find((size) => size.trim().toUpperCase() === label);
-            return {
-                label,
-                value: matchedSize || label,
-                disabled: !matchedSize,
-            };
-        }),
-        ...availableSizes
-            .filter((size) => {
-                const normalized = size.trim().toUpperCase();
-                if (COMPARE_HIDDEN_SIZES.has(normalized)) {
-                    return false;
-                }
-                return !baseQuickSizes.includes(normalized);
-            })
-            .map((size) => ({
-                label: size,
-                value: size,
-                disabled: false,
-            })),
-    ];
-
-    useEffect(() => {
-        if (previousSizeRef.current === selectedSize) {
-            return;
-        }
-
-        previousSizeRef.current = selectedSize;
-        setIsSizeSwitching(true);
-
-        if (sizeSwitchTimerRef.current) {
-            clearTimeout(sizeSwitchTimerRef.current);
-        }
-
-        sizeSwitchTimerRef.current = setTimeout(() => {
-            setIsSizeSwitching(false);
-            sizeSwitchTimerRef.current = null;
-        }, 250);
-    }, [selectedSize]);
-
-    useEffect(() => {
-        return () => {
-            if (sizeSwitchTimerRef.current) {
-                clearTimeout(sizeSwitchTimerRef.current);
-            }
-        };
-    }, []);
-
-    return (
-        <section className={`vto-size-room__screen ${isSizeSwitching ? 'is-switching' : ''}`}>
-            <header className="vto-size-room__screen-head">
-                <div className="vto-size-room__screen-title-wrap">
-                    <p className="vto-size-room__screen-label">{panelLabel}</p>
-                    <h4 className="vto-size-room__screen-title">{productName}</h4>
-                </div>
-
-                <div className="vto-size-room__screen-badges">
-                    <span className="vto-size-room__size-badge">{selectedSize}</span>
-                    {typeof fitScore === 'number' && (
-                        <span className="vto-size-room__score">{fitScore}%</span>
-                    )}
-                </div>
-            </header>
-
-            <div className="vto-size-room__screen-controls">
-                <div className="vto-size-room__field vto-size-room__field--pills">
-                    <span style={{ marginBottom: '6px', display: 'inline-block' }}>Kích cỡ:</span>
-                    <div className="vto-premium-pill-group">
-                        {availableSizes.map((size) => (
-                            <button
-                                key={`${panelLabel}-pill-${size}`}
-                                type="button"
-                                className={`vto-premium-pill ${size === selectedSize ? 'active' : ''}`}
-                                onClick={() => onSelectSize(size)}
-                            >
-                                {size === selectedSize && (
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
-                                        <polyline points="20 6 9 17 4 12"></polyline>
-                                    </svg>
-                                )}
-                                {size}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            </div>
-            <div className="vto-size-room__canvas-wrap">
-                <Canvas className="vto-size-room__canvas" camera={{ position: [0, 0.78, 3.9], fov: 28 }} dpr={[1, 1.5]} shadows>
-                    <ambientLight intensity={0.42} />
-                    <directionalLight
-                        position={[3, 6, 4]}
-                        intensity={1.35}
-                        castShadow
-                        shadow-mapSize-width={1024}
-                        shadow-mapSize-height={1024}
-                        shadow-camera-near={0.5}
-                        shadow-camera-far={20}
-                        shadow-camera-left={-3}
-                        shadow-camera-right={3}
-                        shadow-camera-top={4}
-                        shadow-camera-bottom={-2}
-                        shadow-bias={-0.0005}
-                    />
-                    <directionalLight position={[-2, 3, -2]} intensity={0.3} />
-
-                    <Suspense fallback={<Loader />}>
-                        <Environment preset="city" />
-                        <group position={[0, -1.08, 0]}>
-                            {/* Bục phản chiếu */}
-                            
-                            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]}>
-                                <planeGeometry args={[10, 10]} />
-                                <MeshReflectorMaterial
-                                    blur={[300, 100]}
-                                    resolution={1024}
-                                    mixBlur={1}
-                                    mixStrength={40}
-                                    roughness={1}
-                                    depthScale={1.2}
-                                    minDepthThreshold={0.4}
-                                    maxDepthThreshold={1.4}
-                                    color="#e2e8f0"
-                                    metalness={0.5}
-                                    mirror={0.5}
-                                />
-                            </mesh>
-
-                            <Avatar body={bodyData} pose={pose || 'Idle'} skinColor="#F2C9AC" onSceneReady={setAvatarScene} />
-                            <GarmentModel
-                                config={modelConfig}
-                                selectedSize={selectedSize}
-                                selectedColor={selectedColor}
-                                fabricOverride={selectedFabric}
-                                avatarScene={avatarScene}
-                                heatmapEnabled={heatmapEnabled}
-                                heatmapZones={fitZones}
-                                avatarProfile={bodyData}
-                            />
-                            <ContactShadows position={[0, 0.01, 0]} opacity={0.6} scale={5} blur={2.5} resolution={1024} frames={1} />
-                        </group>
-                    </Suspense>
-
-                    <OrbitControls
-                        target={[0, 0.55, 0]}
-                        enablePan={false}
-                        enableDamping
-                        dampingFactor={0.08}
-                        minDistance={2.2}
-                        maxDistance={4.8}
-                    />
-                </Canvas>
-            </div>
-        </section>
-    );
-}
 
 interface VirtualTryOnProps {
     product: TryOnProduct;
@@ -409,35 +153,10 @@ interface VirtualTryOnProps {
     showToast: (message: string, type?: string) => void;
 }
 
-type CompareWinner = 'left' | 'right' | 'equal';
 
-type CompareZoneRow = {
-    label: string;
-    left: RecommendationZone;
-    right: RecommendationZone;
-    winner: CompareWinner;
-};
 
-const FIT_LABELS: Record<RecommendationFitLevel, { text: string; color: string }> = {
-    tight: { text: 'Chật', color: '#ef4444' },
-    fitted: { text: 'Ôm vừa', color: '#eab308' },
-    comfortable: { text: 'Thoải mái', color: '#22c55e' },
-    loose: { text: 'Rộng', color: '#166534' },
-};
 
-const formatDeltaCm = (value: number) => `${value > 0 ? '+' : ''}${value} cm`;
 
-const getZoneIcon = (label: string) => {
-    const l = label.toLowerCase();
-    if (l.includes('ngực') || l.includes('chest') || l.includes('bust')) return '🧥';
-    if (l.includes('eo') || l.includes('waist')) return '📏';
-    if (l.includes('hông') || l.includes('mông') || l.includes('hip')) return '👖';
-    if (l.includes('vai') || l.includes('shoulder')) return '📐';
-    if (l.includes('dài') || l.includes('length')) return '↕️';
-    if (l.includes('tay') || l.includes('sleeve')) return '💪';
-    if (l.includes('đùi') || l.includes('thigh')) return '🦵';
-    return '📏';
-};
 
 /* ─── Category layer helpers ─── */
 const CATEGORY_LAYER_ORDER: Record<string, number> = {
@@ -511,21 +230,6 @@ const resolveColorConfig = (
     return colors.find((color) => color.hex.trim().toLowerCase() === normalizedTarget);
 };
 
-const resolveFitScopeLabel = (garmentType?: string) => {
-    if (garmentType === 'bottom') {
-        return 'Eo, hông';
-    }
-
-    if (garmentType === 'top') {
-        return 'Ngực, eo, hông, vai';
-    }
-
-    if (garmentType === 'dress' || garmentType === 'outerwear') {
-        return 'Ngực, eo, hông, vai';
-    }
-
-    return 'Toàn thân';
-};
 
 const getCategoryOrder = (cat?: string): number => {
     if (!cat) return 2; // default to "top" layer
@@ -551,27 +255,6 @@ const resolveModel3D = (item: TryOnProduct) => {
 };
 
 /* ─── Main Component ─── */
-function CameraHotspot({ position, label, onClick }: { position: [number, number, number], label: string, onClick: () => void }) {
-    return (
-        <group position={position}>
-            <Html center zIndexRange={[100, 0]}>
-                <div 
-                    onClick={onClick} 
-                    style={{
-                        width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(255,255,255,0.85)',
-                        border: '2px solid #C9963F', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        boxShadow: '0 0 10px rgba(0,0,0,0.2)', transition: 'transform 0.2s',
-                    }}
-                    onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.2)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
-                    title={label}
-                >
-                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#C9963F' }} />
-                </div>
-            </Html>
-        </group>
-    );
-}
 
 export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyNow, showToast }: VirtualTryOnProps) {
     const location = useLocation();
@@ -580,8 +263,6 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
     const {
         avatars,
         currentAvatar,
-        currentAvatarId,
-        setCurrentAvatarId,
         selectedSize,
         setSelectedSize,
         isHeatmapOpen,
@@ -681,15 +362,13 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
     const [isTryOnGuideOpen, setIsTryOnGuideOpen] = useState(false);
     const [isSizeCompareRoomOpen, setIsSizeCompareRoomOpen] = useState(false);
     const [comparePose, setComparePose] = useState<string>('Idle');
-    const [sizeComparePair, setSizeComparePair] = useState({ left: '', right: '' });
+    const [, setSizeComparePair] = useState({ left: '', right: '' });
     // const [hasSidebarScrollFade, setHasSidebarScrollFade] = useState(false);
     const [isClosetOpen, setIsClosetOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<'size'|'fit'>('size');
-    const [showMeasurements, setShowMeasurements] = useState(false);
     const [lightingMode, setLightingMode] = useState<'studio'|'warm'|'cool'|'outdoor'>('studio');
-    const [bgTheme, setBgTheme] = useState<'light'|'dark'>('dark');
+    const [bgTheme] = useState<'light'|'dark'>('dark');
     const [isWebglContextLost, setIsWebglContextLost] = useState(false);
-    const sidebarScrollRef = useRef<HTMLDivElement | null>(null);
     const [canvasEventSource, setCanvasEventSource] = useState<HTMLElement | undefined>(undefined);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -827,7 +506,7 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                 };
             })
             .filter((entry) => Boolean(entry.model3D));
-    }, [items, layeredGarments, resolveModel3D, resolvePurchasedColorHex]);
+    }, [items, layeredGarments, resolvePurchasedColorHex]);
 
     // Resolve active item's model for sidebar controls
     const activeModel3D = useMemo(() => resolveModel3D(activeItem), [activeItem]);
@@ -876,15 +555,11 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
 
     // const activeFitScopeLabel = useMemo(() => resolveFitScopeLabel(activeGarmentType), [activeGarmentType]);
     const isActiveItemReadyToWear = activeSelectedSize.length > 0 && activeSelectedColor.length > 0;
-    const activeSelectedColorConfig = useMemo(
-        () => resolveColorConfig(activeModel3D, activeSelectedColor),
-        [activeModel3D, activeSelectedColor],
-    );
 
     const isSelectedSizeOutOfStock = useMemo(() => {
         if (!activeSelectedSize) return false;
         if (activeItem.currentVariant && activeItem.currentVariant.sizes) {
-            const sizeInfo = activeItem.currentVariant.sizes.find((s: any) => s.size === activeSelectedSize);
+            const sizeInfo = activeItem.currentVariant.sizes.find((s) => s.size === activeSelectedSize);
             if (sizeInfo) {
                 return sizeInfo.stock <= 0;
             }
@@ -900,9 +575,6 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
     // }, [activeModel3D, activeSelectedColorConfig, activeSelectedSize]);
 
     const hasConfigurable3DModel = Boolean(activeModel3D?.sizes && Object.keys(activeModel3D.sizes).length > 0);
-    const comparePreviewColor = activeSelectedColor || '#f5f5f5';
-    const comparePreviewColorName = activeSelectedColorConfig?.name || 'Trắng trung tính';
-    const comparePreviewFabric = activeSelectedColorConfig?.fabric;
 
     const sizeCompareResults = useMemo<RecommendationResult[]>(
         () => recommendSizes(currentBodyData, availableSizes, activeGarmentSizeSpecs, { garmentType: activeGarmentType }),
@@ -948,51 +620,10 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
         [sizeCompareResults],
     );
 
-    const sizeCompareResultMap = useMemo(
-        () => new Map(sizeCompareResults.map((result) => [result.size, result])),
-        [sizeCompareResults],
-    );
 
-    const resolveAlternativeComparableSize = useCallback((excludedSize: string) => {
-        return comparableSizes.find((size) => size !== excludedSize) || excludedSize;
-    }, [comparableSizes]);
 
-    const compareLeftResult: RecommendationResult | null = sizeComparePair.left
-        ? sizeCompareResultMap.get(sizeComparePair.left) || null
-        : null;
-    const compareRightResult: RecommendationResult | null = sizeComparePair.right
-        ? sizeCompareResultMap.get(sizeComparePair.right) || null
-        : null;
 
-    const sizeCompareRows = useMemo<CompareZoneRow[]>(() => {
-        if (!compareLeftResult || !compareRightResult) {
-            return [];
-        }
 
-        return compareLeftResult.zones.map((leftZone: RecommendationZone) => {
-            const rightZone = compareRightResult.zones.find((zone: RecommendationZone) => zone.key === leftZone.key) || leftZone;
-            const leftSeverity = leftZone.severity;
-            const rightSeverity = rightZone.severity;
-
-            let winner: CompareWinner = 'equal';
-            if (leftSeverity + 0.03 < rightSeverity) {
-                winner = 'left';
-            } else if (rightSeverity + 0.03 < leftSeverity) {
-                winner = 'right';
-            }
-
-            return {
-                label: leftZone.label,
-                left: leftZone,
-                right: rightZone,
-                winner,
-            };
-        });
-    }, [compareLeftResult, compareRightResult]);
-
-    const sizeCompareScoreDiff = compareLeftResult && compareRightResult
-        ? compareRightResult.score - compareLeftResult.score
-        : 0;
 
     const canOpenSizeCompareRoom = hasConfigurable3DModel && comparableSizes.length >= 2;
 
@@ -1095,9 +726,6 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
         });
     }, [navigate, location.state]);
 
-    const handleClose = useCallback(() => {
-        navigate(-1);
-    }, [navigate]);
 
     const handleBackToHome = useCallback(() => {
         navigate('/');
@@ -1138,27 +766,7 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
         }
     }, [history.length, itemColors, itemSizes]);
 
-    const handleUndo = useCallback(() => {
-        if (historyIndex > 0) {
-            const prev = history[historyIndex - 1];
-            setItemSizes(prev.sizes);
-            setItemColors(prev.colors);
-            setHistoryIndex(historyIndex - 1);
-            const activeKey = String(activeItem.id);
-            setSelectedSize(prev.sizes[activeKey] || null);
-        }
-    }, [history, historyIndex, activeItem]);
 
-    const handleRedo = useCallback(() => {
-        if (historyIndex < history.length - 1) {
-            const next = history[historyIndex + 1];
-            setItemSizes(next.sizes);
-            setItemColors(next.colors);
-            setHistoryIndex(historyIndex + 1);
-            const activeKey = String(activeItem.id);
-            setSelectedSize(next.sizes[activeKey] || null);
-        }
-    }, [history, historyIndex, activeItem]);
 
     const handleWearClosetItem = useCallback(async (closetItem: ClosetItem, selectedColor?: string, selectedSize?: string) => {
         applySilentWear({
@@ -1291,33 +899,9 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
             const purchasedColorHex = resolvePurchasedColorHex(targetModel3D, lastSilentWear.purchasedColor) || lastSilentWear.purchasedColor;
             setItemColors((prev) => ({ ...prev, [key]: purchasedColorHex }));
         }
-    }, [findItemIndexForClosetItem, items, lastSilentWear, resolveModel3D, resolvePurchasedColorHex, setSelectedSize]);
+    }, [findItemIndexForClosetItem, items, lastSilentWear, resolveClosetSlot, resolvePurchasedColorHex, setSelectedSize]);
 
-    const handleSizeCompareLeftChange = useCallback((nextLeft: string) => {
-        setSizeComparePair((prev) => {
-            if (nextLeft !== prev.right) {
-                return { ...prev, left: nextLeft };
-            }
 
-            const nextRight = comparableSizes.find((size) => size !== nextLeft && size !== prev.left)
-                || resolveAlternativeComparableSize(nextLeft);
-
-            return { left: nextLeft, right: nextRight };
-        });
-    }, [comparableSizes, resolveAlternativeComparableSize]);
-
-    const handleSizeCompareRightChange = useCallback((nextRight: string) => {
-        setSizeComparePair((prev) => {
-            if (nextRight !== prev.left) {
-                return { ...prev, right: nextRight };
-            }
-
-            const nextLeft = comparableSizes.find((size) => size !== nextRight && size !== prev.right)
-                || resolveAlternativeComparableSize(nextRight);
-
-            return { left: nextLeft, right: nextRight };
-        });
-    }, [comparableSizes, resolveAlternativeComparableSize]);
 
     const handleOpenSizeCompareRoom = useCallback(() => {
         if (!canOpenSizeCompareRoom) {
@@ -1338,20 +922,6 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
     }, []);
 
     // Screenshot handler
-    const handleScreenshot = useCallback(() => {
-        const canvas = document.querySelector('.vto-canvas-area canvas') as HTMLCanvasElement;
-        if (!canvas) { showToast('Không thể chụp ảnh', 'error'); return; }
-        try {
-            const dataUrl = canvas.toDataURL('image/png');
-            const link = document.createElement('a');
-            link.download = `outfit-${isMultiProduct ? 'mix' : activeItem.name}-${Date.now()}.png`;
-            link.href = dataUrl;
-            link.click();
-            showToast('Đã lưu ảnh outfit!');
-        } catch {
-            showToast('Không thể chụp — thử lại', 'error');
-        }
-    }, [activeItem, isMultiProduct, showToast]);
 
     const refreshSavedOutfits = useCallback(async (signal?: AbortSignal) => {
         const authToken = localStorage.getItem('token');
@@ -1858,7 +1428,7 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                             <span style={{ color: '#fff', fontSize: 11, fontWeight: 600, paddingLeft: 8, letterSpacing: '0.05em' }}>SÁNG</span>
                             <select 
                                 value={lightingMode} 
-                                onChange={(e) => setLightingMode(e.target.value as any)}
+                                onChange={(e) => setLightingMode(e.target.value as 'studio' | 'warm' | 'cool' | 'outdoor')}
                                 style={{ background: 'transparent', color: '#fff', border: 'none', outline: 'none', fontSize: 11, cursor: 'pointer', marginLeft: 4 }}
                             >
                                 <option value="studio" style={{ color: '#000' }}>Studio</option>
@@ -2119,7 +1689,7 @@ export default function VirtualTryOn({ product, outfitItems, onAddToCart, onBuyN
                         modelConfig={activeModel3D}
                         selectedColor={itemColors[activeItemKey] || ''}
                         selectedFabric={resolveColorConfig(activeModel3D, itemColors[activeItemKey] || '')?.fabric}
-                        fitRecommendations={recommendSizes(currentBodyData, availableSizes, activeGarmentSizeSpecs, activeGarmentType).reduce((acc: any, r: any) => ({...acc, [r.size]: r}), {})}
+                        fitRecommendations={recommendSizes(currentBodyData, availableSizes, activeGarmentSizeSpecs, { garmentType: activeGarmentType }).reduce<Record<string, ReturnType<typeof recommendSizes>[number]>>((acc, r) => ({...acc, [r.size]: r}), {})}
                         garmentSizeSpecs={activeGarmentSizeSpecs}
                         comparePose={comparePose || 'Idle'}
                         onClose={handleCloseSizeCompareRoom}

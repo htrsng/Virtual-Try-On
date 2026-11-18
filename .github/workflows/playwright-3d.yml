@@ -1,4 +1,4 @@
-name: Playwright 3D
+name: Browser and 3D QA
 on:
   pull_request:
     branches: [main]
@@ -10,12 +10,18 @@ concurrency:
   cancel-in-progress: true
 jobs:
   three-d:
-    name: 3D / ${{ matrix.suite }}
+    name: Browser / ${{ matrix.suite }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - suite: playwright-3d
+            runner: ubuntu-24.04
+          - suite: playwright-compat
+            runner: ubuntu-24.04
+          - suite: playwright-accessibility
+            runner: ubuntu-24.04
+          - suite: playwright-production
             runner: ubuntu-24.04
           - suite: playwright-visual
             runner: windows-2022

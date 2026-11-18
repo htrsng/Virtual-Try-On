@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FiShoppingCart, FiHeart, FiZap } from 'react-icons/fi';
 import { useLanguage } from '../contexts/LanguageContext';
 
 function FlashSale({ products = [] }) {
+    const navigate = useNavigate();
     const { t } = useLanguage();
     const [timeLeft, setTimeLeft] = useState({
         hours: 2,
@@ -242,11 +243,12 @@ function FlashSale({ products = [] }) {
                                         </div>
                                         <motion.button
                                             className="quick-buy-btn"
+                                            aria-label={`Chọn size cho ${product.name}`}
                                             whileHover={{ scale: 1.1 }}
                                             whileTap={{ scale: 0.9 }}
                                             onClick={(e) => {
                                                 e.preventDefault();
-                                                console.log('Quick buy:', product);
+                                                navigate(`/product/${product.id}`);
                                             }}
                                         >
                                             <FiShoppingCart />

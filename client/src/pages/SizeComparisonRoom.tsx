@@ -1,8 +1,8 @@
+import type { GarmentSizeSpec, SizeResult } from '../features/virtual-tryon/components/sizeRecommendationEngine';
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import html2canvas from 'html2canvas';
 import './SizeComparisonRoom.css';
-import { type Profile } from '../contexts/FittingRoomContext';
-// @ts-ignore
+import { useFittingRoom, type Profile } from '../contexts/FittingRoomContext';
 import { type ProductWithModel } from '../data/ThreeDConfig';
 import { type LocalFabricProfile } from '../features/virtual-tryon/VirtualTryOn';
 import SizeCompare3DCanvas from '../features/virtual-tryon/components/SizeCompare3DCanvas';
@@ -13,21 +13,6 @@ import SizeCompare3DCanvas from '../features/virtual-tryon/components/SizeCompar
 const IcShirt = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
     <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/>
-  </svg>
-);
-const IcCols = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="3" width="8" height="18" rx="1"/><rect x="13" y="3" width="8" height="18" rx="1"/>
-  </svg>
-);
-const IcLayers = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-  </svg>
-);
-const IcSlide = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M7 16l-4-4 4-4M17 8l4 4-4 4"/><line x1="3" y1="12" x2="21" y2="12"/>
   </svg>
 );
 const IcRotate = () => (
@@ -73,7 +58,7 @@ const IcX = () => (
    ═══════════════════════════════════════════════════════════════ */
 
 
-function getDiff(a: string, b: string, garmentSizeSpecs: Record<string, any> = {}) {
+function getDiff(a: string, b: string, garmentSizeSpecs: Record<string, GarmentSizeSpec> = {}) {
   const sa = garmentSizeSpecs[a], sb = garmentSizeSpecs[b];
   if (!sa || !sb) return [];
   return [
@@ -95,11 +80,11 @@ function getDiff(a: string, b: string, garmentSizeSpecs: Record<string, any> = {
 interface ViewProps {
   sizeA: string; sizeB: string;
   showOutline: boolean; showPoints: boolean; showHeatmap: boolean;
-  bodyData?: any;
-  modelConfig?: any;
+  bodyData: Profile;
+  modelConfig?: ProductWithModel['model3D'];
   selectedColor?: string;
-  selectedFabric?: any;
-  fitRecommendations?: Record<string, any>;
+  selectedFabric?: LocalFabricProfile;
+  fitRecommendations?: Record<string, SizeResult>;
   comparePose?: string;
   hoverZone?: string | null;
   angle?: string;
@@ -144,8 +129,8 @@ const SplitView: React.FC<ViewProps> = ({ sizeA, sizeB, showHeatmap, bodyData, m
                 <div style={{ width: 10, height: 10, background: '#7C6FCD', borderRadius: 2 }}></div>
                 <div style={{ fontSize: 13, fontWeight: 800, color: '#1F2937' }}>SIZE {sizeA}</div>
             </div>
-            <div style={{ fontSize: 12, fontWeight: 600, color: fitRecommendations?.[sizeA]?.score >= 80 ? '#059669' : '#D97706', marginBottom: 2 }}>
-                {fitRecommendations?.[sizeA]?.score >= 80 ? '✨ Recommended' : '⚠️ Cần lưu ý'}
+            <div style={{ fontSize: 12, fontWeight: 600, color: (fitRecommendations?.[sizeA]?.score ?? 0) >= 80 ? '#059669' : '#D97706', marginBottom: 2 }}>
+                {(fitRecommendations?.[sizeA]?.score ?? 0) >= 80 ? '✨ Recommended' : '⚠️ Cần lưu ý'}
             </div>
             <div style={{ fontSize: 11, color: '#6B7280' }}>
                 Fit Score: <span style={{ fontWeight: 700, color: '#374151' }}>{Math.floor(fitRecommendations?.[sizeA]?.score || 0)}%</span>
@@ -189,8 +174,8 @@ const SplitView: React.FC<ViewProps> = ({ sizeA, sizeB, showHeatmap, bodyData, m
                 <div style={{ fontSize: 13, fontWeight: 800, color: '#1F2937' }}>SIZE {sizeB}</div>
                 <div style={{ width: 10, height: 10, background: '#F0C040', borderRadius: 2 }}></div>
             </div>
-            <div style={{ fontSize: 12, fontWeight: 600, color: fitRecommendations?.[sizeB]?.score >= 80 ? '#059669' : '#D97706', marginBottom: 2 }}>
-                {fitRecommendations?.[sizeB]?.score >= 80 ? '✨ Recommended' : '⚠️ Cần lưu ý'}
+            <div style={{ fontSize: 12, fontWeight: 600, color: (fitRecommendations?.[sizeB]?.score ?? 0) >= 80 ? '#059669' : '#D97706', marginBottom: 2 }}>
+                {(fitRecommendations?.[sizeB]?.score ?? 0) >= 80 ? '✨ Recommended' : '⚠️ Cần lưu ý'}
             </div>
             <div style={{ fontSize: 11, color: '#6B7280' }}>
                 Fit Score: <span style={{ fontWeight: 700, color: '#374151' }}>{Math.floor(fitRecommendations?.[sizeB]?.score || 0)}%</span>
@@ -252,12 +237,12 @@ interface SizeComparisonRoomProps {
   product?: { name?: string; sku?: string; sizes?: string[]; image?: string };
   onClose?: () => void;
   onAddToCart?: (size: string) => void;
-  bodyData?: Profile | any;
-  modelConfig?: ProductWithModel['model3D'] | any;
+  bodyData?: Profile;
+  modelConfig?: ProductWithModel['model3D'];
   selectedColor?: string;
-  selectedFabric?: LocalFabricProfile | any;
-  fitRecommendations?: Record<string, any>;
-  garmentSizeSpecs?: Record<string, any>;
+  selectedFabric?: LocalFabricProfile;
+  fitRecommendations?: Record<string, SizeResult>;
+  garmentSizeSpecs?: Record<string, GarmentSizeSpec>;
   comparePose?: string;
 }
 
@@ -265,7 +250,7 @@ const SizeComparisonRoom: React.FC<SizeComparisonRoomProps> = ({
   product = { name: 'Áo khoác Unisex Bomber', sku: 'SKU-0291', sizes: ['S', 'M', 'L'] },
   onClose,
   onAddToCart,
-  bodyData,
+  bodyData: suppliedBodyData,
   modelConfig,
   selectedColor = '',
   selectedFabric,
@@ -273,18 +258,19 @@ const SizeComparisonRoom: React.FC<SizeComparisonRoomProps> = ({
   garmentSizeSpecs = {},
   comparePose,
 }) => {
+  const { currentAvatar } = useFittingRoom();
+  const bodyData = suppliedBodyData || currentAvatar;
   const [sizeA,       setSizeA]       = useState('M');
   const [sizeB,       setSizeB]       = useState('L');
   const [angle] = useState<Angle>('front');
   const [zoom,        setZoom]        = useState(100);
   const [autoRotate,  setAutoRotate]  = useState(false);
-  const [cameraPreset, setCameraPreset] = useState('Free');
+  const [cameraPreset] = useState('Free');
   const [showOutline] = useState(true);
   const [showHeatmap, setShowHeatmap] = useState(false);
   const [settings,    setSettings]    = useState(false);
   
   const [sidebar,     setSidebar]     = useState(false);
-  const [sidebarTab,  setSidebarTab]  = useState<'info'|'compare'>('info');
   const [loading,     setLoading]     = useState(false);
   const hoverZone = null;
 
@@ -379,7 +365,7 @@ const SizeComparisonRoom: React.FC<SizeComparisonRoomProps> = ({
         {/* AI Recommendations List */}
         <div style={{ padding: '16px 16px 0' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {sizes.map((s: string) => ({ size: s, score: fitRecommendations?.[s]?.score || 0 })).sort((a: any, b: any) => b.score - a.score).slice(0, 3).map((item: any, index: number) => (
+                {sizes.map((s: string) => ({ size: s, score: fitRecommendations?.[s]?.score || 0 })).sort((a, b) => b.score - a.score).slice(0, 3).map((item, index) => (
                     <div key={item.size} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', background: index === 0 ? '#FDFBF7' : '#F9FAFB', borderRadius: 8, border: `1px solid ${index === 0 ? '#E8DCC8' : '#E5E7EB'}` }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                             <div style={{ fontSize: 14 }}>{index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}</div>
@@ -393,7 +379,7 @@ const SizeComparisonRoom: React.FC<SizeComparisonRoomProps> = ({
 
         <div style={{ padding: '12px 16px 0' }}>
             <div style={{ background: '#F8FAFC', borderRadius: 8, padding: '10px 12px', border: '1px solid #E2E8F0' }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: '#0F172A', marginBottom: 6 }}>🎯 Vì sao chọn Size {sizes.map((s: string) => ({ size: s, score: fitRecommendations?.[s]?.score || 0 })).sort((a: any, b: any) => b.score - a.score)[0]?.size || 'M'}?</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: '#0F172A', marginBottom: 6 }}>🎯 Vì sao chọn Size {sizes.map((s: string) => ({ size: s, score: fitRecommendations?.[s]?.score || 0 })).sort((a, b) => b.score - a.score)[0]?.size || 'M'}?</div>
                 <div style={{ fontSize: 11, color: '#334155', display: 'flex', flexDirection: 'column', gap: 4 }}>
                     <div style={{ display: 'flex', gap: 6 }}><span style={{ color: '#10B981' }}>✓</span> Vai vừa vặn</div>
                     <div style={{ display: 'flex', gap: 6 }}><span style={{ color: '#10B981' }}>✓</span> Ngực thoải mái</div>

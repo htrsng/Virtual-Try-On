@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-// @ts-ignore – AuthContext is JSX without declarations
 import { useAuth } from '../contexts/AuthContext';
 import { fallbackSuggestions } from '../data/initialData';
 import './CartPage.css';
@@ -206,18 +205,14 @@ export default function CartPage({
 
     /* ---- selection -------------------------------------------------- */
     const [selected, setSelected] = useState<Record<number, boolean>>({});
-    const [isLoading, setIsLoading] = useState(true);
+    const isLoading = authLoading;
+    const [previousCartItems, setPreviousCartItems] = useState(cartItems);
     const [removingId, setRemovingId] = useState<number | null>(null);
 
-    // initialise selection (default: none)
-    useEffect(() => {
-        const s: Record<number, boolean> = {};
-        cartItems.forEach(it => { s[it.cartId] = false; });
-        setSelected(s);
-        // fake loading for UX polish
-        const t = setTimeout(() => setIsLoading(false), 400);
-        return () => clearTimeout(t);
-    }, [cartItems]);
+    if (previousCartItems !== cartItems) {
+        setPreviousCartItems(cartItems);
+        setSelected({});
+    }
 
     // auth guard
     useEffect(() => {
@@ -454,6 +449,7 @@ export default function CartPage({
                                         <label className="cp-checkbox-label cp-item-check">
                                             <input
                                                 type="checkbox"
+                                                aria-label={`Chọn ${item.name} size ${item.size}`}
                                                 checked={isSelected}
                                                 onChange={() => toggleItem(key)}
                                                 className="cp-checkbox"
@@ -584,12 +580,12 @@ export default function CartPage({
                                 </div>
                                 <div className="cp-summary-row">
                                     <span>Phí vận chuyển</span>
-                                    <span className="cp-free">Miễn phí</span>
+                                    <span className="cp-free">Tính khi thanh toán</span>
                                 </div>
                             </div>
 
                             <div className="cp-summary-total">
-                                <span>Tổng cộng</span>
+                                <span>Tạm tính</span>
                                 <span className="cp-summary-amount">{fmt(totalPrice)}</span>
                             </div>
 

@@ -1,9 +1,12 @@
 # Implementation roadmap
 
-Trạng thái hiện tại: Giai đoạn 9. Xem [Test Summary](test-summary.md),
+Trạng thái hiện tại: quality completion ngày18/11/2026 sau Giai đoạn9.
+Xem [kết quả cải tiến](quality-completion.md), [checklist nghiệm thu](manual-acceptance-checklist.md),
+[Test Summary](test-summary.md),
 [Feature Inventory](feature-inventory.md), [RTM](rtm.md) và [Bug Register](../bug-reports/bug-register.md).
 Các dòng giai đoạn cũ giữ kết quả tại thời điểm bàn giao; “CI pending” trong lịch sử
-không thay thế kết quả CI đã xác minh ở Giai đoạn 8. Lint/build vẫn Fail; chưa release.
+không thay thế kết quả CI mới. Lint/build đã Pass local sau cải tiến; CI phải khớp
+commit cuối, human acceptance chưa hoàn tất.
 
 Tài liệu định hướng thứ hai được dùng để thống nhất cấu trúc: giữ `server/` và
 `tests/`; coursework giữ tại `archive/coursework-api-fuzzing/`. Không chuyển tiếp

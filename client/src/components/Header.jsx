@@ -89,7 +89,7 @@ function Header({ cartCount, onSearch, showToast }) {
     return (
         <div className={`shopee-header ${scrolled ? 'header-scrolled' : ''}`}>
             <div className="container header-content">
-                <Link to="/" className="logo">
+                <Link to="/" className="logo" aria-label="VFitAI - Trang chủ">
                     <svg width="110" height="34" viewBox="0 0 110 34" fill="none" xmlns="http://www.w3.org/2000/svg" className="logo-svg">
                         <defs>
                             <linearGradient id="logo-gold" x1="0%" y1="0%" x2="100%" y2="0%">

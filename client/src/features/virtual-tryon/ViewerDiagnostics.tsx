@@ -1,3 +1,4 @@
+declare global { interface Window { __VFIT_3D__?: { frames: number; sampledAt: number; frozen: boolean; camera: {position: number[]; quaternion: number[]; distance: number}; assets: object[]; bones: number[]; loading: boolean; loadingErrors: string[]; renderer: { calls: number; triangles: number; geometries: number; textures: number; contextLost: boolean; width: number; height: number; vendor: string } } } }
 import { useEffect, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useProgress } from '@react-three/drei';
@@ -12,7 +13,7 @@ export default function ViewerDiagnostics({ target }: { target: [number, number,
     const frames = useRef(0);
     useEffect(() => {
         const updateContext = () => {
-            const value = (window as any).__VFIT_3D__;
+            const value = window.__VFIT_3D__;
             if (value) value.renderer.contextLost = gl.getContext().isContextLost();
         };
         gl.domElement.addEventListener('webglcontextlost', updateContext);
@@ -20,7 +21,7 @@ export default function ViewerDiagnostics({ target }: { target: [number, number,
         return () => {
             gl.domElement.removeEventListener('webglcontextlost', updateContext);
             gl.domElement.removeEventListener('webglcontextrestored', updateContext);
-            delete (window as any).__VFIT_3D__;
+            delete window.__VFIT_3D__;
         };
     }, [gl]);
     useFrame(() => {
@@ -46,7 +47,7 @@ export default function ViewerDiagnostics({ target }: { target: [number, number,
         });
         const context = gl.getContext();
         const extension = context.getExtension('WEBGL_debug_renderer_info');
-        (window as any).__VFIT_3D__ = {
+        window.__VFIT_3D__ = {
             frames: frames.current, sampledAt: now, frozen: staticQaRender(),
             camera: { position: camera.position.toArray(), quaternion: camera.quaternion.toArray(),
                 distance: camera.position.distanceTo(new THREE.Vector3(...target)) },

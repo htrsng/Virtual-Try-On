@@ -1,3 +1,5 @@
+import type { CatalogProduct } from '../types/catalog';
+import type { AvatarInput } from '../types/aiResponse';
 import { useState, useRef } from 'react';
 import './AIOutfitChat.css';
 
@@ -26,8 +28,8 @@ interface AIResult {
 }
 
 interface Props {
-    closetItems: any[];
-    avatarData: any;
+    closetItems: CatalogProduct[];
+    avatarData: AvatarInput;
     token?: string;
     onWearOutfit: (items: OutfitItem[]) => void;
     onAddToCart: (productId: number) => void;
@@ -107,7 +109,7 @@ export default function AIOutfitChat({ closetItems, avatarData, token, onWearOut
             const closetOutfit = (data.outfit ?? []).filter((i: OutfitItem) => i.source === 'closet');
             if (closetOutfit.length > 0) onWearOutfit(closetOutfit);
 
-        } catch (e) {
+        } catch {
             setError('Không kết nối được AI. Vui lòng thử lại.');
         } finally {
             setLoading(false);

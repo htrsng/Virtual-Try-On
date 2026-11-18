@@ -24,3 +24,15 @@ Cross-browser repeats do not add requirements. Smoke5 is a subset of Selenium22.
 Two visual angles are one test; the intentional negative control is not a normal
 passing business test. Initial12 designs and17 E2E rows are not an exhaustive count
 of assertions; coverage percentages cannot be inferred from them.
+
+## Quality completion coverage
+
+- STATIC-LINT/BUILD: unchanged lint/strict compiler gates, source contracts and full bundle.
+- BUG-UX-01: shared checkout journey rectangle/click oracle across four profiles.
+- A11Y names/contrast/targets/scrollers: accessibility.spec.ts full-page audits on five routes/states.
+- Keyboard/focus: Tab sequence, visible outline, support Escape/return and3D dialog containment.
+- Build deployment boundary: production.spec.ts compiled assets/no dev client plus reused commerce smoke.
+- AI refinement: AIOutfitGenerator.test.tsx pending/completion/error orchestration; external service mocked explicitly.
+- Human acceptance: HAND-01..06 map to the manual designs; Not Run until results are supplied.
+
+See automated-test-catalog.csv for enumerated instances, not an inflated business-case total.

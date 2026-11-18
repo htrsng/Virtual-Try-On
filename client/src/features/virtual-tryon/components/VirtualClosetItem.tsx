@@ -1,3 +1,4 @@
+import type { ClosetItem } from './VirtualPersonalClosetDrawer';
 import { useState } from 'react';
 import './ClosetItemCard.css';
 
@@ -18,10 +19,10 @@ export interface ClosetItemData {
 }
 
 interface Props {
-    item: any;
+    item: ClosetItem;
     matchScore?: number;
-    onWear: (item: any, color: string, size: string) => void;
-    onViewDetails?: (item: any) => void;
+    onWear: (item: ClosetItem, color: string, size: string) => void;
+    onViewDetails?: (item: ClosetItem) => void;
 }
 
 export default function VirtualClosetItem({ item, matchScore, onWear, onViewDetails }: Props) {
@@ -36,7 +37,7 @@ export default function VirtualClosetItem({ item, matchScore, onWear, onViewDeta
     const hasPicker = hasColors || hasSizes;
 
     const purchasedColorObj = item.availableColors?.find(
-        (c: any) =>
+        (c) =>
             c.value === item.purchasedColor ||
             c.name === item.purchasedColor ||
             c.hex === item.purchasedColor,
@@ -172,7 +173,7 @@ export default function VirtualClosetItem({ item, matchScore, onWear, onViewDeta
                         <div className="cic__picker-row">
                             <span className="cic__picker-label">Màu</span>
                             <div className="cic__color-list">
-                                {item.availableColors!.map((c: any) => {
+                                {item.availableColors!.map((c) => {
                                     const isPurchased =
                                         c.value === item.purchasedColor ||
                                         c.name === item.purchasedColor;
@@ -202,7 +203,7 @@ export default function VirtualClosetItem({ item, matchScore, onWear, onViewDeta
                         <div className="cic__picker-row">
                             <span className="cic__picker-label">Size</span>
                             <div className="cic__size-list">
-                                {item.availableSizes!.map((s: any) => {
+                                {item.availableSizes!.map((s) => {
                                     const isPurchased = s === item.purchasedSize;
                                     const isSelected = size === s;
                                     return (

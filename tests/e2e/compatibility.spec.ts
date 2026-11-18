@@ -31,6 +31,10 @@ test('catalog and product fit the viewport with reachable purchase controls', as
       await buy.scrollIntoViewIfNeeded(); await expect(buy).toBeVisible(); await expect(buy).toBeEnabled();
     }
     const dimensions = await page.evaluate(() => ({ viewport: document.documentElement.clientWidth, content: document.documentElement.scrollWidth }));
+    const header = await page.locator('.shopee-header').boundingBox();
+    const actions = await page.locator('.header-actions').boundingBox();
+    expect(header).not.toBeNull(); expect(actions).not.toBeNull();
+    expect(actions!.y + actions!.height, 'Navigation actions must remain inside the header background').toBeLessThanOrEqual(header!.y + header!.height + 1);
     await testInfo.attach(`layout-${url === '/' ? 'home' : 'product'}`, { body: JSON.stringify(dimensions), contentType: 'application/json' });
     await page.screenshot({ path: testInfo.outputPath(`${url === '/' ? 'home' : 'product'}.png`), fullPage: true });
     expect(dimensions.content, `${url} should not require horizontal document scrolling`).toBeLessThanOrEqual(dimensions.viewport + 1);

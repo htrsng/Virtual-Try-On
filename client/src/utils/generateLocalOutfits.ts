@@ -5,33 +5,8 @@
  */
 import type { OutfitFilter, OutfitResult, OutfitItem } from '../types/outfit';
 
-interface Product {
-    _id?: string;
-    id?: string;
-    name: string;
-    category: string;
-    price: number;
-    imageUrl?: string;
-    img?: string;
-    color?: string;
-    aiStylist?: {
-        styles?: string[];
-        occasions?: string[];
-        colorTone?: string;
-    };
-    productId?: string;
-}
-
-interface ClosetItem {
-    _id?: string;
-    id?: string;
-    productId?: string;
-    name: string;
-    category: string;
-    imageUrl?: string;
-    img?: string;
-    color?: string;
-}
+import type { CatalogProduct as Product } from '../types/catalog';
+type ClosetItem = Product;
 
 function mapCategory(rawCategory: string): 'top' | 'bottom' | 'shoes' | 'accessory' | 'outerwear' {
     const cat = rawCategory?.toLowerCase() || '';
@@ -107,9 +82,9 @@ export function generateLocalOutfits(
         .sort((a, b) => b.score - a.score);
 
     // Step 3: Separate by category
-    const tops = scored.filter(p => mapCategory(p.category) === 'top');
-    const bottoms = scored.filter(p => mapCategory(p.category) === 'bottom');
-    const shoes = scored.filter(p => mapCategory(p.category) === 'shoes');
+    const tops = scored.filter(p => mapCategory(p.category || '') === 'top');
+    const bottoms = scored.filter(p => mapCategory(p.category || '') === 'bottom');
+    const shoes = scored.filter(p => mapCategory(p.category || '') === 'shoes');
 
     // Step 4: Generate 3 outfits with no duplicate products
     const usedIds = new Set<string>();
@@ -125,32 +100,32 @@ export function generateLocalOutfits(
         if (!top || !bottom) continue;
 
         // Mark as used
-        [top, bottom, shoe].filter(Boolean).forEach(p => {
+        [top, bottom, shoe].filter((p): p is NonNullable<typeof p> => p !== undefined).forEach(p => {
             usedIds.add(String(p._id || p.id || ''));
         });
 
         // Build items array
         const items: OutfitItem[] = [top, bottom, shoe]
-            .filter(Boolean)
+            .filter((p): p is NonNullable<typeof p> => p !== undefined)
             .map(p => {
                 const productId = String(p?.productId || p?.id || p?._id || '');
                 const isOwned = ownedIds.has(productId);
 
-                    let availableColors: any[] | undefined = undefined;
+                    let availableColors: { hex: string; label: string; image?: string }[] | undefined = undefined;
                     let availableSizes: string[] | undefined = undefined;
 
-                    if ((p as any).variants && Array.isArray((p as any).variants)) {
-                        const variants = (p as any).variants;
-                        availableColors = variants.map((v: any) => ({
-                            hex: v.color?.hex,
-                            label: v.color?.name,
+                    if (p.variants && Array.isArray(p.variants)) {
+                        const variants = p.variants;
+                        availableColors = variants.map((v) => ({
+                            hex: v.color?.hex || '',
+                            label: v.color?.name || v.color?.hex || '',
                             image: v.color?.image || v.color?.img
-                        })).filter((c: any) => c.hex);
+                        })).filter((c) => c.hex);
 
                         const sizesSet = new Set<string>();
-                        variants.forEach((v: any) => {
+                        variants.forEach((v) => {
                             if (Array.isArray(v.sizes)) {
-                                v.sizes.forEach((s: any) => sizesSet.add(s.size));
+                                v.sizes.forEach((s) => sizesSet.add(s.size));
                             }
                         });
                         if (sizesSet.size > 0) {
@@ -171,7 +146,7 @@ export function generateLocalOutfits(
                         sizeReason: 'Kích thước mặc định',
                         owned: isOwned,
                         slot: mapCategory(p?.category || ''),
-                        model3D: (p as any).model3D || (p as any).model3d,
+                        model3D: p.model3D || p.model3d,
                         availableColors,
                         availableSizes,
                     };

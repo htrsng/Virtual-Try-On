@@ -1,7 +1,8 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import type { Profile } from '../../../contexts/FittingRoomContext';
 import CustomSlider from './CustomSlider';
-import BodyShapeIndicator, { estimateBodyFromHW } from './BodyPresets';
+import BodyShapeIndicator from './BodyPresets';
+import { estimateBodyFromHW } from './bodyShape';
 import {
     getBodyMeasurementRanges,
     sanitizeBodyMeasurements,

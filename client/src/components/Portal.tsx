@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
 interface PortalProps {
@@ -6,16 +6,16 @@ interface PortalProps {
 }
 
 export default function Portal({ children }: PortalProps) {
-    const el = useRef(document.createElement('div'));
+    const [el] = useState(() => document.createElement('div'));
 
     useEffect(() => {
         const portalRoot = document.body;
-        portalRoot.appendChild(el.current);
+        portalRoot.appendChild(el);
 
         return () => {
-            portalRoot.removeChild(el.current);
+            portalRoot.removeChild(el);
         };
-    }, []);
+    }, [el]);
 
-    return createPortal(children, el.current);
+    return createPortal(children, el);
 }

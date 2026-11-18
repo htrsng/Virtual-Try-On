@@ -811,7 +811,7 @@ const buildAvatarBoneLookup = (avatarScene: THREE.Object3D): AvatarBoneLookup =>
     const all: THREE.Bone[] = [];
 
     avatarScene.traverse((child) => {
-        if (!(child as THREE.Bone).isBone) {
+        if (!(child instanceof THREE.Bone)) {
             return;
         }
 
@@ -878,7 +878,7 @@ export const isAvatarMesh = (mesh: THREE.Mesh): boolean => {
  */
 export const prepareGarmentMaterials = (garmentRoot: THREE.Object3D) => {
     garmentRoot.traverse((child) => {
-        if (!(child as THREE.Mesh).isMesh) {
+        if (!(child instanceof THREE.Mesh)) {
             return;
         }
 
@@ -1008,7 +1008,7 @@ export const applyGarmentColor = (garmentRoot: THREE.Object3D, color?: THREE.Col
     let nextColor: THREE.Color;
     try {
         nextColor = new THREE.Color(safeColor);
-    } catch (err) {
+    } catch {
         console.warn(`[GarmentModel] Invalid color: ${color}, ignoring`);
         return;
     }
@@ -1045,7 +1045,7 @@ export const setGarmentTargetColor = (garmentRoot: THREE.Object3D, color?: THREE
     let nextColor: THREE.Color;
     try {
         nextColor = new THREE.Color(safeColor);
-    } catch (err) {
+    } catch {
         console.warn(`[GarmentModel] Invalid color: ${color}, ignoring`);
         return;
     }
@@ -1507,7 +1507,6 @@ export const syncGarmentMorphTargets = (
 ) => {
     const influenceScale = THREE.MathUtils.clamp(options.influenceScale ?? 1, 0, 1.5);
     const smoothing = THREE.MathUtils.clamp(options.smoothing ?? 1, 0, 1);
-    const maxInfluence = THREE.MathUtils.clamp(options.maxInfluence ?? 1, 0, 1);
 
     bindings.forEach(({ targetMesh, channels }) => {
         const targetInfluences = targetMesh.morphTargetInfluences;

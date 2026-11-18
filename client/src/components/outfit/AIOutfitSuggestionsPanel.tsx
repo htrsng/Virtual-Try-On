@@ -1,4 +1,3 @@
-import { X } from 'lucide-react'
 import ResultPanel from './ResultPanel'
 import type { OutfitResult, ChatMessage, OutfitItem } from '../../types/outfit'
 
@@ -20,12 +19,9 @@ interface AIOutfitSuggestionsPanelProps {
 }
 
 export default function AIOutfitSuggestionsPanel({
-    isOpen,
-    onClose,
     outfits,
     selectedOutfitId,
     onSelectOutfit,
-    onWearSet,
     onTryItem,
     isGenerating,
     messages,

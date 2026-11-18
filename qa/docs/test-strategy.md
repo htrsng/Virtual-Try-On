@@ -10,7 +10,7 @@ designs, executed tests and signed product requirements are distinct. See
 | Playwright/TypeScript | WebGL/state/visual/network diagnostics | Six3D functional cases; reviewed Windows visual1 plus separate expected-failure detector |
 | Playwright compatibility | Browser/reflow/keyboard checks | Five scenarios across four configurations;20 invocations, not20 independent designs |
 | Jest/Supertest/Mongoose | API validation/RBAC/business integration |134 tests against owned temporary replica sets |
-| Vitest/Testing Library | DOM boundaries and transport |32 tests; R3F mocked only for DOM composition, never claimed as WebGL evidence |
+| Vitest/Testing Library | DOM boundaries and transport |38 tests; R3F mocked only for DOM composition, never claimed as WebGL evidence |
 | Manual/exploratory | Usability, screenshot review, assistive technologies | Executed reviews and Not Run charters tracked separately; no fabricated human sign-off |
 | Python API fuzzing | Separate coursework | Archived; excluded from VFitAI coverage |
 
@@ -39,11 +39,11 @@ or partly skipped required suite green. Manual Not Run never becomes Pass by des
 
 Reports record source SHA/dirty state or source manifest, command, timestamps, actual
 environment and counts. CI retains native JUnit/HTML/logs/screenshots/traces14 days.
-The Stage8 policy protects empty, missing and under-collected reports. Full regression
-adds Firefox/Chromium compatibility;3D visual stays on its reviewed Windows profile.
+The Stage8 policy protects empty, missing and under-collected reports. PR/full regression
+add Firefox/Chromium compatibility, automated accessibility and production-bundle smoke;3D visual stays on its reviewed Windows profile.
 
 Refactor: characterize first, extract one responsibility, rerun unit/API and complete
 browser regression, review source diff. Do not replace a baseline or count history as
-a new run. Current lint/build failures remain blocking and explicitly documented.
+a new run. Lint/build failures remain blocking when present; the quality-completion branch fixes the measured baseline without waivers.
 Manual assistive technology checks and real devices need separate execution; these
 checks do not certify WCAG compliance or complete accessibility/security coverage.

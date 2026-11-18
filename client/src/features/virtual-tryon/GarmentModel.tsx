@@ -18,40 +18,11 @@ import {
     lerpGarmentColor,
 } from './garmentBinding';
 
-import type { FitZone } from './components/SizeRecommendation';
+import type { FitZone } from './components/sizeRecommendationEngine';
 import { staticQaRender } from './qaRender';
 
-type GarmentSoftnessConfig = {
-    morphInfluence?: number;
-    morphSmoothing?: number;
-    maxMorphInfluence?: number;
-    roughness?: number;
-    metalness?: number;
-    envMapIntensity?: number;
-    /** Small outward offset (in model units) to prevent body-through-cloth clipping. */
-    skinOffset?: number;
-};
-
-type GarmentSizeConfig = {
-    url: string;
-    autoNormalize?: boolean;
-    followAvatarBones?: boolean;
-    /** Optional uniform scale to apply to the garment when rendered (1 = original). */
-    scale?: number;
-    /** Optional translation [x,y,z] (model units) applied after normalization and scaling. */
-    translate?: [number, number, number];
-    softness?: GarmentSoftnessConfig;
-    fabric?: GarmentFabricProfile;
-};
-
-type GarmentConfig = {
-    enable?: boolean;
-    sizes?: Record<string, GarmentSizeConfig>;
-    autoNormalize?: boolean;
-    followAvatarBones?: boolean;
-    softness?: GarmentSoftnessConfig;
-    fabric?: GarmentFabricProfile;
-};
+import type { GarmentSoftness as GarmentSoftnessConfig, GarmentConfig } from '../../types/garment';
+import type { Profile } from '../../contexts/FittingRoomContext';
 
 type ResolvedGarmentConfig = {
     url: string;
@@ -66,13 +37,16 @@ type ResolvedGarmentConfig = {
 
 interface GarmentModelProps {
     config?: GarmentConfig;
+    wireframeColor?: string;
+    ghostOpacity?: number;
+    emissiveIntensity?: number;
     selectedSize?: string | null;
     selectedColor?: string;
     fabricOverride?: GarmentFabricProfile;
     avatarScene?: THREE.Group | null;
     heatmapEnabled?: boolean;
     heatmapZones?: FitZone[];
-    avatarProfile?: any;
+    avatarProfile?: Profile | null;
 }
 
 const mergeSoftnessConfig = (
@@ -116,15 +90,15 @@ const resolveGarmentConfig = (
         followAvatarBones: sizeConfig.followAvatarBones ?? config.followAvatarBones ?? false,
         softness: mergeSoftnessConfig(config.softness, sizeConfig.softness),
         fabric: mergeFabricConfig(config.fabric, sizeConfig.fabric),
-        garmentType: (config as any).measurementProfile?.garmentType,
-        scale: typeof sizeConfig.scale === 'number' ? sizeConfig.scale : (typeof (config as any).scale === 'number' ? (config as any).scale : 1),
-        translate: Array.isArray(sizeConfig.translate) ? sizeConfig.translate as [number, number, number] : (Array.isArray((config as any).translate) ? (config as any).translate as [number, number, number] : [0, 0, 0]),
+        garmentType: config.measurementProfile?.garmentType,
+        scale: typeof sizeConfig.scale === 'number' ? sizeConfig.scale : (typeof config.scale === 'number' ? config.scale : 1),
+        translate: Array.isArray(sizeConfig.translate) ? sizeConfig.translate as [number, number, number] : (Array.isArray(config.translate) ? config.translate as [number, number, number] : [0, 0, 0]),
     };
 };
 
 type GarmentInstanceProps = {
     garment: ResolvedGarmentConfig;
-    selectedColor: string;
+    selectedColor?: string;
     fabricOverride?: GarmentFabricProfile;
     avatarScene: THREE.Group | null;
     heatmapEnabled: boolean;
@@ -132,7 +106,7 @@ type GarmentInstanceProps = {
     wireframeColor?: string;
     ghostOpacity?: number;
     emissiveIntensity?: number;
-    avatarProfile?: any;
+    avatarProfile?: Profile | null;
     config?: GarmentConfig;
     selectedSize?: string | null;
 };
@@ -175,11 +149,11 @@ function GarmentInstance({
         let sizeRatio = 1;
         let widthRatio = 1;
         const normalizedSize = String(selectedSize || 'M').trim().toUpperCase();
-        const sizeSpecs = (config as any)?.measurementProfile?.sizeSpecs;
+        const sizeSpecs = config?.measurementProfile?.sizeSpecs;
         if (sizeSpecs) {
             // Length Ratio (Y axis)
             const currentLength = sizeSpecs[normalizedSize]?.garmentLength;
-            const refLength = sizeSpecs['M']?.garmentLength || (Object.values(sizeSpecs)[0] as any)?.garmentLength;
+            const refLength = sizeSpecs['M']?.garmentLength || Object.values(sizeSpecs)[0]?.garmentLength;
             if (currentLength && refLength) {
                 sizeRatio = currentLength / refLength;
             }
@@ -187,7 +161,7 @@ function GarmentInstance({
             // Width Ratio (X, Z axes)
             // Use waist, hips, or chest to determine the proportional width difference between sizes
             const currentWidth = sizeSpecs[normalizedSize]?.waist || sizeSpecs[normalizedSize]?.hips || sizeSpecs[normalizedSize]?.chest;
-            const refWidth = sizeSpecs['M']?.waist || sizeSpecs['M']?.hips || sizeSpecs['M']?.chest || (Object.values(sizeSpecs)[0] as any)?.waist || (Object.values(sizeSpecs)[0] as any)?.hips || (Object.values(sizeSpecs)[0] as any)?.chest;
+            const refWidth = sizeSpecs['M']?.waist || sizeSpecs['M']?.hips || sizeSpecs['M']?.chest || Object.values(sizeSpecs)[0]?.waist || Object.values(sizeSpecs)[0]?.hips || Object.values(sizeSpecs)[0]?.chest;
             
             if (currentWidth && refWidth) {
                 widthRatio = currentWidth / refWidth;
@@ -219,7 +193,7 @@ function GarmentInstance({
                 if (Array.isArray(t) && t.length === 3 && (t[0] !== 0 || t[1] !== 0 || t[2] !== 0)) {
                     cloned.position.add(new THREE.Vector3(t[0], t[1], t[2]));
                 }
-            } catch (innerErr) {}
+            } catch { /* Ignore only an invalid optional placement override; retain the authored transform. */ }
         } catch (e) {
             console.warn('[GarmentModel] Failed to apply dress scale', e);
         }
@@ -256,6 +230,8 @@ function GarmentInstance({
         gltf.scene,
         garment.autoNormalize,
         garment.fabric,
+        garment.scale,
+        garment.translate,
         garment.softness.envMapIntensity,
         garment.softness.metalness,
         garment.softness.roughness,
@@ -288,8 +264,8 @@ function GarmentInstance({
             if (actionName && actions[actionName]) {
                 const action = actions[actionName]!;
                 action.reset();
-                if (staticQaRender()) { action.play(); action.paused = true; action.getMixer().setTime(0); }
-                else { action.paused = false; action.fadeIn(0.5).play(); }
+                if (staticQaRender()) { action.play(); action.setEffectiveTimeScale(0); action.getMixer().setTime(0); }
+                else { action.setEffectiveTimeScale(1); action.fadeIn(0.5).play(); }
             }
             return () => { actions[actionName]?.fadeOut(0.5); };
         }
@@ -379,7 +355,7 @@ function GarmentInstance({
                 }
             }
         };
-    }, [adaptiveSkinOffset, avatarScene, garment.followAvatarBones, garment.url, garmentScene]);
+    }, [adaptiveSkinOffset, avatarScene, garment.followAvatarBones, garment.garmentType, garment.url, garmentScene, garmentScaleFactors]);
 
     const morphBindings = useMemo(() => {
         if (!avatarScene) {
@@ -422,6 +398,7 @@ export default function GarmentModel({
     heatmapEnabled = false,
     heatmapZones,
     avatarProfile,
+    wireframeColor, ghostOpacity, emissiveIntensity,
 }: GarmentModelProps) {
     const garment = useMemo(() => resolveGarmentConfig(config, selectedSize), [config, selectedSize]);
     const normalizedHeatmapZones = useMemo<GarmentHeatmapZone[]>(() => {
@@ -457,6 +434,9 @@ export default function GarmentModel({
                 avatarScene={avatarScene}
                 heatmapEnabled={Boolean(heatmapEnabled)}
                 heatmapZones={normalizedHeatmapZones}
+                wireframeColor={wireframeColor}
+                ghostOpacity={ghostOpacity}
+                emissiveIntensity={emissiveIntensity}
                 avatarProfile={avatarProfile}
                 config={config}
                 selectedSize={selectedSize}

@@ -1,11 +1,12 @@
-import { useState, useEffect, useMemo } from 'react';
+import type { CatalogProduct } from '../../types/catalog';
+import { useState, type SetStateAction } from 'react';
 import type { OutfitResult, OutfitItem } from '../../types/outfit';
 
 interface TryOnPanelProps {
     isOpen: boolean;
     outfits: OutfitResult[];
     currentIndex: number;
-    closetItems?: any[];
+    closetItems?: CatalogProduct[];
     onClose: () => void;
     onIndexChange: (index: number) => void;
     onUpdateItem: (outfitId: string, itemId: string, updates: Partial<OutfitItem>) => void;
@@ -27,7 +28,7 @@ export default function TryOnPanel({
     onTryOutfit
 }: TryOnPanelProps) {
     const [isAnimating, setIsAnimating] = useState(false);
-    const [selectedForPurchase, setSelectedForPurchase] = useState<Record<string, boolean>>({});
+    const [selectionState, setSelectionState] = useState<{ key: string; values: Record<string, boolean> }>({ key: '', values: {} });
     
     // Check if an item is owned based on current size/color variant
     const checkIsOwned = (item: OutfitItem) => {
@@ -43,41 +44,12 @@ export default function TryOnPanel({
 
     const outfit = outfits[currentIndex];
 
-    // Initialize selection when outfit changes
-    useEffect(() => {
-        if (!outfit) return;
-        const initialSelection: Record<string, boolean> = {};
-        outfit.items.forEach(item => {
-            const isOwned = checkIsOwned(item);
-            initialSelection[item.id] = !isOwned;
-        });
-        setSelectedForPurchase(initialSelection);
-    }, [outfit?.id, closetItems]);
-
-    // Update selection dynamically when size or color changes
-    useEffect(() => {
-        if (!outfit) return;
-        setSelectedForPurchase(prev => {
-            const next = { ...prev };
-            let changed = false;
-            outfit.items.forEach(item => {
-                const isOwned = checkIsOwned(item);
-                // Only automatically uncheck if it becomes owned and was previously checked,
-                // or check if it becomes unowned and was previously unchecked.
-                // Wait, if user manually toggled, we might not want to override, 
-                // but for simplicity we re-evaluate default if it changes status.
-                const shouldBeSelected = !isOwned;
-                if (isOwned && prev[item.id] === true) {
-                    next[item.id] = false;
-                    changed = true;
-                } else if (!isOwned && prev[item.id] === false) {
-                    next[item.id] = true;
-                    changed = true;
-                }
-            });
-            return changed ? next : prev;
-        });
-    }, [outfit, closetItems]);
+    const initialSelection = Object.fromEntries((outfit?.items || []).map(item => [item.id, !checkIsOwned(item)]));
+    const selectionKey = JSON.stringify([outfit?.id, outfit?.items.map(item => [item.id, item.selectedSize, item.selectedColor]), initialSelection]);
+    const selectedForPurchase = selectionState.key === selectionKey ? selectionState.values : initialSelection;
+    const setSelectedForPurchase = (update: SetStateAction<Record<string, boolean>>) => {
+        setSelectionState({ key: selectionKey, values: typeof update === 'function' ? update(selectedForPurchase) : update });
+    };
 
     // Prevent rendering if not open and not animating
     if (!isOpen && !isAnimating) return null;
@@ -211,13 +183,14 @@ export default function TryOnPanel({
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
                                     <input 
                                         type="checkbox" 
+                                        aria-label={`Chọn mua ${item.name}`}
                                         checked={isSelected}
                                         onChange={() => togglePurchase(item.id)}
                                         style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: 'var(--gold-primary)' }}
                                     />
                                     <div style={{ width: '60px', height: '76px', borderRadius: '8px', overflow: 'hidden', background: 'var(--surface-card)', flexShrink: 0 }}>
                                         <img 
-                                            src={item.imageUrl || (item as any).image || (item as any).thumbnail} 
+                                            src={item.imageUrl || item.image || item.thumbnail}
                                             alt={item.name}
                                             style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: isSelected ? 1 : 0.6 }}
                                         />
@@ -256,7 +229,7 @@ export default function TryOnPanel({
                                                     }
 
                                                     const finalColors = (colorsToRender && colorsToRender.length > 0 ? colorsToRender : ['#000000', '#ffffff', '#808080'])
-                                                        .map((c: any) => typeof c === 'string' ? c : c.hex)
+                                                        .map((c) => typeof c === 'string' ? c : c.hex)
                                                         .filter(Boolean);
 
                                                     return finalColors.map((hex: string, cIdx: number) => {

@@ -16,8 +16,8 @@ export async function fetchWithTimeout(
             signal: controller.signal
         });
         return response;
-    } catch (err: any) {
-        if (err.name === 'AbortError') {
+    } catch (err: unknown) {
+        if (err instanceof Error && err.name === 'AbortError') {
             throw new Error(`TIMEOUT: Request took longer than ${timeout}ms to respond`);
         }
         throw err;

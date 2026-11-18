@@ -1,4 +1,3 @@
-import React from 'react';
 import { useFittingRoom, type GarmentSlot } from '../../contexts/FittingRoomContext';
 
 export default function OutfitColorPicker() {
@@ -40,7 +39,7 @@ export default function OutfitColorPicker() {
     };
 
     const activeGarments = Object.entries(layeredGarments).filter(
-        ([_, garment]) => garment && garment.model3D
+        ([, garment]) => garment && garment.model3D
     ) as [GarmentSlot, NonNullable<typeof layeredGarments[GarmentSlot]>][];
 
     if (activeGarments.length === 0) {

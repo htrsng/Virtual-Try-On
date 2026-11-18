@@ -53,6 +53,13 @@ describe('VirtualTryOn DOM composition (renderer replaced, no GLB/WebGL assertio
     expect(screen.queryByRole('dialog', { name: 'Bạn chưa tạo avatar nào' })).not.toBeInTheDocument();
     expect(screen.getByRole('img', { name: '3D renderer boundary' })).toBeInTheDocument();
   });
+  it('focuses the guest dialog action and allows Escape to dismiss it', () => {
+    show();
+    const dialog = screen.getByRole('dialog', { name: 'Bạn chưa tạo avatar nào' });
+    expect(within(dialog).getByRole('button', { name: 'Tạo Avatar' })).toHaveFocus();
+    fireEvent.keyDown(dialog, { key: 'Escape' });
+    expect(screen.queryByRole('dialog', { name: 'Bạn chưa tạo avatar nào' })).not.toBeInTheDocument();
+  });
   it('opens and closes the quick guide', () => {
     show(); fireEvent.click(screen.getByRole('button', { name: 'Bỏ qua' }));
     fireEvent.click(screen.getByRole('button', { name: 'Hướng dẫn' }));

@@ -1,6 +1,6 @@
 ﻿import { test, expect } from '../fixtures';
 
-test('seeded customer: Home -> Product -> Cart -> Checkout', async ({ page, request, qaData }) => {
+test('seeded customer: Home -> Product -> Cart -> Checkout', async ({ page, request, qaData }, testInfo) => {
   // Authentication is fixture setup through the real API, not a claim of UI-login coverage.
   const login = await request.post('/api/auth/login', { data: qaData.accounts.customer });
   expect(login.status()).toBe(200);
@@ -20,6 +20,19 @@ test('seeded customer: Home -> Product -> Cart -> Checkout', async ({ page, requ
   const checkout = page.getByRole('button', { name: /^(Tiến hành thanh toán|Thanh toán \(1\))$/ });
   await expect(checkout).toHaveCount(1);
   await expect(checkout).toBeVisible(); await expect(checkout).toBeEnabled();
+  const chat = page.getByRole('button', { name: 'Mở hỗ trợ', exact: true });
+  await expect(chat).toBeVisible();
+  await expect(chat).toBeInViewport();
+  await chat.click({ trial: true });
+  await chat.screenshot({ path: testInfo.outputPath('support-button.png') });
+  const checkoutBox = await checkout.boundingBox();
+  const chatBox = await chat.boundingBox();
+  expect(checkoutBox).not.toBeNull(); expect(chatBox).not.toBeNull();
+  const overlapWidth = Math.max(0, Math.min(checkoutBox!.x + checkoutBox!.width, chatBox!.x + chatBox!.width) - Math.max(checkoutBox!.x, chatBox!.x));
+  const overlapHeight = Math.max(0, Math.min(checkoutBox!.y + checkoutBox!.height, chatBox!.y + chatBox!.height) - Math.max(checkoutBox!.y, chatBox!.y));
+  expect(overlapWidth * overlapHeight, 'Support chat must not obscure checkout (BUG-UX-01)').toBe(0);
+  await testInfo.attach('checkout-clearance', { body: JSON.stringify({ checkoutBox, chatBox, overlapArea: overlapWidth * overlapHeight }), contentType: 'application/json' });
+  await page.screenshot({ path: testInfo.outputPath('cart-clearance.png') });
   await checkout.click();
   await expect(page).toHaveURL(/\/checkout\/cart$/);
   const summary = page.locator('.co-summary');
