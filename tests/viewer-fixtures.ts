@@ -8,7 +8,7 @@ export type SceneSnapshot = {
   bones: number[];
   renderer: { calls: number; triangles: number; geometries: number; textures: number; contextLost: boolean; width: number; height: number; vendor: string };
 };
-export const snapshot = (page: Page) => page.evaluate(() => (window as any).__VFIT_3D__ as SceneSnapshot | undefined);
+export const snapshot = (page: Page) => page.evaluate(() => (window as Window & { __VFIT_3D__?: SceneSnapshot }).__VFIT_3D__);
 export async function ready(page: Page, size = 'M') {
   await expect.poll(async () => {
     const state = await snapshot(page);
@@ -20,9 +20,14 @@ export async function ready(page: Page, size = 'M') {
 export async function openViewer(page: Page, mode = 'static') {
   await page.goto(`/try-on?product_id=50101&size=M&qa3d=${mode}`, { waitUntil: 'domcontentloaded' });
   const skip = page.getByRole('button', { name: 'Bỏ qua', exact: true });
-  await expect(skip).toBeVisible({ timeout: 30000 }); await skip.click();
+  await expect(skip).toBeVisible({ timeout: 30000 });
+  const create = page.getByRole('button', { name: 'Tạo Avatar', exact: true });
+  await expect(create).toBeFocused();
+  await page.keyboard.press('Shift+Tab'); await expect(skip).toBeFocused();
+  await page.keyboard.press('Tab'); await expect(create).toBeFocused();
+  await skip.click();
 }
-export async function compareRender(page: Page, name: string) {
+export async function captureRender(page: Page): Promise<Buffer> {
   const canvas = page.getByTestId('viewer-render').locator('canvas');
   let previous = ''; let lastFrame = -1;
   // Native WebGL buffer capture excludes DOM overlays/fonts without changing the scene.
@@ -33,7 +38,10 @@ export async function compareRender(page: Page, name: string) {
     const current = await canvas.evaluate(node => (node as HTMLCanvasElement).toDataURL('image/png'));
     const stable = previous === current; previous = current; lastFrame = frame; return stable;
   }, { timeout: 20000, message: 'Frozen WebGL pixels settle across rendered frames' }).toBe(true);
-  expect(Buffer.from(previous.split(',')[1], 'base64')).toMatchSnapshot(name, { maxDiffPixelRatio: 0.002 });
+  return Buffer.from(previous.split(',')[1], 'base64');
+}
+export async function compareRender(page: Page, name: string) {
+  expect(await captureRender(page)).toMatchSnapshot(name, { maxDiffPixelRatio: 0.002 });
 }
 type Diagnostics = { pageErrors: string[]; renderErrors: string[]; warnings: string[]; assets: { path: string; status: number }[] };
 export const test = base.extend<{ diagnostics: Diagnostics }>({

@@ -1,3 +1,4 @@
+import type { GarmentConfig } from './garment';
 export type Occasion = 'cafe' | 'office' | 'street' | 'party' | 'travel' | 'date'
 export type StyleTag = 'Casual' | 'Minimalist' | 'Streetwear' | 'Coquette' | 'Y2K' | 'Vintage' | 'Business casual'
 export type ViewAngle = 'front' | 'back' | 'left' | 'right'
@@ -20,6 +21,14 @@ export interface OutfitFilter {
 }
 
 export interface OutfitItem {
+  _id?: string
+  productId?: string
+  fromCloset?: boolean
+  inCloset?: boolean
+  image?: string
+  thumbnail?: string
+  img?: string
+  images?: string[]
   id: string
   name: string
   category: 'top' | 'bottom' | 'shoes' | 'accessory' | 'outerwear'
@@ -32,7 +41,7 @@ export interface OutfitItem {
   sizeReason?: string
   owned?: boolean
   slot?: string
-  model3D?: Record<string, unknown>
+  model3D?: GarmentConfig
   selectedSize?: string
   selectedColor?: string
   availableColors?: string[] | { hex: string; label: string; isDefault?: boolean }[]
@@ -46,6 +55,9 @@ export interface OutfitItem {
 }
 
 export interface OutfitResult {
+  products?: OutfitItem[]
+  score?: number
+  occasion?: string
   id: string
   name: string
   matchScore: number

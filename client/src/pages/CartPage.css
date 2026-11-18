@@ -4,9 +4,9 @@
    ================================================================= */
 
 :root {
-    --cp-accent: #C6A969;
-    --cp-accent-rgb: 198, 169, 105;
-    --cp-accent-hover: #b89a5a;
+    --cp-accent: #82600D;
+    --cp-accent-rgb: 130, 96, 13;
+    --cp-accent-hover: #6E500A;
     --cp-accent-light: #FAF7F2;
     --cp-bg: #F5F3EF;
     --cp-surface: #ffffff;
@@ -16,10 +16,10 @@
     --cp-border-accent: #C6A969;
     --cp-text: #1A1A1A;
     --cp-text-2: #5C5C5C;
-    --cp-text-3: #9B9590;
-    --cp-danger: #D94848;
+    --cp-text-3: #6C655E;
+    --cp-danger: #B52C2C;
     --cp-danger-bg: rgba(217, 72, 72, 0.06);
-    --cp-success: #2E8B57;
+    --cp-success: #237546;
     --cp-radius: 12px;
     --cp-radius-sm: 8px;
     --cp-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);

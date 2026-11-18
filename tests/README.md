@@ -61,3 +61,24 @@ For SHA-stamped JUnit/HTML/JSON, run `node scripts/ci/run.cjs init playwright-co
 CI includes this matrix; manual/scheduled remote execution requires default-branch
 availability. [Manual testing](../qa/docs/manual-testing.md) records visual review
 findings beyond the width and navigation assertions.
+
+## Accessibility, production and new-platform visual candidates
+
+From root, use the CI runner lifecycle init/run/finalize for playwright-accessibility
+(21 invocations: seven scenarios across three profiles) and playwright-production
+(four checks against the compiled preview bundle). Accessibility includes home,
+login, product, authenticated cart/checkout, real Tab/focus, support Escape and CSS
+zoom200. Full native axe JSON retains incomplete findings; no rules are disabled.
+This is not human NVDA/VoiceOver, native-browser zoom, physical-device testing or
+complete WCAG certification. [User checklist](../qa/docs/manual-acceptance-checklist.md).
+
+The default12 suite stays separate; extra configs are selected explicitly and do
+not inflate its count. Production smoke rebuilds with same-origin API resolution,
+starts owned QA preview, checks compiled assets/no dev client and reuses commerce
+checks. It does not deploy an application or exercise real payment/provider success.
+
+Linux functional CI separately runs playwright.candidates.config.ts and attaches
+front/left native WebGL PNGs plus environment with approved=false. Export is not a
+pixel-comparison verdict. Reports are nested under visual-candidates/ to preserve
+functional6 counts. Approved Windows PNGs stay unchanged; do not promote/copy a
+new platform without inspecting its own images and recording explicit approval.

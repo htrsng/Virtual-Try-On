@@ -1,5 +1,10 @@
 # Manual and exploratory testing - Stage 9
 
+Current follow-up: [human acceptance checklist](manual-acceptance-checklist.md),
+[quality-completion report](quality-completion.md). The user agreed to execute human
+checks; results remain Not Run. BUG-UX-01 is now fixed and automated retest/evidence
+are recorded separately; the sessions below retain the original observations.
+
 Executed by the coding agent using local Playwright observations and explicit image
 inspection on Windows,17 November2026. This is tool-assisted exploration/visual
 review, not human tester or product-owner acceptance. Automated keyboard/navigation

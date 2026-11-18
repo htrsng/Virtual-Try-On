@@ -21,6 +21,10 @@ jobs:
             runner: ubuntu-24.04
           - suite: playwright-compat
             runner: ubuntu-24.04
+          - suite: playwright-accessibility
+            runner: ubuntu-24.04
+          - suite: playwright-production
+            runner: ubuntu-24.04
           - suite: playwright-visual
             runner: windows-2022
     uses: ./.github/workflows/_qa-job.yml

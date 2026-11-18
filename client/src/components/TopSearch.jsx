@@ -98,10 +98,6 @@ function TopSearch({ products }) {
         return (
             <div
                 key={item.id}
-                onClick={() => handleCardClick(item)}
-                onKeyDown={(e) => handleCardKeyDown(e, item)}
-                role="button"
-                tabIndex={0}
                 style={{
                     background: 'var(--surface-card)',
                     borderRadius: '14px',
@@ -114,11 +110,13 @@ function TopSearch({ products }) {
                 }}
             >
                 <div style={{ height: '260px', background: '#F4F4F4', position: 'relative', overflow: 'hidden' }}>
+                    <Link to="/top-products" state={{ selectedCategory: item.category }} aria-label={item.name} style={{ display: 'block', height: '100%' }}>
                     <img
                         src={item.img}
                         alt={item.name}
                         style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                     />
+                    </Link>
                     <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '100px', background: 'linear-gradient(transparent, rgba(15,11,7,0.95))' }} />
                     <div style={{ position: 'absolute', bottom: '16px', left: '16px' }}>
                         <div style={{ fontSize: '12px', color: '#D4AF37', letterSpacing: '0.07em', marginBottom: '6px', fontWeight: '800' }}>
@@ -142,6 +140,7 @@ function TopSearch({ products }) {
                     <div style={{ marginTop: 'auto', paddingTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <button
                             type="button"
+                            aria-label={isLiked ? `Remove ${item.name} from wishlist` : `Add ${item.name} to wishlist`}
                             onClick={(e) => { e.stopPropagation(); toggleWishlist(item.id); }}
                             style={{ background: 'none', border: 'none', color: isLiked ? 'var(--gold-primary)' : 'var(--text-secondary)', cursor: 'pointer', padding: '4px' }}
                         >

@@ -20,3 +20,12 @@ Source presence is separate from verified coverage. Details: [API inventory](api
 
 [System inventory](system-inventory.md) preserves broader source discovery.
 A visible button alone is not a verified service; no150-case coverage claim.
+
+## Quality-completion update
+
+See [feature status](feature-status.md), [automated instance catalog](automated-test-catalog.csv)
+and [human acceptance](manual-acceptance-checklist.md). Cart shipping/subtotal labels
+are explicit; social/recovery affordances no longer imply implemented flows.
+Accessibility covers observed names/contrast/targets/scrollers, keyboard, focus and
+CSS zoom on the five tested route states, not an entire-site WCAG certificate.
+Production smoke verifies the compiled bundle through preview, not deployment.

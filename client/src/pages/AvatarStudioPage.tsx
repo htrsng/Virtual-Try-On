@@ -197,29 +197,14 @@ export default function AvatarStudioPage() {
         }
     }, [draftAvatar, isAdvancedOpen]);
 
-    useEffect(() => {
-        if (avatars.length === 0) {
-            setIsCreatingNew(true);
-            setEditingAvatarId(null);
-            return;
-        }
-
-        if (isCreatingNew) {
-            return;
-        }
-
-        if (editingAvatarId && avatars.some((avatar) => avatar.id === editingAvatarId)) {
-            return;
-        }
-
-        const fallbackId = currentAvatarId && avatars.some((avatar) => avatar.id === currentAvatarId)
-            ? currentAvatarId
-            : avatars[0].id;
-        const fallbackAvatar = avatars.find((avatar) => avatar.id === fallbackId) || avatars[0];
-
+    if (avatars.length === 0 && (!isCreatingNew || editingAvatarId !== null)) {
+        setIsCreatingNew(true);
+        setEditingAvatarId(null);
+    } else if (avatars.length > 0 && !isCreatingNew && !avatars.some(avatar => avatar.id === editingAvatarId)) {
+        const fallbackAvatar = avatars.find(avatar => avatar.id === currentAvatarId) || avatars[0];
         setEditingAvatarId(fallbackAvatar.id);
         setDraftAvatar(cloneAvatar(fallbackAvatar));
-    }, [avatars, editingAvatarId, currentAvatarId, isCreatingNew]);
+    }
 
     const handleCreateNewDraft = useCallback(() => {
         const usedNames = new Set(avatars.map((avatar) => avatar.name.trim().toLowerCase()));
@@ -266,7 +251,7 @@ export default function AvatarStudioPage() {
         showNotice('Đã đưa số đo về mặc định.');
     }, [showNotice]);
 
-    const handlePhotoUploadComplete = useCallback((measurements: any) => {
+    const handlePhotoUploadComplete = useCallback((measurements: Partial<Profile>) => {
         setDraftAvatar((prev) => sanitizeBodyMeasurements({
             ...prev,
             ...measurements
@@ -316,7 +301,7 @@ export default function AvatarStudioPage() {
         }
 
         setCurrentAvatarId(draftAvatar.id);
-        showNotice(`Đã đặt \"${displayDraftName}\" làm avatar mặc định.`);
+        showNotice(`Đã đặt "${displayDraftName}" làm avatar mặc định.`);
     }, [currentAvatarId, displayDraftName, draftAvatar.id, isCreateMode, setCurrentAvatarId, showNotice]);
 
     const handleDeleteAvatar = useCallback(() => {
@@ -324,7 +309,7 @@ export default function AvatarStudioPage() {
             return;
         }
 
-        const approved = window.confirm(`Xóa avatar \"${selectedAvatar.name}\"?`);
+        const approved = window.confirm(`Xóa avatar "${selectedAvatar.name}"?`);
         if (!approved) {
             return;
         }

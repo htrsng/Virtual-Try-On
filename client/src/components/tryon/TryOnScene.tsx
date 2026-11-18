@@ -3,7 +3,7 @@ import { Grid, ContactShadows, Environment, Html } from '@react-three/drei'
 import * as THREE from 'three'
 import { Avatar } from '../../three/controls/avatar/Avatar'
 import GarmentModel from '../../features/virtual-tryon/GarmentModel'
-import type { Profile } from '../../contexts/FittingRoomContext'
+import type { Profile, GarmentSlot, SilentWearItem } from '../../contexts/FittingRoomContext'
 
 function LoaderFallback() {
     return (
@@ -23,7 +23,7 @@ export default function TryOnScene({
 }: {
     body: Profile | null | undefined
     onSceneReady?: (g: THREE.Group | null) => void
-    layeredGarments?: Record<string, any>
+    layeredGarments?: Partial<Record<GarmentSlot, SilentWearItem>>
     showEnvironment?: boolean
     showContactShadows?: boolean
     showGrid?: boolean
@@ -36,7 +36,7 @@ export default function TryOnScene({
                 {showGrid && <Grid position={[0, 0, 0]} args={[10, 10]} cellColor="#f3efe9" sectionColor="#ede9e2" fadeDistance={40} />}
 
                 <Suspense fallback={<LoaderFallback />}>
-                    <Avatar body={body} pose={'Idle'} skinColor="#F2C9AC" onSceneReady={onSceneReady} />
+                    {body && <Avatar body={body} pose={'Idle'} skinColor="#F2C9AC" onSceneReady={onSceneReady} />}
 
                     {layeredGarments && Object.entries(layeredGarments).map(([slot, garment]) => {
                         if (!garment?.model3D) return null

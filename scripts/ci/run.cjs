@@ -7,13 +7,15 @@ const { classify, xml } = require('./policy.cjs');
 const root = path.resolve(__dirname, '../..');
 const definitions = {
   'ci-harness': { dependencies: [], minimum: 12 },
-  lint: { dependencies: ['client'] }, build: { dependencies: ['client'] }, frontend: { dependencies: ['client'], minimum: 32 },
+  lint: { dependencies: ['client'] }, build: { dependencies: ['client'] }, frontend: { dependencies: ['client'], minimum: 38 },
   helpers: { dependencies: ['client'], minimum: 14 }, 'playwright-types': { dependencies: ['tests'] },
   backend: { dependencies: ['server'], minimum: 134 },
   'selenium-smoke': { dependencies: ['server', 'client'], minimum: 5 },
   'selenium-regression': { dependencies: ['server', 'client'], minimum: 22 },
   'playwright-3d': { dependencies: ['server', 'client', 'tests'], minimum: 6 },
   'playwright-regression': { dependencies: ['server', 'client', 'tests'], minimum: 12 },
+  'playwright-accessibility': { dependencies: ['server', 'client', 'tests'], minimum: 21 },
+  'playwright-production': { dependencies: ['server', 'client', 'tests'], minimum: 4 },
   'playwright-compat': { dependencies: ['server', 'client', 'tests'], minimum: 20 },
   'playwright-visual': { dependencies: ['server', 'client', 'tests'], minimum: 1 },
 };
@@ -41,6 +43,7 @@ function metadata() {
     runId: process.env.GITHUB_RUN_ID, runAttempt: process.env.GITHUB_RUN_ATTEMPT, event: process.env.GITHUB_EVENT_NAME || 'local',
     ref: process.env.GITHUB_REF, repository: process.env.GITHUB_REPOSITORY,
     node: process.version, platform: process.platform, architecture: process.arch, osRelease: os.release(),
+    uiMode: suite === 'playwright-production' ? 'preview' : 'development',
     runnerImage: process.env.ImageOS, runnerImageVersion: process.env.ImageVersion,
     mongodbRequestedVersion: process.env.MONGOMS_VERSION || 'mongodb-memory-server default',
     lockSha256LF: Object.fromEntries(['client', 'server', 'tests'].map(name => [name, hash(path.join(root, name, 'package-lock.json'))])) };
@@ -73,8 +76,12 @@ function plans() {
     case 'playwright-types': return [() => node(['node_modules/typescript/bin/tsc', '--noEmit'], tests)];
     case 'backend': return [() => node(['node_modules/jest/bin/jest.js', '--runInBand', '--json', `--outputFile=${path.join(directory, 'backend.json')}`, '--reporters=default', '--reporters=../scripts/ci/jest-reporter.cjs'], server, { NODE_ENV: 'test' })];
     case 'selenium-smoke': case 'selenium-regression': return [() => node(['scripts/qa-selenium.cjs', '-Dbrowser=chrome', `-Dgroups=${suite.endsWith('smoke') ? 'smoke' : 'regression'}`, `-Dqa.commitSha=${state.environment.checkedOutSha}`], root, { NODE_ENV: 'test' })];
-    case 'playwright-3d': return [() => node([...pw, '--project=3d-chromium'], tests, { NODE_ENV: 'test', QA_3D_VISUAL: '0', QA_3D_DIAGNOSTIC: '0' })];
+    case 'playwright-3d': return [() => node([...pw, '--project=3d-chromium'], tests, { NODE_ENV: 'test', QA_3D_VISUAL: '0', QA_3D_DIAGNOSTIC: '0' }),
+      () => node([...pw, '--config=playwright.candidates.config.ts'], tests, { NODE_ENV: 'test', CI_REPORT_DIR: path.join(directory, 'visual-candidates') })];
     case 'playwright-regression': return [() => node(pw, tests, { NODE_ENV: 'test', QA_3D_VISUAL: '0', QA_3D_DIAGNOSTIC: '0' })];
+    case 'playwright-accessibility': return [() => node([...pw, '--config=playwright.accessibility.config.ts'], tests, { NODE_ENV: 'test' })];
+    case 'playwright-production': return [() => command('npm', ['run', 'build'], client, { NODE_ENV: 'production', VITE_API_URL: '' }),
+      () => node([...pw, '--config=playwright.production.config.ts'], tests, { NODE_ENV: 'test', QA_UI_MODE: 'preview' })];
     case 'playwright-compat': return [() => node([...pw, '--config=playwright.compat.config.ts'], tests, { NODE_ENV: 'test' })];
     case 'playwright-visual': return [() => node([...pw, '--project=3d-visual'], tests, { NODE_ENV: 'test', QA_3D_VISUAL: '1', QA_3D_DIAGNOSTIC: '0' }),
       () => node(['scripts/qa-3d-diagnostic.cjs'], root, { NODE_ENV: 'test' })];
@@ -160,13 +167,14 @@ async function main() {
       if (state.status === 'Failed' && state.diagnostics.typescript) state.reason = `Frontend build failed with ${state.diagnostics.typescript} TypeScript diagnostics; no build bypass`;
     }
     if (fs.existsSync(path.join(root, 'tests/node_modules/@playwright/test/package.json'))) state.environment.playwright = read(path.join(root, 'tests/node_modules/@playwright/test/package.json')).version;
+    if (suite === 'playwright-accessibility' && fs.existsSync(path.join(root, 'tests/node_modules/@axe-core/playwright/package.json'))) state.environment.axePlaywright = read(path.join(root, 'tests/node_modules/@axe-core/playwright/package.json')).version;
     if (suite.startsWith('selenium-')) {
       state.environment.java = version('java', ['-version']); state.environment.maven = version('mvn', ['--version']);
       const log = fs.existsSync(path.join(directory, 'run.log')) ? fs.readFileSync(path.join(directory, 'run.log'), 'utf8') : '';
       state.environment.seleniumBrowserVersions = [...new Set([...log.matchAll(/^Browser:\s*(.+)$/gm)].map(match => match[1].trim()))];
     }
     if (fs.existsSync(path.join(root, 'tests/node_modules/playwright-core/browsers.json'))) state.environment.chromium = read(path.join(root, 'tests/node_modules/playwright-core/browsers.json')).browsers.find(browser => browser.name === 'chromium');
-    if (suite === 'playwright-compat') state.environment.firefox = read(path.join(root, 'tests/node_modules/playwright-core/browsers.json'))?.browsers.find(browser => browser.name === 'firefox');
+    if (['playwright-compat', 'playwright-accessibility'].includes(suite)) state.environment.firefox = read(path.join(root, 'tests/node_modules/playwright-core/browsers.json'))?.browsers.find(browser => browser.name === 'firefox');
     save(); reports(); console.log(JSON.stringify({ suite, status: state.status, counts: state.counts, sha: state.environment.checkedOutSha }));
     process.exitCode = state.status === 'Passed' ? 0 : 1; return;
   }
@@ -175,7 +183,7 @@ async function main() {
   if (action === 'install') {
     for (const dependency of definitions[suite].dependencies) { const result = await command('npm', ['ci', '--include=dev'], path.join(root, dependency)); results.push(result); if (result.code) break; }
   } else if (action === 'browsers') {
-    if (suite.startsWith('playwright-') && suite !== 'playwright-types') results.push(await node(['node_modules/@playwright/test/cli.js', 'install', ...(process.platform === 'linux' ? ['--with-deps'] : []), 'chromium', ...(suite === 'playwright-compat' ? ['firefox'] : [])], path.join(root, 'tests')));
+    if (suite.startsWith('playwright-') && suite !== 'playwright-types') results.push(await node(['node_modules/@playwright/test/cli.js', 'install', ...(process.platform === 'linux' ? ['--with-deps'] : []), 'chromium', ...(['playwright-compat', 'playwright-accessibility'].includes(suite) ? ['firefox'] : [])], path.join(root, 'tests')));
   } else {
     if (suite === 'playwright-visual' && process.platform !== 'win32') { state.blockedReason = 'Approved visual baselines are Windows-only; no cross-platform substitution'; results.push({ code: 1 }); }
     else for (const execute of plans()) { const result = await execute(); results.push(result); if (result.code) break; }

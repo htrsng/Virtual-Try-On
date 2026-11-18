@@ -78,7 +78,7 @@ function ProductRecommendations({ currentProductId, category, onBuy, title = "C�
             }}>
                 ✨ {title}
             </h3>
-            <div style={{
+            <div role="region" aria-label="Sản phẩm gợi ý" tabIndex={0} style={{
                 display: 'flex',
                 gap: '16px',
                 overflowX: 'auto',
@@ -146,7 +146,7 @@ function ProductRecommendations({ currentProductId, category, onBuy, title = "C�
                                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                             }}>{product.name}</div>
                             <div style={{
-                                fontSize: '15px', fontWeight: 700, color: '#C9963F', marginTop: '6px',
+                                fontSize: '15px', fontWeight: 700, color: '#82600d', marginTop: '6px',
                             }}>{formatPrice(product.price)}</div>
                             {onBuy && (
                                 <button

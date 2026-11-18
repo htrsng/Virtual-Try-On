@@ -1,4 +1,4 @@
-import type { OutfitResult, OutfitItem } from '../../types/outfit'
+import type { OutfitResult } from '../../types/outfit'
 
 interface OutfitCardProps {
     outfit: OutfitResult
@@ -8,7 +8,7 @@ interface OutfitCardProps {
     onSelectOutfit: () => void
 }
 
-export default function OutfitCard({ outfit, index, isActive, onTryOn, onSelectOutfit }: OutfitCardProps) {
+export default function OutfitCard({ outfit, isActive, onTryOn, onSelectOutfit }: OutfitCardProps) {
     const sortedItems = [...outfit.items].sort((a, b) => {
         // Items to buy (owned === false) appear first, then owned items
         if (a.owned === b.owned) return 0
@@ -154,10 +154,6 @@ export default function OutfitCard({ outfit, index, isActive, onTryOn, onSelectO
         transition: 'background 0.2s ease',
     }
 
-    const expandedButtonHoverStyle: React.CSSProperties = {
-        ...tryOnButtonStyle,
-        backgroundColor: '#2a2a2a',
-    }
 
     const collapsedSummaryStyle: React.CSSProperties = {
         padding: '8px 12px',

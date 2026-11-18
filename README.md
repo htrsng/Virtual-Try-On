@@ -5,7 +5,7 @@ Selenium / Java / TestNG / Maven / POM / Playwright
 
 E-commerce and 3D virtual try-on with UI-to-API-to-MongoDB verification, isolated
 synthetic data, reviewed visual baselines and CI failure evidence.
-**Development in progress: lint/build gates still fail; not production-ready.**
+**Quality completion: strict lint/build pass locally; human/device acceptance remains pending.**
 
 ## Review the portfolio
 
@@ -14,15 +14,20 @@ synthetic data, reviewed visual baselines and CI failure evidence.
 - [Selenium framework](qa/selenium-java/README.md): fresh driver per test, explicit waits, POM, failure screenshots.
 - [Playwright 3D](qa/docs/stage-7-playwright-3d.md): mounted GLB/state, camera, resource lifecycle, visual comparison and wrong-model detector.
 - [CI/reporting](qa/docs/stage-8-ci-quality-gates.md): SHA/environment, JUnit/HTML, screenshots and traces.
-- [Manual/exploratory](qa/docs/manual-testing.md) and [Stage 9 review](qa/docs/stage-9-portfolio.md).
+- [Quality completion](qa/docs/quality-completion.md), [manual acceptance](qa/docs/manual-acceptance-checklist.md), [Stage 9 history](qa/docs/stage-9-portfolio.md).
 
 ## Verified status
 
-[PR #4](https://github.com/htrsng/Virtual-Try-On/pull/4), source `8d6b8b0`, verified
-backend128, frontend25, helpers14, policy12, Selenium smoke5, 3D functional6 and
-Windows visual1 passing on GitHub. Lint failed213 errors/14 warnings; build failed109
-TypeScript diagnostics. These are **pre-refactor** results. Current Stage 9 results
-are maintained separately in [Test Summary](qa/docs/test-summary.md).
+[Current Test Summary](qa/docs/test-summary.md) records lint0 errors/0 warnings,
+production build Pass, frontend38, backend134, Selenium22, default Playwright12,
+compatibility20, accessibility21 and production smoke4 passing locally. Approved
+Windows visual comparison and wrong-model detection remain separate checks.
+Clean CI source/checkout proof is linked from [PR #5](https://github.com/htrsng/Virtual-Try-On/pull/5).
+Historical failed gates are preserved in their original stage reports.
+
+[Human acceptance checklist](qa/docs/manual-acceptance-checklist.md) is ready for
+NVDA/VoiceOver, native zoom200% and real phones; these have not been signed off.
+[Product scope](qa/docs/feature-status.md) distinguishes incomplete integrations.
 
 Online payment has no provider (API503); social login and password recovery have
 no complete flow. Live Gemini/email integrations are not E2E-verified. Browser
@@ -50,6 +55,12 @@ node scripts/qa-selenium.cjs -Dbrowser=chrome -Dgroups=regression
 node scripts/ci/run.cjs init playwright-compat
 node scripts/ci/run.cjs run playwright-compat
 node scripts/ci/run.cjs finalize playwright-compat
+node scripts/ci/run.cjs init playwright-accessibility
+node scripts/ci/run.cjs run playwright-accessibility
+node scripts/ci/run.cjs finalize playwright-accessibility
+node scripts/ci/run.cjs init playwright-production
+node scripts/ci/run.cjs run playwright-production
+node scripts/ci/run.cjs finalize playwright-production
 ```
 
 Compatibility covers desktop Chromium/Firefox plus tablet768 and mobile390 Chromium.

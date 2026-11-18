@@ -1,5 +1,4 @@
-import { OutfitItem, OutfitResult } from '../types/outfit';
-import { MODEL_INJECTION } from '../data/ThreeDConfig';
+import type { OutfitItem, OutfitResult } from '../types/outfit';
 
 export interface SelectionState {
   [productId: string]: {
@@ -44,7 +43,6 @@ export function resolveOutfitGlbs(
 }
 
 export function resolveVariantId(
-  productId: string,
   size: string,
   colorHex: string,
   variants?: { size: string; colorHex: string; variantId?: string }[]
@@ -72,8 +70,8 @@ export function initSelection(outfit: OutfitResult): SelectionState {
       if (typeof firstColor === 'string') {
         defaultColor = firstColor;
       } else {
-        const defaultColorObj = (item.availableColors as any[]).find((c: any) => c.isDefault);
-        defaultColor = defaultColorObj ? defaultColorObj.hex : firstColor.hex;
+        const defaultColorObj = item.availableColors.find(c => typeof c !== 'string' && c.isDefault);
+        defaultColor = defaultColorObj ? (typeof defaultColorObj === 'string' ? defaultColorObj : defaultColorObj.hex) : firstColor.hex;
       }
     }
     

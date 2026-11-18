@@ -21,13 +21,9 @@ const CartPage = lazy(() => import('./pages/CartPage'));
 const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'));
 const OrderPage = lazy(() => import('./pages/OrderPage'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
-// @ts-ignore
 const AdminLayout = lazy(() => import('./admin/layout/AdminLayout'));
-// @ts-ignore
 const AdminDashboard = lazy(() => import('./admin/pages/AdminDashboard'));
-// @ts-ignore
 const AdminUserDetail = lazy(() => import('./admin/pages/AdminUserDetail'));
-// @ts-ignore
 const AIManagerPage = lazy(() => import('./admin/pages/AIManagerPage'));
 const AdminOrders = lazy(() => import('./pages/AdminOrders'));
 const AdminProducts = lazy(() => import('./pages/AdminProducts'));
@@ -51,7 +47,6 @@ const ChatWidget = lazy(() => import('./components/ChatWidget'));
 const VirtualTryOn = lazy(() => import('./features/virtual-tryon/VirtualTryOn.tsx'));
 const AvatarStudioPage = lazy(() => import('./pages/AvatarStudioPage'));
 const AIOutfitGenerator = lazy(() => import('./pages/AIOutfitGenerator'));
-const AIOutfitRoom = lazy(() => import('./pages/AIOutfitRoom'));
 
 // --- 3. IMPORT CONTEXTS ---
 import { AuthProvider } from './contexts/AuthContext';
@@ -515,13 +510,13 @@ function App() {
         fetchJson<{ success?: boolean; session?: { items?: Array<{ productId: string; size?: string }> } }>(`/api/tryon/session/${sessionId}`)
           .then(data => {
             if (data.success && data.session && data.session.items) {
-              const fetchedItems = data.session.items.map((item: any) => {
-                const found = allProducts.find(p => String(p.id) === String(item.productId) || String((p as any)._id) === String(item.productId));
+              const fetchedItems = data.session.items.map((item) => {
+                const found = allProducts.find(p => String(p.id) === String(item.productId) || String(p._id) === String(item.productId));
                 if (found) {
                   return { ...found, size: item.size || sizeParam || 'M', tryon_ready: true };
                 }
                 return null;
-              }).filter(Boolean);
+              }).filter((item): item is NonNullable<typeof item> => item !== null);
 
               if (fetchedItems.length > 0) {
                 setSessionItems(fetchedItems);
@@ -534,9 +529,9 @@ function App() {
           })
           .finally(() => setIsLoadingSession(false));
       } else if (productId && !sessionItems) {
-        const found = allProducts.find(p => String(p.id) === String(productId) || String((p as any)._id) === String(productId));
+        const found = allProducts.find(p => String(p.id) === String(productId) || String(p._id) === String(productId));
         if (found) {
-          setSessionItems([{ ...found, size: sizeParam || 'M', tryon_ready: true } as any]);
+          setSessionItems([{ ...found, size: sizeParam || 'M', tryon_ready: true }]);
         }
       }
     }, [location.search, allProducts, sessionItems, showToast]);

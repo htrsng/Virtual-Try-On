@@ -1,3 +1,4 @@
+import type { AIResponse } from '../types/aiResponse';
 import React, { useEffect, useState, useRef } from 'react';
 import type { AIOutfit } from '../types/aiOutfit';
 import OutfitCard from './OutfitCard.tsx';
@@ -57,19 +58,19 @@ export default function AIOutfitSidebar({ initialPrompt = '' }: { initialPrompt?
                 throw new Error(errorData.message || `API Error: ${response.status}`);
             }
 
-            const data = await response.json();
+            const data: AIResponse = await response.json();
 
             // Transform API response to AIOutfit format
             const transformedOutfits: AIOutfit[] = (data.outfits || []).map(
-                (outfit: any, index: number) => ({
+                (outfit, index) => ({
                     id: `outfit-${Date.now()}-${index}`,
                     name: outfit.name || `Phối Đồ ${index + 1}`,
                     description: outfit.description,
                     occasion: outfit.occasion,
-                    items: (outfit.items || []).map((item: any) => ({
-                        productId: item.productId || item.id,
+                    items: (outfit.items || []).map((item) => ({
+                        productId: String(item.productId || item.id || ''),
                         type: item.type || 'shop',
-                        layer: item.layer || 'tops',
+                        layer: (['tops', 'bottoms', 'outerwear', 'shoes', 'dresses'].includes(item.layer || '') ? item.layer : 'tops') as AIOutfit['items'][number]['layer'],
                         model3DUrl: item.model3DUrl || '',
                         thumbnail: item.thumbnail || item.image || '',
                         name: item.name || '',

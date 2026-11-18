@@ -1,6 +1,6 @@
 # Consolidated bug register
 
-Status is scoped to recorded tests, source and environment, not certification.
+Current status follows the18 November quality-completion branch; historical reports retain their original before states. Status is scoped to recorded tests, source and environment, not certification.
 See [Test Summary](../docs/test-summary.md) for current executions and CI links.
 
 | ID / priority | Type and finding | State | Fix / retest evidence |
@@ -18,9 +18,11 @@ See [Test Summary](../docs/test-summary.md) for current executions and CI links.
 | BUG-3D-01 P1 | Application: requestedM rendersS | Fixed, regression verified | [Stage7](stage7-3d.md), actual mounted size/geometry |
 | BUG-3D-02 P1 | Application: warmed geometry resources grow | Fixed within tested transition workload | Stage7 resource plateau, not every device/long-run leak claim |
 | BUG-A11Y-01 P1 | Application: missing named password/keyboard mode controls | Fixed,20-matrix retest Pass | [Stage9](stage9-portfolio.md), before named-input failure and after semantic checks |
-| BUG-UX-01 P2 | Application: mobile chat overlaps checkout | Open | [Stage9 sample/repro](stage9-portfolio.md); partial occlusion, not total checkout failure |
-| STATIC-LINT P1 | Application/code quality:213 errors,14 warnings | Open, required gate Failed | [Stage8](stage8-ci.md), Stage9 rerun unchanged counts |
-| STATIC-BUILD P1 | Application/code quality:109 TS diagnostics | Open, required gate Failed | Stage8/9 full tsc+Vite command; no bypass |
+| BUG-UX-01 P1 | Application: mobile chat overlaps checkout | Fixed, regression verified | [Quality completion](quality-completion.md), zero rectangle intersection and synthetic after screenshot |
+| STATIC-LINT P0 | Code quality: baseline213 errors/14 warnings | Fixed locally:0/0 | [Quality completion](quality-completion.md), unchanged ESLint config; clean CI proof in current PR |
+| STATIC-BUILD P0 | Code quality: baseline109 TS diagnostics | Fixed locally: full build Pass | Quality completion, same strict compiler and real production smoke |
+| BUG-A11Y-02..05 P1 | Names/targets/contrast/scroll/focus/dialog behavior | Fixed in measured scope | [Before/fix/retest](quality-completion.md), axe plus native keyboard; human acceptance pending |
+| BUG-AI-01 P1 | Refinement undefined loading setter | Fixed, unit regression verified | Pending/completion/error tests; no live-provider claim |
 | TD-09-01/02 P2 | Test defects: appended compatibility projects / desktop-only cart selector | Corrected and retested | Stage9; final20 compatibility/default12 collection; no false application bug |
 | CI-WIN-NET P2 | Infrastructure: npm ECONNRESET before visual execution | Recovered on one rerun | [Run44097933562](https://github.com/htrsng/Virtual-Try-On/actions/runs/44097933562), separate attempt artifacts retained |
 

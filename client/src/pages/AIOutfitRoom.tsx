@@ -1,3 +1,5 @@
+import type { AIResponse, SuggestedItem } from '../types/aiResponse';
+import type { CatalogProduct } from '../types/catalog';
 import { Suspense, useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows, Html, Grid } from '@react-three/drei';
@@ -343,7 +345,7 @@ const mapLayerToCategory = (layer?: string): AIOutfitItem['layer'] => {
     return 'tops';
 };
 
-const normalizeOutfitItem = (item: any): AIOutfitItem => ({
+const normalizeOutfitItem = (item: SuggestedItem): AIOutfitItem => ({
     productId: String(item.productId ?? item.id ?? crypto.randomUUID()),
     type: item.type === 'closet' ? 'closet' : 'shop',
     layer: mapLayerToCategory(item.layer ?? item.slot ?? item.category),
@@ -354,7 +356,7 @@ const normalizeOutfitItem = (item: any): AIOutfitItem => ({
     source: item.source,
 });
 
-const normalizeOutfits = (data: any): AIOutfit[] => {
+const normalizeOutfits = (data: AIResponse): AIOutfit[] => {
     const outfitsSource = Array.isArray(data?.outfits) && data.outfits.length > 0
         ? data.outfits
         : [{
@@ -364,7 +366,7 @@ const normalizeOutfits = (data: any): AIOutfit[] => {
             items: Array.isArray(data?.outfit) ? data.outfit : Array.isArray(data?.suggestions) ? data.suggestions : [],
         }];
 
-    return outfitsSource.slice(0, 3).map((outfit: any, index: number) => ({
+    return outfitsSource.slice(0, 3).map((outfit, index) => ({
         id: `ai-outfit-${Date.now()}-${index}`,
         name: outfit.name ?? `Outfit ${index + 1}`,
         description: outfit.description ?? data?.explanation ?? '',
@@ -496,7 +498,7 @@ function SceneContent({ environmentPreset, cameraPos, cameraTarget, isRotating }
                         enable: true,
                         sizes: {
                             M: {
-                                url: String((garment as any).model3D.url),
+                                url: String(garment.model3D.url),
                                 autoNormalize: true,
                                 followAvatarBones: true,
                             },
@@ -537,7 +539,7 @@ export default function AIOutfitRoom() {
     const navigate = useNavigate();
     const [isWebglContextLost, setIsWebglContextLost] = useState(false);
     const { avatars, currentAvatarId, setCurrentAvatarId, currentAvatar, layeredGarments } = useFittingRoom();
-    const canvasAreaRef = useRef<HTMLDivElement | null>(null);
+    const [canvasArea, setCanvasArea] = useState<HTMLDivElement | null>(null);
     const canvasElementRef = useRef<HTMLCanvasElement | null>(null);
     const webglContextHandlersRef = useRef<{
         handleContextLost?: (event: Event) => void;
@@ -555,7 +557,7 @@ export default function AIOutfitRoom() {
     const [outfits, setOutfits] = useState<AIOutfit[]>([]);
     const [isGenerating, setIsGenerating] = useState(false);
     const [error, setError] = useState<string>('');
-    const [closetItems, setClosetItems] = useState<any[]>([]);
+    const [closetItems, setClosetItems] = useState<CatalogProduct[]>([]);
 
     // Camera controls state
     const [cameraView, setCameraView] = useState('front');
@@ -678,12 +680,12 @@ export default function AIOutfitRoom() {
     }, [isRotating]);
 
     const Avatar3DCanvas = () => (
-        <div ref={canvasAreaRef} className="vto-canvas-area" style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+        <div ref={setCanvasArea} className="vto-canvas-area" style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
             <div className="vto-canvas-floor" />
             <div className="vto-canvas-spotlight" />
             <div className="vto-canvas-rim-light" />
             <Canvas
-                eventSource={canvasAreaRef}
+                eventSource={canvasArea || undefined}
                 frameloop={isWebglContextLost ? 'never' : 'always'}
                 dpr={[1, 1.2]}
                 camera={{ position: cameraPos, fov: 32 }}

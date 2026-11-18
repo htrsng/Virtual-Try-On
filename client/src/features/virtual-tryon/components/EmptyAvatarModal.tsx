@@ -1,3 +1,6 @@
+import { useRef } from 'react';
+import { useDialogFocus } from '../../../hooks/useDialogFocus';
+
 interface EmptyAvatarModalProps {
     isOpen: boolean;
     onCreateAvatar: () => void;
@@ -5,13 +8,15 @@ interface EmptyAvatarModalProps {
 }
 
 export default function EmptyAvatarModal({ isOpen, onCreateAvatar, onSkip }: EmptyAvatarModalProps) {
+    const dialog = useRef<HTMLDivElement>(null);
+    useDialogFocus(isOpen, dialog, onSkip);
     if (!isOpen) {
         return null;
     }
 
     return (
         <div className="vto-empty-avatar-modal__backdrop" role="presentation">
-            <div className="vto-empty-avatar-modal" role="dialog" aria-modal="true" aria-labelledby="vto-empty-avatar-title">
+            <div ref={dialog} className="vto-empty-avatar-modal" role="dialog" aria-modal="true" aria-labelledby="vto-empty-avatar-title" tabIndex={-1}>
                 <h3 id="vto-empty-avatar-title">Bạn chưa tạo avatar nào</h3>
                 <p>
                     Tạo avatar để thử đồ với số đo thật của bạn. Nếu bỏ qua, hệ thống sẽ sử dụng body mặc định tạm thời.

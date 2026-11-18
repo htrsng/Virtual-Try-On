@@ -39,6 +39,9 @@ async function control(command, config = configuration()) {
 }
 async function start(config = configuration()) {
   if (process.env.NODE_ENV === 'production') throw new Error('QA launcher refuses NODE_ENV=production');
+  if (config.uiMode === 'preview' && !fs.existsSync(path.join(config.root, 'client/dist/index.html'))) {
+    throw new Error('Build the client before starting QA preview');
+  }
   // No runtime URI/JWT/provider credentials from a development shell are forwarded.
   process.env.NODE_ENV = 'test';
   await freePort(config.apiPort); await freePort(config.uiPort);
@@ -47,7 +50,7 @@ async function start(config = configuration()) {
   const lock = fs.openSync(lockPath, 'wx');
   const token = randomBytes(32).toString('hex');
   const children = []; const logs = []; let database; let controlServer; let stopping;
-  const state = { runId: config.runId, status: 'starting', dataState: 'empty', resets: 0, token, control: config.control,
+  const state = { runId: config.runId, uiMode: config.uiMode || 'development', status: 'starting', dataState: 'empty', resets: 0, token, control: config.control,
     apiURL: config.apiURL, uiURL: config.uiURL, pid: process.pid };
   function save() { fs.writeFileSync(config.manifest, JSON.stringify(state, null, 2), { mode: 0o600 }); }
   save();
@@ -93,7 +96,8 @@ async function start(config = configuration()) {
       GEMINI_API_KEY: '', EMAIL_USER: '', EMAIL_PASS: '', QA_RUN_ID: config.runId,
       VITE_API_URL: config.apiURL, VITE_API_PROXY_TARGET: config.apiURL, VITE_QA_3D: 'true' };
     child('api', 'server', ['index.js'], env);
-    child('ui', 'client', ['node_modules/vite/bin/vite.js', '--mode', 'qa', '--host', config.host, '--port', String(config.uiPort), '--strictPort'], env);
+    const uiCommand = config.uiMode === 'preview' ? ['preview'] : ['--mode', 'qa'];
+    child('ui', 'client', ['node_modules/vite/bin/vite.js', ...uiCommand, '--host', config.host, '--port', String(config.uiPort), '--strictPort'], env);
     const matches = async response => { const data = await response.json(); return data.status === 'ready' && data.runId === config.runId; };
     await waitReady(`${config.apiURL}/api/health/ready`, matches);
     await waitReady(`${config.uiURL}/api/health/ready`, matches);

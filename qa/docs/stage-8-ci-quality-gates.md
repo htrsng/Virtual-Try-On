@@ -118,3 +118,12 @@ Với local mongod đặt MONGOMS_SYSTEM_BINARY/MONGOMS_RUNTIME_DOWNLOAD theo en
 setup; máy Windows chỉ có Edge có thể dùng SELENIUM_BROWSER_BINARY với Chromium phù hợp.
 Không chạy nhiều browser suites đồng thời trong cùng working copy/ports. CI matrix
 dùng các VM riêng. `finalize` luôn chạy để ghi artifact, và vẫn exit nonzero nếu gate Fail.
+
+## Quality-completion extension (18 November2026)
+
+Existing strict lint/build now pass locally; frontend minimum38. Browser PR matrix
+also runs compatibility20, accessibility21 and production4. Full regression includes
+those isolated suites. Linux3D functional6 additionally exports review-only PNG
+candidates in a separate report subtree; candidate export is not visual approval.
+The original table/counts above are historical. Current counts/source/CI links are
+in [Test Summary](test-summary.md) and the active PR checks.

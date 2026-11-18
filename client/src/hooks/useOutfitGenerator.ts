@@ -15,25 +15,14 @@ import type { OutfitFilter, OutfitResult } from '../types/outfit';
 import { fetchWithTimeout } from '../utils/fetchWithTimeout';
 import { generateLocalOutfits } from '../utils/generateLocalOutfits';
 
-type Product = {
-    _id?: string;
-    id?: string;
-    name?: string;
-    price?: number;
-    category?: string;
-    imageUrl?: string;
-    aiStylist?: {
-        styles?: string[];
-        occasions?: string[];
-        colorTone?: string;
-    };
-};
+import type { CatalogProduct as Product } from '../types/catalog';
+import type { AvatarInput } from '../types/aiResponse';
 
 interface UseOutfitGeneratorOptions {
-    closetItems: any[];
-    shopItems?: any[];
+    closetItems: Product[];
+    shopItems?: Product[];
     userId?: string;
-    avatarData?: any;
+    avatarData?: AvatarInput;
 }
 
 // Helper: Get authentication token from localStorage
@@ -165,7 +154,7 @@ const buildGeminiProducts = (shopItems: Product[], filters: OutfitFilter): Produ
 };
 
 export function useOutfitGenerator(options: UseOutfitGeneratorOptions) {
-    const { closetItems, shopItems: initialShopItems = [], userId, avatarData } = options;
+    const { closetItems, shopItems: initialShopItems = [], userId } = options;
 
     const [outfits, setOutfits] = useState<OutfitResult[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -306,9 +295,9 @@ export function useOutfitGenerator(options: UseOutfitGeneratorOptions) {
                 console.info('[AI] ✓ Gemini API succeeded. Outfits loaded:', data.outfits.length);
                 return data.outfits;
 
-            } catch (err: any) {
+            } catch (err: unknown) {
                 // ─── FALLBACK: Circuit Breaker Triggered ───
-                console.warn('[AI] ⚠ Circuit Breaker activated. Reason:', err.message);
+                console.warn('[AI] ⚠ Circuit Breaker activated. Reason:', (err instanceof Error ? err.message : String(err)));
                 console.info('[AI] Attempting Local Outfit Engine...');
 
                 try {
@@ -324,9 +313,9 @@ export function useOutfitGenerator(options: UseOutfitGeneratorOptions) {
                         throw new Error('Local engine generated no outfits');
                     }
 
-                } catch (localErr: any) {
+                } catch (localErr: unknown) {
                     // ─── TOTAL FAILURE: Both Gemini and Local Engine failed ───
-                    console.error('[AI] ✗ Both Gemini and Local Engine failed:', localErr.message);
+                    console.error('[AI] ✗ Both Gemini and Local Engine failed:', (localErr instanceof Error ? localErr.message : String(localErr)));
                     setError(
                         'Hệ thống tạm thời gián đoạn. Vui lòng thử lại sau hoặc điều chỉnh bộ lọc.'
                     );
@@ -338,7 +327,7 @@ export function useOutfitGenerator(options: UseOutfitGeneratorOptions) {
                 setIsLoading(false);
             }
         },
-        [closetItems, shopItems, userId]
+        [closetItems, shopItems, shopLoading, userId]
     );
 
     return {

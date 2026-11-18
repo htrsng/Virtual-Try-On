@@ -219,8 +219,8 @@ export const Avatar: React.FC<AvatarProps & { skinColor?: string; opacity?: numb
         if (actionName && actions[actionName]) {
             const action = actions[actionName]!;
             action.reset();
-            if (staticQaRender()) { action.play(); action.paused = true; action.getMixer().setTime(0); }
-            else { action.paused = false; action.fadeIn(0.5).play(); }
+            if (staticQaRender()) { action.play(); action.setEffectiveTimeScale(0); action.getMixer().setTime(0); }
+            else { action.setEffectiveTimeScale(1); action.fadeIn(0.5).play(); }
         }
         return () => { actions[actionName]?.fadeOut(0.5); };
     }, [actions, names, pose]);

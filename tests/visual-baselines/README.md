@@ -28,3 +28,8 @@ profile/baselines; do not copy Windows PNGs into another platform's directory.
 Wrong-model detector: from root `node scripts/qa-3d-diagnostic.cjs`. This deliberately
 produces a failed Playwright test with diff/trace; the wrapper succeeds only after
 verifying that exact negative result. See [stage7 report](../../qa/docs/stage-7-playwright-3d.md).
+
+New-platform candidates: Linux functional CI exports frozen front/left images under
+its visual-candidates artifact subtree using the same capture helper and pinned
+render settings. Metadata explicitly says approved=false. This is review material,
+not a baseline update or visual-regression Pass. CI never uses update-snapshots.

@@ -1,5 +1,3 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import type { OutfitResult, OutfitItem } from '../../types/outfit';
 
 interface OutfitCardProps {
@@ -19,20 +17,11 @@ export default function OutfitCard({
     index,
     onSelect,
     onTryItem,
-    isLocalFallback = false,
     onUpdateItem,
     onOpenTryonPanel,
 }: OutfitCardProps) {
-    const [expanded, setExpanded] = useState(isSelected);
-    const [isLoadingSession, setIsLoadingSession] = useState(false);
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        setExpanded(isSelected);
-    }, [isSelected]);
-
-    const items = outfit.items ?? (outfit as any).products ?? [];
-    const rawScore = outfit.matchScore ?? (outfit as any).score ?? 0;
+    const items = outfit.items ?? outfit.products ?? [];
+    const rawScore = outfit.matchScore ?? outfit.score ?? 0;
     const score = Math.round(parseFloat(String(rawScore)) || 0);
     
     let scoreColor = 'var(--text-secondary)';
@@ -141,7 +130,7 @@ export default function OutfitCard({
                         gap: '4px',
                         marginTop: '8px',
                     }}>
-                        {items.slice(0, 3).map((p: any, i: number) => {
+                        {items.slice(0, 3).map((p, i) => {
                             const pImage = p.image || p.thumbnail || p.img || p.imageUrl || p.images?.[0];
                             return (
                                 <div key={i} style={{
@@ -206,8 +195,8 @@ export default function OutfitCard({
 
             <div style={{ padding: '0 14px 10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {items.map((item, i) => {
-                    const isCloset = item.source === 'closet' || item.owned || (item as any).fromCloset || (item as any).inCloset;
-                    const itemImage = (item as any).image || (item as any).thumbnail || (item as any).img || (item as any).imageUrl || (item as any).images?.[0];
+                    const isCloset = item.source === 'closet' || item.owned || item.fromCloset || item.inCloset;
+                    const itemImage = item.image || item.thumbnail || item.img || item.imageUrl || item.images?.[0];
                     return (
                         <div
                             key={i}
@@ -320,7 +309,7 @@ export default function OutfitCard({
                                                     colorsToRender = ['#222222']; // Đen
                                                 }
 
-                                                const finalColors = (colorsToRender || ['#000000', '#ffffff', '#808080']).map((c: any) => typeof c === 'string' ? c : c.hex).filter(Boolean);
+                                                const finalColors = (colorsToRender || ['#000000', '#ffffff', '#808080']).map((c) => typeof c === 'string' ? c : c.hex).filter(Boolean);
                                                 
                                                 return finalColors.map((c: string) => (
                                                     <div
@@ -420,7 +409,7 @@ export default function OutfitCard({
                                     <button
                                         onClick={e => {
                                             e.stopPropagation();
-                                            const productId = (item as any)._id || item.id || (item as any).productId;
+                                            const productId = item._id || item.id || item.productId;
                                             if (productId) {
                                                 window.open(`/product/${productId}`, '_blank');
                                             }

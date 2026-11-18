@@ -1,8 +1,8 @@
-'use client'
+import type { CatalogProduct } from '../types/catalog';
+import type { GarmentConfig } from '../types/garment';
 
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Sparkles, MessageCircle } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { generateOutfit } from '../services/aiOutfitService'
 import LeftPanel from '../components/ai-outfit/LeftPanel'
@@ -15,12 +15,12 @@ import { useFittingRoom, type GarmentSlot, type Profile } from '../contexts/Fitt
 import type { OutfitFilter, OutfitResult, ChatMessage, ViewAngle } from '../types/outfit'
 import type { OutfitItem } from '../types/outfit'
 import { useOutfitGenerator } from '../hooks/useOutfitGenerator'
-import { initSelection, SelectionState, resolveGlbUrl } from '../utils/glb'
+import { initSelection, type SelectionState, resolveGlbUrl } from '../utils/glb'
 import '../features/virtual-tryon/VirtualTryOn.css'
 
 interface AIOutfitGeneratorProps {
-  onAddToCart?: (product: any, size?: string) => void;
-  onBuyNow?: (product: any, size?: string) => void;
+  onAddToCart?: (product: { id: string | number; name: string; price: number | string; [key: string]: unknown }, size?: string) => void;
+  onBuyNow?: (product: { id: string | number; name: string; price: number | string; [key: string]: unknown }, size?: string) => void;
   showToast?: (message: string, type?: string) => void;
 }
 
@@ -51,7 +51,7 @@ export default function AIOutfitGenerator({ onAddToCart, onBuyNow, showToast }: 
   const [selectedOutfitId, setSelectedOutfitId] = useState<string | null>(null)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [viewAngle, setViewAngle] = useState<ViewAngle>('front')
-  const [closetItems, setClosetItems] = useState<any[]>([])
+  const [closetItems, setClosetItems] = useState<CatalogProduct[]>([])
   const [isBodyEditorOpen, setIsBodyEditorOpen] = useState(false)
   const [bodyEditorNotice, setBodyEditorNotice] = useState<string>('')
   
@@ -66,7 +66,7 @@ export default function AIOutfitGenerator({ onAddToCart, onBuyNow, showToast }: 
   // Circuit Breaker Hook - handles Gemini fallback to Local Engine
   const {
     outfits,
-    isLoading: isGenerating,
+    isLoading: isOutfitGenerating,
     error,
     fallbackMode,
     shopLoading,
@@ -83,13 +83,15 @@ export default function AIOutfitGenerator({ onAddToCart, onBuyNow, showToast }: 
     },
   })
 
+  const [isRefining, setIsRefining] = useState(false)
+  const isGenerating = isOutfitGenerating || isRefining
   const selectedOutfit = outfits.find(o => o.id === selectedOutfitId) || outfits[0] || null
 
   useEffect(() => {
     if (selectedOutfit) {
       setSelections(initSelection(selectedOutfit));
     }
-  }, [selectedOutfitId, outfits]);
+  }, [selectedOutfit]);
 
   const activeAvatarData = useMemo(() => ({
     avatar: currentAvatar,
@@ -127,7 +129,7 @@ export default function AIOutfitGenerator({ onAddToCart, onBuyNow, showToast }: 
     return null
   }
 
-  const resolveModel3D = (itemId: string | number, itemModel3D?: any, productUrl?: string, category?: string) => {
+  const resolveModel3D = (itemId: string | number, itemModel3D?: GarmentConfig | string, productUrl?: string) => {
     // If backend returns a config object
     if (itemModel3D && typeof itemModel3D === 'object' && itemModel3D.sizes) return itemModel3D;
     
@@ -144,10 +146,10 @@ export default function AIOutfitGenerator({ onAddToCart, onBuyNow, showToast }: 
         };
     }
 
-    const modelMap = MODEL_INJECTION as any;
+    const modelMap = MODEL_INJECTION;
     
     // First try the item ID
-    let strId = String(itemId).trim();
+    const strId = String(itemId).trim();
     if (strId && modelMap[strId]) return modelMap[strId];
     
     // If it didn't match, the item ID might be a MongoDB ObjectID. 
@@ -169,7 +171,7 @@ export default function AIOutfitGenerator({ onAddToCart, onBuyNow, showToast }: 
         const size = selections[item.id]?.size || item.selectedSize || item.suggestedSize || 'M'
         const color = selections[item.id]?.colorHex || item.selectedColor || item.color
         
-        let glbUrl = resolveGlbUrl(item, size, color)
+        const glbUrl = resolveGlbUrl(item, size, color)
 
         return {
           itemId: item.id,
@@ -180,7 +182,7 @@ export default function AIOutfitGenerator({ onAddToCart, onBuyNow, showToast }: 
           purchasedColor: color,
           thumbnail: item.imageUrl,
           source: 'fallback' as const,
-          model3D: glbUrl ? { enable: true, sizes: { [size]: { url: glbUrl, autoNormalize: true } } } : resolveModel3D(item.id, item.model3D, item.productUrl, item.category),
+          model3D: glbUrl ? { enable: true, sizes: { [size]: { url: glbUrl, autoNormalize: true } } } : resolveModel3D(item.id, item.model3D, item.productUrl),
         }
       })
       .filter((item): item is NonNullable<typeof item> => Boolean(item))
@@ -281,7 +283,7 @@ export default function AIOutfitGenerator({ onAddToCart, onBuyNow, showToast }: 
       purchasedColor: item.selectedColor || item.color,
       thumbnail: item.imageUrl,
       source: 'fallback',
-      model3D: resolveModel3D(item.id, item.model3D, item.productUrl, item.category),
+      model3D: resolveModel3D(item.id, item.model3D, item.productUrl),
     })
   }
 
@@ -303,7 +305,7 @@ export default function AIOutfitGenerator({ onAddToCart, onBuyNow, showToast }: 
     if (outfits && outfits.length > 0) {
       setIsLeftPanelExpanded(false)
     }
-  }, [outfits.length])
+  }, [outfits])
 
   // Handle outfit generation with Circuit Breaker pattern
   const handleGenerate = async () => {
@@ -326,7 +328,7 @@ export default function AIOutfitGenerator({ onAddToCart, onBuyNow, showToast }: 
       timestamp: new Date(),
     }
     setMessages(prev => [...prev, userMsg])
-    setIsGenerating(true)
+    setIsRefining(true)
     setError('')
 
     try {
@@ -342,15 +344,15 @@ export default function AIOutfitGenerator({ onAddToCart, onBuyNow, showToast }: 
         timestamp: new Date(),
         suggestions: result.suggestions,
       }])
-    } catch (err: any) {
+    } catch (err: unknown) {
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: `⚠️ ${err.message}`,
+        content: `⚠️ ${err instanceof Error ? err.message : String(err)}`,
         timestamp: new Date(),
       }])
     } finally {
-      setIsGenerating(false)
+      setIsRefining(false)
     }
   }
 

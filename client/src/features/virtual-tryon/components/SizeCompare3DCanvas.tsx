@@ -1,4 +1,5 @@
-import React, { useState, Suspense, useEffect, useRef } from 'react';
+import type { FitZone } from './sizeRecommendationEngine';
+import { useState, Suspense, useEffect, useRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows, useProgress, Html } from '@react-three/drei';
 import * as THREE from 'three';
@@ -29,7 +30,7 @@ export type SizeCompare3DCanvasProps = {
     selectedColor: string;
     selectedFabric?: LocalFabricProfile;
     heatmapEnabled: boolean;
-    fitZones?: any[]; // RecommendationZone[]
+    fitZones?: FitZone[]; // RecommendationZone[]
     pose?: string;
     opacity?: number;
     hoverZone?: string | null;
@@ -125,8 +126,8 @@ export default function SizeCompare3DCanvas({
     outlineIntensity,
 }: SizeCompare3DCanvasProps) {
     const [avatarScene, setAvatarScene] = useState<THREE.Group | null>(null);
-    const ghost1Ref = useRef<THREE.Group>(null);
-    const ghost2Ref = useRef<THREE.Group>(null);
+    const [ghost1, setGhost1] = useState<THREE.Group | null>(null);
+    const [ghost2, setGhost2] = useState<THREE.Group | null>(null);
 
     return (
         <div style={{ width: '100%', height: '100%', opacity, transition: 'opacity 0.3s' }}>
@@ -166,7 +167,7 @@ export default function SizeCompare3DCanvas({
                             ghostSizes ? (
                                 <>
                                     {ghostSizes[0] && (
-                                        <group ref={ghost1Ref}>
+                                        <group ref={setGhost1}>
                                             <GarmentModel
                                                 config={modelConfig}
                                                 selectedSize={ghostSizes[0]}
@@ -182,7 +183,7 @@ export default function SizeCompare3DCanvas({
                                         </group>
                                     )}
                                     {ghostSizes[1] && (
-                                        <group ref={ghost2Ref}>
+                                        <group ref={setGhost2}>
                                             <GarmentModel
                                                 config={modelConfig}
                                                 selectedSize={ghostSizes[1]}
@@ -206,7 +207,7 @@ export default function SizeCompare3DCanvas({
                                     fabricOverride={selectedFabric}
                                     avatarScene={avatarScene}
                                     heatmapEnabled={heatmapEnabled || !!hoverZone}
-                                    heatmapZones={hoverZone ? fitZones?.filter((z: any) => z.key === hoverZone) : fitZones}
+                                    heatmapZones={hoverZone ? fitZones?.filter((z) => z.key === hoverZone) : fitZones}
                                     avatarProfile={bodyData}
                                 />
                             )
@@ -216,8 +217,8 @@ export default function SizeCompare3DCanvas({
 
                     {ghostSizes && (
                         <CustomOutline 
-                            target1={ghost1Ref.current} 
-                            target2={ghost2Ref.current} 
+                            target1={ghost1}
+                            target2={ghost2}
                             color1="#D5C9B3" 
                             color2="#C8A867" 
                             edgeStrength1={diffOnly ? 0 : 2}

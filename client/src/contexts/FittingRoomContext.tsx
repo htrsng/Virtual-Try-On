@@ -169,24 +169,14 @@ const generateAvatarId = () => `avatar-${Date.now()}-${Math.random().toString(36
 
 export const FittingRoomProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [avatars, setAvatars] = useState<Profile[]>(loadStoredAvatars);
-    const [currentAvatarId, setCurrentAvatarIdState] = useState<string | null>(loadStoredActiveAvatarId);
+    const [storedAvatarId, setCurrentAvatarIdState] = useState<string | null>(loadStoredActiveAvatarId);
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
     const [isHeatmapOpen, setIsHeatmapOpen] = useState(false);
     const [layeredGarments, setLayeredGarments] = useState<Partial<Record<GarmentSlot, SilentWearItem>>>({});
     const [lastSilentWear, setLastSilentWear] = useState<SilentWearItem | null>(null);
 
-    useEffect(() => {
-        if (avatars.length === 0) {
-            if (currentAvatarId !== null) {
-                setCurrentAvatarIdState(null);
-            }
-            return;
-        }
-
-        if (!currentAvatarId || !avatars.some((avatar) => avatar.id === currentAvatarId)) {
-            setCurrentAvatarIdState(avatars[0].id);
-        }
-    }, [avatars, currentAvatarId]);
+    const currentAvatarId = avatars.some(avatar => avatar.id === storedAvatarId)
+        ? storedAvatarId : avatars[0]?.id || null;
 
     useEffect(() => {
         if (typeof window === 'undefined') {

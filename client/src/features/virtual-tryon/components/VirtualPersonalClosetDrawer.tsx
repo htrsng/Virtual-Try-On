@@ -12,6 +12,7 @@ type ClosetColorOption = {
 };
 
 export type ClosetItem = {
+    img?: string;
     id: string;
     itemId?: string;
     productId?: string | number;
@@ -68,6 +69,8 @@ type ProductLike = {
 };
 
 type ClosetApiItem = {
+    _id?: string;
+    glbUrl?: string;
     itemId?: string;
     orderId?: string;
     productId?: string | number;
@@ -292,7 +295,7 @@ function mapApiClosetItems(rawItems: ClosetApiItem[], products: ProductCatalogIt
         }
 
         const sourceModelId = String(item.productId || '').trim();
-        // @ts-ignore - indexing MODEL_INJECTION with string
+
         const fullConfig = MODEL_INJECTION[sourceModelId] || productModel3D;
         
         let finalModel3D = fullConfig || undefined;
@@ -331,7 +334,7 @@ function mapApiClosetItems(rawItems: ClosetApiItem[], products: ProductCatalogIt
             productId: Number(item.productId),
             orderId: item.orderId,
             name: String(item.name || '').trim() || name,
-            img: resolveAssetUrl(
+            thumbnail: resolveAssetUrl(
                 String(item.thumbnailUrl || item.imageUrl || item.img || item.image || '').trim(),
             ) || createPlaceholderThumb(name),
             imageUrl: resolveAssetUrl(String(item.imageUrl || item.img || item.image || '').trim()) || undefined,
@@ -519,7 +522,7 @@ export default function VirtualPersonalClosetDrawer({
     }, [activeTab, tabs]);
 
     const activeGroup = tabs.find((group) => group.key === activeTab) || tabs[0];
-    const activeItems = activeGroup?.items || [];
+    const activeItems = useMemo(() => activeGroup?.items || [], [activeGroup]);
 
     const sortedItems = useMemo(() => {
         if (activeGroup?.key === '__saved__') {

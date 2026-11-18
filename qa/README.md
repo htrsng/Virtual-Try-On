@@ -1,5 +1,7 @@
 # VFitAI QA portfolio
 
+Current: [quality completion](docs/quality-completion.md), [human checklist](docs/manual-acceptance-checklist.md), [automated catalog](docs/automated-test-catalog.csv).
+
 Start with [Test Summary](docs/test-summary.md), [Feature Inventory](docs/feature-inventory.md),
 [RTM](docs/rtm.md), [Bug Register](bug-reports/bug-register.md).
 

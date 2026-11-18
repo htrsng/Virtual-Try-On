@@ -297,3 +297,13 @@ selector hoặc assertion rồi gọi đó là kết quả suite nguyên bản.
 
 Chưa có seed/reset, health endpoint hay launcher test mới. Script `start-web.ps1`
 hiện là launcher web development, không phải môi trường test cô lập.
+
+## Quality-completion suites
+
+`node scripts/ci/run.cjs init|run|finalize <suite>` supports playwright-accessibility,
+playwright-production and playwright-compat. Execute the three lifecycle commands
+separately. Production smoke builds first, then QA_UI_MODE=preview serves dist with
+the same owned API/MongoDB/proxy checks. Preview refuses a missing build; default
+mode stays development. No production data or provider credentials are forwarded.
+
+Human interactive setup and cleanup are in [manual checklist](manual-acceptance-checklist.md).
