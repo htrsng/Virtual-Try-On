@@ -1,6 +1,14 @@
 # Tài liệu kiểm thử VFitAI
 
-Nếu mới vào dự án, đọc [phạm vi chức năng](docs/feature-inventory.md) trước để biết từng luồng làm gì. [Báo cáo kết quả](docs/test-summary.md) ghi lần chạy, môi trường và giới hạn kiểm thử. [Danh sách lỗi](bug-reports/bug-register.md) ghi những lỗi đã được xác nhận và tình trạng kiểm tra lại.
+Dùng trang này để tìm test theo nghiệp vụ, xem bằng chứng của một lần chạy hoặc chọn tầng phù hợp khi bổ sung ca hồi quy.
+
+| Việc cần làm | Bắt đầu ở đâu |
+| --- | --- |
+| Kiểm tra quyền truy cập, giá, coupon và tồn kho | [Jest/Supertest](../server/tests/README.md) |
+| Kiểm tra đặt COD và quản lý đơn qua giao diện | [Selenium/TestNG](selenium-java/README.md) |
+| Kiểm tra model 3D, tương thích browser và accessibility | [Playwright](../tests/README.md) |
+| Tra yêu cầu, test case và kết quả | [Phạm vi chức năng](docs/feature-inventory.md) · [RTM](docs/rtm.md) · [Test Summary](docs/test-summary.md) |
+| Xem lỗi đã xác nhận và đợt kiểm tra lại | [Bug Register](bug-reports/bug-register.md) |
 
 ## Chạy hoặc viết thêm bài test
 
@@ -15,4 +23,4 @@ Nếu mới vào dự án, đọc [phạm vi chức năng](docs/feature-inventor
 - [Kết quả đợt rà soát chất lượng](docs/quality-completion.md) ghi các kiểm tra đã thực hiện. [Checklist nghiệm thu](docs/manual-acceptance-checklist.md) dùng khi kiểm tra bằng thiết bị thật hoặc công cụ hỗ trợ.
 - [Kế hoạch kiểm thử](docs/test-strategy.md), [ghi chú kiểm thử thủ công](docs/manual-testing.md) và [lộ trình](docs/implementation-roadmap.md) giúp chọn phần cần bổ sung.
 
-Báo cáo theo từng giai đoạn lưu kết quả tại thời điểm chạy. Dùng báo cáo kết quả để tra số liệu của đợt gần nhất được ghi nhận.
+Khi trích số liệu, lấy số ca từ danh mục và kết quả thực thi từ báo cáo của lần chạy tương ứng. Checklist nghiệm thu ghi phần cần người kiểm thử thực hiện.

@@ -1,4 +1,8 @@
-# Chạy Selenium cho VFitAI
+# Kiểm thử nghiệp vụ bằng Selenium
+
+Luồng tiêu biểu là đăng nhập, chọn áo, đặt COD trên giao diện rồi đọc lại đơn qua API để kiểm tra tổng tiền, phí ship, giảm giá và tồn kho. Các ca khác kiểm tra huỷ đơn, chuyển trạng thái và quyền truy cập. [Test nghiệp vụ](src/test/java/com/vfitai/qa/tests/BusinessE2ETests.java#L47) · [Bằng chứng E2E](../docs/stage-6-business-e2e.md).
+
+## Cách chạy
 
 Bộ test dùng Selenium 4.38.0, TestNG 7.11.0, Java 17, Maven 3.9+, Node.js 22 và Chrome hoặc Edge. Selenium Manager tìm driver phù hợp với trình duyệt. Lần chạy đầu có thể cần mạng để tải driver, các gói Maven hoặc MongoDB.
 
@@ -34,6 +38,8 @@ Nhóm `diagnostics` cố tình làm một ca thất bại để kiểm tra việ
 
 Đặt thao tác UI dùng lại trong Page Object và để assertion nghiệp vụ trong test. Chờ theo điều kiện như nút khả dụng, nội dung xuất hiện hoặc chuyển trang. Giữ các phương thức TestNG và DataProvider chạy tuần tự khi chúng cùng dùng thao tác reset trên một database.
 
-## Tìm bài test và kết quả
+## Tìm bài test, kết quả và giới hạn
 
 Trong `src/test/java/com/vfitai/qa/`, thư mục `tests/` chứa kịch bản, `pages/` chứa Page Objects, còn `base/` và `utils/` quản lý browser và môi trường. Đợt chạy local ngày 18/11/2026 ghi 22/22 lượt hồi quy đạt. [Báo cáo QA](../docs/test-summary.md).
+
+Smoke dừng ở tóm tắt checkout. Để kiểm tra thao tác đặt COD và dữ liệu đã lưu, chọn `e2e` hoặc `regression`. Phần render WebGL và so ảnh nằm trong [bộ Playwright](../../tests/README.md).

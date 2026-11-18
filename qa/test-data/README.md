@@ -2,6 +2,8 @@
 
 Playwright và Selenium đặt lại dữ liệu trước mỗi ca. Jest bắt đầu với database rỗng để mỗi ca tự tạo dữ liệu cần thiết. Khi cần cả bộ dữ liệu mẫu trong Jest, gọi `global.qaTestDatabase.reset()`.
 
+## Chọn dữ liệu cho ca test
+
 | Dữ liệu | Giá trị dùng trong test |
 | --- | --- |
 | Tài khoản | Admin, khách mua hàng và khách thứ hai. Email có dạng `role+runId@example.test`. |
@@ -15,6 +17,8 @@ Playwright và Selenium đặt lại dữ liệu trước mỗi ca. Jest bắt �
 
 Đơn mẫu là dữ liệu lịch sử với `inventoryReserved=false`. Đơn tạo qua API vẫn trừ tồn kho qua transaction. Model 3D lấy từ `client/public/`, gồm avatar và các size S/M/L của áo, quần. [Danh mục mẫu](catalog.json).
 
-Dùng API reset/clear của [helper quản lý database QA](../../server/test-support/owned-database.js). Helper kiểm tra connection, tên database và marker sở hữu trước khi xoá dữ liệu. Chỉ reset giữa các ca vì các bài trong cùng suite dùng chung môi trường.
+## Đặt lại dữ liệu
+
+Dùng phương thức reset/clear của [helper quản lý database QA](../../server/test-support/owned-database.js). Helper kiểm tra connection, tên database và marker sở hữu trước khi xoá dữ liệu. Chỉ reset giữa các ca vì các bài trong cùng suite dùng chung môi trường.
 
 Mật khẩu được tạo khi mở môi trường và dùng lại qua các lần reset. Manifest local có tài khoản mẫu và một JWT đã hết hạn để kiểm tra phiên đăng nhập. Launcher xoá các giá trị này khi dừng. Giữ manifest trong `.runtime/qa/` ở máy local.

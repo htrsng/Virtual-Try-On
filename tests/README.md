@@ -1,4 +1,13 @@
-# Chạy Playwright cho VFitAI
+# Kiểm thử web và 3D bằng Playwright
+
+| Phạm vi | Ca kiểm thử tiêu biểu |
+| --- | --- |
+| Giỏ hàng trên web | [Chọn sản phẩm đến màn tóm tắt checkout](e2e/checkout-journey.spec.ts) |
+| Phòng thử đồ | [Đổi geometry, xoay camera, animation và phục hồi sau lỗi GLB](e2e/tryon-3d.spec.ts) |
+| Tương thích và thao tác bàn phím | [Browser và viewport](e2e/compatibility.spec.ts) · [axe, focus và Escape](e2e/accessibility.spec.ts) |
+| Bundle đã build | [Tài nguyên build và giao diện qua Vite preview](e2e/production.spec.ts) |
+
+## Cách chạy
 
 Bộ test dùng TypeScript và Playwright 1.60.0 trên Node.js 22, với MongoDB tạm do launcher QA quản lý. Cài các gói theo [README ở thư mục gốc](../README.md), sau đó cài Chromium và Firefox từ thư mục gốc:
 
@@ -45,4 +54,4 @@ Từ thư mục gốc, chạy `node scripts/qa-3d-diagnostic.cjs` để thử b�
 
 - `e2e/` chứa các kịch bản web, accessibility và 3D. `fixtures.ts` quản lý dữ liệu mẫu, còn `viewer-fixtures.ts` hỗ trợ kiểm tra renderer.
 - `playwright.config.ts` chạy suite mặc định. Các file `playwright.*.config.ts` chọn nhóm kiểm tra riêng.
-- [Báo cáo QA](../qa/docs/test-summary.md) ghi 12/12 ca mặc định đạt trong đợt chạy local ngày 18/11/2026, cùng kết quả từng nhóm bổ sung.
+Đợt local ngày 18/11/2026 ghi 12/12 ca mặc định, 20/20 lượt compatibility, 21/21 lượt accessibility, 4/4 lượt production preview và 1/1 ca so ảnh Windows đạt. Các nhóm browser chạy lại một số ca trên nhiều cấu hình. [Báo cáo QA và cách đếm](../qa/docs/test-summary.md).
