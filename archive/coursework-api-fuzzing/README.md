@@ -1,8 +1,8 @@
-﻿# Coursework / Archive — API Fuzzing
+# Coursework / Archive — API Fuzzing
 
 Bài tập học phần kiểm thử API Express mô phỏng bằng Python, mutation/greybox và mô hình Z3 giới hạn, được lưu riêng khỏi hướng Selenium/Java của VFitAI.
 
-Các thư mục giữ cấu trúc tương đối cũ: `fuzz-testing/`, `api-testing/`, `automation-testing/`, `tools/`, `qa/`, `docs/`, `manual-testing/`, `bug-reports/` và `reports/`. Thư mục `fuzzing-security-testing/` chứa file legacy có sẵn trên máy, chưa được Git theo dõi.
+Các thư mục giữ cấu trúc tương đối cũ: `fuzz-testing/`, `api-testing/`, `automation-testing/`, `tools/`, `qa/`, `docs/`, `manual-testing/`, `bug-reports/` và `reports/`. Target của bộ bài tập nằm trong `fuzz-testing/target/`. Chỉ chạy với target và dữ liệu mô phỏng của bài tập. Giữ database Atlas và dữ liệu VFitAI ngoài môi trường này. [Danh sách lỗi lịch sử](bug-reports/README.md).
 
 [Hướng dẫn fuzzing](fuzz-testing/README.md) · [Snapshot portfolio cũ](PORTFOLIO-SNAPSHOT.md)
 
