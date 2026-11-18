@@ -1,4 +1,4 @@
-# VFitAI — 3D Virtual Try-On and QA Automation
+# VFitAI — QA Automation for 3D E-commerce
 
 VFitAI is a clothing storefront with a 3D fitting room. Shoppers can browse products, select sizes, and place cash-on-delivery (COD) orders. The test suite focuses on order totals and persistence, access control, and fitting-room behavior when shoppers change sizes or a model fails to load.
 
