@@ -1,6 +1,6 @@
 # Chạy Selenium cho VFitAI
 
-Bộ test dùng Java 17, Maven 3.9+, Node.js 22 và Chrome hoặc Edge. Selenium Manager tìm driver phù hợp với trình duyệt. Lần chạy đầu có thể cần mạng để tải driver, các gói Maven hoặc MongoDB.
+Bộ test dùng Selenium 4.38.0, TestNG 7.11.0, Java 17, Maven 3.9+, Node.js 22 và Chrome hoặc Edge. Selenium Manager tìm driver phù hợp với trình duyệt. Lần chạy đầu có thể cần mạng để tải driver, các gói Maven hoặc MongoDB.
 
 Chạy từ thư mục gốc:
 
@@ -33,3 +33,7 @@ Nhóm `diagnostics` cố tình làm một ca thất bại để kiểm tra việ
 ## Khi thêm ca mới
 
 Đặt thao tác UI dùng lại trong Page Object và để assertion nghiệp vụ trong test. Chờ theo điều kiện như nút khả dụng, nội dung xuất hiện hoặc chuyển trang. Giữ các phương thức TestNG và DataProvider chạy tuần tự khi chúng cùng dùng thao tác reset trên một database.
+
+## Tìm bài test và kết quả
+
+Trong `src/test/java/com/vfitai/qa/`, thư mục `tests/` chứa kịch bản, `pages/` chứa Page Objects, còn `base/` và `utils/` quản lý browser và môi trường. Đợt chạy local ngày 18/11/2026 ghi 22/22 lượt hồi quy đạt. [Báo cáo QA](../docs/test-summary.md).

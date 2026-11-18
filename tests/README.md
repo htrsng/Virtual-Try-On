@@ -1,6 +1,6 @@
 # Chạy Playwright cho VFitAI
 
-Cài các gói theo [README ở thư mục gốc](../README.md), sau đó cài Chromium và Firefox từ thư mục gốc:
+Bộ test dùng TypeScript và Playwright 1.60.0 trên Node.js 22, với MongoDB tạm do launcher QA quản lý. Cài các gói theo [README ở thư mục gốc](../README.md), sau đó cài Chromium và Firefox từ thư mục gốc:
 
 ```sh
 node tests/node_modules/@playwright/test/cli.js install chromium firefox
@@ -40,3 +40,9 @@ Compatibility chạy Chromium và Firefox trên desktop, cùng viewport tablet 7
 Báo cáo HTML mặc định ở `tests/playwright-report/`. Ảnh và trace của ca lỗi ở `tests/test-results/`. Mở trace từ `tests/` bằng `node node_modules/@playwright/test/cli.js show-trace <trace.zip>`. Nếu cần giữ kết quả cũ, sao chép chúng ra ngoài `test-results/` trước khi chạy lại.
 
 Từ thư mục gốc, chạy `node scripts/qa-3d-diagnostic.cjs` để thử bộ so ảnh với một model GLB hợp lệ nhưng sai loại. Ca Playwright bên trong được kỳ vọng tạo ảnh diff. Script chỉ trả mã thoát 0 sau khi xác minh đúng loại sai khác; kết quả nằm trong `.runtime/qa3d-diagnostic/`. [Thiết kế và giới hạn của bộ 3D](../qa/docs/stage-7-playwright-3d.md).
+
+## Tìm bài test và kết quả
+
+- `e2e/` chứa các kịch bản web, accessibility và 3D. `fixtures.ts` quản lý dữ liệu mẫu, còn `viewer-fixtures.ts` hỗ trợ kiểm tra renderer.
+- `playwright.config.ts` chạy suite mặc định. Các file `playwright.*.config.ts` chọn nhóm kiểm tra riêng.
+- [Báo cáo QA](../qa/docs/test-summary.md) ghi 12/12 ca mặc định đạt trong đợt chạy local ngày 18/11/2026, cùng kết quả từng nhóm bổ sung.
